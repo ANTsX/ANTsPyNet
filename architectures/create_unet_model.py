@@ -67,7 +67,7 @@ def create_unet_model_2d(input_image_size,
     encoding_convolution_layers = []
     pool = None
     for i in range(number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**(layers[i])
+        number_of_filters = number_of_filters_at_base_layer * 2**i
 
         if i == 0:
             conv = Conv2D(filters=number_of_filters,
@@ -90,14 +90,14 @@ def create_unet_model_2d(input_image_size,
                                                   activation='relu',
                                                   padding='same')(conv))
 
-        if i < len(layers) - 1:
+        if i < number_of_layers - 1:
             pool = MaxPooling2D(pool_size=pool_size)(encoding_convolution_layers[i])
 
     # Decoding path
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
     for i in range(1, number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**(number_of_layers - i)
+        number_of_filters = number_of_filters_at_base_layer * 2**(number_of_layers - i - 1)
         deconv = Conv2DTranspose(filters=number_of_filters,
                                  kernel_size=deconvolution_kernel_size,
                                  padding='same',
@@ -204,7 +204,7 @@ def create_unet_model_3d(input_image_size,
     encoding_convolution_layers = []
     pool = None
     for i in range(number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**(layers[i])
+        number_of_filters = number_of_filters_at_base_layer * 2**i
 
         if i == 0:
             conv = Conv3D(filters=number_of_filters,
@@ -227,14 +227,14 @@ def create_unet_model_3d(input_image_size,
                                                   activation='relu',
                                                   padding='same')(conv))
 
-        if i < len(layers) - 1:
+        if i < number_of_layers - 1:
             pool = MaxPooling3D(pool_size=pool_size)(encoding_convolution_layers[i])
 
     # Decoding path
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
     for i in range(1, number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**(number_of_layers - i)
+        number_of_filters = number_of_filters_at_base_layer * 2**(number_of_layers - i - 1)
         deconv = Conv3DTranspose(filters=number_of_filters,
                                  kernel_size=deconvolution_kernel_size,
                                  padding='same',
