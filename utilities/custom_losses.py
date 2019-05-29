@@ -51,7 +51,7 @@ def loss_multilabel_dice_coefficient_error(y_true, y_pred):
 
 
 def peak_signal_to_noise_ratio(y_true, y_pred):
-    return(-10.0 * K.log(K.mean(K.square(y_pred - y_true)))/K.log(10.0))
+    return(-10.0 * K.log(K.mean(K.square(y_pred - y_true))) / K.log(10.0))
 
 def loss_peak_signal_to_noise_ratio_error(y_true, y_pred):
     return(-peak_signal_to_noise_ratio(y_true, y_pred))
