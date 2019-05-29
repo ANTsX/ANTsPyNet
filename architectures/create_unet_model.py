@@ -3,7 +3,6 @@ from keras.layers import (Input, Conv2D, Conv2DTranspose,
                           MaxPooling2D, Concatenate, UpSampling2D,
                           Conv3D, Conv3DTranspose, MaxPooling3D,
                           UpSampling3D, Dropout)
-from keras import optimizers
 from keras import regularizers
 
 def create_unet_model_2d(input_image_size,
