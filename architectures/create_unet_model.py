@@ -39,7 +39,7 @@ def create_unet_model_2d(input_image_size,
       shape (or dimension) of that tensor is the image dimensions followed by
       the number of channels (e.g., red, green, and blue).  The batch size
       (i.e., number of training images) is not specified a priori.
-    :param number_of_outputs Meaning depends on the mode.  For
+    :param number_of_outputs: Meaning depends on the mode.  For
       `classification` this is the number of segmentation labels.  For
       `regression` this is the number of outputs.
     :param number_of_layers: number of encoding/decoding layers.
@@ -176,7 +176,7 @@ def create_unet_model_3d(input_image_size,
       shape (or dimension) of that tensor is the image dimensions followed by
       the number of channels (e.g., red, green, and blue).  The batch size
       (i.e., number of training images) is not specified a priori.
-    :param number_of_outputs Meaning depends on the mode.  For
+    :param number_of_outputs: Meaning depends on the mode.  For
       `classification` this is the number of segmentation labels.  For
       `regression` this is the number of outputs.
     :param number_of_layers: number of encoding/decoding layers.
