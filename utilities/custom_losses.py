@@ -29,7 +29,7 @@ def multilabel_dice_coefficient(y_true, y_pred):
     denominator = K.sum(union)
 
     if number_of_labels > 2:
-        for j in range(1, number_of_labels):
+        for j in range(2, number_of_labels):
             y_true_label = K.gather(y_true_permuted, indices = (j))
             y_pred_label = K.gather(y_pred_permuted, indices = (j))
             y_true_label_f = K.flatten(y_true_label)
