@@ -43,7 +43,7 @@ def multilabel_dice_coefficient(y_true, y_pred):
 
     unionOverlap = numerator / denominator
 
-    return ((2.0 * unionOverlap + smoothingFactor) /
+    return((2.0 * unionOverlap + smoothingFactor) /
       (1.0 + unionOverlap + smoothingFactor))
 
 def loss_multilabel_dice_coefficient_error(y_true, y_pred):
@@ -72,7 +72,7 @@ def pearson_correlation_coefficient(y_true, y_pred):
 
     coefficient = numerator / denominator
 
-    return( coefficient )
+    return(coefficient)
 
 def loss_pearson_correlation_coefficient_error(y_true, y_pred)
     return(-pearson_correlation_coefficient(y_true, y_pred))
