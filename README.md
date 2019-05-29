@@ -2,7 +2,9 @@
 
 A collection of deep learning architectures ported to the python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
 
+<!--
 Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
+-->
 
 ## Architectures
 
@@ -29,16 +31,12 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 ## Installation
 
-* ANTsRNet Installation:
+* ANTsPyNet Installation:
     * Option 1:
        ```
-       $ R
-       > devtools::install_github( "ANTsX/ANTsRNet" )
        ```
     * Option 2:
        ```
-       $ git clone https://github.com/ANTsX/ANTsRNet.git
-       $ R CMD INSTALL ANTsRNet
        ```
 
 ## Publications
