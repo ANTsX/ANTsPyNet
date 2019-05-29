@@ -68,7 +68,7 @@ def pearson_correlation_coefficient(y_true, y_pred):
 
     numerator = sum_xy - (sum_x * sum_y / N)
     denominator = K.sqrt((sum_x_squared - K.square(sum_x) / N) *
-      (sum_y_squared - K$square(sum_y) / N))
+      (sum_y_squared - K.square(sum_y) / N))
 
     coefficient = numerator / denominator
 
