@@ -23,6 +23,9 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 ### Image super-resolution
 
+* Deep back-projection network (DBPN) (2-D, 3-D)
+    * [Muhammad Haris, Greg Shakhnarovich, Norimichi Ukita.  Deep Back-Projection Networks For Super-Resolution.](https://arxiv.org/abs/1803.02735)
+
 ### Registration and transforms
 
 ### Generative adverserial networks
