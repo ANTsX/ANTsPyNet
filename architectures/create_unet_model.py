@@ -130,7 +130,7 @@ def create_unet_model_2d(input_image_size,
     elif mode == 'regression':
         convActivation = 'linear'
     else:
-        raise ValueError( 'mode must be either `classification` or `regression`.')
+        raise ValueError('mode must be either `classification` or `regression`.')
 
     outputs = Conv2D(filters=number_of_outputs,
                      kernel_size=(1, 1),
@@ -267,7 +267,7 @@ def create_unet_model_3d(input_image_size,
     elif mode == 'regression':
         convActivation = 'linear'
     else:
-        raise ValueError( 'mode must be either `classification` or `regression`.')
+        raise ValueError('mode must be either `classification` or `regression`.')
 
     outputs = Conv3D(filters=number_of_outputs,
                      kernel_size=(1, 1, 1),
