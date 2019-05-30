@@ -5,7 +5,7 @@ from keras.layers import (Input, Dropout, BatchNormalization, Add,
                           Conv2D, Conv2DTranspose,
                           MaxPooling2D, GlobalAveragePooling2D,
                           UpSampling2D,
-                          Conv3D, Conv3DTranspose, MaxPooling3D,
+                          Conv3D, Conv3DTranspose,
                           MaxPooling3D, GlobalAveragePooling3D,
                           UpSampling3D)
 
@@ -74,7 +74,7 @@ def create_resnet_model_2d(input_image_size,
                                              strides=strides,
                                              padding='same')(local_layer))
 
-        grouped_model = Concatenate(convolution_layers)
+        grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
     def residual_block_2d(model, number_of_filters_in, number_of_filters_out, strides=(1, 1), project_shortcut=False):
@@ -229,7 +229,7 @@ def create_resnet_model_3d(input_image_size,
                                              strides=strides,
                                              padding='same')(local_layer))
 
-        grouped_model = Concatenate(convolution_layers)
+        grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
     def residual_block_3d(model, number_of_filters_in, number_of_filters_out, strides=(1, 1, 1), project_shortcut=False):
