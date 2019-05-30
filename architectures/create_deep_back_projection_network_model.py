@@ -155,7 +155,7 @@ def create_deep_back_projection_network_model_2d(input_image_size,
 
         return(down_block)
 
-    inputs = Input(shape=input_image_size )
+    inputs = Input(shape=input_image_size)
 
     # Initial feature extraction
     model = Conv2D(filters=number_of_feature_filters,
@@ -213,7 +213,7 @@ def create_deep_back_projection_network_model_2d(input_image_size,
                      kernel_size=last_convolution,
                      strides=(1, 1),
                      padding = 'same',
-                     kernel_initializer = "glorot_uniform" )(model)
+                     kernel_initializer = "glorot_uniform")(model)
 
     if number_of_loss_functions == 1:
         deep_back_projection_network_model = Model(inputs=inputs, outputs=outputs)
@@ -376,7 +376,7 @@ def create_deep_back_projection_network_model_3d(input_image_size,
 
         return(down_block)
 
-    inputs = Input(shape=input_image_size )
+    inputs = Input(shape=input_image_size)
 
     # Initial feature extraction
     model = Conv3D(filters=number_of_feature_filters,
@@ -434,7 +434,7 @@ def create_deep_back_projection_network_model_3d(input_image_size,
                      kernel_size=last_convolution,
                      strides=(1, 1, 1),
                      padding = 'same',
-                     kernel_initializer = "glorot_uniform" )(model)
+                     kernel_initializer = "glorot_uniform")(model)
 
     if number_of_loss_functions == 1:
         deep_back_projection_network_model = Model(inputs=inputs, outputs=outputs)
