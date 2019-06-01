@@ -55,9 +55,9 @@ def extract_image_patches(image,
     image_array = image.numpy()
     if number_of_image_components > 1:
         if dimensionality == 2:
-            image_array = np.transpose(image_array, [2, 3, 1])
+            image_array = np.transpose(image_array, [1, 2, 0])
         else:
-            image_array = np.transpose(image_array, [2, 3, 4, 1])
+            image_array = np.transpose(image_array, [1, 2, 3, 0])
 
     patch_list = []
     patch_array = np.empty([1, 1])
@@ -70,7 +70,7 @@ def extract_image_patches(image,
         if isinstance(stride_length, int):
             stride_length_tuple = tuple(np.multiply(np.ones_like(patch_size), stride_length))
         elif len(stride_length) != dimensionality:
-            raise ValueError("Patch size is greater than the image size.")
+            raise ValueError("stride_length is not a scalar or vector of length dimensionality.")
         elif np.any(np.less(stride_length, 1)):
             raise ValueError("stride_length elements must be positive integers.")
 
