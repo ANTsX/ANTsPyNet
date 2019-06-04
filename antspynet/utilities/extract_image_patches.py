@@ -52,7 +52,7 @@ def extract_image_patches(image,
     -------
     >>> import ants
     >>> image = ants.image_read(ants.get_ants_data('r16'))
-    >>> image_patches = extract_image_patches(image)
+    >>> image_patches = extract_image_patches(image, patch_size=(32, 32))
     """
 
     if random_seed is None:
@@ -109,8 +109,8 @@ def extract_image_patches(image,
 
         count = 1
         if dimensionality == 2:
-            for i in indices[1]:
-                for j in indices[2]:
+            for i in indices[0]:
+                for j in indices[1]:
                     start_index = (i, j)
                     end_index = tuple(np.add(start_index, patch_size))
 
@@ -131,9 +131,9 @@ def extract_image_patches(image,
 
                     count += 1
         else:
-            for i in indices[1]:
-                for j in indices[2]:
-                    for k in indices[3]:
+            for i in indices[0]:
+                for j in indices[1]:
+                    for k in indices[2]:
                         start_index = (i, j, k)
                         end_index = tuple(np.add(start_index, patch_size))
 
@@ -192,47 +192,47 @@ def extract_image_patches(image,
             for d in range(dimensionality):
                 random_indices[:, d] = random.sample(range(image_size[d] - patch_size[d]), max_number_of_patches)
 
-    if return_as_array:
-        if number_of_image_components == 1:
-            patch_array = np.zeros((number_of_extracted_patches, *patch_size))
-        else:
-            patch_array = np.zeros((number_of_extracted_patches, *patch_size, number_of_image_components))
-
-    start_index = np.ones( dimensionality )
-    for i in range(number_of_extracted_patches):
-        start_index = random_indices[i, :]
-        end_index = np.add(start_index, patch_size)
-
-        if dimensionality == 2:
-            if number_of_image_components == 1:
-                patch = image_array[start_index[0]:end_index[0],
-                                    start_index[1]:end_index[1]]
-            else:
-                patch = image_array[start_index[0]:end_index[0],
-                                    start_index[1]:end_index[1], :]
-        else:
-            if number_of_image_components == 1:
-                patch = image_array[start_index[0]:end_index[0],
-                                    start_index[1]:end_index[1],
-                                    start_index[2]:end_index[2]]
-            else:
-                patch = image_array[start_index[0]:end_index[0],
-                                    start_index[1]:end_index[1],
-                                    start_index[2]:end_index[2], :]
-
         if return_as_array:
+            if number_of_image_components == 1:
+                patch_array = np.zeros((number_of_extracted_patches, *patch_size))
+            else:
+                patch_array = np.zeros((number_of_extracted_patches, *patch_size, number_of_image_components))
+
+        start_index = np.ones( dimensionality )
+        for i in range(number_of_extracted_patches):
+            start_index = random_indices[i, :]
+            end_index = np.add(start_index, patch_size)
+
             if dimensionality == 2:
                 if number_of_image_components == 1:
-                    patch_array[i, :, :] = patch
+                    patch = image_array[start_index[0]:end_index[0],
+                                        start_index[1]:end_index[1]]
                 else:
-                    patch_array[i, :, :, :] = patch
+                    patch = image_array[start_index[0]:end_index[0],
+                                        start_index[1]:end_index[1], :]
             else:
                 if number_of_image_components == 1:
-                    patch_array[i, :, :] = patch
+                    patch = image_array[start_index[0]:end_index[0],
+                                        start_index[1]:end_index[1],
+                                        start_index[2]:end_index[2]]
                 else:
-                    patch_array[i, :, :, :, :] = patch
-        else:
-            patch_list.append(patch)
+                    patch = image_array[start_index[0]:end_index[0],
+                                        start_index[1]:end_index[1],
+                                        start_index[2]:end_index[2], :]
+
+            if return_as_array:
+                if dimensionality == 2:
+                    if number_of_image_components == 1:
+                        patch_array[i, :, :] = patch
+                    else:
+                        patch_array[i, :, :, :] = patch
+                else:
+                    if number_of_image_components == 1:
+                        patch_array[i, :, :] = patch
+                    else:
+                        patch_array[i, :, :, :, :] = patch
+            else:
+                patch_list.append(patch)
 
     if return_as_array:
        return(patch_array)
