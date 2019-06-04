@@ -10,17 +10,35 @@ def reconstruct_image_from_patches(patches,
     """
     Reconstruct image from a list of patches.
 
-    :param patches: List or array of patches defining an image.  Patches are assumed
-      to have the same format as returned by \code{extractImagePatches}.
-    :param domain_image: Image or mask to define the geometric information of the
-      reconstructed image.  If this is a mask image, the reconstruction will only
-      use patches in the mask.
-    :param stride_length: Defines the sequential patch overlap for
-      maxNumberOfPatches = all.  Can be a image-dimensional vector or a scalar.
-    :param domain_image_is_mask: boolean specifying whether the domain image is a
-      mask used to limit the region of reconstruction from the patches.
-    :returns: an ANTs image.
+    Arguments
+    ---------
+    patches : list or array of patches
+        List or array of patches defining an image.  Patches are assumed
+        to have the same format as returned by extract_image_patches.
 
+    domain_image : ANTs image
+        Image or mask to define the geometric information of the
+        reconstructed image.  If this is a mask image, the reconstruction will only
+        use patches in the mask.
+
+    stride_length:  integer or n-D tuple
+        Defines the sequential patch overlap for max_number_of_patches = "all".
+        Can be a image-dimensional vector or a scalar.
+
+    domain_image_is_mask : boolean
+        Boolean specifying whether the domain image is a
+        mask used to limit the region of reconstruction from the patches.
+
+    Returns
+    -------
+    An ANTs image.
+
+    Example
+    -------
+    >>> import ants
+    >>> image = ants.image_read(ants.get_ants_data('r16'))
+    >>> image_patches = extract_image_patches(image, stride_length=4)
+    >>> reconstructed_image = reconstruct_image_from_patches(image_patches, image, stride_length=4)
     """
 
     image_size = domain_image.shape

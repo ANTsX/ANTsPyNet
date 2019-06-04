@@ -13,26 +13,46 @@ def extract_image_patches(image,
     """
     Extract 2-D or 3-D image patches.
 
-    :param image: Input ANTs image with one or more components.
-    :param patch_size: Width, height, and depth (if 3-D) of patches.
-    :param max_number_of_patches: Maximum number of patches returned.  If
-      "all" is specified, then all patches in sequence (defined by the
-      stride_length are extracted.
-    :param stride_length: Defines the sequential patch overlap for
-      max_number_of_patches = "all".  Can be a image-dimensional vector or
-      a scalar.
-    :param mask_image: optional image specifying the sampling region for
-      the patches when max_number_of_patches does not equal "all".
-      The way we constrain patch selection using a mask is by forcing
-      each returned patch to have a masked voxel at its center.
-    :param random_seed: integer seed that allows reproducible patch extraction
-      across runs.
-    :param return_as_array: specifies the return type of the function.  If
-      False (default) the return type is a list where each element is
-      a single patch.  Otherwise the return type is an array of size
-      dim( number_of_patches, patch_size ).
-    :returns: a list (or array) of image patches.
+    Arguments
+    ---------
+    image : ANTsImage
+        Input image with one or more components.
 
+    patch_size: n-D tuple (depending on dimensionality).
+        Width, height, and depth (if 3-D) of patches.
+
+    max_number_of_patches:  integer or string
+        Maximum number of patches returned.  If "all" is specified, then
+        all patches in sequence (defined by the stride_length are extracted.
+
+    stride_length:  integer or n-D tuple
+        Defines the sequential patch overlap for max_number_of_patches = "all".
+        Can be a image-dimensional vector or a scalar.
+
+    mask_image:  ANTsImage (optional)
+        Optional image specifying the sampling region for
+        the patches when max_number_of_patches does not equal "all".
+        The way we constrain patch selection using a mask is by forcing
+        each returned patch to have a masked voxel at its center.
+
+    random_seed: integer (optional)
+        Seed value that allows reproducible patch extraction across runs.
+
+    return_as_array: boolean
+        Specifies the return type of the function.  If
+        False (default) the return type is a list where each element is
+        a single patch.  Otherwise the return type is an array of size
+        dim( number_of_patches, patch_size ).
+
+    Returns
+    -------
+    A list (or array) of patches.
+
+    Example
+    -------
+    >>> import ants
+    >>> image = ants.image_read(ants.get_ants_data('r16'))
+    >>> image_patches = extract_image_patches(image)
     """
 
     if random_seed is None:

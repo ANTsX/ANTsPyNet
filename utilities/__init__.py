@@ -1,1 +1,2 @@
-import extract_image_patches
+from .extract_image_patches import extract_image_patches
+from .reconstruct_image_from_patches import reconstruct_image_from_patches
