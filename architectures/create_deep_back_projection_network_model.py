@@ -37,29 +37,56 @@ def create_deep_back_projection_network_model_2d(input_image_size,
             https://github.com/alterzero/DBPN-caffe
             https://github.com/alterzero/DBPN-Pytorch
 
-    :param input_image_size: Used for specifying the input tensor shape.  The
-      shape (or dimension) of that tensor is the image dimensions followed by
-      the number of channels (e.g., red, green, and blue).
-    :param number_of_outputs: number of outputs (e.g., 3 for RGB images).
-    :param number_of_feature_filters: number of feature filters.
-    :param number_of_base_filters: number of base filters.
-    :param number_of_back_projection_stages: number of up-down-projection stages.
-      This number includes the final up block.
-    :param convolution_kernel_size: kernel size for certain convolutional layers.
-      This strides are dependent on the scale factor discussed in original paper.
-      Factors used in the original implementation are as follows:
-        2x --> convolutionKernelSize=(6, 6),
-        4x --> convolutionKernelSize=(8, 8),
-        8x --> convolutionKernelSize=(12, 12).  We default to 8x parameters.
-    :param strides: strides for certain convolutional layers.  This and the
-      convolution_kernel_size are dependent on the scale factor discussed in
-      original paper.  Factors used in the original implementation are as follows:
-        2x --> strides = (2, 2),
-        4x --> strides = (4, 4),
-        8x --> strides = (8, 8). We default to 8x parameters.
-    :param last_convolution: the kernel size for the last convolutional layer
-    :param number_of_loss_functions: the number of data targets, e.g. 2 for 2 targets
-    :returns: a keras model defining the deep back-projection network.
+    Arguments
+    ---------
+    input_image_size : tuple of length 3
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_outputs : integer
+        Number of outputs (e.g., 3 for RGB images).
+
+    number_of_feature_filters : integer
+        Number of feature filters.
+
+    number_of_base_filters : integer
+        Number of base filters.
+
+    number_of_back_projection_stages : integer
+        Number of up-down-projection stages.
+        This number includes the final up block.
+
+    convolution_kernel_size : tuple of length 2
+        Kernel size for certain convolutional layers.  The strides are dependent on
+        the scale factor discussed in original paper.  Factors used in the original
+        implementation are as follows:
+          2x --> convolution_kernel_size=(6, 6),
+          4x --> convolution_kernel_size=(8, 8),
+          8x --> convolution_kernel_size=(12, 12).  We default to 8x parameters.
+
+    strides : tuple of length 2
+        Strides for certain convolutional layers.  This and the
+        convolution_kernel_size are dependent on the scale factor discussed in
+        original paper.  Factors used in the original implementation are as follows:
+          2x --> strides = (2, 2),
+          4x --> strides = (4, 4),
+          8x --> strides = (8, 8). We default to 8x parameters.
+
+    last_convolution: tuple of length 2
+        The kernel size for the last convolutional layer.
+
+    number_of_loss_functions :  integer
+        The number of data targets, e.g. 2 for 2 targets
+
+    Returns
+    -------
+    A keras model defining the deep back-projection network.
+
+    Example
+    -------
+    >>> model = create_deep_back_projection_network_model_2d((128, 128, 1))
+    >>> model.summary()
     """
 
     def up_block_2d(L, number_of_filters=64, kernel_size=(12, 12), strides=(8, 8),
@@ -258,29 +285,56 @@ def create_deep_back_projection_network_model_3d(input_image_size,
             https://github.com/alterzero/DBPN-caffe
             https://github.com/alterzero/DBPN-Pytorch
 
-    :param input_image_size: Used for specifying the input tensor shape.  The
-      shape (or dimension) of that tensor is the image dimensions followed by
-      the number of channels (e.g., red, green, and blue).
-    :param number_of_outputs: number of outputs (e.g., 3 for RGB images).
-    :param number_of_feature_filters: number of feature filters.
-    :param number_of_base_filters: number of base filters.
-    :param number_of_back_projection_stages: number of up-down-projection stages.
-      This number includes the final up block.
-    :param convolution_kernel_size: kernel size for certain convolutional layers.
-      This strides are dependent on the scale factor discussed in original paper.
-      Factors used in the original implementation are as follows:
-        2x --> convolutionKernelSize=(6, 6, 6),
-        4x --> convolutionKernelSize=(8, 8, 6),
-        8x --> convolutionKernelSize=(12, 12, 12).  We default to 8x parameters.
-    :param strides: strides for certain convolutional layers.  This and the
-      convolution_kernel_size are dependent on the scale factor discussed in
-      original paper.  Factors used in the original implementation are as follows:
-        2x --> strides = (2, 2, 2),
-        4x --> strides = (4, 4, 4),
-        8x --> strides = (8, 8, 8). We default to 8x parameters.
-    :param last_convolution: the kernel size for the last convolutional layer
-    :param number_of_loss_functions: the number of data targets, e.g. 2 for 2 targets
-    :returns: a keras model defining the deep back-projection network.
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_outputs : integer
+        Number of outputs (e.g., 3 for RGB images).
+
+    number_of_feature_filters : integer
+        Number of feature filters.
+
+    number_of_base_filters : integer
+        Number of base filters.
+
+    number_of_back_projection_stages : integer
+        Number of up-down-projection stages.
+        This number includes the final up block.
+
+    convolution_kernel_size : tuple of length 3
+        Kernel size for certain convolutional layers.  The strides are dependent on
+        the scale factor discussed in original paper.  Factors used in the original
+        implementation are as follows:
+          2x --> convolution_kernel_size=(6, 6, 6),
+          4x --> convolution_kernel_size=(8, 8, 8),
+          8x --> convolution_kernel_size=(12, 12, 12).  We default to 8x parameters.
+
+    strides : tuple of length 3
+        Strides for certain convolutional layers.  This and the
+        convolution_kernel_size are dependent on the scale factor discussed in
+        original paper.  Factors used in the original implementation are as follows:
+          2x --> strides = (2, 2, 2),
+          4x --> strides = (4, 4, 4),
+          8x --> strides = (8, 8, 8). We default to 8x parameters.
+
+    last_convolution: tuple of length 3
+        The kernel size for the last convolutional layer.
+
+    number_of_loss_functions :  integer
+        The number of data targets, e.g. 2 for 2 targets
+
+    Returns
+    -------
+    A keras model defining the deep back-projection network.
+
+    Example
+    -------
+    >>> model = create_deep_back_projection_network_model_3d((128, 128, 128, 1))
+    >>> model.summary()
     """
 
     def up_block_3d(L, number_of_filters=64, kernel_size=(12, 12, 12), strides=(8, 8, 8),

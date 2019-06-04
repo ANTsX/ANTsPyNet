@@ -30,20 +30,39 @@ def create_resnet_model_2d(input_image_size,
 
             https://gist.github.com/mjdietzx/0cb95922aac14d446a6530f87b3a04ce
 
-    :param input_image_size: Used for specifying the input tensor shape.  The
-      shape (or dimension) of that tensor is the image dimensions followed by
-      the number of channels (e.g., red, green, and blue).  The batch size
-      (i.e., number of training images) is not specified a priori.
-    :param number_of_classification_labels: Number of segmentation labels.
-    :param layers: a array determining the number of 'filters' defined at
-      for each layer.
-    :param residual_block_schedule: array defining the how many residual blocks
-      repeats.
-    :param lowest_resolution: number of filters at the initial layer.
-    :param cardinality: perform ResNet (cardinality = 1) or ResNeXt
-      (cardinality != 1 but powers of 2---try '32')
-    :param mode: 'classification' or 'regression'.  Default = 'classification'.
-    :returns: an ResNet keras model.
+    Arguments
+    ---------
+    input_image_size : tuple of length 3
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_classification_labels : integer
+        Number of classification labels.
+
+    layers : tuple
+        A tuple determining the number of 'filters' defined at for each layer.
+
+    residual_block_schedule : tuple
+        A tuple defining the how many residual blocks repeats for each layer.
+
+    lowest_resolution : integer
+        Number of filters at the initial layer.
+
+    cardinality : integer
+        perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
+        instead, powers of 2---try '32').
+
+    mode: 'classification' or 'regression'.  Default = 'classification'.
+
+    Returns
+    -------
+    A keras model defining the ResNet network.
+
+    Example
+    -------
+    >>> model = create_resnet_model_2d((128, 128, 1))
+    >>> model.summary()
     """
 
     def add_common_layers(model):
@@ -185,20 +204,39 @@ def create_resnet_model_3d(input_image_size,
 
             https://gist.github.com/mjdietzx/0cb95922aac14d446a6530f87b3a04ce
 
-    :param input_image_size: Used for specifying the input tensor shape.  The
-      shape (or dimension) of that tensor is the image dimensions followed by
-      the number of channels (e.g., red, green, and blue).  The batch size
-      (i.e., number of training images) is not specified a priori.
-    :param number_of_classification_labels: Number of segmentation labels.
-    :param layers: a array determining the number of 'filters' defined at
-      for each layer.
-    :param residual_block_schedule: array defining the how many residual blocks
-      repeats.
-    :param lowest_resolution: number of filters at the initial layer.
-    :param cardinality: perform ResNet (cardinality = 1) or ResNeXt
-      (cardinality != 1 but powers of 2---try '32')
-    :param mode: 'classification' or 'regression'.  Default = 'classification'.
-    :returns: an ResNet keras model.
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_classification_labels : integer
+        Number of classification labels.
+
+    layers : tuple
+        A tuple determining the number of 'filters' defined at for each layer.
+
+    residual_block_schedule : tuple
+        A tuple defining the how many residual blocks repeats for each layer.
+
+    lowest_resolution : integer
+        Number of filters at the initial layer.
+
+    cardinality : integer
+        perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
+        instead, powers of 2---try '32').
+
+    mode: 'classification' or 'regression'.  Default = 'classification'.
+
+    Returns
+    -------
+    A keras model defining the ResNet network.
+
+    Example
+    -------
+    >>> model = create_resnet_model_3d((128, 128, 128, 1))
+    >>> model.summary()
     """
 
     def add_common_layers(model):

@@ -35,29 +35,55 @@ def create_unet_model_2d(input_image_size,
 
             https://github.com/joelthelion/ultrasound-nerve-segmentation
 
-    :param input_image_size: Used for specifying the input tensor shape.  The
-      shape (or dimension) of that tensor is the image dimensions followed by
-      the number of channels (e.g., red, green, and blue).  The batch size
-      (i.e., number of training images) is not specified a priori.
-    :param number_of_outputs: Meaning depends on the mode.  For
-      `classification` this is the number of segmentation labels.  For
-      `regression` this is the number of outputs.
-    :param number_of_layers: number of encoding/decoding layers.
-    :param number_of_filters_at_base_layer: number of filters at the beginning
-      and end of the `U`.  Doubles at each descending/ascending layer.
-    :param convolution_kernel_size: 2-d array defining the kernel size
-      during the encoding path.
-    :param deconvolution_kernel_size: 2-d array defining the kernel size
-      during the decoding.
-    :param pool_size: 2-d array defining the region for each pooling layer.
-    :param strides: 2-d array describing the stride length in each direction.
-    :param dropout_rate: float between 0 and 1 to use between dense layers.
-    :param weight_decay weighting parameter for L2 regularization of the
-      kernel weights of the convolution layers.  Default = 0.0.
-    :param mode `classification` or `regression`.  Default = `classification`.
-    :returns: a u-net keras model.
-    :raises: ValueError: raises an exception if `mode` is incorrect.
 
+    Arguments
+    ---------
+    input_image_size : tuple of length 3
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_outputs : integer
+        Meaning depends on the mode.  For `classification` this is the number of
+        segmentation labels.  For `regression` this is the number of outputs.
+
+    number_of_layers : integer
+        number of encoding/decoding layers.
+
+    number_of_filters_at_base_layer : integer
+        number of filters at the beginning and end of the `U`.  Doubles at each
+        descending/ascending layer.
+
+    convolution_kernel_size : tuple of length 2
+        Defines the kernel size during the encoding.
+
+    deconvolution_kernel_size : tuple of length 2
+        Defines the kernel size during the decoding.
+
+    pool_size : tuple of length 2
+        Defines the region for each pooling layer.
+
+    strides : tuple of length 2
+        Strides for the convolutional layers.
+
+    dropout_rate : scalar
+        Float between 0 and 1 to use between dense layers.
+
+    weight_decay :  scalar
+        Weighting parameter for L2 regularization of the kernel weights of the
+        convolution layers.  Default = 0.0.
+
+    mode :  string
+        `classification` or `regression`.  Default = `classification`.
+
+    Returns
+    -------
+    A keras model defining the U-net network.
+
+    Example
+    -------
+    >>> model = create_unet_model_2d((128, 128, 1))
+    >>> model.summary()
     """
 
     inputs = Input(shape = input_image_size)
@@ -172,29 +198,55 @@ def create_unet_model_3d(input_image_size,
 
             https://github.com/joelthelion/ultrasound-nerve-segmentation
 
-    :param input_image_size: Used for specifying the input tensor shape.  The
-      shape (or dimension) of that tensor is the image dimensions followed by
-      the number of channels (e.g., red, green, and blue).  The batch size
-      (i.e., number of training images) is not specified a priori.
-    :param number_of_outputs: Meaning depends on the mode.  For
-      `classification` this is the number of segmentation labels.  For
-      `regression` this is the number of outputs.
-    :param number_of_layers: number of encoding/decoding layers.
-    :param number_of_filters_at_base_layer: number of filters at the beginning
-      and end of the `U`.  Doubles at each descending/ascending layer.
-    :param convolution_kernel_size: 3-d array defining the kernel size
-      during the encoding path.
-    :param deconvolution_kernel_size: 3-d array defining the kernel size
-      during the decoding.
-    :param pool_size: 3-d array defining the region for each pooling layer.
-    :param strides: 3-d array describing the stride length in each direction.
-    :param dropout_rate: float between 0 and 1 to use between dense layers.
-    :param weight_decay weighting parameter for L2 regularization of the
-      kernel weights of the convolution layers.  Default = 0.0.
-    :param mode `classification` or `regression`.  Default = `classification`.
-    :returns: a u-net keras model.
-    :raises: ValueError: raises an exception if `mode` is incorrect.
 
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_outputs : integer
+        Meaning depends on the mode.  For `classification` this is the number of
+        segmentation labels.  For `regression` this is the number of outputs.
+
+    number_of_layers : integer
+        number of encoding/decoding layers.
+
+    number_of_filters_at_base_layer : integer
+        number of filters at the beginning and end of the `U`.  Doubles at each
+        descending/ascending layer.
+
+    convolution_kernel_size : tuple of length 4
+        Defines the kernel size during the encoding.
+
+    deconvolution_kernel_size : tuple of length 4
+        Defines the kernel size during the decoding.
+
+    pool_size : tuple of length 4
+        Defines the region for each pooling layer.
+
+    strides : tuple of length 4
+        Strides for the convolutional layers.
+
+    dropout_rate : scalar
+        Float between 0 and 1 to use between dense layers.
+
+    weight_decay :  scalar
+        Weighting parameter for L2 regularization of the kernel weights of the
+        convolution layers.  Default = 0.0.
+
+    mode :  string
+        `classification` or `regression`.  Default = `classification`.
+
+    Returns
+    -------
+    A keras model defining the U-net network.
+
+    Example
+    -------
+    >>> model = create_unet_model_3d((128, 128, 128, 1))
+    >>> model.summary()
     """
 
     inputs = Input(shape = input_image_size)
