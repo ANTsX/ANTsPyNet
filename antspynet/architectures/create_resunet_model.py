@@ -243,10 +243,9 @@ def create_resunet_model_2d(input_image_size,
     for i in range(number_of_bottle_neck_layers):
         number_of_filters = number_of_filters_at_base_layer * 2**i
 
-        for j in range(bottle_neck_block_depth_schedule[0]):
+        for j in range(bottle_neck_block_depth_schedule[i]):
 
             do_downsample = False
-
             if j == 0:
                 do_downsample = True
             else:
@@ -257,7 +256,7 @@ def create_resunet_model_2d(input_image_size,
                                          deconvolution_kernel_size=deconvolution_kernel_size,
                                          weight_decay=weight_decay, dropout_rate=dropout_rate)
 
-            if j == bottle_neck_block_depth_schedule[i]:
+            if j == (bottle_neck_block_depth_schedule[i] - 1):
                encoding_layers_with_long_skip_connections.append(model)
                encoding_layer_count += 1
 
@@ -286,7 +285,6 @@ def create_resunet_model_2d(input_image_size,
         for j in range(bottle_neck_block_depth_schedule[number_of_bottle_neck_layers - i - 1]):
 
             do_upsample = False
-
             if j == bottle_neck_block_depth_schedule[number_of_bottle_neck_layers - i - 1] - 1:
                 do_upsample = True
             else:
@@ -322,6 +320,9 @@ def create_resunet_model_2d(input_image_size,
     encoding_layer_count -= 1
 
     model = skip_connection(encoding_layers_with_long_skip_connections[encoding_layer_count - 1], model)
+
+    model = BatchNormalization()(model)
+    model = ThresholdedReLU(theta = 0)(model)
 
     convActivation = ''
 
@@ -406,7 +407,7 @@ def create_resunet_model_3d(input_image_size,
 
     Example
     -------
-    >>> model = create_resunet_model_2d((128, 128, 128, 1))
+    >>> model = create_resunet_model_3d((128, 128, 128, 1))
     >>> model.summary()
     """
 
@@ -450,7 +451,6 @@ def create_resunet_model_3d(input_image_size,
         elif upsample:
             input = Conv3DTranspose(filters=number_of_output_filters,
                                     kernel_size=(1, 1, 1),
-                                    strides=(2, 2, 2),
                                     padding='same')(input)
             input = UpSampling3D(size=(2, 2, 2))(input)
         elif number_of_filters != number_of_output_filters:
@@ -476,7 +476,7 @@ def create_resunet_model_3d(input_image_size,
 
             output = Conv3D(filters=number_of_filters,
                             kernel_size=(1, 1, 1),
-                            strides=(1, 1, 1),
+                            strides=(2, 2, 2),
                             kernel_initializer=initializers.he_normal(),
                             kernel_regularizer=regularizers.l2(weight_decay))(output)
 
@@ -519,7 +519,6 @@ def create_resunet_model_3d(input_image_size,
         elif upsample:
             input = Conv3DTranspose(filters=number_of_output_filters,
                                     kernel_size=(1, 1, 1),
-                                    strides=(2, 2, 2),
                                     padding='same')(input)
             input = UpSampling3D(size=(2, 2, 2))(input)
         elif number_of_filters != number_of_output_filters:
@@ -578,10 +577,9 @@ def create_resunet_model_3d(input_image_size,
     for i in range(number_of_bottle_neck_layers):
         number_of_filters = number_of_filters_at_base_layer * 2**i
 
-        for j in range(bottle_neck_block_depth_schedule[0]):
+        for j in range(bottle_neck_block_depth_schedule[i]):
 
             do_downsample = False
-
             if j == 0:
                 do_downsample = True
             else:
@@ -592,7 +590,7 @@ def create_resunet_model_3d(input_image_size,
                                          deconvolution_kernel_size=deconvolution_kernel_size,
                                          weight_decay=weight_decay, dropout_rate=dropout_rate)
 
-            if j == bottle_neck_block_depth_schedule[i]:
+            if j == (bottle_neck_block_depth_schedule[i] - 1):
                encoding_layers_with_long_skip_connections.append(model)
                encoding_layer_count += 1
 
@@ -620,9 +618,8 @@ def create_resunet_model_3d(input_image_size,
 
         for j in range(bottle_neck_block_depth_schedule[number_of_bottle_neck_layers - i - 1]):
 
-            do_downsample = False
-
-            if j == bottle_neck_block_depth_schedule[number_of_bottle_neck_layers - i - 1]:
+            do_upsample = False
+            if j == bottle_neck_block_depth_schedule[number_of_bottle_neck_layers - i - 1] - 1:
                 do_upsample = True
             else:
                 do_upsample = False
@@ -634,7 +631,7 @@ def create_resunet_model_3d(input_image_size,
 
             if j == 0:
                model = Conv3D(filters=(number_of_filters * 4),
-                              kernel_size=(1, 1),
+                              kernel_size=(1, 1, 1),
                               padding='same')(model)
                model = skip_connection(encoding_layers_with_long_skip_connections[encoding_layer_count - 1], model)
                encoding_layer_count -= 1
@@ -658,6 +655,9 @@ def create_resunet_model_3d(input_image_size,
 
     model = skip_connection(encoding_layers_with_long_skip_connections[encoding_layer_count - 1], model)
 
+    model = BatchNormalization()(model)
+    model = ThresholdedReLU(theta = 0)(model)
+
     convActivation = ''
 
     if mode == 'classification':
@@ -670,7 +670,7 @@ def create_resunet_model_3d(input_image_size,
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Conv2D(filters=number_of_outputs,
+    outputs = Conv3D(filters=number_of_outputs,
                      kernel_size=(1, 1, 1),
                      activation = convActivation,
                      kernel_regularizer=regularizers.l2(weight_decay))(model)
@@ -678,4 +678,3 @@ def create_resunet_model_3d(input_image_size,
     resunet_model = Model(inputs=inputs, outputs=outputs)
 
     return resunet_model
-
