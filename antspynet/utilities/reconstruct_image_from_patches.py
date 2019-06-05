@@ -37,7 +37,7 @@ def reconstruct_image_from_patches(patches,
     -------
     >>> import ants
     >>> image = ants.image_read(ants.get_ants_data('r16'))
-    >>> image_patches = extract_image_patches(image, stride_length=4)
+    >>> image_patches = extract_image_patches(image, patch_size=(16, 16), stride_length=4)
     >>> reconstructed_image = reconstruct_image_from_patches(image_patches, image, stride_length=4)
     """
 
@@ -78,7 +78,7 @@ def reconstruct_image_from_patches(patches,
         mask_array = domain_image.numpy()
         mask_array[np.where(mask_array != 0)] = 1
 
-    count = 1
+    count = 0
     if dimensionality == 2:
         if np.all(np.equal(stride_length_tuple, 1)):
             for i in range(image_size[0] - patch_size[0]):
@@ -107,8 +107,8 @@ def reconstruct_image_from_patches(patches,
                             patch = np.expand_dims(patch, axis = 2)
 
                         image_array[start_index[0]:end_index[0],
-                                    start_index[1]:end_index[1]][mid_patch_index[0],
-                                                                 mid_patch_index[1], :] += patch
+                                    start_index[1]:end_index[1], :][mid_patch_index[0],
+                                                                    mid_patch_index[1], :] += patch
                         count += 1
 
             if not domain_image_is_mask:
@@ -138,11 +138,9 @@ def reconstruct_image_from_patches(patches,
                         patch = np.expand_dims(patch, axis = 2)
 
                     image_array[start_index[0]:end_index[0],
-                                start_index[1]:end_index[1]][mid_patch_index[0],
-                                                             mid_patch_index[1], :] += patch
+                                start_index[1]:end_index[1], :] += patch
                     count_array[start_index[0]:end_index[0],
-                                start_index[1]:end_index[1]][mid_patch_index[0],
-                                                             mid_patch_index[1], :] += np.ones(patch_size)
+                                start_index[1]:end_index[1]] += np.ones(patch_size)
                     count += 1
 
             count_array[np.where(count_array == 0)] = 1
@@ -182,9 +180,9 @@ def reconstruct_image_from_patches(patches,
 
                             image_array[start_index[0]:end_index[0],
                                         start_index[1]:end_index[1],
-                                        start_index[2]:end_index[2]][mid_patch_index[0],
-                                                                     mid_patch_index[1],
-                                                                     mid_patch_index[2], :] += patch
+                                        start_index[2]:end_index[2], :][mid_patch_index[0],
+                                                                        mid_patch_index[1],
+                                                                        mid_patch_index[2], :] += patch
                             count += 1
 
             if not domain_image_is_mask:
@@ -218,14 +216,10 @@ def reconstruct_image_from_patches(patches,
 
                             image_array[start_index[0]:end_index[0],
                                         start_index[1]:end_index[1],
-                                        start_index[2]:end_index[2]][mid_patch_index[0],
-                                                                     mid_patch_index[1],
-                                                                     mid_patch_index[2], :] += patch
+                                        start_index[2]:end_index[2], :] += patch
                             count_array[start_index[0]:end_index[0],
                                         start_index[1]:end_index[1],
-                                        start_index[1]:end_index[2]][mid_patch_index[0],
-                                                                     mid_patch_index[1],
-                                                                     mid_patch_index[2], :] += np.ones(patch_size)
+                                        start_index[1]:end_index[2]] += np.ones(patch_size)
                             count += 1
 
                 count_array[np.where(count_array == 0)] = 1
@@ -238,13 +232,14 @@ def reconstruct_image_from_patches(patches,
         image_array = np.transpose(image_array, [3, 0, 1, 2])
 
     image_array = np.squeeze(image_array)
+
     reconstructed_image = ants.from_numpy(image_array,
                                           origin=domain_image.origin,
                                           spacing=domain_image.spacing,
                                           direction=domain_image.direction,
-                                          has_components=(number_of_image_components == 1))
+                                          has_components=(number_of_image_components != 1))
 
-    return(reconstruced_image)
+    return(reconstructed_image)
 
 
 
