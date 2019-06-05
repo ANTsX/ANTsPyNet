@@ -12,6 +12,8 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 * U-Net (2-D, 3-D)
     * [O. Ronneberger, P. Fischer, and T. Brox.  U-Net: Convolutional Networks for Biomedical Image Segmentation.](https://arxiv.org/abs/1505.04597)
+* U-Net + ResNet (2-D, 3-D)
+    * [Michal Drozdzal, Eugene Vorontsov, Gabriel Chartrand, Samuel Kadoury, and Chris Pal.  The Importance of Skip Connections in Biomedical Image Segmentation.](https://arxiv.org/abs/1608.04117)
 
 ### Image classification/regression
 
