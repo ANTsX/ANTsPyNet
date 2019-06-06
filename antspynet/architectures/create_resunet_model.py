@@ -71,6 +71,10 @@ def create_resunet_model_2d(input_image_size,
     mode : string
         'classification' or 'regression'.  Default = 'classification'.
 
+    Returns
+    -------
+    A keras model defining the Res/U-net network.
+
     Example
     -------
     >>> model = create_resunet_model_2d((128, 128, 1))
@@ -404,6 +408,10 @@ def create_resunet_model_3d(input_image_size,
 
     mode : string
         'classification' or 'regression'.  Default = 'classification'.
+
+    Returns
+    -------
+    A keras model defining the Res/U-net network.
 
     Example
     -------
