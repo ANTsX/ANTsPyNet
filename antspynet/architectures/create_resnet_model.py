@@ -53,7 +53,8 @@ def create_resnet_model_2d(input_image_size,
         perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
         instead, powers of 2---try '32').
 
-    mode: 'classification' or 'regression'.  Default = 'classification'.
+    mode : string
+        'classification' or 'regression'.  Default = 'classification'.
 
     Returns
     -------
@@ -227,7 +228,8 @@ def create_resnet_model_3d(input_image_size,
         perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
         instead, powers of 2---try '32').
 
-    mode: 'classification' or 'regression'.  Default = 'classification'.
+    mode : string
+        'classification' or 'regression'.  Default = 'classification'.
 
     Returns
     -------
