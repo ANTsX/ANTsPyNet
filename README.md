@@ -28,7 +28,9 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
     * [Saining Xie and Ross Girshick and Piotr Dollár and Zhuowen Tu and Kaiming He.  Aggregated Residual Transformations for Deep Neural Networks.](https://arxiv.org/abs/1611.05431)
 * WideResNet (2-D, 3-D)
     * [Sergey Zagoruyko and Nikos Komodakis.  Wide Residual Networks.](http://arxiv.org/abs/1605.07146)    
-    
+* DenseNet (2-D, 3-D)
+    * [G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected Convolutional Networks Networks.](https://arxiv.org/abs/1608.06993)
+
 ### Object detection
 
 ### Image super-resolution
