@@ -5,3 +5,4 @@ from .create_resnet_model import create_resnet_model_2d, create_resnet_model_3d
 from .create_resunet_model import create_resunet_model_2d, create_resunet_model_3d
 from .create_unet_model import create_unet_model_2d, create_unet_model_3d
 from .create_vgg_model import create_vgg_model_2d, create_vgg_model_3d
+from .create_wide_resnet_model import create_wide_resnet_model_2d, create_wide_resnet_model_3d
