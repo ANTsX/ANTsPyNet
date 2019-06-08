@@ -1,8 +1,9 @@
 from keras.models import Model
-from keras.layers import (Input, Conv2D, Conv2DTranspose,
-                          MaxPooling2D, Concatenate, UpSampling2D,
+from keras.layers import (Input, Concatenate, Dropout,
+                          Conv2D, Conv2DTranspose, MaxPooling2D,
+                          UpSampling2D,
                           Conv3D, Conv3DTranspose, MaxPooling3D,
-                          UpSampling3D, Dropout)
+                          UpSampling3D)
 from keras import regularizers
 
 def create_unet_model_2d(input_image_size,

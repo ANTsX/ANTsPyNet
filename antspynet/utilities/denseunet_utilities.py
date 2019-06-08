@@ -23,10 +23,9 @@ class Scale(Layer):
 
     """
 
-    def __init__(self, initial_weights=None, axis=-1, momentum=0.9, **kwargs):
+    def __init__(self, axis=-1, momentum=0.9, **kwargs):
         self.momentum = momentum
         self.axis = axis
-        self.initial_weights = initial_weights
 
         super(Scale, self).__init__(**kwargs)
 

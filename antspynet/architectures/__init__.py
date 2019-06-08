@@ -4,6 +4,7 @@ from .create_densenet_model import create_densenet_model_2d, create_densenet_mod
 from .create_denseunet_model import create_denseunet_model_2d, create_denseunet_model_3d
 from .create_resnet_model import create_resnet_model_2d, create_resnet_model_3d
 from .create_resunet_model import create_resunet_model_2d, create_resunet_model_3d
+from .create_spatial_transformer_network_model import create_spatial_transformer_network_model_2d, create_spatial_transformer_network_model_3d
 from .create_unet_model import create_unet_model_2d, create_unet_model_3d
 from .create_vgg_model import create_vgg_model_2d, create_vgg_model_3d
 from .create_wide_resnet_model import create_wide_resnet_model_2d, create_wide_resnet_model_3d
