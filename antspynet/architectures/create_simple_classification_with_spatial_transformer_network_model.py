@@ -8,9 +8,9 @@ from ..utilities import (SpatialTransformer2D, SpatialTransformer3D)
 
 import numpy as np
 
-def create_spatial_transformer_network_model_2d(input_image_size,
-                                                resampled_size=(30, 30),
-                                                number_of_classification_labels=10):
+def create_simple_classification_with_spatial_transformer_network_model_2d(input_image_size,
+                                                                           resampled_size=(30, 30),
+                                                                           number_of_classification_labels=10):
     """
     2-D implementation of the spatial transformer network.
 
@@ -48,7 +48,7 @@ def create_spatial_transformer_network_model_2d(input_image_size,
 
     Example
     -------
-    >>> model = create_spatial_transformer_network_model_2d((128, 128, 1))
+    >>> model = create_simple_classification_with_spatial_transformer_network_model_2d((128, 128, 1))
     >>> model.summary()
     """
 
@@ -103,9 +103,9 @@ def create_spatial_transformer_network_model_2d(input_image_size,
 
     return(stnModel)
 
-def create_spatial_transformer_network_model_3d(input_image_size,
-                                                resampled_size=(30, 30, 30),
-                                                number_of_classification_labels=10):
+def create_simple_classification_with_spatial_transformer_network_model_3d(input_image_size,
+                                                                           resampled_size=(30, 30, 30),
+                                                                           number_of_classification_labels=10):
     """
     3-D implementation of the spatial transformer network.
 
@@ -143,7 +143,7 @@ def create_spatial_transformer_network_model_3d(input_image_size,
 
     Example
     -------
-    >>> model = create_spatial_transformer_network_model_3d((128, 128, 128, 1))
+    >>> model = create_simple_classification_with_spatial_transformer_network_model_3d((128, 128, 128, 1))
     >>> model.summary()
     """
 
