@@ -40,6 +40,9 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 ### Registration and transforms
 
+* Spatial transformer network (STN) (2-D, 3-D)
+    * [Max Jaderberg, Karen Simonyan, Andrew Zisserman, and Koray Kavukcuoglu.  Spatial Transformer Networks.](https://arxiv.org/abs/1506.02025)
+    
 ### Generative adverserial networks
 
 ### Clustering
