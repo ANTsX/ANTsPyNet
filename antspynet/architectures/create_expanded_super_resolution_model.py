@@ -1,13 +1,13 @@
 
 from keras.models import Model
-from keras.layers import (Input, Conv2D, Conv3D)
+from keras.layers import (Input, Average, Conv2D, Conv3D)
 
-def create_image_super_resolution_model_2d(input_image_size,
-                                           convolution_kernel_sizes=[(9, 9), (1, 1), (5, 5)],
-                                           number_of_filters=(64, 32)
-                                          ):
+def create_expanded_super_resolution_model_2d(input_image_size,
+                                              convolution_kernel_sizes=[(9, 9), (1, 1), (3, 3), (5, 5), (5, 5)],
+                                              number_of_filters=(64, 32, 32, 32)
+                                             ):
     """
-    2-D implementation of the image super resolution deep learning architecture.
+    2-D implementation of the expanded  image super resolution deep learning architecture.
 
     Creates a keras model of the image super resolution deep learning framework.
     based on the paper available here:
@@ -41,7 +41,7 @@ def create_image_super_resolution_model_2d(input_image_size,
 
     Example
     -------
-    >>> model = create_image_super_resolution_model_2d((128, 128, 1))
+    >>> model = create_expanded_super_resolution_model_2d((128, 128, 1))
     >>> model.summary()
     """
 
@@ -54,11 +54,21 @@ def create_image_super_resolution_model_2d(input_image_size,
 
     outputs = inputs
 
+    averaging_convolution_layers = []
     for i in range(number_of_convolution_layers - 1):
-        outputs = Conv2D(filters=number_of_filters[i],
-                         kernel_size=convolution_kernel_sizes[i],
-                         activation='relu',
-                         padding='same')(outputs)
+        if i == 0:
+            outputs = Conv2D(filters=number_of_filters[i],
+                             kernel_size=convolution_kernel_sizes[i],
+                             activation='relu',
+                             padding='same')(outputs)
+        else:
+            layer = Conv2D(filters=number_of_filters[i],
+                             kernel_size=convolution_kernel_sizes[i],
+                             activation='relu',
+                             padding='same')(outputs)
+            averaging_convolution_layers.append(layer)
+
+    outputs = Average()(averaging_convolution_layers)
 
     number_of_channels = input_image_size[-1]
 
@@ -72,12 +82,12 @@ def create_image_super_resolution_model_2d(input_image_size,
     return(sr_model)
 
 
-def create_image_super_resolution_model_3d(input_image_size,
-                                           convolution_kernel_sizes=[(9, 9, 9), (1, 1, 1), (5, 5, 5)],
-                                           number_of_filters=(64, 32)
-                                          ):
+def create_expanded_super_resolution_model_3d(input_image_size,
+                                              convolution_kernel_sizes=[(9, 9, 9), (1, 1, 1), (3, 3, 3), (5, 5, 5), (5, 5, 5)],
+                                              number_of_filters=(64, 32, 32, 32)
+                                             ):
     """
-    3-D implementation of the image super resolution deep learning architecture.
+    3-D implementation of the expanded  image super resolution deep learning architecture.
 
     Creates a keras model of the image super resolution deep learning framework.
     based on the paper available here:
@@ -91,7 +101,7 @@ def create_image_super_resolution_model_3d(input_image_size,
 
     Arguments
     ---------
-    input_image_size : tuple of length 4
+    input_image_size : tuple of length 3
         Used for specifying the input tensor shape.  The shape (or dimension) of
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
@@ -111,7 +121,7 @@ def create_image_super_resolution_model_3d(input_image_size,
 
     Example
     -------
-    >>> model = create_image_super_resolution_model_3d((128, 128, 128, 1))
+    >>> model = create_expanded_super_resolution_model_3d((128, 128, 128, 1))
     >>> model.summary()
     """
 
@@ -124,11 +134,21 @@ def create_image_super_resolution_model_3d(input_image_size,
 
     outputs = inputs
 
+    averaging_convolution_layers = []
     for i in range(number_of_convolution_layers - 1):
-        outputs = Conv3D(filters=number_of_filters[i],
-                         kernel_size=convolution_kernel_sizes[i],
-                         activation='relu',
-                         padding='same')(outputs)
+        if i == 0:
+            outputs = Conv3D(filters=number_of_filters[i],
+                             kernel_size=convolution_kernel_sizes[i],
+                             activation='relu',
+                             padding='same')(outputs)
+        else:
+            layer = Conv3D(filters=number_of_filters[i],
+                             kernel_size=convolution_kernel_sizes[i],
+                             activation='relu',
+                             padding='same')(outputs)
+            averaging_convolution_layers.append(layer)
+
+    outputs = Average()(averaging_convolution_layers)
 
     number_of_channels = input_image_size[-1]
 
