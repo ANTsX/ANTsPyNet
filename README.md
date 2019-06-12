@@ -37,6 +37,8 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 * Super-resolution convolutional neural network (SRCNN) (2-D, 3-D)
     * [Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang.  Image Super-Resolution Using Deep Convolutional Networks.](https://arxiv.org/abs/1501.00092)
+* Expanded super-resolution (ESRCNN) (2-D, 3-D)
+    * [Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang.  Image Super-Resolution Using Deep Convolutional Networks.](https://arxiv.org/abs/1501.00092)
 * Deep back-projection network (DBPN) (2-D, 3-D)
     * [Muhammad Haris, Greg Shakhnarovich, Norimichi Ukita.  Deep Back-Projection Networks For Super-Resolution.](https://arxiv.org/abs/1803.02735)
 
