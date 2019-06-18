@@ -58,6 +58,9 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 ### Miscellaneous
 
+* Mixture density networks (MDN)
+    * [Christopher M. Bishop.  Mixture Density Networks.](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
+
 --------------------------------------
 
 ## Installation
