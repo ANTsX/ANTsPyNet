@@ -56,6 +56,11 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
 
 ### Clustering
 
+* Deep embedded clustering (DEC)
+    * [Junyuan Xie, Ross Girshick, and Ali Farhadi.  Unsupervised Deep Embedding for Clustering Analysis.](https://arxiv.org/abs/1511.06335)
+* Deep convolutional embedded clustering (DCEC)
+    * [Xifeng Guo, Xinwang Liu, En Zhu, and Jianping Yin.  Deep Clustering with Convolutional Autoencoders.](https://xifengguo.github.io/papers/ICONIP17-DCEC.pdf)
+
 ### Miscellaneous
 
 * Mixture density networks (MDN)
