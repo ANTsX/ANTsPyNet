@@ -10,3 +10,5 @@ from .super_resolution_utilities import mse, mae, psnr, ssim, gmsd
 from .deep_embedded_clustering_utilities import DeepEmbeddedClusteringModel
 
 from .mixture_density_utilities import MixtureDensityLayer
+
+from .vanilla_gan_utilities import VanillaGanModel
