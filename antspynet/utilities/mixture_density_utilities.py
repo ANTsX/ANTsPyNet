@@ -380,5 +380,5 @@ def sample_from_output(parameters, output_dimension, number_of_mixtures,
     mu_vector = mu[m * output_dimension:(m + 1) * output_dimension]
     sigma_vector = sigma[m * output_dimension:(m + 1) * output_dimension] * sigma_temperature
     covariance_matrix = np.identity(output_dimension) * sigma_vector
-    sample = np.random.multivariate_normal(mus_vector, cov_matrix, 1)
+    sample = np.random.multivariate_normal(mu_vector, covariance_matrix, 1)
     return(sample)
