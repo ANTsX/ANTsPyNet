@@ -54,6 +54,9 @@ Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
     
 ### Generative adverserial networks
 
+* Generative adverserial network (GAN)
+    * [Ian J. Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, Yoshua Bengio.  Generative Adverserial Networks.](https://arxiv.org/abs/1406.2661)
+
 ### Clustering
 
 * Deep embedded clustering (DEC)
