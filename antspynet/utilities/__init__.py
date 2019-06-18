@@ -7,4 +7,6 @@ from .reconstruct_image_from_patches import reconstruct_image_from_patches
 
 from .super_resolution_utilities import mse, mae, psnr, ssim, gmsd
 
+from .deep_embedded_clustering_utilities import DeepEmbeddedClusteringModel
+
 from .mixture_density_utilities import MixtureDensityLayer
