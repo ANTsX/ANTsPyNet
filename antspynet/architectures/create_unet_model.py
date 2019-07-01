@@ -293,7 +293,7 @@ def create_unet_model_3d(input_image_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
         deconv = UpSampling3D(size=pool_size)(deconv)
-        outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
+        outputs = Concatenate(axis=4)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         outputs = Conv3D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
