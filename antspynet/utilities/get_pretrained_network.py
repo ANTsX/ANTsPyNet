@@ -3,7 +3,7 @@ import tempfile
 
 from os import path
 
-def get_pretrained_network(file_id=None, target_file_name=None, verbose=False):
+def get_pretrained_network(file_id=None, target_file_name=None):
 
     """
     Downloads pretrained network.
@@ -18,9 +18,6 @@ def get_pretrained_network(file_id=None, target_file_name=None, verbose=False):
 
     target_file_name string
        Optional target filename.
-
-    verbose boolean
-       If True, suppress status messages (if any), and the progress bar.
 
     Returns
     -------
