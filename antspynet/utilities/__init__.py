@@ -1,3 +1,5 @@
+from .get_pretrained_network import get_pretrained_network
+
 from .denseunet_utilities import Scale
 
 from .spatial_transformer_network_utilities import SpatialTransformer2D, SpatialTransformer3D
