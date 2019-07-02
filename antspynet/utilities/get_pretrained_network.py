@@ -68,13 +68,14 @@ def get_pretrained_network(file_id=None, target_file_name=None):
         temp_directory = tempfile.TemporaryDirectory()
         target_file = tempfile.NamedTemporaryFile(suffix=".h5", dir=temp_directory.name)
         target_file.close()
+        target_file_name = target_file.name
 
-    if not path.exists(target_file.name):
+    if not path.exists(target_file_name):
         r = requests.get(url)
-        with open(target_file.name, 'wb') as f:
+        with open(target_file_name, 'wb') as f:
             f.write(r.content)
 
-    return(target_file.name)
+    return(target_file_name)
 
 
 
