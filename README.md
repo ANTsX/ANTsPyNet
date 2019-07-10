@@ -2,9 +2,7 @@
 
 A collection of deep learning architectures ported to the python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
 
-<!--
-Applications available at [ANTsRNet Apps](https://github.com/ANTsRNet).
--->
+Applications available at [ANTsXNet Apps](https://github.com/ANTsXNet).
 
 ## Architectures
 
