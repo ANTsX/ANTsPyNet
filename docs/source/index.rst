@@ -11,6 +11,7 @@ ANTsPyNet documentation
    :caption: Contents:
 
    architectures
+   utilities
 
 Indices and tables
 ==================

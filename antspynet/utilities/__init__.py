@@ -12,3 +12,10 @@ from .super_resolution_utilities import mse, mae, psnr, ssim, gmsd
 from .deep_embedded_clustering_utilities import DeepEmbeddedClusteringModel
 
 from .mixture_density_utilities import MixtureDensityLayer
+
+from .custom_losses import multilabel_dice_coefficient
+from .custom_losses import loss_multilabel_dice_coefficient_error
+from .custom_losses import peak_signal_to_noise_ratio
+from .custom_losses import loss_peak_signal_to_noise_ratio_error
+from .custom_losses import pearson_correlation_coefficient
+from .custom_losses import loss_pearson_correlation_coefficient_error

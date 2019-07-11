@@ -47,7 +47,7 @@ def multilabel_dice_coefficient(y_true, y_pred):
       (1.0 + unionOverlap + smoothingFactor))
 
 def loss_multilabel_dice_coefficient_error(y_true, y_pred):
-    return -multilabel_dice_coefficient(y_true, y_pred)
+    return(-multilabel_dice_coefficient(y_true, y_pred))
 
 
 def peak_signal_to_noise_ratio(y_true, y_pred):
@@ -74,5 +74,5 @@ def pearson_correlation_coefficient(y_true, y_pred):
 
     return(coefficient)
 
-def loss_pearson_correlation_coefficient_error(y_true, y_pred)
+def loss_pearson_correlation_coefficient_error(y_true, y_pred):
     return(-pearson_correlation_coefficient(y_true, y_pred))

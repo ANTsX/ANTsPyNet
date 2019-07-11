@@ -34,7 +34,6 @@ Image classification/regression
 .. autofunction:: antspynet.architectures.create_simple_classification_with_spatial_transformer_network_model_2d
 .. autofunction:: antspynet.architectures.create_simple_classification_with_spatial_transformer_network_model_3d
 
-
 Image super-resolution
 -------------------------------
 
