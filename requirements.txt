@@ -1,4 +1,4 @@
--e git+https://github.com/ANTsX/ANTsPy.git#egg=antspy
+-e git+https://github.com/ANTsX/ANTsPy.git#egg=antspyx
 requests
 tempfile
 random
