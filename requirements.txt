@@ -1,7 +1,7 @@
+-e git+https://github.com/ANTsX/ANTsPy.git#egg=antspy
 requests
 tempfile
 random
 tensorflow
 tensorflow_probability
 keras
--e git+https://github.com/ANTsX/ANTsPy.git#egg=antspy
