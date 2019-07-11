@@ -1,5 +1,4 @@
 requests
-tempfile
 random
 tensorflow
 tensorflow_probability
