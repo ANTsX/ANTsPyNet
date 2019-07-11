@@ -1,3 +1,4 @@
+cmake
 -e git+https://github.com/ANTsX/ANTsPy.git#egg=antspyx
 requests
 tensorflow
