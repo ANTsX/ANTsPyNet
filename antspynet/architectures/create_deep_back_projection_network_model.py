@@ -61,17 +61,17 @@ def create_deep_back_projection_network_model_2d(input_image_size,
         Kernel size for certain convolutional layers.  The strides are dependent on
         the scale factor discussed in original paper.  Factors used in the original
         implementation are as follows:
-          2x --> convolution_kernel_size=(6, 6),
-          4x --> convolution_kernel_size=(8, 8),
-          8x --> convolution_kernel_size=(12, 12).  We default to 8x parameters.
+        2x --> convolution_kernel_size=(6, 6),
+        4x --> convolution_kernel_size=(8, 8),
+        8x --> convolution_kernel_size=(12, 12).  We default to 8x parameters.
 
     strides : tuple of length 2
         Strides for certain convolutional layers.  This and the
         convolution_kernel_size are dependent on the scale factor discussed in
         original paper.  Factors used in the original implementation are as follows:
-          2x --> strides = (2, 2),
-          4x --> strides = (4, 4),
-          8x --> strides = (8, 8). We default to 8x parameters.
+        2x --> strides = (2, 2),
+        4x --> strides = (4, 4),
+        8x --> strides = (8, 8). We default to 8x parameters.
 
     last_convolution: tuple of length 2
         The kernel size for the last convolutional layer.
@@ -81,7 +81,8 @@ def create_deep_back_projection_network_model_2d(input_image_size,
 
     Returns
     -------
-    A keras model defining the deep back-projection network.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -309,17 +310,17 @@ def create_deep_back_projection_network_model_3d(input_image_size,
         Kernel size for certain convolutional layers.  The strides are dependent on
         the scale factor discussed in original paper.  Factors used in the original
         implementation are as follows:
-          2x --> convolution_kernel_size=(6, 6, 6),
-          4x --> convolution_kernel_size=(8, 8, 8),
-          8x --> convolution_kernel_size=(12, 12, 12).  We default to 8x parameters.
+        2x --> convolution_kernel_size=(6, 6, 6),
+        4x --> convolution_kernel_size=(8, 8, 8),
+        8x --> convolution_kernel_size=(12, 12, 12).  We default to 8x parameters.
 
     strides : tuple of length 3
         Strides for certain convolutional layers.  This and the
         convolution_kernel_size are dependent on the scale factor discussed in
         original paper.  Factors used in the original implementation are as follows:
-          2x --> strides = (2, 2, 2),
-          4x --> strides = (4, 4, 4),
-          8x --> strides = (8, 8, 8). We default to 8x parameters.
+        2x --> strides = (2, 2, 2),
+        4x --> strides = (4, 4, 4),
+        8x --> strides = (8, 8, 8). We default to 8x parameters.
 
     last_convolution: tuple of length 3
         The kernel size for the last convolutional layer.
@@ -329,7 +330,8 @@ def create_deep_back_projection_network_model_3d(input_image_size,
 
     Returns
     -------
-    A keras model defining the deep back-projection network.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

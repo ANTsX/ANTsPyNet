@@ -58,7 +58,8 @@ def create_resnet_model_2d(input_image_size,
 
     Returns
     -------
-    A keras model defining the ResNet network.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -233,7 +234,8 @@ def create_resnet_model_3d(input_image_size,
 
     Returns
     -------
-    A keras model defining the ResNet network.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

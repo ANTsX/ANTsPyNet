@@ -44,7 +44,8 @@ def create_simple_classification_with_spatial_transformer_network_model_2d(input
 
     Returns
     -------
-    A keras model.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -139,7 +140,8 @@ def create_simple_classification_with_spatial_transformer_network_model_3d(input
 
     Returns
     -------
-    A keras model.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

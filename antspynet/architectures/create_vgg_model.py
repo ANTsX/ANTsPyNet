@@ -24,7 +24,7 @@ def create_vgg_model_2d(input_image_size,
     recognition based on the paper
 
     K. Simonyan and A. Zisserman, Very Deep Convolutional Networks for
-      Large-Scale Image Recognition
+    Large-Scale Image Recognition
 
     available here:
 
@@ -75,7 +75,8 @@ def create_vgg_model_2d(input_image_size,
 
     Returns
     -------
-    A keras model defining the VGG network.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -178,7 +179,7 @@ def create_vgg_model_3d(input_image_size,
     recognition based on the paper
 
     K. Simonyan and A. Zisserman, Very Deep Convolutional Networks for
-      Large-Scale Image Recognition
+    Large-Scale Image Recognition
 
     available here:
 
@@ -229,7 +230,8 @@ def create_vgg_model_3d(input_image_size,
 
     Returns
     -------
-    A keras model defining the VGG network.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

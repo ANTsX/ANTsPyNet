@@ -19,8 +19,7 @@ def create_alexnet_model_2d(input_image_size,
     Creates a keras model of the AlexNet deep learning architecture for image
     recognition based on the paper
 
-    A. Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification
-      with Deep Convolutional Neural Networks.
+    A. Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification with Deep Convolutional Neural Networks.
 
     available here:
 
@@ -54,7 +53,8 @@ def create_alexnet_model_2d(input_image_size,
 
     Returns
     -------
-    A keras model defining the AlexNet network.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -219,8 +219,7 @@ def create_alexnet_model_3d(input_image_size,
     Creates a keras model of the AlexNet deep learning architecture for image
     recognition based on the paper
 
-    A. Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification
-      with Deep Convolutional Neural Networks.
+    A. Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification with Deep Convolutional Neural Networks.
 
     available here:
 
@@ -254,7 +253,8 @@ def create_alexnet_model_3d(input_image_size,
 
     Returns
     -------
-    A keras model defining the AlexNet network.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

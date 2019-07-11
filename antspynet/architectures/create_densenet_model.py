@@ -26,7 +26,7 @@ def create_densenet_model_2d(input_image_size,
     recognition based on the paper
 
     G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected
-      Convolutional Networks Networks
+    Convolutional Networks Networks
 
     available here:
 
@@ -65,11 +65,13 @@ def create_densenet_model_2d(input_image_size,
     weight_decay : scalar
         Weight decay (default = 1e-4).
 
-    mode 'classification' or 'regression'.  Default = 'classification'.
+    mode : string
+        'classification' or 'regression'.  Default = 'classification'.
 
     Returns
     -------
-    A keras model defining the DenseNet network.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -197,7 +199,7 @@ def create_densenet_model_3d(input_image_size,
     recognition based on the paper
 
     G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected
-      Convolutional Networks Networks
+    Convolutional Networks Networks
 
     available here:
 
@@ -236,11 +238,13 @@ def create_densenet_model_3d(input_image_size,
     weight_decay : scalar
         Weight decay (default = 1e-4).
 
-    mode 'classification' or 'regression'.  Default = 'classification'.
+    mode :  string
+        'classification' or 'regression'.  Default = 'classification'.
 
     Returns
     -------
-    A keras model defining the DenseNet network.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

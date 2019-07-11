@@ -79,7 +79,8 @@ def create_unet_model_2d(input_image_size,
 
     Returns
     -------
-    A keras model defining the U-net network.
+    Keras model
+        A 2-D keras model defining the U-net network.
 
     Example
     -------
@@ -242,7 +243,8 @@ def create_unet_model_3d(input_image_size,
 
     Returns
     -------
-    A keras model defining the U-net network.
+    Keras model
+        A 3-D keras model defining the U-net network.
 
     Example
     -------

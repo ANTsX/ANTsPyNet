@@ -28,7 +28,8 @@ def create_autoencoder_model(number_of_units_per_layer,
 
     Returns
     -------
-    A keras encoder and autoencoder model.
+    Keras model
+        An encoder and autoencoder Keras model.
 
     Example
     -------

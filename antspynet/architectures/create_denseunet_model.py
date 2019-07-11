@@ -78,7 +78,8 @@ def create_denseunet_model_2d(input_image_size,
 
     Returns
     -------
-    A keras model defining the Dense U-net network.
+    Keras model
+        A 2-D Keras model defining the network.
 
     Example
     -------
@@ -333,7 +334,8 @@ def create_denseunet_model_3d(input_image_size,
 
     Returns
     -------
-    A keras model defining the Dense U-net network.
+    Keras model
+        A 3-D Keras model defining the network.
 
     Example
     -------

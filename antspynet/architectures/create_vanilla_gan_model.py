@@ -27,7 +27,8 @@ class VanillaGanModel(object):
 
     Returns
     -------
-    A keras vanilla GAN model.
+    Keras model
+        A Keras model defining the network.
     """
 
     def __init__(self, input_image_size, latent_dimension=100):
