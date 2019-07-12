@@ -1,0 +1,190 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>antspynet.utilities.get_pretrained_network &#8212; ANTsPyNet 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.utilities.get_pretrained_network</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+
+<div class="viewcode-block" id="get_pretrained_network"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.get_pretrained_network">[docs]</a><span class="k">def</span> <span class="nf">get_pretrained_network</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads pretrained network.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+
+<span class="sd">    file_id string</span>
+<span class="sd">        One of the permitted file ids or pass &quot;show&quot; to list all</span>
+<span class="sd">        valid possibilities. Note that most require internet access</span>
+<span class="sd">        to download.</span>
+
+<span class="sd">    target_file_name string</span>
+<span class="sd">       Optional target filename.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A filename string</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; model_file = get_pretrained_network( &#39;dbpn4x&#39; )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">switch_networks</span><span class="p">(</span><span class="n">argument</span><span class="p">):</span>
+        <span class="n">switcher</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dbpn4x&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13347617&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;brainExtraction&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13729661&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;brainSegmentation&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13900010&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;brainSegmentationPatchBased&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/14249717&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;brainAgeGender&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/14394350&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;denoising&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/14235296&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;wholeTumorSegmentationT2Flair&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/14087045&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;protonLungMri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13606799&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;functionalLungMri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13824167&quot;</span>
+        <span class="p">}</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">switcher</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="s2">&quot;Invalid argument.&quot;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">file_id</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing file id.&quot;</span><span class="p">)</span>
+
+    <span class="n">valid_list</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;dbpn4x&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;brainExtraction&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;brainSegmentation&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;brainSegmentationPatchBased&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;brainAgeGender&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;denoising&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;wholeTumorSegmentationT2Flair&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;protonLungMri&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;functionalLungMri&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;show&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_id</span> <span class="ow">in</span> <span class="n">valid_list</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No data with the id you passed - try </span><span class="se">\&quot;</span><span class="s2">show</span><span class="se">\&quot;</span><span class="s2"> to get list of valid ids.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">file_id</span> <span class="o">==</span> <span class="s2">&quot;show&quot;</span><span class="p">:</span>
+       <span class="k">return</span><span class="p">(</span><span class="n">valid_list</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="n">switch_networks</span><span class="p">(</span><span class="n">file_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">target_file_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">temp_directory</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+        <span class="n">target_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">temp_directory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">target_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">target_file_name</span> <span class="o">=</span> <span class="n">target_file</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target_file_name</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_file_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">target_file_name</span><span class="p">)</span></div>
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Brian Avants, and Nick Cullen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

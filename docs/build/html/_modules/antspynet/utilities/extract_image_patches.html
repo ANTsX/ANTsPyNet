@@ -1,0 +1,349 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>antspynet.utilities.extract_image_patches &#8212; ANTsPyNet 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.utilities.extract_image_patches</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ants</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<div class="viewcode-block" id="extract_image_patches"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.extract_image_patches">[docs]</a><span class="k">def</span> <span class="nf">extract_image_patches</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
+                          <span class="n">patch_size</span><span class="p">,</span>
+                          <span class="n">max_number_of_patches</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+                          <span class="n">stride_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                          <span class="n">mask_image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">return_as_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract 2-D or 3-D image patches.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    image : ANTsImage</span>
+<span class="sd">        Input image with one or more components.</span>
+
+<span class="sd">    patch_size: n-D tuple (depending on dimensionality).</span>
+<span class="sd">        Width, height, and depth (if 3-D) of patches.</span>
+
+<span class="sd">    max_number_of_patches:  integer or string</span>
+<span class="sd">        Maximum number of patches returned.  If &quot;all&quot; is specified, then</span>
+<span class="sd">        all patches in sequence (defined by the stride_length are extracted.</span>
+
+<span class="sd">    stride_length:  integer or n-D tuple</span>
+<span class="sd">        Defines the sequential patch overlap for max_number_of_patches = &quot;all&quot;.</span>
+<span class="sd">        Can be a image-dimensional vector or a scalar.</span>
+
+<span class="sd">    mask_image:  ANTsImage (optional)</span>
+<span class="sd">        Optional image specifying the sampling region for</span>
+<span class="sd">        the patches when max_number_of_patches does not equal &quot;all&quot;.</span>
+<span class="sd">        The way we constrain patch selection using a mask is by forcing</span>
+<span class="sd">        each returned patch to have a masked voxel at its center.</span>
+
+<span class="sd">    random_seed: integer (optional)</span>
+<span class="sd">        Seed value that allows reproducible patch extraction across runs.</span>
+
+<span class="sd">    return_as_array: boolean</span>
+<span class="sd">        Specifies the return type of the function.  If</span>
+<span class="sd">        False (default) the return type is a list where each element is</span>
+<span class="sd">        a single patch.  Otherwise the return type is an array of size</span>
+<span class="sd">        dim( number_of_patches, patch_size ).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    A list (or array) of patches.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import ants</span>
+<span class="sd">    &gt;&gt;&gt; image = ants.image_read(ants.get_ants_data(&#39;r16&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; image_patches = extract_image_patches(image, patch_size=(32, 32))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">random_seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+    <span class="n">image_size</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">dimensionality</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">dimension</span>
+
+    <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">dimensionality</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported dimensionality.&quot;</span><span class="p">)</span>
+
+    <span class="n">number_of_image_components</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">components</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_size</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch_size</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between the image size and the specified patch size.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">patch_size</span> <span class="o">&gt;</span> <span class="n">image_size</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Patch size is greater than the image size.&quot;</span><span class="p">)</span>
+
+    <span class="n">image_array</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">image_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">image_array</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">image_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">image_array</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">patch_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">patch_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">mid_patch_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">patch_size</span><span class="p">))),</span> <span class="mi">1</span><span class="p">)))</span>
+
+    <span class="n">number_of_extracted_patches</span> <span class="o">=</span> <span class="n">max_number_of_patches</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">max_number_of_patches</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">max_number_of_patches</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">stride_length_tuple</span> <span class="o">=</span> <span class="n">stride_length</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stride_length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">stride_length_tuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">patch_size</span><span class="p">),</span> <span class="n">stride_length</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">stride_length</span><span class="p">)</span> <span class="o">!=</span> <span class="n">dimensionality</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;stride_length is not a scalar or vector of length dimensionality.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">less</span><span class="p">(</span><span class="n">stride_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;stride_length elements must be positive integers.&quot;</span><span class="p">)</span>
+
+        <span class="n">number_of_extracted_patches</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">):</span>
+            <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">image_size</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">patch_size</span><span class="p">[</span><span class="n">d</span><span class="p">],</span> <span class="n">stride_length_tuple</span><span class="p">[</span><span class="n">d</span><span class="p">]))</span>
+            <span class="n">number_of_extracted_patches</span> <span class="o">*=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">return_as_array</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">patch_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">number_of_extracted_patches</span><span class="p">,</span> <span class="o">*</span><span class="n">patch_size</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">patch_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">number_of_extracted_patches</span><span class="p">,</span> <span class="o">*</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">number_of_image_components</span><span class="p">))</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">start_index</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                    <span class="n">end_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">patch_size</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                            <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                            <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],:]</span>
+
+                    <span class="k">if</span> <span class="n">return_as_array</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">patch_array</span><span class="p">[</span><span class="n">count</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">patch_array</span><span class="p">[</span><span class="n">count</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+
+                    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="n">start_index</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+                        <span class="n">end_index</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">patch_size</span><span class="p">))</span>
+
+                        <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="n">start_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="n">start_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">2</span><span class="p">],:]</span>
+
+                        <span class="k">if</span> <span class="n">return_as_array</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">patch_array</span><span class="p">[</span><span class="n">count</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">patch_array</span><span class="p">[</span><span class="n">count</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">random_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">max_number_of_patches</span><span class="p">,</span> <span class="n">dimensionality</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mask_image</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask_array</span> <span class="o">=</span> <span class="n">mask_image</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">mask_array</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_array</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="c1"># The way we constrain patch selection using a mask is by assuming that</span>
+            <span class="c1"># each patch must have a masked voxel at its midPatchIndex.</span>
+
+            <span class="n">mask_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask_array</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">):</span>
+                <span class="n">shifted_mask_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">mask_indices</span><span class="p">[:,</span> <span class="n">d</span><span class="p">],</span> <span class="n">mid_patch_index</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+                <span class="n">outside_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">shifted_mask_indices</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">mask_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">mask_indices</span><span class="p">,</span> <span class="n">outside_indices</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">shifted_mask_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mask_indices</span><span class="p">[</span><span class="n">d</span><span class="p">],</span> <span class="n">mid_patch_index</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+                <span class="n">outside_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">shifted_mask_indices</span> <span class="o">&gt;=</span> <span class="n">image_size</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+                <span class="n">mask_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">mask_indices</span><span class="p">,</span> <span class="n">outside_indices</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># After pruning the mask indices, which were originally defined in terms of the</span>
+            <span class="c1"># mid_patch_index, we subtract the midPatchIndex so that it&#39;s now defined at the</span>
+            <span class="c1"># corner for patch selection.</span>
+
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">):</span>
+                <span class="n">mask_indices</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">mask_indices</span><span class="p">[:,</span> <span class="n">d</span><span class="p">],</span> <span class="n">mid_patch_index</span><span class="p">[</span><span class="n">d</span><span class="p">])</span>
+
+            <span class="n">number_of_extracted_patches</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_number_of_patches</span><span class="p">,</span> <span class="n">mask_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">random_indices</span> <span class="o">=</span> <span class="n">mask_indices</span><span class="p">[</span>
+              <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">mask_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">number_of_extracted_patches</span><span class="p">),</span> <span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">):</span>
+                <span class="n">random_indices</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">image_size</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">patch_size</span><span class="p">[</span><span class="n">d</span><span class="p">]),</span> <span class="n">max_number_of_patches</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_as_array</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">patch_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">number_of_extracted_patches</span><span class="p">,</span> <span class="o">*</span><span class="n">patch_size</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">patch_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">number_of_extracted_patches</span><span class="p">,</span> <span class="o">*</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">number_of_image_components</span><span class="p">))</span>
+
+        <span class="n">start_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span> <span class="n">dimensionality</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_extracted_patches</span><span class="p">):</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">random_indices</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">patch_size</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                        <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                        <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                        <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">start_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">patch</span> <span class="o">=</span> <span class="n">image_array</span><span class="p">[</span><span class="n">start_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                        <span class="n">start_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                        <span class="n">start_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="n">end_index</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">return_as_array</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">patch_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">patch_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">number_of_image_components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">patch_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">patch_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">patch</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">patch_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_as_array</span><span class="p">:</span>
+       <span class="k">return</span><span class="p">(</span><span class="n">patch_array</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+       <span class="k">return</span><span class="p">(</span><span class="n">patch_list</span><span class="p">)</span></div>
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Brian Avants, and Nick Cullen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

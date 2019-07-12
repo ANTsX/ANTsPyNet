@@ -15,12 +15,16 @@ class MixtureDensityLayer(Layer):
 
     Arguments
     ---------
-
     output_dimension : integer
         Dimensionality of the output.
 
     number_of_mixtures : integer
         Number of gaussians used.
+
+    Returns
+    -------
+    Layer
+        A keras layer
 
     """
 
@@ -105,7 +109,6 @@ def get_mixture_density_loss_function(output_dimension, number_of_mixtures):
 
     Arguments
     ---------
-
     output_dimension : integer
         Dimensionality of the output.
 
@@ -114,7 +117,8 @@ def get_mixture_density_loss_function(output_dimension, number_of_mixtures):
 
     Returns
     -------
-    A function providing the mean square error accuracy
+    Function
+        A function providing the mean square error accuracy
 
     """
 
@@ -161,7 +165,6 @@ def get_mixture_density_sampling_function(output_dimension, number_of_mixtures):
 
     Arguments
     ---------
-
     output_dimension : integer
         Dimensionality of the output.
 
@@ -170,7 +173,8 @@ def get_mixture_density_sampling_function(output_dimension, number_of_mixtures):
 
     Returns
     -------
-    A function providing the mean square error accuracy
+    Function
+        A function providing the mean square error accuracy
 
     """
 
@@ -214,7 +218,6 @@ def get_mixture_density_mse_function(output_dimension, number_of_mixtures):
 
     Arguments
     ---------
-
     output_dimension : integer
         Dimensionality of the output.
 
@@ -223,7 +226,8 @@ def get_mixture_density_mse_function(output_dimension, number_of_mixtures):
 
     Returns
     -------
-    A function providing the mean square error accuracy
+    Function
+        A function providing the mean square error accuracy
 
     """
 
@@ -281,7 +285,8 @@ def split_mixture_parameters(parameters, output_dimension, number_of_mixtures):
 
     Returns
     -------
-    Separate mixture parameters
+    List of arrays
+        Separate mixture parameters
 
     """
 
@@ -307,7 +312,8 @@ def mixture_density_software_max(logits, temperature=1.0):
 
     Returns
     -------
-    Softmax loss value.
+    Scalar
+        Softmax loss value.
 
     """
 
@@ -332,7 +338,8 @@ def sample_from_categorical_distribution(distribution):
 
     Returns
     -------
-    A single sample.
+    Scalar
+        A single sample.
 
     """
 
@@ -369,7 +376,8 @@ def sample_from_output(parameters, output_dimension, number_of_mixtures,
 
     Returns
     -------
-    A single sample.
+    Scalar
+        A single sample.
 
     """
 

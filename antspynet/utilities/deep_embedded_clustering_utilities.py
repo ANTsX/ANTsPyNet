@@ -14,7 +14,6 @@ class Clustering(Layer):
 
     Arguments
     ---------
-
     number_of_clusters : integer
         Specifies which axis to normalize.
 
@@ -22,11 +21,13 @@ class Clustering(Layer):
         Initial clustering weights.
 
     alpha : scalar
+        Parameter.
 
     Returns
     -------
-
     Keras layer
+        A keras layer
+
     """
 
     def __init__(self, number_of_clusters=10, initial_cluster_weights=None, name='', **kwargs):
@@ -90,10 +91,11 @@ class DeepEmbeddedClusteringModel(object):
     initializer : string
         Initializer for autoencoder.
 
-
     Returns
     -------
-    A keras clustering model.
+    Keras model
+        A keras clustering model.
+
     """
 
     def __init__(self, number_of_units_per_layer=None, number_of_clusters=10, alpha=1.0,

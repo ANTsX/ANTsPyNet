@@ -1,0 +1,313 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>antspynet.utilities.deep_embedded_clustering_utilities &#8212; ANTsPyNet 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.utilities.deep_embedded_clustering_utilities</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">initializers</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="k">import</span> <span class="n">KMeans</span>
+
+<div class="viewcode-block" id="Clustering"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.Clustering">[docs]</a><span class="k">class</span> <span class="nc">Clustering</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clustering layer.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    number_of_clusters : integer</span>
+<span class="sd">        Specifies which axis to normalize.</span>
+
+<span class="sd">    initial_cluster_weights : list</span>
+<span class="sd">        Initial clustering weights.</span>
+
+<span class="sd">    alpha : scalar</span>
+<span class="sd">        Parameter.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras layer</span>
+<span class="sd">        A keras layer</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_clusters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">initial_cluster_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span> <span class="o">=</span> <span class="n">number_of_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_cluster_weights</span> <span class="o">=</span> <span class="n">initial_cluster_weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Clustering</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Clustering.build"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.Clustering.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">InputSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input_shape is not of length 2.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clusters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                                        <span class="n">initializer</span><span class="o">=</span><span class="n">initializers</span><span class="o">.</span><span class="n">glorot_uniform</span><span class="p">(),</span>
+                                        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;clusters&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_cluster_weights</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_cluster_weights</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_cluster_weights</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">built</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Clustering.call"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.Clustering.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Uses Student t-distribution (same as t-SNE)</span>
+        <span class="c1"># inputs are the variable containing the data, shape=(number_of_samples, number_of_features)</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">clusters</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">^</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="o">/</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span><span class="p">(</span> <span class="n">q</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Clustering.compute_output_shape"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.Clustering.compute_output_shape">[docs]</a>    <span class="k">def</span> <span class="nf">compute_output_shape</span><span class="p">(</span><span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">([</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Clustering.get_config"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.Clustering.get_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;momentum&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">momentum</span><span class="p">,</span> <span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">}</span>
+        <span class="n">base_config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Scale</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base_config</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span></div></div>
+
+<div class="viewcode-block" id="DeepEmbeddedClusteringModel"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.DeepEmbeddedClusteringModel">[docs]</a><span class="k">class</span> <span class="nc">DeepEmbeddedClusteringModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deep embedded clustering with and without convolutions.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+
+<span class="sd">    number_of_units_per_layer : integer</span>
+<span class="sd">        Autoencoder number of units per layer.</span>
+
+<span class="sd">    number_of_clusters : integer</span>
+<span class="sd">        Number of clusters.</span>
+
+<span class="sd">    alpha : scalar</span>
+<span class="sd">        Parameter</span>
+
+<span class="sd">    initializer : string</span>
+<span class="sd">        Initializer for autoencoder.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras model</span>
+<span class="sd">        A keras clustering model.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_units_per_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number_of_clusters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                 <span class="n">initializer</span><span class="o">=</span><span class="s1">&#39;glorot_uniform&#39;</span><span class="p">,</span> <span class="n">convolutional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">input_image_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DeepEmbeddedClusteringModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_units_per_layer</span> <span class="o">=</span> <span class="n">number_of_units_per_layer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span> <span class="o">=</span> <span class="n">number_of_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convolutional</span> <span class="o">=</span> <span class="n">convolutional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span> <span class="o">=</span> <span class="n">input_image_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolutional</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need to specify the input image size for CNN.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># 2-D</span>
+                <span class="n">ae</span> <span class="o">=</span> <span class="n">createConvolutionalAutoencoderModel2D</span><span class="p">(</span>
+                       <span class="n">input_image_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span><span class="p">,</span>
+                       <span class="n">number_of_filters_per_layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_units_per_layer</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ae</span> <span class="o">=</span> <span class="n">createConvolutionalAutoencoderModel3D</span><span class="p">(</span>
+                       <span class="n">input_image_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span><span class="p">,</span>
+                       <span class="n">number_of_filters_per_layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_units_per_layer</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">ae</span><span class="o">.</span><span class="n">ConvolutionalAutoencoderModel</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ae</span> <span class="o">=</span> <span class="n">createAutoencoderModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_units_per_layer</span><span class="p">,</span>
+                                        <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializer</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">ae</span><span class="o">.</span><span class="n">AutoencoderModel</span>
+
+        <span class="n">clustering_layer</span> <span class="o">=</span> <span class="n">Clustering</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;clustering&quot;</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">clustering_layer</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pretrain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">load_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">extract_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict_cluster_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">cluster_probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">cluster_probabilities</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">target_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">q</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">weight</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;kld&#39;</span><span class="p">,</span> <span class="n">loss_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">loss_weights</span><span class="o">=</span><span class="n">loss_weights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">max_number_of_iterations</span><span class="o">=</span><span class="mf">2e4</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">update_interval</span><span class="o">=</span><span class="mi">140</span><span class="p">):</span>
+
+        <span class="c1"># Initialize clusters using k-means</span>
+
+        <span class="n">kmeans</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">current_prediction</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">previous_prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">current_prediction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_layer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;clustering&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_weights</span><span class="p">([</span><span class="n">kmeans</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">])</span>
+
+        <span class="c1"># Deep clustering</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="mi">100000000</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">index_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_number_of_iterations</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">update_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_distribution</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+
+                <span class="c1"># Met stopping criterion</span>
+
+                <span class="n">current_prediction</span> <span class="o">&lt;-</span> <span class="n">q</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">delta_label</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">current_prediction</span> <span class="o">!=</span> <span class="n">previous_prediction</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span>
+                               <span class="n">current_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">previous_prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">current_prediction</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">delta_label</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">index_array</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">:</span><span class="nb">min</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+            <span class="n">loss</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolutional</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:])</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">current_prediction</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Brian Avants, and Nick Cullen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

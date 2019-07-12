@@ -12,7 +12,6 @@ class SpatialTransformer2D(Layer):
 
     Arguments
     ---------
-
     inputs : list of size 2
         The first element are the images and the second element are the
         weights.
@@ -25,6 +24,11 @@ class SpatialTransformer2D(Layer):
 
     interpolator_type : string
         Interpolator type (default = 'linear').
+
+    Returns
+    -------
+    Keras layer
+        A 2-D keras layer
 
     """
 
@@ -163,7 +167,6 @@ class SpatialTransformer3D(Layer):
 
     Arguments
     ---------
-
     inputs : list of size 2
         The first element are the images and the second element are the
         weights.
@@ -176,6 +179,11 @@ class SpatialTransformer3D(Layer):
 
     interpolator_type : string
         Interpolator type (default = 'linear').
+
+    Returns
+    -------
+    Keras layer
+        A 3-D keras layer
 
     """
 

@@ -68,6 +68,591 @@
 <dd></dd></dl>
 
 </div>
+<div class="section" id="patches">
+<h2>Patches<a class="headerlink" href="#patches" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.utilities.extract_image_patches">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">extract_image_patches</code><span class="sig-paren">(</span><em>image</em>, <em>patch_size</em>, <em>max_number_of_patches='all'</em>, <em>stride_length=1</em>, <em>mask_image=None</em>, <em>random_seed=None</em>, <em>return_as_array=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/extract_image_patches.html#extract_image_patches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.extract_image_patches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract 2-D or 3-D image patches.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>image</strong> (<em>ANTsImage</em>) – Input image with one or more components.</li>
+<li><strong>patch_size</strong> (<em>n-D tuple</em><em> (</em><em>depending on dimensionality</em><em>)</em><em></em>) – Width, height, and depth (if 3-D) of patches.</li>
+<li><strong>max_number_of_patches</strong> (<em>python:integer</em><em> or </em><em>string</em>) – Maximum number of patches returned.  If “all” is specified, then
+all patches in sequence (defined by the stride_length are extracted.</li>
+<li><strong>stride_length</strong> (<em>python:integer</em><em> or </em><em>n-D tuple</em>) – Defines the sequential patch overlap for max_number_of_patches = “all”.
+Can be a image-dimensional vector or a scalar.</li>
+<li><strong>mask_image</strong> (<em>ANTsImage</em><em> (</em><em>optional</em><em>)</em>) – Optional image specifying the sampling region for
+the patches when max_number_of_patches does not equal “all”.
+The way we constrain patch selection using a mask is by forcing
+each returned patch to have a masked voxel at its center.</li>
+<li><strong>random_seed</strong> (<em>python:integer</em><em> (</em><em>optional</em><em>)</em>) – Seed value that allows reproducible patch extraction across runs.</li>
+<li><strong>return_as_array</strong> (<em>boolean</em>) – Specifies the return type of the function.  If
+False (default) the return type is a list where each element is
+a single patch.  Otherwise the return type is an array of size
+dim( number_of_patches, patch_size ).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A list (or array) of patches.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_patches</span> <span class="o">=</span> <span class="n">extract_image_patches</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.reconstruct_image_from_patches">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">reconstruct_image_from_patches</code><span class="sig-paren">(</span><em>patches</em>, <em>domain_image</em>, <em>stride_length=1</em>, <em>domain_image_is_mask=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/reconstruct_image_from_patches.html#reconstruct_image_from_patches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.reconstruct_image_from_patches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct image from a list of patches.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>patches</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em> or </em><em>array of patches</em>) – List or array of patches defining an image.  Patches are assumed
+to have the same format as returned by extract_image_patches.</li>
+<li><strong>domain_image</strong> (<em>ANTs image</em>) – Image or mask to define the geometric information of the
+reconstructed image.  If this is a mask image, the reconstruction will only
+use patches in the mask.</li>
+<li><strong>stride_length</strong> (<em>python:integer</em><em> or </em><em>n-D tuple</em>) – Defines the sequential patch overlap for max_number_of_patches = “all”.
+Can be a image-dimensional vector or a scalar.</li>
+<li><strong>domain_image_is_mask</strong> (<em>boolean</em>) – Boolean specifying whether the domain image is a
+mask used to limit the region of reconstruction from the patches.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">An ANTs image.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_patches</span> <span class="o">=</span> <span class="n">extract_image_patches</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">stride_length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconstructed_image</span> <span class="o">=</span> <span class="n">reconstruct_image_from_patches</span><span class="p">(</span><span class="n">image_patches</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">stride_length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="clustering">
+<h2>Clustering<a class="headerlink" href="#clustering" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="antspynet.utilities.Clustering">
+<em class="property">class </em><code class="descclassname">antspynet.utilities.</code><code class="descname">Clustering</code><span class="sig-paren">(</span><em>number_of_clusters=10</em>, <em>initial_cluster_weights=None</em>, <em>name=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_embedded_clustering_utilities.html#Clustering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.Clustering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clustering layer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>number_of_clusters</strong> (<em>python:integer</em>) – Specifies which axis to normalize.</li>
+<li><strong>initial_cluster_weights</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Initial clustering weights.</li>
+<li><strong>alpha</strong> (<em>scalar</em>) – Parameter.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A keras layer</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Keras layer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.utilities.DeepEmbeddedClusteringModel">
+<em class="property">class </em><code class="descclassname">antspynet.utilities.</code><code class="descname">DeepEmbeddedClusteringModel</code><span class="sig-paren">(</span><em>number_of_units_per_layer=None</em>, <em>number_of_clusters=10</em>, <em>alpha=1.0</em>, <em>initializer='glorot_uniform'</em>, <em>convolutional=False</em>, <em>input_image_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_embedded_clustering_utilities.html#DeepEmbeddedClusteringModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.DeepEmbeddedClusteringModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deep embedded clustering with and without convolutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>number_of_units_per_layer</strong> (<em>python:integer</em>) – Autoencoder number of units per layer.</li>
+<li><strong>number_of_clusters</strong> (<em>python:integer</em>) – Number of clusters.</li>
+<li><strong>alpha</strong> (<em>scalar</em>) – Parameter</li>
+<li><strong>initializer</strong> (<em>string</em>) – Initializer for autoencoder.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A keras clustering model.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Keras model</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="dense-unet">
+<h2>Dense Unet<a class="headerlink" href="#dense-unet" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="antspynet.utilities.Scale">
+<em class="property">class </em><code class="descclassname">antspynet.utilities.</code><code class="descname">Scale</code><span class="sig-paren">(</span><em>axis=-1</em>, <em>momentum=0.9</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/denseunet_utilities.html#Scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.Scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom layer used in the Dense U-net class for normalization which
+learns a set of weights and biases for scaling the input data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>axis</strong> (<em>python:integer</em>) – Specifies which axis to normalize.</li>
+<li><strong>momentum</strong> (<em>scalar</em>) – Value used for computation of the exponential average of the
+mean and standard deviation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="mixture-density">
+<h2>Mixture density<a class="headerlink" href="#mixture-density" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="antspynet.utilities.MixtureDensityLayer">
+<em class="property">class </em><code class="descclassname">antspynet.utilities.</code><code class="descname">MixtureDensityLayer</code><span class="sig-paren">(</span><em>output_dimension</em>, <em>number_of_mixtures</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#MixtureDensityLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.MixtureDensityLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer for modeling arbitrary functions using neural networks.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>output_dimension</strong> (<em>python:integer</em>) – Dimensionality of the output.</li>
+<li><strong>number_of_mixtures</strong> (<em>python:integer</em>) – Number of gaussians used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A keras layer</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Layer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.get_mixture_density_loss_function">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">get_mixture_density_loss_function</code><span class="sig-paren">(</span><em>output_dimension</em>, <em>number_of_mixtures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#get_mixture_density_loss_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_mixture_density_loss_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a loss function for the mixture density.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>output_dimension</strong> (<em>python:integer</em>) – Dimensionality of the output.</li>
+<li><strong>number_of_mixtures</strong> (<em>python:integer</em>) – Number of gaussians used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A function providing the mean square error accuracy</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.get_mixture_density_sampling_function">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">get_mixture_density_sampling_function</code><span class="sig-paren">(</span><em>output_dimension</em>, <em>number_of_mixtures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#get_mixture_density_sampling_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_mixture_density_sampling_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a sampling function for the mixture density.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>output_dimension</strong> (<em>python:integer</em>) – Dimensionality of the output.</li>
+<li><strong>number_of_mixtures</strong> (<em>python:integer</em>) – Number of gaussians used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A function providing the mean square error accuracy</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.get_mixture_density_mse_function">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">get_mixture_density_mse_function</code><span class="sig-paren">(</span><em>output_dimension</em>, <em>number_of_mixtures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#get_mixture_density_mse_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_mixture_density_mse_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a mse function for the mixture density.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>output_dimension</strong> (<em>python:integer</em>) – Dimensionality of the output.</li>
+<li><strong>number_of_mixtures</strong> (<em>python:integer</em>) – Number of gaussians used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A function providing the mean square error accuracy</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.split_mixture_parameters">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">split_mixture_parameters</code><span class="sig-paren">(</span><em>parameters</em>, <em>output_dimension</em>, <em>number_of_mixtures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#split_mixture_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.split_mixture_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits the mixture parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – Parameter to split</li>
+<li><strong>output_dimension</strong> (<em>python:integer</em>) – Dimensionality of the output.</li>
+<li><strong>number_of_mixtures</strong> (<em>python:integer</em>) – Number of gaussians used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Separate mixture parameters</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">List of arrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.mixture_density_software_max">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">mixture_density_software_max</code><span class="sig-paren">(</span><em>logits</em>, <em>temperature=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#mixture_density_software_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.mixture_density_software_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softmax function for mixture density with temperature adjustment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>logits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em> or </em><em>numpy array</em>) – input</li>
+<li><strong>temperature</strong> – The temperature for to adjust the distribution (default 1.0)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Softmax loss value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Scalar</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.sample_from_output">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">sample_from_output</code><span class="sig-paren">(</span><em>parameters</em>, <em>output_dimension</em>, <em>number_of_mixtures</em>, <em>temperature=1.0</em>, <em>sigma_temperature=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#sample_from_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.sample_from_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softmax function for mixture density with temperature adjustment.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>output_dimension</strong> (<em>python:integer</em>) – Dimensionality of the output.</li>
+<li><strong>number_of_mixtures</strong> (<em>python:integer</em>) – Number of gaussians used.</li>
+<li><strong>temperature</strong> – The temperature for to adjust the distribution (default 1.0)</li>
+<li><strong>sigma_temperature</strong> – The temperature for to adjust the distribution (default 1.0)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A single sample.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Scalar</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="super-resolution">
+<h2>Super-resolution<a class="headerlink" href="#super-resolution" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.utilities.mse">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">mse</code><span class="sig-paren">(</span><em>x</em>, <em>y=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#mse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.mse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean square error of a single image or between two images.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>input image</em>) – ants input image</li>
+<li><strong>y</strong> (<em>input image</em>) – ants input image</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r16</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="n">mse</span><span class="p">(</span><span class="n">r16</span><span class="p">,</span> <span class="n">r64</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.mae">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">mae</code><span class="sig-paren">(</span><em>x</em>, <em>y=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#mae"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.mae" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean absolute error of a single image or between two images.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>input image</em>) – ants input image</li>
+<li><strong>y</strong> (<em>input image</em>) – ants input image</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Value</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r16</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="n">mae</span><span class="p">(</span><span class="n">r16</span><span class="p">,</span> <span class="n">r64</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.psnr">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">psnr</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#psnr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.psnr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Peak signal-to-noise ratio between two images.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>input image</em>) – ants input image</li>
+<li><strong>y</strong> (<em>input image</em>) – ants input image</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Value</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r16</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="n">psnr</span><span class="p">(</span><span class="n">r16</span><span class="p">,</span> <span class="n">r64</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.ssim">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">ssim</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>K=(0.01</em>, <em>0.03)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#ssim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.ssim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structural similarity index (SSI) between two images.</p>
+<p>Implementation of the SSI quantity for two images proposed in</p>
+<p>Z. Wang, A.C. Bovik, H.R. Sheikh, E.P. Simoncelli. “Image quality
+assessment: from error visibility to structural similarity”. IEEE TIP.
+13 (4): 600–612.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>input image</em>) – ants input image</li>
+<li><strong>y</strong> (<em>input image</em>) – ants input image</li>
+<li><strong>K</strong> (<em>tuple of length 2</em>) – tuple which contain SSI parameters meant to stabilize the formula
+in case of weak denominators.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Value</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r16</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="n">psnr</span><span class="p">(</span><span class="n">r16</span><span class="p">,</span> <span class="n">r64</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.gmsd">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">gmsd</code><span class="sig-paren">(</span><em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#gmsd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.gmsd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gradient magnitude similarity deviation</p>
+<p>A fast and simple metric that correlates to perceptual quality.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>input image</em>) – ants input image</li>
+<li><strong>y</strong> (<em>input image</em>) – ants input image</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Value</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">r16</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="n">gmsd</span><span class="p">(</span><span class="n">r16</span><span class="p">,</span> <span class="n">r64</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="spatial-transformer-network">
+<h2>Spatial transformer network<a class="headerlink" href="#spatial-transformer-network" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="antspynet.utilities.SpatialTransformer2D">
+<em class="property">class </em><code class="descclassname">antspynet.utilities.</code><code class="descname">SpatialTransformer2D</code><span class="sig-paren">(</span><em>resampled_size</em>, <em>transform_type='affine'</em>, <em>interpolator_type='linear'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/spatial_transformer_network_utilities.html#SpatialTransformer2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.SpatialTransformer2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom layer for the spatial transfomer network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inputs</strong> (<em>list of size 2</em>) – The first element are the images and the second element are the
+weights.</li>
+<li><strong>resampled_size</strong> (<em>tuple of length 2</em>) – Size of the resampled output images.</li>
+<li><strong>transform_type</strong> (<em>string</em>) – Transform type (default = ‘affine’).</li>
+<li><strong>interpolator_type</strong> (<em>string</em>) – Interpolator type (default = ‘linear’).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A 2-D keras layer</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Keras layer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.utilities.SpatialTransformer3D">
+<em class="property">class </em><code class="descclassname">antspynet.utilities.</code><code class="descname">SpatialTransformer3D</code><span class="sig-paren">(</span><em>resampled_size</em>, <em>transform_type='affine'</em>, <em>interpolator_type='linear'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/spatial_transformer_network_utilities.html#SpatialTransformer3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.SpatialTransformer3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom layer for the spatial transfomer network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inputs</strong> (<em>list of size 2</em>) – The first element are the images and the second element are the
+weights.</li>
+<li><strong>resampled_size</strong> (<em>tuple of length 3</em>) – Size of the resampled output images.</li>
+<li><strong>transform_type</strong> (<em>string</em>) – Transform type (default = ‘affine’).</li>
+<li><strong>interpolator_type</strong> (<em>string</em>) – Interpolator type (default = ‘linear’).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A 3-D keras layer</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Keras layer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="misc">
+<h2>Misc.<a class="headerlink" href="#misc" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.utilities.get_pretrained_network">
+<code class="descclassname">antspynet.utilities.</code><code class="descname">get_pretrained_network</code><span class="sig-paren">(</span><em>file_id=None</em>, <em>target_file_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_pretrained_network.html#get_pretrained_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_pretrained_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads pretrained network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>string</strong> (<em>target_file_name</em>) – One of the permitted file ids or pass “show” to list all
+valid possibilities. Note that most require internet access
+to download.</li>
+<li><strong>string</strong> – Optional target filename.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">A filename string</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model_file</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span> <span class="s1">&#39;dbpn4x&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -92,6 +677,13 @@
 <li class="toctree-l1"><a class="reference internal" href="architectures.html">Architectures</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#custom-loss-functions">Custom loss functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#patches">Patches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clustering">Clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dense-unet">Dense Unet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mixture-density">Mixture density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#super-resolution">Super-resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spatial-transformer-network">Spatial transformer network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#misc">Misc.</a></li>
 </ul>
 </li>
 </ul>
