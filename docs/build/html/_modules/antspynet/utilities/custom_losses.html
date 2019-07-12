@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>antspynet.utilities.custom_losses &#8212; ANTsPyNet 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.utilities.custom_losses</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+
+<div class="viewcode-block" id="multilabel_dice_coefficient"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.multilabel_dice_coefficient">[docs]</a><span class="k">def</span> <span class="nf">multilabel_dice_coefficient</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="n">smoothing_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+    <span class="n">y_dims</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="n">number_of_labels</span> <span class="o">=</span> <span class="n">y_dims</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y_dims</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># 2-D image</span>
+        <span class="n">y_true_permuted</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">y_pred_permuted</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 3-D image</span>
+        <span class="n">y_true_permuted</span> <span class="o">&lt;-</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">y_pred_permuted</span> <span class="o">&lt;-</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+    <span class="n">y_true_label</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_true_permuted</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">y_pred_label</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_pred_permuted</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">y_true_label_f</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">y_true_label</span><span class="p">)</span>
+    <span class="n">y_pred_label_f</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">y_pred_label</span><span class="p">)</span>
+    <span class="n">intersection</span> <span class="o">=</span> <span class="n">y_true_label_f</span> <span class="o">*</span> <span class="n">y_pred_label_f</span>
+    <span class="n">union</span> <span class="o">=</span> <span class="n">y_true_label_f</span> <span class="o">+</span> <span class="n">y_pred_label_f</span> <span class="o">-</span> <span class="n">intersection</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">number_of_labels</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">number_of_labels</span><span class="p">):</span>
+            <span class="n">y_true_label</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_true_permuted</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">y_pred_label</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_pred_permuted</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="p">(</span><span class="n">j</span><span class="p">))</span>
+            <span class="n">y_true_label_f</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">y_true_label</span><span class="p">)</span>
+            <span class="n">y_pred_label_f</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">y_pred_label</span><span class="p">)</span>
+
+            <span class="n">intersection</span> <span class="o">=</span> <span class="n">y_true_label_f</span> <span class="o">*</span> <span class="n">y_pred_label_f</span>
+            <span class="n">union</span> <span class="o">=</span> <span class="n">y_true_label_f</span> <span class="o">+</span> <span class="n">y_pred_label_f</span> <span class="o">-</span> <span class="n">intersection</span>
+
+            <span class="n">numerator</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">+</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span>
+            <span class="n">denominator</span> <span class="o">=</span> <span class="n">denominator</span> <span class="o">+</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
+
+    <span class="n">unionOverlap</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
+
+    <span class="k">return</span><span class="p">((</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">unionOverlap</span> <span class="o">+</span> <span class="n">smoothingFactor</span><span class="p">)</span> <span class="o">/</span>
+      <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">unionOverlap</span> <span class="o">+</span> <span class="n">smoothingFactor</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="loss_multilabel_dice_coefficient_error"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.loss_multilabel_dice_coefficient_error">[docs]</a><span class="k">def</span> <span class="nf">loss_multilabel_dice_coefficient_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="n">multilabel_dice_coefficient</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="peak_signal_to_noise_ratio"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.peak_signal_to_noise_ratio">[docs]</a><span class="k">def</span> <span class="nf">peak_signal_to_noise_ratio</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="mf">10.0</span> <span class="o">*</span> <span class="n">K</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">-</span> <span class="n">y_true</span><span class="p">)))</span> <span class="o">/</span> <span class="n">K</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">10.0</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="loss_peak_signal_to_noise_ratio_error"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.loss_peak_signal_to_noise_ratio_error">[docs]</a><span class="k">def</span> <span class="nf">loss_peak_signal_to_noise_ratio_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="n">peak_signal_to_noise_ratio</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="pearson_correlation_coefficient"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.pearson_correlation_coefficient">[docs]</a><span class="k">def</span> <span class="nf">pearson_correlation_coefficient</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">y_true</span><span class="p">))</span>
+
+    <span class="n">sum_x</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="n">sum_y</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">sum_x_squared</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span><span class="p">))</span>
+    <span class="n">sum_y_squared</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_pred</span><span class="p">))</span>
+    <span class="n">sum_xy</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_true</span> <span class="o">*</span> <span class="n">y_pred</span><span class="p">)</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">sum_xy</span> <span class="o">-</span> <span class="p">(</span><span class="n">sum_x</span> <span class="o">*</span> <span class="n">sum_y</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">sum_x_squared</span> <span class="o">-</span> <span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">sum_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span> <span class="o">*</span>
+      <span class="p">(</span><span class="n">sum_y_squared</span> <span class="o">-</span> <span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">sum_y</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">))</span>
+
+    <span class="n">coefficient</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="loss_pearson_correlation_coefficient_error"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.loss_pearson_correlation_coefficient_error">[docs]</a><span class="k">def</span> <span class="nf">loss_pearson_correlation_coefficient_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="n">pearson_correlation_coefficient</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Brian Avants, and Nick Cullen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

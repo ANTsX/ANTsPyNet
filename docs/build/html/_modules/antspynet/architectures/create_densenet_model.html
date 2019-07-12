@@ -1,0 +1,465 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>antspynet.architectures.create_densenet_model &#8212; ANTsPyNet 0.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.architectures.create_densenet_model</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">BatchNormalization</span><span class="p">,</span>
+                          <span class="n">Activation</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span>
+                          <span class="n">Conv2D</span><span class="p">,</span> <span class="n">Conv2DTranspose</span><span class="p">,</span> <span class="n">GlobalAveragePooling2D</span><span class="p">,</span>
+                          <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">GlobalAveragePooling3D</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">initializers</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">regularizers</span>
+
+<div class="viewcode-block" id="create_densenet_model_2d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_densenet_model_2d">[docs]</a><span class="k">def</span> <span class="nf">create_densenet_model_2d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
+                             <span class="n">number_of_classification_labels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                             <span class="n">number_of_filters</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                             <span class="n">depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                             <span class="n">number_of_dense_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">growth_rate</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                             <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                             <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
+                            <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2-D implementation of the Wide ResNet deep learning architecture.</span>
+
+<span class="sd">    Creates a keras model of the DenseNet deep learning architecture for image</span>
+<span class="sd">    recognition based on the paper</span>
+
+<span class="sd">    G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected</span>
+<span class="sd">    Convolutional Networks Networks</span>
+
+<span class="sd">    available here:</span>
+
+<span class="sd">            https://arxiv.org/abs/1608.06993</span>
+
+<span class="sd">    This particular implementation was influenced by the following python</span>
+<span class="sd">    implementation:</span>
+
+<span class="sd">            https://github.com/tdeboissiere/DeepLearningImplementations/blob/master/DenseNet/densenet.py</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    input_image_size : tuple of length 3</span>
+<span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
+<span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
+<span class="sd">        (e.g., red, green, and blue).</span>
+
+<span class="sd">    number_of_classification_labels : integer</span>
+<span class="sd">        Number of classification labels.</span>
+
+<span class="sd">    number_of_filters : integer</span>
+<span class="sd">        Number of filters.</span>
+
+<span class="sd">    depth : integer</span>
+<span class="sd">        Number of layers---must be equal to 3 * N + 4 where N is an integer (default = 7).</span>
+
+<span class="sd">    number_of_dense_blocks : integer</span>
+<span class="sd">        Number of dense blocks number of dense blocks to add to the end (default = 1).</span>
+
+<span class="sd">    growth_rate :  integer</span>
+<span class="sd">        Number of filters to add for each dense block layer (default = 12).</span>
+
+<span class="sd">    dropout_rate : scalar</span>
+<span class="sd">        Per drop out layer rate (default = 0.2).</span>
+
+<span class="sd">    weight_decay : scalar</span>
+<span class="sd">        Weight decay (default = 1e-4).</span>
+
+<span class="sd">    mode : string</span>
+<span class="sd">        &#39;classification&#39; or &#39;regression&#39;.  Default = &#39;classification&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras model</span>
+<span class="sd">        A 2-D Keras model defining the network.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; model = create_densenet_model_2d((128, 128, 1))</span>
+<span class="sd">    &gt;&gt;&gt; model.summary()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">concatenation_axis</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">:</span>
+        <span class="n">concatenation_axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">convolution_factory_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">concatenation_axis</span><span class="p">,</span>
+                                   <span class="n">gamma_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">),</span>
+                                   <span class="n">beta_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                       <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel_size</span><span class="p">,</span>
+                       <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                       <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">initializers</span><span class="o">.</span><span class="n">he_normal</span><span class="p">(),</span>
+                       <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dropout_rate</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">transition_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">convolution_factory_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                       <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">AveragePooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                                 <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">create_dense_blocks_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">growth_rate</span><span class="p">,</span>
+                               <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+
+        <span class="n">dense_block_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">depth</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">convolution_factory_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">growth_rate</span><span class="p">,</span>
+                                           <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span>
+                                           <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+            <span class="n">dense_block_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">concatenation_axis</span><span class="p">)(</span><span class="n">dense_block_layers</span><span class="p">)</span>
+            <span class="n">number_of_filters</span> <span class="o">+=</span> <span class="n">growth_rate</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Depth must be equal to 3*N+4 where N is an integer.&#39;</span><span class="p">)</span>
+
+    <span class="n">number_of_layers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                     <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_uniform&#39;</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                     <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="c1"># Add dense blocks</span>
+
+    <span class="n">nFilters</span> <span class="o">=</span> <span class="n">number_of_filters</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_dense_blocks</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">outputs</span><span class="p">,</span> <span class="n">nFilters</span> <span class="o">=</span> \
+          <span class="n">create_dense_blocks_2d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">nFilters</span><span class="p">,</span>
+                                 <span class="n">depth</span><span class="o">=</span><span class="n">number_of_layers</span><span class="p">,</span> <span class="n">growth_rate</span><span class="o">=</span><span class="n">growth_rate</span><span class="p">,</span>
+                                 <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">transition_2d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">nFilters</span><span class="p">,</span>
+                                <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+
+    <span class="n">outputs</span><span class="p">,</span> <span class="n">nFilters</span> <span class="o">=</span> \
+      <span class="n">create_dense_blocks_2d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">nFilters</span><span class="p">,</span>
+                             <span class="n">depth</span><span class="o">=</span><span class="n">number_of_layers</span><span class="p">,</span> <span class="n">growth_rate</span><span class="o">=</span><span class="n">growth_rate</span><span class="p">,</span>
+                             <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">concatenation_axis</span><span class="p">,</span>
+                                 <span class="n">gamma_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">),</span>
+                                 <span class="n">beta_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;classification&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">number_of_classification_labels</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;sigmoid&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
+        <span class="n">layerActivation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
+                    <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">,</span>
+                    <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">),</span>
+                    <span class="n">bias_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">densenet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">densenet_model</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="create_densenet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_densenet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_densenet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
+                             <span class="n">number_of_classification_labels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                             <span class="n">number_of_filters</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                             <span class="n">depth</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+                             <span class="n">number_of_dense_blocks</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">growth_rate</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                             <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                             <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
+                            <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2-D implementation of the Wide ResNet deep learning architecture.</span>
+
+<span class="sd">    Creates a keras model of the DenseNet deep learning architecture for image</span>
+<span class="sd">    recognition based on the paper</span>
+
+<span class="sd">    G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected</span>
+<span class="sd">    Convolutional Networks Networks</span>
+
+<span class="sd">    available here:</span>
+
+<span class="sd">            https://arxiv.org/abs/1608.06993</span>
+
+<span class="sd">    This particular implementation was influenced by the following python</span>
+<span class="sd">    implementation:</span>
+
+<span class="sd">            https://github.com/tdeboissiere/DeepLearningImplementations/blob/master/DenseNet/densenet.py</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    input_image_size : tuple of length 4</span>
+<span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
+<span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
+<span class="sd">        (e.g., red, green, and blue).</span>
+
+<span class="sd">    number_of_classification_labels : integer</span>
+<span class="sd">        Number of classification labels.</span>
+
+<span class="sd">    number_of_filters : integer</span>
+<span class="sd">        Number of filters.</span>
+
+<span class="sd">    depth : integer</span>
+<span class="sd">        Number of layers---must be equal to 3 * N + 4 where N is an integer (default = 7).</span>
+
+<span class="sd">    number_of_dense_blocks : integer</span>
+<span class="sd">        Number of dense blocks number of dense blocks to add to the end (default = 1).</span>
+
+<span class="sd">    growth_rate :  integer</span>
+<span class="sd">        Number of filters to add for each dense block layer (default = 12).</span>
+
+<span class="sd">    dropout_rate : scalar</span>
+<span class="sd">        Per drop out layer rate (default = 0.2).</span>
+
+<span class="sd">    weight_decay : scalar</span>
+<span class="sd">        Weight decay (default = 1e-4).</span>
+
+<span class="sd">    mode :  string</span>
+<span class="sd">        &#39;classification&#39; or &#39;regression&#39;.  Default = &#39;classification&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras model</span>
+<span class="sd">        A 3-D Keras model defining the network.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; model = create_densenet_model_3d((128, 128, 128, 1))</span>
+<span class="sd">    &gt;&gt;&gt; model.summary()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">concatenation_axis</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;channels_last&#39;</span><span class="p">:</span>
+        <span class="n">concatenation_axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">convolution_factory_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">concatenation_axis</span><span class="p">,</span>
+                                   <span class="n">gamma_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">),</span>
+                                   <span class="n">beta_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                       <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel_size</span><span class="p">,</span>
+                       <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                       <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                       <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">initializers</span><span class="o">.</span><span class="n">he_normal</span><span class="p">(),</span>
+                       <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dropout_rate</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">transition_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">convolution_factory_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                                       <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">AveragePooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                                 <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">create_dense_blocks_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">growth_rate</span><span class="p">,</span>
+                               <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+
+        <span class="n">dense_block_layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">depth</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">convolution_factory_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">growth_rate</span><span class="p">,</span>
+                                           <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span>
+                                           <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+            <span class="n">dense_block_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">concatenation_axis</span><span class="p">)(</span><span class="n">dense_block_layers</span><span class="p">)</span>
+            <span class="n">number_of_filters</span> <span class="o">+=</span> <span class="n">growth_rate</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Depth must be equal to 3*N+4 where N is an integer.&#39;</span><span class="p">)</span>
+
+    <span class="n">number_of_layers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                     <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_uniform&#39;</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                     <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                     <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="c1"># Add dense blocks</span>
+
+    <span class="n">nFilters</span> <span class="o">=</span> <span class="n">number_of_filters</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_dense_blocks</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">outputs</span><span class="p">,</span> <span class="n">nFilters</span> <span class="o">=</span> \
+          <span class="n">create_dense_blocks_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">nFilters</span><span class="p">,</span>
+                                 <span class="n">depth</span><span class="o">=</span><span class="n">number_of_layers</span><span class="p">,</span> <span class="n">growth_rate</span><span class="o">=</span><span class="n">growth_rate</span><span class="p">,</span>
+                                 <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">transition_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">nFilters</span><span class="p">,</span>
+                                <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+
+    <span class="n">outputs</span><span class="p">,</span> <span class="n">nFilters</span> <span class="o">=</span> \
+      <span class="n">create_dense_blocks_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="n">nFilters</span><span class="p">,</span>
+                             <span class="n">depth</span><span class="o">=</span><span class="n">number_of_layers</span><span class="p">,</span> <span class="n">growth_rate</span><span class="o">=</span><span class="n">growth_rate</span><span class="p">,</span>
+                             <span class="n">dropout_rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">weight_decay</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">concatenation_axis</span><span class="p">,</span>
+                                 <span class="n">gamma_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">),</span>
+                                 <span class="n">beta_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;classification&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">number_of_classification_labels</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;sigmoid&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
+        <span class="n">layerActivation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
+                    <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">,</span>
+                    <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">),</span>
+                    <span class="n">bias_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">densenet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">densenet_model</span><span class="p">)</span></div>
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Brian Avants, and Nick Cullen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
