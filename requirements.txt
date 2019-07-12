@@ -1,6 +1,8 @@
 cmake
 -e git+https://github.com/ANTsX/ANTsPy.git#egg=antspyx
 requests
+tempfile
+random
 tensorflow
 tensorflow_probability
 keras
