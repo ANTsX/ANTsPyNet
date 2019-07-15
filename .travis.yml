@@ -15,7 +15,7 @@ env:
 before_install:
   - pip install tensorflow tensorflow_probability keras
 #  - pip install requests tempfile random
-  - gh_binary_install ANTsX/ANTsPyNet
+  - gh_binary_install ANTsX/ANTsPy
 
 install:
 #  - python setup.py install
