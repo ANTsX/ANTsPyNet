@@ -25,7 +25,8 @@ before_install:
         pip install https://github.com/ANTsX/ANTsPy/releases/download/Weekly/antspy-0.1.4-cp36-cp36m-macosx_10_7_x86_64.whl
       fi
 
-scripts: echo foo
+scripts:
+  - echo foo
 
 branches:
   only:
