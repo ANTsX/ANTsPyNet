@@ -13,8 +13,6 @@ env:
   - KERAS_IMPLEMENTATION="tensorflow"
 
 before_install:
-  - pip install tensorflow tensorflow_probability keras
-#  - pip install requests tempfile random
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ];
       then
