@@ -13,11 +13,12 @@ env:
   - KERAS_IMPLEMENTATION="tensorflow"
 
 before_install:
-  - pip3 install -r requirements.txt
+  - pip install tensorflow tensorflow_probability keras
+#  - pip install requests tempfile random
   - gh_binary_install ANTsX/ANTsPyNet
 
 install:
-  - python3 setup.py install
+#  - python setup.py install
 
 branches:
   only:
