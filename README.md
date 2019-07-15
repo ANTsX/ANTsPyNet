@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ANTsX/ANTsPyNet.png?branch=master)](https://travis-ci.org/ANTsX/ANTsPyNet)
+
 # ANTsPyNet
 
 A collection of deep learning architectures ported to the python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
