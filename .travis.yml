@@ -1,0 +1,24 @@
+language: python
+python:
+  - "3.6"
+
+cache:
+  packages: true
+  directories:
+    - $HOME/.keras
+    - $HOME/.cache/pip
+
+env:
+  - KERAS_BACKEND="tensorflow"
+  - KERAS_IMPLEMENTATION="tensorflow"
+
+before_install:
+  - pip3 install requests tempfile random tensorflow tensorflow_probability keras
+  - gh_binary_install ANTsX/ANTsPyNet
+
+install:
+  - python3 setup.py install
+
+branches:
+  only:
+    - master
