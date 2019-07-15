@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ANTsX/ANTsPyNet.png?branch=master)](https://travis-ci.org/ANTsX/ANTsPyNet)
+[![Build Status]https://travis-ci.org/ANTsX/ANTsPyNet.svg?branch=master)](https://travis-ci.org/ANTsX/ANTsPyNet)
 
 # ANTsPyNet
 
