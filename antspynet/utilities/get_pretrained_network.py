@@ -38,7 +38,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "denoising": "https://ndownloader.figshare.com/files/14235296",
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
             "protonLungMri": "https://ndownloader.figshare.com/files/13606799",
-            "ctLungMri": "https://ndownloader.figshare.com/files/16874150",
+            "ctHumanLung": "https://ndownloader.figshare.com/files/16874150",
             "functionalLungMri": "https://ndownloader.figshare.com/files/13824167"
         }
         return(switcher.get(argument, "Invalid argument."))
@@ -54,7 +54,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
                   "denoising",
                   "wholeTumorSegmentationT2Flair",
                   "protonLungMri",
-                  "ctLungMri",
+                  "ctHumanLung",
                   "functionalLungMri",
                   "show")
 
