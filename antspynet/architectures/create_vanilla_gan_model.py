@@ -12,6 +12,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 
+import ants
+
 class VanillaGanModel(object):
     """
     Deep embedded clustering with and without convolutions.
@@ -37,22 +39,24 @@ class VanillaGanModel(object):
         self.input_image_size = input_image_size
         self.latent_dimension = latent_dimension
 
+        optimizer = optimizers.adam(lr=0.0002, beta_1=0.5)
+
         self.discriminator = self.build_discriminator()
 
         self.discriminator.compile(loss='binary_crossentropy',
-                                   optimizer=optimizers.adam(lr=0.0001), metrics=['acc'])
+                                   optimizer=optimizer, metrics=['acc'])
         self.discriminator.trainable = False
 
         self.generator = self.build_generator()
 
-        z = Input(shape=(self.latent_dimension))
+        z = Input(shape=(self.latent_dimension,))
         image = self.generator(z)
 
         validity = self.discriminator(image)
 
         self.combined_model = Model(inputs=z, outputs=validity)
         self.combined_model.compile(loss = 'binary_crossentropy',
-                                    optimizer=optimizers.adam(lr=0.0001))
+                                    optimizer=optimizer)
 
     def build_generator(self):
         model = Sequential()
@@ -61,23 +65,23 @@ class VanillaGanModel(object):
             number_of_units = 2 ** (8 + i)
 
             if i == 0:
-                model.add(Dense(input_shape=self.latent_dimension,
+                model.add(Dense(input_dim=self.latent_dimension,
                                 units=number_of_units))
             else:
                 model.add(Dense(units=number_of_units))
 
             model.add(Dense(units=number_of_units))
-            model.add(LeakyReLu(alpha=0.2))
+            model.add(LeakyReLU(alpha=0.2))
             model.add(BatchNormalization(momentum=0.8))
 
         size = 1.0
         for i in range(len(self.input_image_size)):
             size *= self.input_image_size[i]
 
-        model.add(Dense(units=size))
+        model.add(Dense(units=int(size), activation='tanh'))
         model.add(Reshape(target_shape=self.input_image_size))
 
-        noise = Input(shape=(self.latent_dimension))
+        noise = Input(shape=(self.latent_dimension,))
         image = model(noise)
 
         generator = Model(inputs=noise, outputs=image)
@@ -88,7 +92,9 @@ class VanillaGanModel(object):
 
         model.add(Flatten(input_shape=self.input_image_size))
         model.add(Dense(units=512))
-        model.add(LeakyReLu(alpha=0.2))
+        model.add(LeakyReLU(alpha=0.2))
+        model.add(Dense(units=256))
+        model.add(LeakyReLU(alpha=0.2))
         model.add(Dense(units=1,
                         activation='sigmoid'))
 
@@ -99,9 +105,10 @@ class VanillaGanModel(object):
         discriminator = Model(inputs=image, outputs=validity)
         return(discriminator)
 
-    def train(self, X_train, number_of_epochs, batch_size=128):
+    def train(self, X_train, number_of_epochs, batch_size=128,
+              sample_interval=None, sample_file_prefix='sample'):
         valid = np.ones((batch_size, 1))
-        fake = np.ones((batch_size, 1))
+        fake = np.zeros((batch_size, 1))
 
         for epoch in range(number_of_epochs):
 
@@ -124,6 +131,24 @@ class VanillaGanModel(object):
 
             print("Epoch ", epoch, ": [Discriminator loss: ", d_loss[0],
                   " acc: ", d_loss[1], "] ", "[Generator loss: ", g_loss)
+
+            if sample_interval != None:
+                if epoch % sample_interval == 0:
+                    noise = np.random.normal(0, 1, (1, self.latent_dimension))
+                    X_generated = self.generator.predict(noise)
+
+                    # Convert to [0,255] to write as jpg using ANTsPy
+
+                    X_generated = (255 * (X_generated-X_generated.min()) /
+                      (X_generated.max()-min(X_generated)))
+                    X_generated = np.squeeze(X_generated)
+                    X_generated = np.uint8(X_generated)
+
+                    X_generated_image = ants.from_numpy(X_generated)
+
+                    image_file_name = sample_file_prefix + "_iteration" + str( epoch ) + ".jpg"
+                    print("   --> writing sample image: ", image_file_name)
+                    ants.image_write(X_generated_image, image_file_name)
 
 
 
