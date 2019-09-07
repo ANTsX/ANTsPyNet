@@ -219,7 +219,7 @@ def reconstruct_image_from_patches(patches,
                                     start_index[2]:end_index[2], :] += patch
                         count_array[start_index[0]:end_index[0],
                                     start_index[1]:end_index[1],
-                                    start_index[1]:end_index[2]] += np.ones(patch_size)
+                                    start_index[2]:end_index[2]] += np.ones(patch_size)
                         count += 1
 
             count_array[np.where(count_array == 0)] = 1
