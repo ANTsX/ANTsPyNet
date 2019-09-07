@@ -107,7 +107,7 @@ def extract_image_patches(image,
             else:
                 patch_array = np.zeros((number_of_extracted_patches, *patch_size, number_of_image_components))
 
-        count = 1
+        count = 0
         if dimensionality == 2:
             for i in indices[0]:
                 for j in indices[1]:
