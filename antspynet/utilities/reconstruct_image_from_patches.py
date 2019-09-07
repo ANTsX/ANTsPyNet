@@ -194,37 +194,37 @@ def reconstruct_image_from_patches(patches,
                                       min(k + 1, patch_size[2], image_size[2] - k))
 
                             image_array[i, j, k, :] /= factor
-            else:
-                count_array = np.zeros(image_array.shape[0:dimensionality])
-                for i in range(0, image_size[0] - patch_size[0], stride_length_tuple[0]):
-                    for j in range(0, image_size[1] - patch_size[1], stride_length_tuple[1]):
-                        for k in range(0, image_size[2] - patch_size[2], stride_length_tuple[2]):
-                            start_index = (i, j, k)
-                            end_index = tuple(np.add(start_index, patch_size))
+        else:
+            count_array = np.zeros(image_array.shape[0:dimensionality])
+            for i in range(0, image_size[0] - patch_size[0], stride_length_tuple[0]):
+                for j in range(0, image_size[1] - patch_size[1], stride_length_tuple[1]):
+                    for k in range(0, image_size[2] - patch_size[2], stride_length_tuple[2]):
+                        start_index = (i, j, k)
+                        end_index = tuple(np.add(start_index, patch_size))
 
-                            patch = np.empty((1, 1, 1))
-                            if is_list_patches:
-                                patch = patches[count]
-                            else:
-                                if number_of_image_components == 1:
-                                    patch = patches[count, :, :, :]
-                                else:
-                                    patch = patches[count, :, :, :, :]
-
+                        patch = np.empty((1, 1, 1))
+                        if is_list_patches:
+                            patch = patches[count]
+                        else:
                             if number_of_image_components == 1:
-                                patch = np.expand_dims(patch, axis = 3)
+                                patch = patches[count, :, :, :]
+                            else:
+                                patch = patches[count, :, :, :, :]
 
-                            image_array[start_index[0]:end_index[0],
-                                        start_index[1]:end_index[1],
-                                        start_index[2]:end_index[2], :] += patch
-                            count_array[start_index[0]:end_index[0],
-                                        start_index[1]:end_index[1],
-                                        start_index[1]:end_index[2]] += np.ones(patch_size)
-                            count += 1
+                        if number_of_image_components == 1:
+                            patch = np.expand_dims(patch, axis = 3)
 
-                count_array[np.where(count_array == 0)] = 1
-                for i in range(number_of_image_components):
-                    image_array[:, :, :, i] /= count_array
+                        image_array[start_index[0]:end_index[0],
+                                    start_index[1]:end_index[1],
+                                    start_index[2]:end_index[2], :] += patch
+                        count_array[start_index[0]:end_index[0],
+                                    start_index[1]:end_index[1],
+                                    start_index[1]:end_index[2]] += np.ones(patch_size)
+                        count += 1
+
+            count_array[np.where(count_array == 0)] = 1
+            for i in range(number_of_image_components):
+                image_array[:, :, :, i] /= count_array
 
     if dimensionality == 2:
         image_array = np.transpose(image_array, [2, 0, 1])
