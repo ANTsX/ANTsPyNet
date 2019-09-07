@@ -78,9 +78,9 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * ANTsPyNet Installation:
     * Option 1:
        ```
-       ```
-    * Option 2:
-       ```
+       $ git clone https://github.com/ANTsX/ANTsPyNet
+       $ cd ANTsPyNet
+       $ python setup.py install
        ```
 
 ## Publications
