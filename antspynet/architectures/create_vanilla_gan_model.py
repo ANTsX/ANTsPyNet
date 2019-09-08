@@ -9,8 +9,7 @@ from keras.layers import (Input, Concatenate, Dense, Activation,
 from keras import optimizers
 
 import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
+import os
 
 import ants
 
@@ -38,6 +37,14 @@ class VanillaGanModel(object):
 
         self.input_image_size = input_image_size
         self.latent_dimension = latent_dimension
+
+        self.dimensionality = None
+        if len(self.input_image_size) == 3:
+            self.dimensionality = 2
+        elif len(self.input_image_size) == 4:
+            self.dimensionality = 3
+        else:
+            ValueError("Incorrect size for input_image_size.")
 
         optimizer = optimizers.adam(lr=0.0002, beta_1=0.5)
 
@@ -132,23 +139,40 @@ class VanillaGanModel(object):
             print("Epoch ", epoch, ": [Discriminator loss: ", d_loss[0],
                   " acc: ", d_loss[1], "] ", "[Generator loss: ", g_loss)
 
-            if sample_interval != None:
-                if epoch % sample_interval == 0:
-                    noise = np.random.normal(0, 1, (1, self.latent_dimension))
-                    X_generated = self.generator.predict(noise)
+            if self.dimensionality == 2:
+                if sample_interval != None:
+                    if epoch % sample_interval == 0:
 
-                    # Convert to [0,255] to write as jpg using ANTsPy
+                        # Do a 5x5 grid
 
-                    X_generated = (255 * (X_generated-X_generated.min()) /
-                      (X_generated.max()-min(X_generated)))
-                    X_generated = np.squeeze(X_generated)
-                    X_generated = np.uint8(X_generated)
+                        predicted_batch_size = 5 * 5
+                        noise = np.random.normal(0, 1, (predicted_batch_size, self.latent_dimension))
+                        X_generated = self.generator.predict(noise)
 
-                    X_generated_image = ants.from_numpy(X_generated)
+                        # Convert to [0,255] to write as jpg using ANTsPy
 
-                    image_file_name = sample_file_prefix + "_iteration" + str( epoch ) + ".jpg"
-                    print("   --> writing sample image: ", image_file_name)
-                    ants.image_write(X_generated_image, image_file_name)
+                        X_generated = (255 * (X_generated - X_generated.min()) /
+                          (X_generated.max() - X_generated.min()))
+                        X_generated = np.squeeze(X_generated)
+                        X_generated = np.uint8(X_generated)
+
+                        X_tiled = np.zeros((5 * X_generated.shape[1], 5 * X_generated.shape[2]), dtype=np.uint8)
+                        for i in range(5):
+                            indices_i = (i * X_generated.shape[1], (i + 1) * X_generated.shape[1])
+                            for j in range(5):
+                                indices_j = (j * X_generated.shape[2], (j + 1) * X_generated.shape[2])
+                                X_tiled[indices_i[0]:indices_i[1], indices_j[0]:indices_j[1]] = \
+                                  np.squeeze(X_generated[i * 5 + j, :, :])
+
+                        X_generated_image = ants.from_numpy(np.transpose(X_tiled))
+
+                        image_file_name = sample_file_prefix + "_iteration" + str(epoch) + ".jpg"
+                        dir_name = os.path.dirname(sample_file_prefix)
+                        if not os.path.exists(dir_name):
+                            os.mkdir(dir_name)
+
+                        print("   --> writing sample image: ", image_file_name)
+                        ants.image_write(X_generated_image, image_file_name)
 
 
 
