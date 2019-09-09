@@ -20,6 +20,8 @@ from .mixture_density_utilities import split_mixture_parameters
 from .mixture_density_utilities import mixture_density_software_max
 from .mixture_density_utilities import sample_from_output
 
+from .resample_tensor_utilities import ResamplingLayer2D, ResamplingLayer3D
+
 from .custom_metrics import multilabel_dice_coefficient
 from .custom_metrics import peak_signal_to_noise_ratio
 from .custom_metrics import pearson_correlation_coefficient
