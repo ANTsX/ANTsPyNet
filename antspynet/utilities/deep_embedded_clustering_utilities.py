@@ -64,7 +64,7 @@ class Clustering(Layer):
         q = K.transpose(K.transpose(q) / K.sum(q, axis=1))
         return( q )
 
-    def compute_output_shape(input_shape):
+    def compute_output_shape(self, input_shape):
         return([input_shape[0], self.number_of_clusters])
 
     def get_config(self):
