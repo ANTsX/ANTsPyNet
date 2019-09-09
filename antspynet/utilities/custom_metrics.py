@@ -46,16 +46,8 @@ def multilabel_dice_coefficient(y_true, y_pred):
     return((2.0 * unionOverlap + smoothingFactor) /
       (1.0 + unionOverlap + smoothingFactor))
 
-def loss_multilabel_dice_coefficient_error(y_true, y_pred):
-    return(-multilabel_dice_coefficient(y_true, y_pred))
-
-
 def peak_signal_to_noise_ratio(y_true, y_pred):
     return(-10.0 * K.log(K.mean(K.square(y_pred - y_true))) / K.log(10.0))
-
-def loss_peak_signal_to_noise_ratio_error(y_true, y_pred):
-    return(-peak_signal_to_noise_ratio(y_true, y_pred))
-
 
 def pearson_correlation_coefficient(y_true, y_pred):
     N = K.sum(K.ones_like(y_true))
@@ -74,5 +66,28 @@ def pearson_correlation_coefficient(y_true, y_pred):
 
     return(coefficient)
 
-def loss_pearson_correlation_coefficient_error(y_true, y_pred):
-    return(-pearson_correlation_coefficient(y_true, y_pred))
+def categorical_focal_gain(y_true, y_pred, gamma=2.0, alpha=0.25)
+{
+  def categorical_focal_gain_fixed(y_true, y_pred)
+    {
+    y_pred = y_pred / K.sum(y_pred, axis=-1L, keepdims=True)
+    y_pred = K.clip(y_pred, K.epsilon(), 1.0 - K.epsilon())
+    cross_entropy = y_true * K.log(y_pred)
+    gain = alpha * K.pow(1.0 - y_pred, gamma) * cross_entropy
+    return(K.sum(gain, axis=-1L))
+    }
+  return(categorical_focal_gain_fixed)
+}
+
+def categorical_focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25)
+{
+  def categorical_focal_loss_fixed(y_true, y_pred)
+    {
+    y_pred = y_pred / K.sum(y_pred, axis=-1L, keepdims=True)
+    y_pred = K.clip(y_pred, K.epsilon(), 1.0 - K.epsilon())
+    cross_entropy = y_true * K.log(y_pred)
+    loss = alpha * K.pow(1.0 - y_pred, gamma) * cross_entropy
+    return(-K.sum(loss, axis=-1L))
+    }
+  return(categorical_focal_loss_fixed)
+}

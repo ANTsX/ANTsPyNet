@@ -20,9 +20,8 @@ from .mixture_density_utilities import split_mixture_parameters
 from .mixture_density_utilities import mixture_density_software_max
 from .mixture_density_utilities import sample_from_output
 
-from .custom_losses import multilabel_dice_coefficient
-from .custom_losses import loss_multilabel_dice_coefficient_error
-from .custom_losses import peak_signal_to_noise_ratio
-from .custom_losses import loss_peak_signal_to_noise_ratio_error
-from .custom_losses import pearson_correlation_coefficient
-from .custom_losses import loss_pearson_correlation_coefficient_error
+from .custom_metrics import multilabel_dice_coefficient
+from .custom_metrics import peak_signal_to_noise_ratio
+from .custom_metrics import pearson_correlation_coefficient
+from .custom_metrics import categorical_focal_gain
+from .custom_metrics import categorical_focal_loss
