@@ -117,20 +117,20 @@ class DeepEmbeddedClusteringModel(object):
                 raise ValueError("Need to specify the input image size for CNN.")
 
             if len(self.input_image_size) == 3:  # 2-D
-                ae = createConvolutionalAutoencoderModel2D(
+                ae = create_convolutional_autoencoder_model_2d(
                        input_image_size=self.input_image_size,
                        number_of_filters_per_layer=self.number_of_units_per_layer)
             else:
-                ae = createConvolutionalAutoencoderModel3D(
+                ae = create_convolutional_autoencoder_model_3d(
                        input_image_size=self.input_image_size,
                        number_of_filters_per_layer=self.number_of_units_per_layer)
 
-            self.autoencoder, self.encoder = ae.ConvolutionalAutoencoderModel
+            self.autoencoder, self.encoder = ae.convolutional_autoencoder_model
 
         else:
-            ae = createAutoencoderModel(self.number_of_units_per_layer,
+            ae = create_autoencoder_model(self.number_of_units_per_layer,
                                         initializer=self.initializer )
-            self.autoencoder, self.encoder = ae.AutoencoderModel
+            self.autoencoder, self.encoder = ae.autoencoder_model
 
         clustering_layer = Clustering(self.number_of_clusters, name = "clustering")(self.encoder.output)
 

@@ -15,7 +15,7 @@ import ants
 
 class VanillaGanModel(object):
     """
-    Deep embedded clustering with and without convolutions.
+    Vanilla GAN model.
 
     Arguments
     ---------
