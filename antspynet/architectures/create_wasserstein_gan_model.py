@@ -211,7 +211,7 @@ class WassersteinGanModel(object):
     def train(self, X_train, number_of_epochs, batch_size=128,
               sample_interval=None, sample_file_prefix='sample'):
         valid = -np.ones((batch_size, 1))
-        fake = np.zeros((batch_size, 1))
+        fake = np.ones((batch_size, 1))
 
         for epoch in range(number_of_epochs):
 
