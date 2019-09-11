@@ -4,18 +4,31 @@ import keras.backend as K
 from keras.models import Model, Sequential
 from keras.engine import Layer, InputSpec
 from keras.layers import (Input, Concatenate, Dense, Activation,
-                          BatchNormalization, Reshape,
-                          Flatten, LeakyReLU)
+                          BatchNormalization, Reshape,  Dropout,
+                          Flatten, LeakyReLU, Conv2D, Conv3D)
 from keras import optimizers
+
+from . import (create_convolutional_autoencoder_model_2d,
+               create_convolutional_autoencoder_model_3d)
+
+from ..utilities import ResampleTensorLayer2D, ResampleTensorLayer3D
 
 import numpy as np
 import os
 
 import ants
 
-class VanillaGanModel(object):
+class DeepConvolutionalGanModel(object):
     """
-    Vanilla GAN model.
+    GAN model using CNNs
+
+    Deep convolutional generative adverserial network from the paper:
+
+      https://arxiv.org/abs/1511.06434
+
+    and ported from the Keras (python) implementation:
+
+      https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py
 
     Arguments
     ---------
@@ -33,7 +46,7 @@ class VanillaGanModel(object):
     """
 
     def __init__(self, input_image_size, latent_dimension=100):
-        super(VanillaGanModel, self).__init__()
+        super(DeepConvolutionalGanModel, self).__init__()
 
         self.input_image_size = input_image_size
         self.latent_dimension = latent_dimension
@@ -65,28 +78,79 @@ class VanillaGanModel(object):
         self.combined_model.compile(loss = 'binary_crossentropy',
                                     optimizer=optimizer)
 
-    def build_generator(self):
+    def build_generator(self, number_of_filters_per_layer=(128, 64), kernel_size=3):
+
         model = Sequential()
 
-        for i in range(3):
-            number_of_units = 2 ** (8 + i)
+        # To build the generator, we create the reverse encoder model
+        # and simply build the reverse model
 
-            if i == 0:
-                model.add(Dense(input_dim=self.latent_dimension,
-                                units=number_of_units))
+        encoder = None
+        if self.dimensionality == 2:
+             autoencoder, encoder = create_convolutional_autoencoder_model_2d(
+                          input_image_size=self.input_image_size,
+                          number_of_filters_per_layer=(*(number_of_filters_per_layer[::-1]), self.latent_dimension),
+                          convolution_kernel_size=(5, 5),
+                          deconvolution_kernel_size=(5, 5))
+        else:
+             autoencoder, encoder = create_convolutional_autoencoder_model_3d(
+                          input_image_size=self.input_image_size,
+                          number_of_filters_per_layer=(*(number_of_filters_per_layer[::-1]), self.latent_dimension),
+                          convolution_kernel_size=(5, 5, 5),
+                          deconvolution_kernel_size=(5, 5, 5))
+
+        encoder_layers = encoder.layers
+
+        penultimate_layer = encoder_layers[len(encoder_layers) - 2]
+
+        model.add(Dense(units=penultimate_layer.output_shape[1],
+                        input_dim=self.latent_dimension,
+                        activation="relu"))
+
+        conv_layer = encoder_layers[len(encoder_layers) - 3]
+        resampled_size = conv_layer.output_shape[1:(self.dimensionality + 2)]
+        model.add(Reshape(resampled_size))
+
+        count = 0
+        for i in range(len(encoder_layers) - 3, 1, -1):
+            conv_layer = encoder_layers[i]
+            resampled_size = conv_layer.output_shape[1:(self.dimensionality + 1)]
+
+            if self.dimensionality == 2:
+                model.add(ResampleTensorLayer2D(shape=resampled_size,
+                                                interpolation_type='linear'))
+                model.add(Conv2D(filters=number_of_filters_per_layer[count],
+                                 kernel_size=kernel_size,
+                                 padding='same'))
             else:
-                model.add(Dense(units=number_of_units))
-
-            model.add(Dense(units=number_of_units))
-            model.add(LeakyReLU(alpha=0.2))
+                model.add(ResampleTensorLayer3D(shape=resampled_size,
+                                                interpolation_type='linear'))
+                model.add(Conv3D(filters=number_of_filters_per_layer[count],
+                                 kernel_size=kernel_size,
+                                 padding='same'))
             model.add(BatchNormalization(momentum=0.8))
+            model.add(Activation(activation='relu'))
+            count += 1
 
-        size = 1.0
-        for i in range(len(self.input_image_size)):
-            size *= self.input_image_size[i]
+        number_of_channels = self.input_image_size[-1]
+        spatial_dimensions = self.input_image_size[:self.dimensionality]
 
-        model.add(Dense(units=int(size), activation='tanh'))
-        model.add(Reshape(target_shape=self.input_image_size))
+        if self.dimensionality == 2:
+            model.add(ResampleTensorLayer2D(shape=spatial_dimensions,
+                                            interpolation_type='linear'))
+            model.add(Conv2D(filters=number_of_channels,
+                             kernel_size=kernel_size,
+                             padding='same'))
+        else:
+            model.add(ResampleTensorLayer3D(shape=spatial_dimensions,
+                                            interpolation_type='linear'))
+            model.add(Conv3D(filters=number_of_channels,
+                             kernel_size=kernel_size,
+                             padding='same'))
+
+        model.add(Activation(activation="tanh"))
+
+        model.summary()
 
         noise = Input(shape=(self.latent_dimension,))
         image = model(noise)
@@ -94,22 +158,37 @@ class VanillaGanModel(object):
         generator = Model(inputs=noise, outputs=image)
         return(generator)
 
-    def build_discriminator(self):
+    def build_discriminator(self, number_of_filters_per_layer=(32, 64, 128, 256),
+                            kernel_size=3, dropout_rate=0.25):
         model = Sequential()
 
-        model.add(Flatten(input_shape=self.input_image_size))
-        model.add(Dense(units=512))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(Dense(units=256))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(Dense(units=1,
-                        activation='sigmoid'))
+        for i in range(len(number_of_filters_per_layer)):
+            if self.dimensionality == 2:
+                model.add(Conv2D(input_shape=self.input_image_size,
+                                 filters=number_of_filters_per_layer[i],
+                                 kernel_size = kernel_size,
+                                 strides = 2,
+                                 padding='same'))
+            else:
+                model.add(Conv3D(input_shape=self.input_image_size,
+                                 filters=number_of_filters_per_layer[i],
+                                 kernel_size = kernel_size,
+                                 strides = 2,
+                                 padding='same'))
+
+            model.add(BatchNormalization(momentum=0.8))
+            model.add(LeakyReLU(alpha=0.2))
+            model.add(Dropout(rate=dropout_rate))
+
+        model.add(Flatten())
+        model.add(Dense(units=1, activation='sigmoid'))
 
         image = Input(shape=self.input_image_size)
 
         validity = model(image)
 
         discriminator = Model(inputs=image, outputs=validity)
+
         return(discriminator)
 
     def train(self, X_train, number_of_epochs, batch_size=128,

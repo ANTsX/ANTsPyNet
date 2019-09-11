@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from keras.engine import Layer, InputSpec
 
-class ResamplingLayer2D(Layer):
+class ResampleTensorLayer2D(Layer):
 
     """
     Tensor resampling layer (2D).
@@ -38,12 +38,12 @@ class ResamplingLayer2D(Layer):
 
         self.name = name
 
-        super(ResamplingLayer2D, self).__init__(**kwargs)
+        super(ResampleTensorLayer2D, self).__init__(**kwargs)
 
     def compute_output_shape(self, input_shape):
         if len(input_shape) != 4:
             raise ValueError("Input tensor must be of rank 4.")
-        return([input_shape[0], self.shape[0], self.shape[1], input_shape[2]])
+        return((input_shape[0], self.shape[0], self.shape[1], input_shape[3]))
 
     def call(self, x, mask=None):
         dimensionality = 2
@@ -57,11 +57,11 @@ class ResamplingLayer2D(Layer):
 
         resampled_tensor = None
         if self.interpolation_type == 'nearest_neighbor':
-            resampled_tensor = tf.compat.v1.image.resize_nearest_neighbor(x, size=new_size, align_corners=True)
+            resampled_tensor = tf.image.resize_nearest_neighbor(x, size=new_size, align_corners=True)
         elif self.interpolation_type == 'linear':
-            resampled_tensor = tf.compat.v1.image.resize_bilinear(x, size=new_size, align_corners=True)
+            resampled_tensor = tf.image.resize_bilinear(x, size=new_size, align_corners=True)
         elif self.interpolation_type == 'cubic':
-            resampled_tensor = tf.compat.v1.image.resize_bicubic(x, size=new_size, align_corners=True)
+            resampled_tensor = tf.image.resize_bicubic(x, size=new_size, align_corners=True)
 
         return(resampled_tensor)
 
@@ -70,7 +70,7 @@ class ResamplingLayer2D(Layer):
         base_config = super(Scale, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-class ResamplingLayer3D(Layer):
+class ResampleTensorLayer3D(Layer):
 
     """
     Tensor resampling layer (3D).
@@ -104,13 +104,13 @@ class ResamplingLayer3D(Layer):
 
         self.name = name
 
-        super(ResamplingLayer3D, self).__init__(**kwargs)
+        super(ResampleTensorLayer3D, self).__init__(**kwargs)
 
     def compute_output_shape(self, input_shape):
         if len(input_shape) != 5:
             raise ValueError("Input tensor must be of rank 5.")
-        return([input_shape[0], self.shape[0], self.shape[1], self.shape[2],
-                input_shape[4]])
+        return((input_shape[0], self.shape[0], self.shape[1], self.shape[2],
+                input_shape[4]))
 
     def call(self, x, mask=None):
         dimensionality = 3
@@ -133,13 +133,13 @@ class ResamplingLayer3D(Layer):
 
         resampled_tensor_yz = None
         if self.interpolation_type == 'nearest_neighbor':
-            resampled_tensor_yz = tf.compat.v1.image.resize_nearest_neighbor(squeeze_tensor_yz,
+            resampled_tensor_yz = tf.image.resize_nearest_neighbor(squeeze_tensor_yz,
               size=new_shape_yz, align_corners=True)
         elif self.interpolation_type == 'linear':
-            resampled_tensor_yz = tf.compat.v1.image.resize_bilinear(squeeze_tensor_yz,
+            resampled_tensor_yz = tf.image.resize_bilinear(squeeze_tensor_yz,
               size=new_shape_yz, align_corners=True)
         elif self.interpolation_type == 'cubic':
-            resampled_tensor_yz = tf.compat.v1.image.resize_bicubic(squeeze_tensor_yz,
+            resampled_tensor_yz = tf.image.resize_bicubic(squeeze_tensor_yz,
               size=new_shape_yz, align_corners=True)
 
         new_shape_yz = (-1, old_size[0], new_size[1], new_size[2], channel_size)
@@ -156,13 +156,13 @@ class ResamplingLayer3D(Layer):
 
         resampled_tensor_x = None
         if self.interpolation_type == 'nearest_neighbor':
-            resampled_tensor_x = tf.compat.v1.image.resize_nearest_neighbor(squeeze_tensor_x,
+            resampled_tensor_x = tf.image.resize_nearest_neighbor(squeeze_tensor_x,
                 size=new_shape_x, align_corners=True)
         elif self.interpolation_type == 'linear':
-            resampled_tensor_x = tf.compat.v1.image.resize_bilinear(squeeze_tensor_x,
+            resampled_tensor_x = tf.image.resize_bilinear(squeeze_tensor_x,
                 size=new_shape_x, align_corners=True)
         elif self.interpolation_type == 'cubic':
-            resampled_tensor_x = tf.compat.v1.image.resize_bicubic(squeeze_tensor_x,
+            resampled_tensor_x = tf.image.resize_bicubic(squeeze_tensor_x,
                 size=new_shape_x, align_corners=True)
 
         new_shape_x = (-1, new_size[2], new_size[1], new_size[0], channel_size)
