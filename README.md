@@ -60,6 +60,8 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Ian J. Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, Yoshua Bengio.  Generative Adverserial Networks.](https://arxiv.org/abs/1406.2661)
 * Deep Convolutional GAN
     * [Alec Radford, Luke Metz, Soumith Chintala.  Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks.](https://arxiv.org/abs/1511.06434)
+* Wasserstein GAN
+    * [Martin Arjovsky, Soumith Chintala, Léon Bottou.  Wasserstein GAN.](https://arxiv.org/abs/1701.07875)
 
 ### Clustering
 
