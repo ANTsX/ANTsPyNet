@@ -18,17 +18,17 @@ import os
 
 import ants
 
-class DeepConvolutionalGanModel(object):
+class WassersteinGanModel(object):
     """
-    GAN model using CNNs
+    Wasserstein GAN model
 
-    Deep convolutional generative adverserial network from the paper:
+    Wasserstein generative adverserial network from the paper:
 
-      https://arxiv.org/abs/1511.06434
+      ttps://arxiv.org/abs/1701.07875
 
-    and ported from the Keras (python) implementation:
+    and ported from the Keras implementation:
 
-      https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py
+      https://github.com/eriklindernoren/Keras-GAN/blob/master/wgan/wgan.py
 
     Arguments
     ---------
@@ -38,6 +38,13 @@ class DeepConvolutionalGanModel(object):
         (e.g., red, green, and blue).
 
     latent_dimension : integer
+        Default = 100.
+
+    number_of_critic_iterations : integer
+        Default = 5.
+
+    clip_value : float
+        Default = 0.01.
 
     Returns
     -------
@@ -45,11 +52,14 @@ class DeepConvolutionalGanModel(object):
         A Keras model defining the network.
     """
 
-    def __init__(self, input_image_size, latent_dimension=100):
-        super(DeepConvolutionalGanModel, self).__init__()
+    def __init__(self, input_image_size, latent_dimension=100,
+                 number_of_critic_iterations=5, clip_value=0.01):
+        super(WassersteinGanModel, self).__init__()
 
         self.input_image_size = input_image_size
         self.latent_dimension = latent_dimension
+        self.number_of_critic_iterations = number_of_critic_iterations
+        self.clip_value = clip_value
 
         self.dimensionality = None
         if len(self.input_image_size) == 3:
@@ -59,26 +69,28 @@ class DeepConvolutionalGanModel(object):
         else:
             raise ValueError("Incorrect size for input_image_size.")
 
-        optimizer = optimizers.adam(lr=0.0002, beta_1=0.5)
+        optimizer = optimizers.rmsprop(lr=0.00005)
 
-        self.discriminator = self.build_discriminator()
-
-        self.discriminator.compile(loss='binary_crossentropy',
-                                   optimizer=optimizer, metrics=['acc'])
-        self.discriminator.trainable = False
+        self.critic = self.build_critic()
+        self.critic.compile(loss=self.wasserstein_loss, optimizer=optimizer,
+                            metrics=['acc'])
+        self.critic.trainable = False
 
         self.generator = self.build_generator()
 
         z = Input(shape=(self.latent_dimension,))
         image = self.generator(z)
 
-        validity = self.discriminator(image)
+        validity = self.critic(image)
 
         self.combined_model = Model(inputs=z, outputs=validity)
-        self.combined_model.compile(loss='binary_crossentropy',
-                                    optimizer=optimizer)
+        self.combined_model.compile(loss=self.wasserstein_loss,
+                                    optimizer=optimizer, metrics=['acc'])
 
-    def build_generator(self, number_of_filters_per_layer=(128, 64), kernel_size=3):
+    def wasserstein_loss(self, y_true, y_pred):
+       return(K.mean(y_true * y_pred))
+
+    def build_generator(self, number_of_filters_per_layer=(128, 64), kernel_size=4):
 
         model = Sequential()
 
@@ -156,65 +168,81 @@ class DeepConvolutionalGanModel(object):
         generator = Model(inputs=noise, outputs=image)
         return(generator)
 
-    def build_discriminator(self, number_of_filters_per_layer=(32, 64, 128, 256),
+    def build_critic(self, number_of_filters_per_layer=(16, 32, 64, 128),
                             kernel_size=3, dropout_rate=0.25):
         model = Sequential()
 
         for i in range(len(number_of_filters_per_layer)):
+
+            strides = 2
+            if i == len(number_of_filters_per_layer) - 1:
+                strides=1
+
             if self.dimensionality == 2:
                 model.add(Conv2D(input_shape=self.input_image_size,
                                  filters=number_of_filters_per_layer[i],
                                  kernel_size = kernel_size,
-                                 strides = 2,
+                                 strides = strides,
                                  padding='same'))
             else:
                 model.add(Conv3D(input_shape=self.input_image_size,
                                  filters=number_of_filters_per_layer[i],
                                  kernel_size = kernel_size,
-                                 strides = 2,
+                                 strides = strides,
                                  padding='same'))
 
-            model.add(BatchNormalization(momentum=0.8))
+            if i > 0:
+                model.add(BatchNormalization(momentum=0.8))
+
             model.add(LeakyReLU(alpha=0.2))
             model.add(Dropout(rate=dropout_rate))
 
         model.add(Flatten())
-        model.add(Dense(units=1, activation='sigmoid'))
+        model.add(Dense(units=1))
 
         image = Input(shape=self.input_image_size)
 
         validity = model(image)
 
-        discriminator = Model(inputs=image, outputs=validity)
+        critic = Model(inputs=image, outputs=validity)
 
-        return(discriminator)
+        return(critic)
 
     def train(self, X_train, number_of_epochs, batch_size=128,
               sample_interval=None, sample_file_prefix='sample'):
-        valid = np.ones((batch_size, 1))
+        valid = -np.ones((batch_size, 1))
         fake = np.zeros((batch_size, 1))
 
         for epoch in range(number_of_epochs):
 
-            # train discriminator
+            # train critic
 
-            indices = np.random.randint(0, X_train.shape[0], batch_size)
-            X_valid_batch = X_train[indices]
+            for c in range(self.number_of_critic_iterations):
+                indices = np.random.randint(0, X_train.shape[0], batch_size)
+                X_valid_batch = X_train[indices]
 
-            noise = np.random.normal(0, 1, (batch_size, self.latent_dimension))
-            X_fake_batch = self.generator.predict(noise)
+                noise = np.random.normal(0, 1, (batch_size, self.latent_dimension))
+                X_fake_batch = self.generator.predict(noise)
 
-            d_loss_real = self.discriminator.train_on_batch(X_valid_batch, valid)
-            d_loss_fake = self.discriminator.train_on_batch(X_fake_batch, fake)
-            d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
+                d_loss_real = self.critic.train_on_batch(X_valid_batch, valid)
+                d_loss_fake = self.critic.train_on_batch(X_fake_batch, fake)
+                d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
+
+                # clip critic weights
+
+                for i in range(len(self.critic.layers)):
+                    weights = self.critic.layers[i].get_weights()
+                    for j in range(len(weights)):
+                       weights[j] = np.clip(weights[j], -self.clip_value, self.clip_value)
+                    self.critic.layers[i].set_weights(weights)
 
             # train generator
 
             noise = np.random.normal(0, 1, (batch_size, self.latent_dimension))
             g_loss = self.combined_model.train_on_batch(noise, valid)
 
-            print("Epoch ", epoch, ": [Discriminator loss: ", d_loss[0],
-                  " acc: ", d_loss[1], "] ", "[Generator loss: ", g_loss)
+            print("Epoch ", epoch, ": [Critic loss: ", 1.0 - d_loss[0],
+                  "] ", "[Generator loss: ", 1.0 - g_loss[0])
 
             if self.dimensionality == 2:
                 if sample_interval != None:

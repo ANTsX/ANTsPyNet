@@ -15,5 +15,6 @@ from .create_simple_classification_with_spatial_transformer_network_model import
 from .create_unet_model import create_unet_model_2d, create_unet_model_3d
 from .create_vanilla_gan_model import VanillaGanModel
 from .create_deep_convolutional_gan_model import DeepConvolutionalGanModel
+from .create_wasserstein_gan_model import WassersteinGanModel
 from .create_vgg_model import create_vgg_model_2d, create_vgg_model_3d
 from .create_wide_resnet_model import create_wide_resnet_model_2d, create_wide_resnet_model_3d
