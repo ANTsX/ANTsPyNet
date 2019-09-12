@@ -62,7 +62,9 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Alec Radford, Luke Metz, Soumith Chintala.  Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks.](https://arxiv.org/abs/1511.06434)
 * Wasserstein GAN
     * [Martin Arjovsky, Soumith Chintala, Léon Bottou.  Wasserstein GAN.](https://arxiv.org/abs/1701.07875)
-
+* Improved Wasserstein GAN
+    * [Ishaan Gulrajani, Faruk Ahmed, Martin Arjovsky, Vincent Dumoulin, Aaron Courville.  Improved Training of Wasserstein GANs.](https://arxiv.org/abs/1704.00028)
+    
 ### Clustering
 
 * Deep embedded clustering (DEC)
