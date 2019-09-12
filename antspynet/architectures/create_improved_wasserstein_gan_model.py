@@ -256,7 +256,7 @@ class ImprovedWassersteinGanModel(object):
             # train critic
 
             for c in range(self.number_of_critic_iterations):
-                indices = np.random.randint(0, X_train.shape[0], batch_size)
+                indices = np.random.randint(0, X_train.shape[0] - 1, batch_size)
                 X_valid_batch = X_train[indices]
 
                 noise = np.random.normal(0, 1, (batch_size, self.latent_dimension))
