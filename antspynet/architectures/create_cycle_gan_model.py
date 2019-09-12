@@ -294,17 +294,17 @@ class CycleGanModel(object):
                         indexA = np.random.randint(0, X_trainA.shape[0] - 1, 1)
                         indexB = np.random.randint(0, X_trainB.shape[0] - 1, 1)
 
-                        imageA = X_trainA[i,:,:,:]
-                        imageB = X_trainB[i,:,:,:]
+                        imageA = X_trainA[indexA,:,:,:]
+                        imageB = X_trainB[indexB,:,:,:]
 
                         X = list()
                         X.append(imageA)
-                        X.append(self.generatorAtoB(X[0]))
-                        X.append(self.generatorBtoA(X[1]))
+                        X.append(self.generatorAtoB.predict(X[0]))
+                        X.append(self.generatorBtoA.predict(X[1]))
 
                         X.append(imageB)
-                        X.append(self.generatorAtoB(X[3]))
-                        X.append(self.generatorBtoA(X[4]))
+                        X.append(self.generatorAtoB.predict(X[3]))
+                        X.append(self.generatorBtoA.predict(X[4]))
 
                         plot_images = np.concatenate(X)
                         plot_images = 0.5 * plot_images + 0.5
@@ -315,7 +315,7 @@ class CycleGanModel(object):
                         count = 0
                         for i in range(2):
                             for j in range(3):
-                                axes[i, j].imshow(gen_imgs[count])
+                                axes[i, j].imshow(plot_images[count])
                                 axes[i, j].set_title(titles[j])
                                 axes[i, j].axis('off')
                                 count += 1
