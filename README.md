@@ -64,6 +64,8 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Martin Arjovsky, Soumith Chintala, Léon Bottou.  Wasserstein GAN.](https://arxiv.org/abs/1701.07875)
 * Improved Wasserstein GAN
     * [Ishaan Gulrajani, Faruk Ahmed, Martin Arjovsky, Vincent Dumoulin, Aaron Courville.  Improved Training of Wasserstein GANs.](https://arxiv.org/abs/1704.00028)
+* Cycle GAN
+    * [Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros.  Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.](https://arxiv.org/abs/1703.10593)
     
 ### Clustering
 
