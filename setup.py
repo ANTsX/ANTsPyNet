@@ -7,5 +7,5 @@ setup(name='antspynet',
       author='Nicholas J. Tustison and Brian B. Avants and Nick Cullen',
       author_email='ntustison@gmail.com',
       packages=['antspynet','antspynet/architectures','antspynet/utilities'],
-      install_requires=['ants','antspyx','keras','scikit-learn','tensorflow','numpy','requests','statsmodels','matplotlib','tempfile'],
+      install_requires=['ants','antspyx','keras','scikit-learn','tensorflow','numpy','requests','statsmodels','matplotlib'],
       zip_safe=False)
