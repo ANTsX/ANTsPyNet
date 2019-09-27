@@ -53,7 +53,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 * Spatial transformer network (STN) (2-D, 3-D)
     * [Max Jaderberg, Karen Simonyan, Andrew Zisserman, and Koray Kavukcuoglu.  Spatial Transformer Networks.](https://arxiv.org/abs/1506.02025)
-    
+
 ### Generative adverserial networks
 
 * Generative adverserial network (GAN)
@@ -66,7 +66,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Ishaan Gulrajani, Faruk Ahmed, Martin Arjovsky, Vincent Dumoulin, Aaron Courville.  Improved Training of Wasserstein GANs.](https://arxiv.org/abs/1704.00028)
 * Cycle GAN
     * [Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros.  Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.](https://arxiv.org/abs/1703.10593)
-    
+
 ### Clustering
 
 * Deep embedded clustering (DEC)
@@ -91,9 +91,38 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
        $ python setup.py install
        ```
 
+## Quick example
+
+```
+import numpy as np
+import keras as k
+import ants
+import antspynet
+import antspynet.architectures as apa
+import antspynet.utilities as apu
+nChannels = 1
+patchWidth = 32
+pw2 = ( patchWidth, patchWidth )
+image = ants.image_read(ants.get_ants_data('r16'))
+image_patches = apu.extract_image_patches(image, patch_size = pw2,
+  max_number_of_patches = 64, return_as_array = True )
+image2 = ants.image_read(ants.get_ants_data('r85'))
+image2_patches = apu.extract_image_patches(image2, patch_size = pw2,
+  max_number_of_patches = 64, return_as_array = True )
+xarray = np.empty( [len( image_patches ), patchWidth, patchWidth, nChannels ] )
+yarray = np.empty( [len( image_patches ), patchWidth, patchWidth, nChannels ] )
+for x in range( 0, len( image_patches ) ):
+  xarray[x,:,:,0] = image_patches[x][:,:]
+  yarray[x,:,:,0] = image2_patches[x][:,:]
+model.compile( loss = k.losses.mse,
+               optimizer = k.optimizers.Adam() )
+model.fit( xarray, yarray, epochs = 10 )
+```
+
+
 ## Publications
 
-* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026) 
+* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026)
 
 * Nicholas J. Tustison, Brian B. Avants, Zixuan Lin, Xue Feng, Nicholas Cullen, Jaime F. Mata, Lucia Flors, James C. Gee, Talissa A. Altes, John P. Mugler III, and Kun Qing.  Convolutional Neural Networks with Template-Based Data Augmentation for Functional Lung Image Quantification, _Academic Radiology_, 26(3):412-423, Mar 2019. [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
 
