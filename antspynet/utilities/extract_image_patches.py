@@ -55,7 +55,7 @@ def extract_image_patches(image,
     >>> image_patches = extract_image_patches(image, patch_size=(32, 32))
     """
 
-    if random_seed is None:
+    if random_seed is not None:
         random.seed(random_seed)
 
     image_size = image.shape
@@ -238,6 +238,3 @@ def extract_image_patches(image,
        return(patch_array)
     else:
        return(patch_list)
-
-
-
