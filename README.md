@@ -116,11 +116,11 @@ for x in range( 0, len( image_patches ) ):
   yarray[x,:,:,0] = image2_patches[x][:,:]
 ##########################################
 model = apa.create_unet_model_2d( ( None, None, nChannels ),
-  number_of_layers = 2, mode = 'regression' )
+  number_of_layers = 4, mode = 'regression' )
 model.summary()
 model.compile( loss = ke.losses.mse,
-               optimizer = ke.optimizers.Adam( lr = 1e-2 ) )
-model.fit( xarray, yarray, epochs = 25, batch_size = 8 )
+               optimizer = ke.optimizers.Adam( lr = 0.0001 ) )
+model.fit( xarray, yarray, epochs = 125, batch_size = 8 )
 preds = model.predict( xarray )
 k = 12
 pimgIn = ants.from_numpy( xarray[k,:,:,0] )
