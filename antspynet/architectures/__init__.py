@@ -25,4 +25,5 @@ from .create_deep_convolutional_gan_model import DeepConvolutionalGanModel
 from .create_wasserstein_gan_model import WassersteinGanModel
 from .create_improved_wasserstein_gan_model import ImprovedWassersteinGanModel
 from .create_cycle_gan_model import CycleGanModel
+from .create_super_resolution_gan_model import SuperResolutionGanModel
 

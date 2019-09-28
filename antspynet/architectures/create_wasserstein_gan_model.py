@@ -24,11 +24,11 @@ class WassersteinGanModel(object):
 
     Wasserstein generative adverserial network from the paper:
 
-      ttps://arxiv.org/abs/1701.07875
+      https://arxiv.org/abs/1701.07875
 
     and ported from the Keras implementation:
 
-      https://github.com/eriklindernoren/Keras-GAN/blob/master/wgan/wgan.py
+      https://github.com/eriklindernoren/Keras-GAN/blob/master/srgan/srgan.py
 
     Arguments
     ---------
