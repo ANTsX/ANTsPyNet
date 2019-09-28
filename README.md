@@ -48,7 +48,9 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, and Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)    
 * Deep back-projection network (DBPN) (2-D, 3-D)
     * [Muhammad Haris, Greg Shakhnarovich, Norimichi Ukita.  Deep Back-Projection Networks For Super-Resolution.](https://arxiv.org/abs/1803.02735)
-
+* Super resolution GAN
+    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
+    
 ### Registration and transforms
 
 * Spatial transformer network (STN) (2-D, 3-D)
@@ -66,7 +68,9 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Ishaan Gulrajani, Faruk Ahmed, Martin Arjovsky, Vincent Dumoulin, Aaron Courville.  Improved Training of Wasserstein GANs.](https://arxiv.org/abs/1704.00028)
 * Cycle GAN
     * [Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros.  Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.](https://arxiv.org/abs/1703.10593)
-
+* Super resolution GAN
+    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
+    
 ### Clustering
 
 * Deep embedded clustering (DEC)
