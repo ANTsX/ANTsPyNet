@@ -364,17 +364,17 @@ class SuperResolutionGanModel(object):
 
                         index = np.random.randint(0, X_train_low_resolution.shape[0] - 1, 1)
                         low_resolution_image = X_train_low_resolution[index,:,:,:]
-                        high_resolution_image = np.squeeze(X_train_high_resolution[index,:,:,:])
+                        high_resolution_image = X_train_high_resolution[index,:,:,:]
 
-                        X.append(np.squeeze(self.generator.predict(low_resolution_image)))
-                        X.append(np.squeeze(high_resolution_image))
+                        X.append(self.generator.predict(low_resolution_image))
+                        X.append(high_resolution_image)
 
                         index = np.random.randint(0, X_train_low_resolution.shape[0] - 1, 1)
                         low_resolution_image = X_train_low_resolution[index,:,:,:]
-                        high_resolution_image = np.squeeze(X_train_high_resolution[index,:,:,:])
+                        high_resolution_image = X_train_high_resolution[index,:,:,:]
 
-                        X.append(np.squeeze(self.generator.predict(low_resolution_image)))
-                        X.append(np.squeeze(high_resolution_image))
+                        X.append(self.generator.predict(low_resolution_image))
+                        X.append(high_resolution_image)
 
                         plot_images = np.concatenate(X)
                         plot_images = 0.5 * plot_images + 0.5
