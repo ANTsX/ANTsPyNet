@@ -344,12 +344,14 @@ class SuperResolutionGanModel(object):
                 image_features = self.vgg_model.predict(high_resolution_images)
                 g_loss = self.combined_model.train_on_batch(
                   [low_resolution_images, high_resolution_images], [valid, image_features])
+                print("Epoch ", epoch, ": [Discriminator loss: ", d_loss[0],
+                    "] ", "[Generator loss: ", g_loss[0], "] ")
             else:
                 g_loss = self.combined_model.train_on_batch(
                   [low_resolution_images, high_resolution_images], valid)
+                print("Epoch ", epoch, ": [Discriminator loss: ", d_loss[0],
+                    "] ", "[Generator loss: ", g_loss, "] ")
 
-            print("Epoch ", epoch, ": [Discriminator loss: ", d_loss[0],
-                  "] ", "[Generator loss: ", g_loss[0], "] ")
 
             if self.dimensionality == 2:
                 if sample_interval != None:
