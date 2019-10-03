@@ -1,9 +1,11 @@
 # Minimal makefile for Sphinx documentation
 #
 
-# You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
+# You can set these variables from the command line, and also
+# from the environment for the first two.
+SPHINXOPTS    ?=
+# SPHINXBUILD   ?= sphinx-build
+SPHINXBUILD = /Users/ntustison/anaconda3/envs/r-tensorflow/bin/python3 -msphinx
 SOURCEDIR     = source
 BUILDDIR      = build
 

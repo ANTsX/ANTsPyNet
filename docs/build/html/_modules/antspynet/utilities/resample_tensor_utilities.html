@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>antspynet.utilities.resample_tensor_utilities &#8212; ANTsPyNet 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.utilities.resample_tensor_utilities</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
+
+<div class="viewcode-block" id="ResampleTensorLayer2D"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.ResampleTensorLayer2D">[docs]</a><span class="k">class</span> <span class="nc">ResampleTensorLayer2D</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tensor resampling layer (2D).</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    shape : tuple</span>
+<span class="sd">        Specifies the output shape of the resampled tensor.</span>
+
+<span class="sd">    interpolation_type : string</span>
+<span class="sd">        One of &#39;nearest_neighbor&#39;, &#39;linear&#39;, or &#39;cubic&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras layer</span>
+<span class="sd">        A keras layer</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">interpolation_type</span><span class="o">=</span><span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;shape must be of length 2 specifying the width and &quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot;height of the resampled tensor.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+
+        <span class="n">allowed_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;cubic&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">interpolation_type</span> <span class="ow">in</span> <span class="n">allowed_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;interpolation_type not one of the allowed types.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">=</span> <span class="n">interpolation_type</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ResampleTensorLayer2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input tensor must be of rank 4.&quot;</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">((</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">dimensionality</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="n">new_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">input_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+        <span class="n">old_size</span><span class="o">=</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="n">dimensionality</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">new_size</span> <span class="o">==</span> <span class="n">old_size</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">resampled_tensor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_nearest_neighbor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">new_size</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_bilinear</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">new_size</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;cubic&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_bicubic</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">new_size</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">resampled_tensor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;interpolation_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span><span class="p">}</span>
+        <span class="n">base_config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Scale</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base_config</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span></div>
+
+<div class="viewcode-block" id="ResampleTensorLayer3D"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.ResampleTensorLayer3D">[docs]</a><span class="k">class</span> <span class="nc">ResampleTensorLayer3D</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tensor resampling layer (3D).</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    shape : tuple</span>
+<span class="sd">        Specifies the output shape of the resampled tensor.</span>
+
+<span class="sd">    interpolation_type : string</span>
+<span class="sd">        One of &#39;nearest_neighbor&#39;, &#39;linear&#39;, or &#39;cubic&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras layer</span>
+<span class="sd">        A keras layer</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">interpolation_type</span><span class="o">=</span><span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;shape must be of length 3 specifying the width, &quot;</span> <span class="o">+</span>
+                             <span class="s2">&quot;height, and depth of the resampled tensor.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+
+        <span class="n">allowed_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;cubic&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">interpolation_type</span> <span class="ow">in</span> <span class="n">allowed_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;interpolation_type not one of the allowed types.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">=</span> <span class="n">interpolation_type</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ResampleTensorLayer3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input tensor must be of rank 5.&quot;</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">((</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">dimensionality</span> <span class="o">=</span> <span class="mi">3</span>
+
+        <span class="n">new_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">input_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+        <span class="n">old_size</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:(</span><span class="n">dimensionality</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="n">channel_size</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">new_size</span> <span class="o">==</span> <span class="n">old_size</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">resampled_tensor</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Do yz</span>
+        <span class="n">squeeze_tensor_yz</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">old_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">old_size</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">channel_size</span><span class="p">))</span>
+
+        <span class="n">new_shape_yz</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">resampled_tensor_yz</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor_yz</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_nearest_neighbor</span><span class="p">(</span><span class="n">squeeze_tensor_yz</span><span class="p">,</span>
+              <span class="n">size</span><span class="o">=</span><span class="n">new_shape_yz</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor_yz</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_bilinear</span><span class="p">(</span><span class="n">squeeze_tensor_yz</span><span class="p">,</span>
+              <span class="n">size</span><span class="o">=</span><span class="n">new_shape_yz</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;cubic&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor_yz</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_bicubic</span><span class="p">(</span><span class="n">squeeze_tensor_yz</span><span class="p">,</span>
+              <span class="n">size</span><span class="o">=</span><span class="n">new_shape_yz</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">new_shape_yz</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">old_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">channel_size</span><span class="p">)</span>
+        <span class="n">resume_tensor_yz</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">resampled_tensor_yz</span><span class="p">,</span> <span class="n">new_shape_yz</span><span class="p">)</span>
+
+        <span class="c1"># Do x</span>
+
+        <span class="n">reoriented_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">resume_tensor_yz</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+        <span class="n">squeeze_tensor_x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">reoriented_tensor</span><span class="p">,</span>
+          <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">old_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">channel_size</span><span class="p">))</span>
+
+        <span class="n">new_shape_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">resampled_tensor_x</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;nearest_neighbor&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor_x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_nearest_neighbor</span><span class="p">(</span><span class="n">squeeze_tensor_x</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">new_shape_x</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor_x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_bilinear</span><span class="p">(</span><span class="n">squeeze_tensor_x</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">new_shape_x</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span> <span class="o">==</span> <span class="s1">&#39;cubic&#39;</span><span class="p">:</span>
+            <span class="n">resampled_tensor_x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize_bicubic</span><span class="p">(</span><span class="n">squeeze_tensor_x</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="n">new_shape_x</span><span class="p">,</span> <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">new_shape_x</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">new_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">channel_size</span><span class="p">)</span>
+        <span class="n">resumeTensor_x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">resampled_tensor_x</span><span class="p">,</span> <span class="n">new_shape_x</span><span class="p">)</span>
+
+        <span class="n">resampled_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">resumeTensor_x</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="n">resampled_tensor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;interpolation_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interpolation_type</span><span class="p">}</span>
+        <span class="n">base_config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Scale</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base_config</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

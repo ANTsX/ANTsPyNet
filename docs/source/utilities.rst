@@ -1,51 +1,47 @@
-Utilities
-===================================
 
-Custom loss functions
----------------------
+Utilities
+=========
+
+Custom metrics
+--------------
 
 .. autofunction:: antspynet.utilities.multilabel_dice_coefficient
-.. autofunction:: antspynet.utilities.loss_multilabel_dice_coefficient_error
-
 .. autofunction:: antspynet.utilities.peak_signal_to_noise_ratio
-.. autofunction:: antspynet.utilities.loss_peak_signal_to_noise_ratio_error
-
 .. autofunction:: antspynet.utilities.pearson_correlation_coefficient
-.. autofunction:: antspynet.utilities.loss_pearson_correlation_coefficient_error
+.. autofunction:: antspynet.utilities.categorical_focal_gain
+.. autofunction:: antspynet.utilities.categorical_focal_loss
 
-Patches
--------
+Custom normalization layers
+---------------------------
 
-.. autofunction:: antspynet.utilities.extract_image_patches
-.. autofunction:: antspynet.utilities.reconstruct_image_from_patches
+.. autoclass:: antspynet.utilities.InstanceNormalization
+
+Resample tensor layer
+---------------------
+
+.. autoclass:: antspynet.utilities.ResampleTensorLayer2D
+.. autoclass:: antspynet.utilities.ResampleTensorLayer3D
+
+Mixture density networks
+------------------------
+
+.. autoclass:: antspynet.utilities.MixtureDensityLayer
+.. autofunction:: antspynet.utilities.get_mixture_density_loss_function
 
 Clustering
 ----------
 
 .. autoclass:: antspynet.utilities.Clustering
-
 .. autoclass:: antspynet.utilities.DeepEmbeddedClusteringModel
 
-Dense Unet
-----------
+Image patch
+-----------
 
-.. autoclass:: antspynet.utilities.Scale
-
-Mixture density
----------------
-
-.. autoclass:: antspynet.utilities.MixtureDensityLayer
-
-.. autofunction:: antspynet.utilities.get_mixture_density_loss_function
-.. autofunction:: antspynet.utilities.get_mixture_density_sampling_function
-.. autofunction:: antspynet.utilities.get_mixture_density_mse_function
-.. autofunction:: antspynet.utilities.split_mixture_parameters
-.. autofunction:: antspynet.utilities.mixture_density_software_max
-.. autofunction:: antspynet.utilities.sample_from_output
-
+.. autofunction:: antspynet.utilities.extract_image_patches
+.. autofunction:: antspynet.utilities.reconstruct_image_from_patches
 
 Super-resolution
-----------------
+-----------------
 
 .. autofunction:: antspynet.utilities.mse
 .. autofunction:: antspynet.utilities.mae
@@ -59,16 +55,10 @@ Spatial transformer network
 .. autoclass:: antspynet.utilities.SpatialTransformer2D
 .. autoclass:: antspynet.utilities.SpatialTransformer3D
 
-Misc.
------
+Miscellaneous
+-------------
 
 .. autofunction:: antspynet.utilities.get_pretrained_network
-
-
-
-
-
-
-
+.. autoclass:: antspynet.utilities.Scale
 
 
