@@ -43,6 +43,7 @@
                           <span class="n">UpSampling3D</span><span class="p">)</span>
 
 <div class="viewcode-block" id="create_resnet_model_2d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_resnet_model_2d">[docs]</a><span class="k">def</span> <span class="nf">create_resnet_model_2d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
+                           <span class="n">input_scalars_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                            <span class="n">number_of_classification_labels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                            <span class="n">layers</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                            <span class="n">residual_block_schedule</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
@@ -69,6 +70,10 @@
 <span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
 <span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
 <span class="sd">        (e.g., red, green, and blue).</span>
+
+<span class="sd">    input_scalars_size : integer</span>
+<span class="sd">        Optional integer specifying the size of the input vector for scalars that</span>
+<span class="sd">        get concatenated to the fully connected layer at the end of the network.</span>
 
 <span class="sd">    number_of_classification_labels : integer</span>
 <span class="sd">        Number of classification labels.</span>
@@ -164,14 +169,14 @@
         <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
 
-    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+    <span class="n">input_image</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
 
     <span class="n">n_filters</span> <span class="o">=</span> <span class="n">lowest_resolution</span>
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">n_filters</span><span class="p">,</span>
                      <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
                      <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">input_image</span><span class="p">)</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">add_common_layers</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">MaxPooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                            <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
@@ -210,15 +215,23 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
 
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
-                    <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
-
-    <span class="n">resnet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">resnet_model</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">input_scalars_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">input_scalars</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span> <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_scalars_size</span><span class="p">,)</span> <span class="p">)</span>
+        <span class="n">concatenated_layer</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">outputs</span><span class="p">,</span> <span class="n">input_scalars</span><span class="p">])</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">)(</span><span class="n">concatenated_layer</span><span class="p">)</span>
+        <span class="n">resnet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">input_image</span><span class="p">,</span> <span class="n">input_scalars</span><span class="p">],</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">resnet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">input_image</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="k">return</span><span class="p">(</span><span class="n">resnet_model</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="create_resnet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_resnet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_resnet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
+                           <span class="n">input_scalars_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                            <span class="n">number_of_classification_labels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                            <span class="n">layers</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                            <span class="n">residual_block_schedule</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
@@ -245,6 +258,10 @@
 <span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
 <span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
 <span class="sd">        (e.g., red, green, and blue).</span>
+
+<span class="sd">    input_scalars_size : integer</span>
+<span class="sd">        Optional integer specifying the size of the input vector for scalars that</span>
+<span class="sd">        get concatenated to the fully connected layer at the end of the network.</span>
 
 <span class="sd">    number_of_classification_labels : integer</span>
 <span class="sd">        Number of classification labels.</span>
@@ -340,14 +357,14 @@
         <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
 
-    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+    <span class="n">input_image</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
 
     <span class="n">n_filters</span> <span class="o">=</span> <span class="n">lowest_resolution</span>
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">n_filters</span><span class="p">,</span>
                      <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
                      <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">input_image</span><span class="p">)</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">add_common_layers</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">MaxPooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                            <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
@@ -387,10 +404,17 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
 
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
-                    <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
-
-    <span class="n">resnet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">resnet_model</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">input_scalars_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">input_scalars</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span> <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_scalars_size</span><span class="p">,)</span> <span class="p">)</span>
+        <span class="n">concatenated_layer</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">outputs</span><span class="p">,</span> <span class="n">input_scalars</span><span class="p">])</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">)(</span><span class="n">concatenated_layer</span><span class="p">)</span>
+        <span class="n">resnet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">input_image</span><span class="p">,</span> <span class="n">input_scalars</span><span class="p">],</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_classification_labels</span><span class="p">,</span>
+                        <span class="n">activation</span><span class="o">=</span><span class="n">layer_activation</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">resnet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">input_image</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="k">return</span><span class="p">(</span><span class="n">resnet_model</span><span class="p">)</span></div>
 

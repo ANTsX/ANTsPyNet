@@ -10,6 +10,7 @@ from keras.layers import (Input, Dropout, BatchNormalization, Add,
                           UpSampling3D)
 
 def create_resnet_model_2d(input_image_size,
+                           input_scalars_size=0,
                            number_of_classification_labels=1000,
                            layers=(1, 2, 3, 4),
                            residual_block_schedule=(3, 4, 6, 3),
@@ -36,6 +37,10 @@ def create_resnet_model_2d(input_image_size,
         Used for specifying the input tensor shape.  The shape (or dimension) of
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
+
+    input_scalars_size : integer
+        Optional integer specifying the size of the input vector for scalars that
+        get concatenated to the fully connected layer at the end of the network.
 
     number_of_classification_labels : integer
         Number of classification labels.
@@ -131,14 +136,14 @@ def create_resnet_model_2d(input_image_size,
         return(model)
 
 
-    inputs = Input(shape = input_image_size)
+    input_image = Input(shape = input_image_size)
 
     n_filters = lowest_resolution
 
     outputs = Conv2D(filters=n_filters,
                      kernel_size=(7, 7),
                      strides=(2, 2),
-                     padding='same')(inputs)
+                     padding='same')(input_image)
     outputs = add_common_layers(outputs)
     outputs = MaxPooling2D(pool_size=(3, 3),
                            strides=(2, 2),
@@ -177,15 +182,23 @@ def create_resnet_model_2d(input_image_size,
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Dense(units=number_of_classification_labels,
-                    activation=layer_activation)(outputs)
-
-    resnet_model = Model(inputs=inputs, outputs=outputs)
+    resnet_model = None
+    if input_scalars_size > 0:
+        input_scalars = Input( shape = (input_scalars_size,) )
+        concatenated_layer = Concatenate()([outputs, input_scalars])
+        outputs = Dense(units=number_of_classification_labels,
+                        activation=layer_activation)(concatenated_layer)
+        resnet_model = Model(inputs=[input_image, input_scalars], outputs = outputs)
+    else:
+        outputs = Dense(units=number_of_classification_labels,
+                        activation=layer_activation)(outputs)
+        resnet_model = Model(inputs=input_image, outputs=outputs)
 
     return(resnet_model)
 
 
 def create_resnet_model_3d(input_image_size,
+                           input_scalars_size=0,
                            number_of_classification_labels=1000,
                            layers=(1, 2, 3, 4),
                            residual_block_schedule=(3, 4, 6, 3),
@@ -212,6 +225,10 @@ def create_resnet_model_3d(input_image_size,
         Used for specifying the input tensor shape.  The shape (or dimension) of
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
+
+    input_scalars_size : integer
+        Optional integer specifying the size of the input vector for scalars that
+        get concatenated to the fully connected layer at the end of the network.
 
     number_of_classification_labels : integer
         Number of classification labels.
@@ -307,14 +324,14 @@ def create_resnet_model_3d(input_image_size,
         return(model)
 
 
-    inputs = Input(shape = input_image_size)
+    input_image = Input(shape = input_image_size)
 
     n_filters = lowest_resolution
 
     outputs = Conv3D(filters=n_filters,
                      kernel_size=(7, 7, 7),
                      strides=(2, 2, 2),
-                     padding='same')(inputs)
+                     padding='same')(input_image)
     outputs = add_common_layers(outputs)
     outputs = MaxPooling3D(pool_size=(3, 3, 3),
                            strides=(2, 2, 2),
@@ -354,10 +371,17 @@ def create_resnet_model_3d(input_image_size,
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Dense(units=number_of_classification_labels,
-                    activation=layer_activation)(outputs)
-
-    resnet_model = Model(inputs=inputs, outputs=outputs)
+    resnet_model = None
+    if input_scalars_size > 0:
+        input_scalars = Input( shape = (input_scalars_size,) )
+        concatenated_layer = Concatenate()([outputs, input_scalars])
+        outputs = Dense(units=number_of_classification_labels,
+                        activation=layer_activation)(concatenated_layer)
+        resnet_model = Model(inputs=[input_image, input_scalars], outputs = outputs)
+    else:
+        outputs = Dense(units=number_of_classification_labels,
+                        activation=layer_activation)(outputs)
+        resnet_model = Model(inputs=input_image, outputs=outputs)
 
     return(resnet_model)
 
