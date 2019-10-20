@@ -19,6 +19,7 @@ from .create_wide_resnet_model import create_wide_resnet_model_2d, create_wide_r
 from .create_unet_model import create_unet_model_2d, create_unet_model_3d
 from .create_resunet_model import create_resunet_model_2d, create_resunet_model_3d
 from .create_denseunet_model import create_denseunet_model_2d, create_denseunet_model_3d
+from .create_custom_unet_model import create_nobrainer_unet_model_3d
 
 from .create_vanilla_gan_model import VanillaGanModel
 from .create_deep_convolutional_gan_model import DeepConvolutionalGanModel

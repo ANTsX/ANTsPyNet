@@ -219,16 +219,16 @@ def create_unet_model_3d(input_image_size,
         number of filters at the beginning and end of the `U`.  Doubles at each
         descending/ascending layer.
 
-    convolution_kernel_size : tuple of length 4
+    convolution_kernel_size : tuple of length 3
         Defines the kernel size during the encoding.
 
-    deconvolution_kernel_size : tuple of length 4
+    deconvolution_kernel_size : tuple of length 3
         Defines the kernel size during the decoding.
 
-    pool_size : tuple of length 4
+    pool_size : tuple of length 3
         Defines the region for each pooling layer.
 
-    strides : tuple of length 4
+    strides : tuple of length 3
         Strides for the convolutional layers.
 
     dropout_rate : scalar

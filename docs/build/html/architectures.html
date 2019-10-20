@@ -1263,10 +1263,10 @@ segmentation labels.  For <cite>regression</cite> this is the number of outputs.
 <li><p><strong>number_of_layers</strong> (<em>integer</em>) – number of encoding/decoding layers.</p></li>
 <li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – number of filters at the beginning and end of the <cite>U</cite>.  Doubles at each
 descending/ascending layer.</p></li>
-<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 4</em>) – Defines the kernel size during the encoding.</p></li>
-<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 4</em>) – Defines the kernel size during the decoding.</p></li>
-<li><p><strong>pool_size</strong> (<em>tuple of length 4</em>) – Defines the region for each pooling layer.</p></li>
-<li><p><strong>strides</strong> (<em>tuple of length 4</em>) – Strides for the convolutional layers.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 3</em>) – Defines the kernel size during the encoding.</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 3</em>) – Defines the kernel size during the decoding.</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple of length 3</em>) – Defines the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>tuple of length 3</em>) – Strides for the convolutional layers.</p></li>
 <li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
 <li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
 convolution layers.  Default = 0.0.</p></li>
@@ -1481,6 +1481,84 @@ convolution layers (default = 1e-4).</p></li>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_denseunet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_nobrainer_unet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_nobrainer_unet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_filters_at_base_layer=16</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">deconvolution_kernel_size=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_custom_unet_model.html#create_nobrainer_unet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_nobrainer_unet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the “NoBrainer” U-net architecture</p>
+<p>Creates a keras model of the U-net deep learning architecture for image
+segmentation available at:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/neuronets/nobrainer/">https://github.com/neuronets/nobrainer/</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Number of segmentation labels.</p></li>
+<li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – number of filters at the beginning and end of the <cite>U</cite>.  Doubles at each
+descending/ascending layer.  Default = 16.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 3</em>) – Defines the kernel size during the encoding.  Default = (3, 3, 3).</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 3</em>) – Defines the kernel size during the decoding.  Default = (2, 2, 2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D keras model defining the U-net network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_nobrainer_unet_model_3d</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url_weights</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/neuronets/nobrainer-models/releases/download/0.1/brain-extraction-unet-128iso-weights.h5&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">temp_directory</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_file_weights</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">temp_directory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_file_weights</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_file_weights_name</span> <span class="o">=</span> <span class="n">target_file_weights</span><span class="o">.</span><span class="n">name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target_file_weights_name</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url_weights</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_file_weights_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">target_file_weights_name</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url_image</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/ANTsXNet/BrainExtraction/blob/master/Data/Example/1097782_defaced_MPRAGE.nii.gz?raw=true&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_file_image</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.nii.gz&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">temp_directory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_file_image</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">target_file_image_name</span> <span class="o">=</span> <span class="n">target_file_image</span><span class="o">.</span><span class="n">name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">target_file_image_name</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url_image</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">target_file_image_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">target_file_image_name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_math</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="s1">&#39;Normalize&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="mf">255.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_resampled</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">resample_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">batchX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">image_resampled</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">batchX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">batchX</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brain_mask_array</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">batchX</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brain_mask_resampled</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">brain_mask_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,:,:,</span><span class="mi">0</span><span class="p">]),</span>
+<span class="go">      origin=image_resampled.origin, spacing=image_resampled.spacing,</span>
+<span class="go">      direction=image_resampled.direction)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brain_mask_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">resample_image</span><span class="p">(</span><span class="n">brain_mask_resampled</span><span class="p">,</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimum_brain_volume</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span> <span class="mf">649933.7</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brain_mask_labeled</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">label_clusters</span><span class="p">(</span><span class="n">brain_mask_image</span><span class="p">,</span> <span class="n">minimum_brain_volume</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ants</span><span class="o">.</span><span class="n">image_write</span><span class="p">(</span><span class="n">brain_mask_labeled</span><span class="p">,</span> <span class="s2">&quot;brain_mask.nii.gz&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

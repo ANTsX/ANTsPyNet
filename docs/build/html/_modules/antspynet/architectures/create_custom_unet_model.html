@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>antspynet.architectures.create_custom_unet_model &#8212; ANTsPyNet 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.architectures.create_custom_unet_model</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span>
+                          <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">MaxPooling3D</span><span class="p">)</span>
+
+<div class="viewcode-block" id="create_nobrainer_unet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_nobrainer_unet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_nobrainer_unet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
+                                   <span class="n">number_of_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">number_of_filters_at_base_layer</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                                   <span class="n">convolution_kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                   <span class="n">deconvolution_kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                                  <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of the &quot;NoBrainer&quot; U-net architecture</span>
+
+<span class="sd">    Creates a keras model of the U-net deep learning architecture for image</span>
+<span class="sd">    segmentation available at:</span>
+
+<span class="sd">            https://github.com/neuronets/nobrainer/</span>
+
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    input_image_size : tuple of length 4</span>
+<span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
+<span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
+<span class="sd">        (e.g., red, green, and blue).</span>
+
+<span class="sd">    number_of_outputs : integer</span>
+<span class="sd">        Number of segmentation labels.</span>
+
+<span class="sd">    number_of_filters_at_base_layer : integer</span>
+<span class="sd">        number of filters at the beginning and end of the `U`.  Doubles at each</span>
+<span class="sd">        descending/ascending layer.  Default = 16.</span>
+
+<span class="sd">    convolution_kernel_size : tuple of length 3</span>
+<span class="sd">        Defines the kernel size during the encoding.  Default = (3, 3, 3).</span>
+
+<span class="sd">    deconvolution_kernel_size : tuple of length 3</span>
+<span class="sd">        Defines the kernel size during the decoding.  Default = (2, 2, 2).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras model</span>
+<span class="sd">        A 3-D keras model defining the U-net network.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import requests</span>
+<span class="sd">    &gt;&gt;&gt; import tempfile</span>
+<span class="sd">    &gt;&gt;&gt; from os import path</span>
+<span class="sd">    &gt;&gt;&gt; import ants</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = create_nobrainer_unet_model_3d((None, None, None, 1))</span>
+<span class="sd">    &gt;&gt;&gt; model.summary()</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; url_weights = &quot;https://github.com/neuronets/nobrainer-models/releases/download/0.1/brain-extraction-unet-128iso-weights.h5&quot;</span>
+<span class="sd">    &gt;&gt;&gt; temp_directory = tempfile.TemporaryDirectory()</span>
+<span class="sd">    &gt;&gt;&gt; target_file_weights = tempfile.NamedTemporaryFile(suffix=&quot;.h5&quot;, dir=temp_directory.name)</span>
+<span class="sd">    &gt;&gt;&gt; target_file_weights.close()</span>
+<span class="sd">    &gt;&gt;&gt; target_file_weights_name = target_file_weights.name</span>
+<span class="sd">    &gt;&gt;&gt; if not path.exists(target_file_weights_name):</span>
+<span class="sd">    &gt;&gt;&gt;     r = requests.get(url_weights)</span>
+<span class="sd">    &gt;&gt;&gt;     with open(target_file_weights_name, &#39;wb&#39;) as f:</span>
+<span class="sd">    &gt;&gt;&gt;         f.write(r.content)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.load_weights(target_file_weights_name)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; url_image = &quot;https://github.com/ANTsXNet/BrainExtraction/blob/master/Data/Example/1097782_defaced_MPRAGE.nii.gz?raw=true&quot;</span>
+<span class="sd">    &gt;&gt;&gt; target_file_image = tempfile.NamedTemporaryFile(suffix=&quot;.nii.gz&quot;, dir=temp_directory.name)</span>
+<span class="sd">    &gt;&gt;&gt; target_file_image.close()</span>
+<span class="sd">    &gt;&gt;&gt; target_file_image_name = target_file_image.name</span>
+<span class="sd">    &gt;&gt;&gt; if not path.exists(target_file_image_name):</span>
+<span class="sd">    &gt;&gt;&gt;     r = requests.get(url_image)</span>
+<span class="sd">    &gt;&gt;&gt;     with open(target_file_image_name, &#39;wb&#39;) as f:</span>
+<span class="sd">    &gt;&gt;&gt;         f.write(r.content)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; image = ants.image_read(target_file_image_name)</span>
+<span class="sd">    &gt;&gt;&gt; image = ants.image_math(image, &#39;Normalize&#39;) * 255.0</span>
+<span class="sd">    &gt;&gt;&gt; image_resampled = ants.resample_image(image, (256, 256, 256), True)</span>
+<span class="sd">    &gt;&gt;&gt; batchX = np.expand_dims(image_resampled.numpy(), axis=0)</span>
+<span class="sd">    &gt;&gt;&gt; batchX = np.expand_dims(batchX, axis=-1)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; brain_mask_array = model.predict(batchX, verbose=0)</span>
+<span class="sd">    &gt;&gt;&gt; brain_mask_resampled = ants.from_numpy(np.squeeze(brain_mask_array[0,:,:,:,0]),</span>
+<span class="sd">          origin=image_resampled.origin, spacing=image_resampled.spacing,</span>
+<span class="sd">          direction=image_resampled.direction)</span>
+<span class="sd">    &gt;&gt;&gt; brain_mask_image = ants.resample_image(brain_mask_resampled, image.shape, True, 1)</span>
+<span class="sd">    &gt;&gt;&gt; minimum_brain_volume = round( 649933.7 )</span>
+<span class="sd">    &gt;&gt;&gt; brain_mask_labeled = ants.label_clusters(brain_mask_image, minimum_brain_volume)</span>
+<span class="sd">    &gt;&gt;&gt; ants.image_write(brain_mask_labeled, &quot;brain_mask.nii.gz&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+
+    <span class="c1"># Encoding path</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">skip1</span> <span class="o">=</span> <span class="n">outputs</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">MaxPooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">skip2</span> <span class="o">=</span> <span class="n">outputs</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">MaxPooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">skip3</span> <span class="o">=</span> <span class="n">outputs</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">MaxPooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">16</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="c1"># Decoding path</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3DTranspose</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">16</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">deconvolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">skip3</span><span class="p">,</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3DTranspose</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">deconvolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">skip2</span><span class="p">,</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3DTranspose</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">deconvolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">skip1</span><span class="p">,</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_at_base_layer</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                     <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">convActivation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">number_of_outputs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">convActivation</span> <span class="o">=</span> <span class="s1">&#39;sigmoid&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">convActivation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_outputs</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                     <span class="n">activation</span> <span class="o">=</span> <span class="n">convActivation</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">unet_model</span></div>
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
