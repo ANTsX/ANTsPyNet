@@ -256,6 +256,12 @@
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; shape_initial_stage = (160, 160, 128)</span>
+<span class="sd">    &gt;&gt;&gt; model_refine_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), False)</span>
+<span class="sd">    &gt;&gt;&gt; model_refine_stage.load_weights(get_pretrained_network(&quot;hippMapp3rRefine&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; shape_refine_stage = (112, 112, 64)</span>
+<span class="sd">    &gt;&gt;&gt; model_refine_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), False)</span>
+<span class="sd">    &gt;&gt;&gt; model_refine_stage.load_weights(get_pretrained_network(&quot;hippMapp3rRefine&quot;))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">channels_axis</span> <span class="o">=</span> <span class="kc">None</span>

@@ -39,7 +39,9 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
             "protonLungMri": "https://ndownloader.figshare.com/files/13606799",
             "ctHumanLung": "https://ndownloader.figshare.com/files/16874150",
-            "functionalLungMri": "https://ndownloader.figshare.com/files/13824167"
+            "functionalLungMri": "https://ndownloader.figshare.com/files/13824167",
+            "hippMapp3rInitial": "https://ndownloader.figshare.com/files/18068408",
+            "hippMapp3rRefine": "https://ndownloader.figshare.com/files/18068411"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -56,6 +58,8 @@ def get_pretrained_network(file_id=None, target_file_name=None):
                   "protonLungMri",
                   "ctHumanLung",
                   "functionalLungMri",
+                  "hippMapp3rInitial",
+                  "hippMapp3rRefine",
                   "show")
 
     if not file_id in valid_list:

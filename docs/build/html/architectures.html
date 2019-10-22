@@ -1589,6 +1589,14 @@ architecture as the original weights were saved in “channels_first” format.<
 </dd>
 </dl>
 <p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shape_initial_stage</span> <span class="o">=</span> <span class="p">(</span><span class="mi">160</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_refine_stage</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">create_hippmapp3r_unet_model_3d</span><span class="p">((</span><span class="o">*</span><span class="n">shape_refine_stage</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_refine_stage</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;hippMapp3rRefine&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_refine_stage</span> <span class="o">=</span> <span class="p">(</span><span class="mi">112</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_refine_stage</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">create_hippmapp3r_unet_model_3d</span><span class="p">((</span><span class="o">*</span><span class="n">shape_refine_stage</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_refine_stage</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;hippMapp3rRefine&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
