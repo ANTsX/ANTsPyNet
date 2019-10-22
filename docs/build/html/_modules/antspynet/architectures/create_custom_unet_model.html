@@ -32,15 +32,12 @@
             
   <h1>Source code for antspynet.architectures.create_custom_unet_model</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span>
-                          <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">MaxPooling3D</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span> <span class="n">LeakyReLU</span><span class="p">,</span>
+                          <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">MaxPooling3D</span><span class="p">,</span>
+                          <span class="n">SpatialDropout3D</span><span class="p">,</span> <span class="n">UpSampling3D</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..utilities</span> <span class="k">import</span> <span class="n">InstanceNormalization</span>
 
-<div class="viewcode-block" id="create_nobrainer_unet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_nobrainer_unet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_nobrainer_unet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
-                                   <span class="n">number_of_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                                   <span class="n">number_of_filters_at_base_layer</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-                                   <span class="n">convolution_kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-                                   <span class="n">deconvolution_kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                                  <span class="p">):</span>
+<div class="viewcode-block" id="create_nobrainer_unet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_nobrainer_unet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_nobrainer_unet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implementation of the &quot;NoBrainer&quot; U-net architecture</span>
 
@@ -56,19 +53,6 @@
 <span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
 <span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
 <span class="sd">        (e.g., red, green, and blue).</span>
-
-<span class="sd">    number_of_outputs : integer</span>
-<span class="sd">        Number of segmentation labels.</span>
-
-<span class="sd">    number_of_filters_at_base_layer : integer</span>
-<span class="sd">        number of filters at the beginning and end of the `U`.  Doubles at each</span>
-<span class="sd">        descending/ascending layer.  Default = 16.</span>
-
-<span class="sd">    convolution_kernel_size : tuple of length 3</span>
-<span class="sd">        Defines the kernel size during the encoding.  Default = (3, 3, 3).</span>
-
-<span class="sd">    deconvolution_kernel_size : tuple of length 3</span>
-<span class="sd">        Defines the kernel size during the decoding.  Default = (2, 2, 2).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -123,7 +107,12 @@
 <span class="sd">    &gt;&gt;&gt; ants.image_write(brain_mask_labeled, &quot;brain_mask.nii.gz&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+    <span class="n">number_of_outputs</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">number_of_filters_at_base_layer</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">convolution_kernel_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">deconvolution_kernel_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_image_size</span><span class="p">)</span>
 
     <span class="c1"># Encoding path</span>
 
@@ -229,6 +218,178 @@
     <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">unet_model</span></div>
+
+<div class="viewcode-block" id="create_hippmapp3r_unet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_hippmapp3r_unet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_hippmapp3r_unet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
+                                    <span class="n">do_first_network</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                    <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;channels_last&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of the &quot;HippMapp3r&quot; U-net architecture</span>
+
+<span class="sd">    Creates a keras model implementation of the u-net architecture</span>
+<span class="sd">    described here:</span>
+
+<span class="sd">        https://onlinelibrary.wiley.com/doi/pdf/10.1002/hbm.24811</span>
+
+<span class="sd">    with the implementation available here:</span>
+
+<span class="sd">        https://github.com/mgoubran/HippMapp3r</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    input_image_size : tuple of length 4</span>
+<span class="sd">        Used for specifying the input tensor shape.  The shape (or dimension) of</span>
+<span class="sd">        that tensor is the image dimensions followed by the number of channels</span>
+<span class="sd">        (e.g., red, green, and blue).</span>
+
+<span class="sd">    do_first_network : boolean</span>
+<span class="sd">        Boolean dictating if the model built should be the first (initial) network</span>
+<span class="sd">        or second (refinement) network.</span>
+
+<span class="sd">    data_format : string</span>
+<span class="sd">        One of &quot;channels_first&quot; or &quot;channels_last&quot;.  We do this for this specific</span>
+<span class="sd">        architecture as the original weights were saved in &quot;channels_first&quot; format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras model</span>
+<span class="sd">        A 3-D keras model defining the U-net network.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">channels_axis</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">:</span>
+        <span class="n">channels_axis</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="k">elif</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;channels_first&quot;</span><span class="p">:</span>
+        <span class="n">channels_axis</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unexpected string for data_format.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">convB_3d_layer</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                       <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel_size</span><span class="p">,</span>
+                       <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+                       <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                       <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">InstanceNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">channels_axis</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">residual_block_3d</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">SpatialDropout3D</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                                 <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">upsample_block_3d</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">UpSampling3D</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">feature_block_3d</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="n">number_of_filters_at_base_layer</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="n">number_of_layers</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="k">if</span> <span class="n">do_first_network</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">number_of_layers</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_image_size</span><span class="p">)</span>
+
+    <span class="c1"># Encoding path</span>
+
+    <span class="n">add</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">encoding_convolution_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">number_of_filters_at_base_layer</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">i</span>
+        <span class="n">conv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">residual_block</span> <span class="o">=</span> <span class="n">residual_block_3d</span><span class="p">(</span><span class="n">conv</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="n">add</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">conv</span><span class="p">,</span> <span class="n">residual_block</span><span class="p">])</span>
+        <span class="n">encoding_convolution_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>
+
+    <span class="c1"># Decoding path</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">number_of_layers</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># 256</span>
+    <span class="n">number_of_filters</span> <span class="o">=</span> <span class="p">(</span><span class="n">number_of_filters_at_base_layer</span> <span class="o">*</span>
+      <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">number_of_layers</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">upsample_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">do_first_network</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># 256, 128</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">channels_axis</span><span class="p">)([</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">outputs</span><span class="p">])</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">feature_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">number_of_filters</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">upsample_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+    <span class="c1"># 128, 64</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">channels_axis</span><span class="p">)([</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">feature_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+    <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">number_of_filters</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">upsample_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+    <span class="c1"># 64, 32</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">channels_axis</span><span class="p">)([</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">feature64</span> <span class="o">=</span> <span class="n">feature_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+    <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">number_of_filters</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">upsample_block_3d</span><span class="p">(</span><span class="n">feature64</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+    <span class="n">back64</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">do_first_network</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">back64</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">feature64</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">back64</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="n">feature64</span><span class="p">)</span>
+    <span class="n">back64</span> <span class="o">=</span> <span class="n">UpSampling3D</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="n">back64</span><span class="p">)</span>
+
+    <span class="c1"># 32, 16</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">channels_axis</span><span class="p">)([</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">feature32</span> <span class="o">=</span> <span class="n">feature_block_3d</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+    <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">number_of_filters</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">upsample_block_3d</span><span class="p">(</span><span class="n">feature32</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+    <span class="n">back32</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">do_first_network</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">back32</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">feature32</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">back32</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="n">feature32</span><span class="p">)</span>
+    <span class="n">back32</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">back64</span><span class="p">,</span> <span class="n">back32</span><span class="p">])</span>
+    <span class="n">back32</span> <span class="o">=</span> <span class="n">UpSampling3D</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="n">back32</span><span class="p">)</span>
+
+    <span class="c1"># Final</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">channels_axis</span><span class="p">)([</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">do_first_network</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">convB_3d_layer</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">back32</span><span class="p">,</span> <span class="n">outputs</span><span class="p">])</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">unet_model</span><span class="p">)</span></div>
+
+
+
+
+
+
 
 
 </pre></div>

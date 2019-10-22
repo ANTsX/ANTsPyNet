@@ -65,6 +65,8 @@ Image voxelwise segmentation
 
 .. autofunction:: antspynet.architectures.create_nobrainer_unet_model_3d
 
+.. autofunction:: antspynet.architectures.create_hippmapp3r_unet_model_3d
+
 Generative adverserial networks
 -------------------------------
 
