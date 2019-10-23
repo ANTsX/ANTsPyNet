@@ -224,11 +224,11 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
     Example
     -------
     >>> shape_initial_stage = (160, 160, 128)
-    >>> model_refine_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), False)
-    >>> model_refine_stage.load_weights(get_pretrained_network("hippMapp3rRefine"))
+    >>> model_initial_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_initial_stage, 1), True)
+    >>> model_initial_stage.load_weights(antspynet.get_pretrained_network("hippMapp3rInitial"))
     >>> shape_refine_stage = (112, 112, 64)
     >>> model_refine_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), False)
-    >>> model_refine_stage.load_weights(get_pretrained_network("hippMapp3rRefine"))
+    >>> model_refine_stage.load_weights(antspynet.get_pretrained_network("hippMapp3rRefine"))
     """
 
     channels_axis = None
