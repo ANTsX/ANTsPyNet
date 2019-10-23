@@ -104,8 +104,7 @@
     <span class="n">url</span> <span class="o">=</span> <span class="n">switch_networks</span><span class="p">(</span><span class="n">file_id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">target_file_name</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">temp_directory</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
-        <span class="n">target_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">temp_directory</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">target_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.h5&quot;</span><span class="p">)</span>
         <span class="n">target_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">target_file_name</span> <span class="o">=</span> <span class="n">target_file</span><span class="o">.</span><span class="n">name</span>
 

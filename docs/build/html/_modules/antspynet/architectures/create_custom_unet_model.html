@@ -61,50 +61,8 @@
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
-<span class="sd">    &gt;&gt;&gt; import requests</span>
-<span class="sd">    &gt;&gt;&gt; import tempfile</span>
-<span class="sd">    &gt;&gt;&gt; from os import path</span>
-<span class="sd">    &gt;&gt;&gt; import ants</span>
-<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt;</span>
 <span class="sd">    &gt;&gt;&gt; model = create_nobrainer_unet_model_3d((None, None, None, 1))</span>
 <span class="sd">    &gt;&gt;&gt; model.summary()</span>
-<span class="sd">    &gt;&gt;&gt;</span>
-<span class="sd">    &gt;&gt;&gt; url_weights = &quot;https://github.com/neuronets/nobrainer-models/releases/download/0.1/brain-extraction-unet-128iso-weights.h5&quot;</span>
-<span class="sd">    &gt;&gt;&gt; temp_directory = tempfile.TemporaryDirectory()</span>
-<span class="sd">    &gt;&gt;&gt; target_file_weights = tempfile.NamedTemporaryFile(suffix=&quot;.h5&quot;, dir=temp_directory.name)</span>
-<span class="sd">    &gt;&gt;&gt; target_file_weights.close()</span>
-<span class="sd">    &gt;&gt;&gt; target_file_weights_name = target_file_weights.name</span>
-<span class="sd">    &gt;&gt;&gt; if not path.exists(target_file_weights_name):</span>
-<span class="sd">    &gt;&gt;&gt;     r = requests.get(url_weights)</span>
-<span class="sd">    &gt;&gt;&gt;     with open(target_file_weights_name, &#39;wb&#39;) as f:</span>
-<span class="sd">    &gt;&gt;&gt;         f.write(r.content)</span>
-<span class="sd">    &gt;&gt;&gt;</span>
-<span class="sd">    &gt;&gt;&gt; model.load_weights(target_file_weights_name)</span>
-<span class="sd">    &gt;&gt;&gt;</span>
-<span class="sd">    &gt;&gt;&gt; url_image = &quot;https://github.com/ANTsXNet/BrainExtraction/blob/master/Data/Example/1097782_defaced_MPRAGE.nii.gz?raw=true&quot;</span>
-<span class="sd">    &gt;&gt;&gt; target_file_image = tempfile.NamedTemporaryFile(suffix=&quot;.nii.gz&quot;, dir=temp_directory.name)</span>
-<span class="sd">    &gt;&gt;&gt; target_file_image.close()</span>
-<span class="sd">    &gt;&gt;&gt; target_file_image_name = target_file_image.name</span>
-<span class="sd">    &gt;&gt;&gt; if not path.exists(target_file_image_name):</span>
-<span class="sd">    &gt;&gt;&gt;     r = requests.get(url_image)</span>
-<span class="sd">    &gt;&gt;&gt;     with open(target_file_image_name, &#39;wb&#39;) as f:</span>
-<span class="sd">    &gt;&gt;&gt;         f.write(r.content)</span>
-<span class="sd">    &gt;&gt;&gt;</span>
-<span class="sd">    &gt;&gt;&gt; image = ants.image_read(target_file_image_name)</span>
-<span class="sd">    &gt;&gt;&gt; image = ants.image_math(image, &#39;Normalize&#39;) * 255.0</span>
-<span class="sd">    &gt;&gt;&gt; image_resampled = ants.resample_image(image, (256, 256, 256), True)</span>
-<span class="sd">    &gt;&gt;&gt; batchX = np.expand_dims(image_resampled.numpy(), axis=0)</span>
-<span class="sd">    &gt;&gt;&gt; batchX = np.expand_dims(batchX, axis=-1)</span>
-<span class="sd">    &gt;&gt;&gt;</span>
-<span class="sd">    &gt;&gt;&gt; brain_mask_array = model.predict(batchX, verbose=0)</span>
-<span class="sd">    &gt;&gt;&gt; brain_mask_resampled = ants.from_numpy(np.squeeze(brain_mask_array[0,:,:,:,0]),</span>
-<span class="sd">          origin=image_resampled.origin, spacing=image_resampled.spacing,</span>
-<span class="sd">          direction=image_resampled.direction)</span>
-<span class="sd">    &gt;&gt;&gt; brain_mask_image = ants.resample_image(brain_mask_resampled, image.shape, True, 1)</span>
-<span class="sd">    &gt;&gt;&gt; minimum_brain_volume = round( 649933.7 )</span>
-<span class="sd">    &gt;&gt;&gt; brain_mask_labeled = ants.label_clusters(brain_mask_image, minimum_brain_volume)</span>
-<span class="sd">    &gt;&gt;&gt; ants.image_write(brain_mask_labeled, &quot;brain_mask.nii.gz&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">number_of_outputs</span> <span class="o">=</span> <span class="mi">1</span>
@@ -257,11 +215,11 @@
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; shape_initial_stage = (160, 160, 128)</span>
-<span class="sd">    &gt;&gt;&gt; model_refine_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), False)</span>
-<span class="sd">    &gt;&gt;&gt; model_refine_stage.load_weights(get_pretrained_network(&quot;hippMapp3rRefine&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; model_initial_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_initial_stage, 1), True)</span>
+<span class="sd">    &gt;&gt;&gt; model_initial_stage.load_weights(antspynet.get_pretrained_network(&quot;hippMapp3rInitial&quot;))</span>
 <span class="sd">    &gt;&gt;&gt; shape_refine_stage = (112, 112, 64)</span>
 <span class="sd">    &gt;&gt;&gt; model_refine_stage = antspynet.create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), False)</span>
-<span class="sd">    &gt;&gt;&gt; model_refine_stage.load_weights(get_pretrained_network(&quot;hippMapp3rRefine&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; model_refine_stage.load_weights(antspynet.get_pretrained_network(&quot;hippMapp3rRefine&quot;))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">channels_axis</span> <span class="o">=</span> <span class="kc">None</span>
