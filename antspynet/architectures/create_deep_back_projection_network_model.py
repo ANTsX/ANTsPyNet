@@ -91,7 +91,7 @@ def create_deep_back_projection_network_model_2d(input_image_size,
     """
 
     def up_block_2d(L, number_of_filters=64, kernel_size=(12, 12), strides=(8, 8),
-                    include_dense_convolution_layer=False):
+                    include_dense_convolution_layer=True):
         if include_dense_convolution_layer == True:
             L = Conv2D(filters = number_of_filters,
                        use_bias=True,
@@ -138,7 +138,7 @@ def create_deep_back_projection_network_model_2d(input_image_size,
 
 
     def down_block_2d(H, number_of_filters=64, kernel_size=(12, 12), strides=(8, 8),
-                    include_dense_convolution_layer=False):
+                    include_dense_convolution_layer=True):
         if include_dense_convolution_layer == True:
             H = Conv2D(filters = number_of_filters,
                        use_bias=True,
@@ -340,7 +340,7 @@ def create_deep_back_projection_network_model_3d(input_image_size,
     """
 
     def up_block_3d(L, number_of_filters=64, kernel_size=(12, 12, 12), strides=(8, 8, 8),
-                    include_dense_convolution_layer=False):
+                    include_dense_convolution_layer=True):
         if include_dense_convolution_layer == True:
             L = Conv3D(filters = number_of_filters,
                        use_bias=True,
@@ -387,7 +387,7 @@ def create_deep_back_projection_network_model_3d(input_image_size,
 
 
     def down_block_3d(H, number_of_filters=64, kernel_size=(12, 12, 12), strides=(8, 8, 8),
-                    include_dense_convolution_layer=False):
+                    include_dense_convolution_layer=True):
         if include_dense_convolution_layer == True:
             H = Conv3D(filters = number_of_filters,
                        use_bias=True,
