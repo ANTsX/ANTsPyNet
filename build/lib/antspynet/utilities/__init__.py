@@ -7,7 +7,10 @@ from .spatial_transformer_network_utilities import SpatialTransformer2D, Spatial
 from .extract_image_patches import extract_image_patches
 from .reconstruct_image_from_patches import reconstruct_image_from_patches
 
+from .regression_match_image import regression_match_image
+
 from .super_resolution_utilities import mse, mae, psnr, ssim, gmsd
+from .super_resolution_utilities import apply_super_resolution_model_to_image
 
 from .deep_embedded_clustering_utilities import Clustering
 from .deep_embedded_clustering_utilities import DeepEmbeddedClusteringModel

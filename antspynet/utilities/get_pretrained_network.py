@@ -6,7 +6,7 @@ from os import path
 def get_pretrained_network(file_id=None, target_file_name=None):
 
     """
-    Downloads pretrained network.
+    Download pretrained network/weights.
 
     Arguments
     ---------
@@ -31,6 +31,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
     def switch_networks(argument):
         switcher = {
             "dbpn4x": "https://ndownloader.figshare.com/files/13347617",
+            "mriSuperResolution": "https://ndownloader.figshare.com/files/19430123",
             "brainExtraction": "https://ndownloader.figshare.com/files/13729661",
             "brainSegmentation": "https://ndownloader.figshare.com/files/13900010",
             "brainSegmentationPatchBased": "https://ndownloader.figshare.com/files/14249717",
@@ -49,6 +50,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
         raise ValueError("Missing file id.")
 
     valid_list = ("dbpn4x",
+                  "mriSuperResolution",
                   "brainExtraction",
                   "brainSegmentation",
                   "brainSegmentationPatchBased",

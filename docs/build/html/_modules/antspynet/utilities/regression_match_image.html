@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>antspynet.utilities.regression_match_image &#8212; ANTsPyNet 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for antspynet.utilities.regression_match_image</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="k">import</span> <span class="n">PolynomialFeatures</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="k">import</span> <span class="n">LinearRegression</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">ants</span>
+
+<div class="viewcode-block" id="regression_match_image"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.regression_match_image">[docs]</a><span class="k">def</span> <span class="nf">regression_match_image</span><span class="p">(</span><span class="n">source_image</span><span class="p">,</span>
+                           <span class="n">reference_image</span><span class="p">,</span>
+                           <span class="n">poly_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                           <span class="n">truncate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Image intensity normalization using linear regression.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    source_image : ANTsImage</span>
+<span class="sd">        Image whose intensities are matched to the reference</span>
+<span class="sd">        image.</span>
+
+<span class="sd">    reference_image : ANTsImage</span>
+<span class="sd">        Defines the reference intensity function.</span>
+
+<span class="sd">    poly_order : integer</span>
+<span class="sd">        Polynomial order of fit.  Default is 1 (linear fit).</span>
+
+<span class="sd">    truncate : boolean</span>
+<span class="sd">        Turns on/off the clipping of intensities.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ANTs image (i.e., source_image) matched to the (reference_image).</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import ants</span>
+<span class="sd">    &gt;&gt;&gt; source_image = ants.image_read(ants.get_ants_data(&#39;r16&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; reference_image = ants.image_read(ants.get_ants_data(&#39;r64&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; matched_image = regression_match_image(source_image, reference_image)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">source_image</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">reference_image</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Images do not have the same dimension.&quot;</span><span class="p">)</span>
+
+    <span class="n">source_intensities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">((</span><span class="n">source_image</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">reference_intensities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">((</span><span class="n">reference_image</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">poly_features</span> <span class="o">=</span> <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">degree</span><span class="o">=</span><span class="n">poly_order</span><span class="p">)</span>
+    <span class="n">source_intensities_poly</span> <span class="o">=</span> <span class="n">poly_features</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">source_intensities</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source_intensities_poly</span><span class="p">,</span> <span class="n">reference_intensities</span><span class="p">)</span>
+
+    <span class="n">matched_source_intensities</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">source_intensities_poly</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">truncate</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">min_reference_value</span> <span class="o">=</span> <span class="n">reference_intensities</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">max_reference_value</span> <span class="o">=</span> <span class="n">reference_intensities</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">matched_source_intensities</span><span class="p">[</span><span class="n">matched_source_intensities</span> <span class="o">&lt;</span> <span class="n">min_reference_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_reference_value</span>
+        <span class="n">matched_source_intensities</span><span class="p">[</span><span class="n">matched_source_intensities</span> <span class="o">&gt;</span> <span class="n">max_reference_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_reference_value</span>
+
+    <span class="n">matched_source_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">make_image</span><span class="p">(</span><span class="n">source_image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">matched_source_intensities</span><span class="p">)</span>
+    <span class="n">matched_source_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">copy_image_info</span><span class="p">(</span><span class="n">source_image</span><span class="p">,</span>  <span class="n">matched_source_image</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">matched_source_image</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ANTsPyNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../architectures.html">Architectures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

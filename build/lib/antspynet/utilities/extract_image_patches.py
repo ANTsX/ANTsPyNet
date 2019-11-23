@@ -186,11 +186,11 @@ def extract_image_patches(image,
             number_of_extracted_patches = min(max_number_of_patches, mask_indices.shape[0])
 
             random_indices = mask_indices[
-              random.sample(range(mask_indices.shape[0]), number_of_extracted_patches), :]
+              random.sample(range(mask_indices.shape[0] + 1), number_of_extracted_patches), :]
         else:
 
             for d in range(dimensionality):
-                random_indices[:, d] = random.sample(range(image_size[d] - patch_size[d]), max_number_of_patches)
+                random_indices[:, d] = random.sample(range(image_size[d] - patch_size[d] + 1), max_number_of_patches)
 
         if return_as_array:
             if number_of_image_components == 1:

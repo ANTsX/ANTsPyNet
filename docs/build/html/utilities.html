@@ -451,6 +451,46 @@ in case of weak denominators.</p></li>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="antspynet.utilities.apply_super_resolution_model_to_image">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">apply_super_resolution_model_to_image</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">model</em>, <em class="sig-param">target_range=(-127.5</em>, <em class="sig-param">127.5)</em>, <em class="sig-param">batch_size=32</em>, <em class="sig-param">regression_order=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#apply_super_resolution_model_to_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.apply_super_resolution_model_to_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a pretrained deep back projection model for super resolution.
+Helper function for applying a pretrained deep back projection model.
+Apply a patch-wise trained network to perform super-resolution. Can be applied
+to variable sized inputs. Warning: This function may be better used on CPU
+unless the GPU can accommodate the full image size. Warning 2: The global
+intensity range (min to max) of the output will match the input where the
+range is taken over all channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>ANTs image</em>) – input image.</p></li>
+<li><p><strong>model</strong> (<em>keras object</em><em> or </em><em>string</em>) – pretrained keras model or filename.</p></li>
+<li><p><strong>target_range</strong> (<em>2-element tuple</em>) – a tuple or array defining the (min, max) of the input image
+(e.g., -127.5, 127.5).  Output images will be scaled back to original
+intensity. This range should match the mapping used in the training
+of the network.</p></li>
+<li><p><strong>batch_size</strong> (<em>integer</em>) – Batch size used for the prediction call.</p></li>
+<li><p><strong>regression_order</strong> (<em>integer</em>) – If specified, Apply the function regression_match_image with
+poly_order=regression_order.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – If True, show status messages.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Super-resolution image upscaled to resolution specified by the network.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_sr</span> <span class="o">=</span> <span class="n">apply_deep_back_projection_model</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;dbpn4x&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="spatial-transformer-network">
 <h2>Spatial transformer network<a class="headerlink" href="#spatial-transformer-network" title="Permalink to this headline">¶</a></h2>
@@ -506,7 +546,7 @@ weights.</p></li>
 <dl class="function">
 <dt id="antspynet.utilities.get_pretrained_network">
 <code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">get_pretrained_network</code><span class="sig-paren">(</span><em class="sig-param">file_id=None</em>, <em class="sig-param">target_file_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_pretrained_network.html#get_pretrained_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_pretrained_network" title="Permalink to this definition">¶</a></dt>
-<dd><p>Downloads pretrained network.</p>
+<dd><p>Download pretrained network/weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -543,6 +583,36 @@ mean and standard deviation.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.regression_match_image">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">regression_match_image</code><span class="sig-paren">(</span><em class="sig-param">source_image</em>, <em class="sig-param">reference_image</em>, <em class="sig-param">poly_order=1</em>, <em class="sig-param">truncate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/regression_match_image.html#regression_match_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.regression_match_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Image intensity normalization using linear regression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_image</strong> (<em>ANTsImage</em>) – Image whose intensities are matched to the reference
+image.</p></li>
+<li><p><strong>reference_image</strong> (<em>ANTsImage</em>) – Defines the reference intensity function.</p></li>
+<li><p><strong>poly_order</strong> (<em>integer</em>) – Polynomial order of fit.  Default is 1 (linear fit).</p></li>
+<li><p><strong>truncate</strong> (<em>boolean</em>) – Turns on/off the clipping of intensities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ANTs image (i.e., source_image) matched to the (reference_image)</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">source_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r64&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matched_image</span> <span class="o">=</span> <span class="n">regression_match_image</span><span class="p">(</span><span class="n">source_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>

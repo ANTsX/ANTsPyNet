@@ -124,7 +124,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">up_block_2d</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">include_dense_convolution_layer</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">L</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span> <span class="o">=</span> <span class="n">number_of_filters</span><span class="p">,</span>
                        <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -171,7 +171,7 @@
 
 
     <span class="k">def</span> <span class="nf">down_block_2d</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">include_dense_convolution_layer</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">H</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span> <span class="o">=</span> <span class="n">number_of_filters</span><span class="p">,</span>
                        <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -373,7 +373,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">up_block_3d</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">include_dense_convolution_layer</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">L</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span> <span class="o">=</span> <span class="n">number_of_filters</span><span class="p">,</span>
                        <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -420,7 +420,7 @@
 
 
     <span class="k">def</span> <span class="nf">down_block_3d</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
-                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                    <span class="n">include_dense_convolution_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">include_dense_convolution_layer</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">H</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span> <span class="o">=</span> <span class="n">number_of_filters</span><span class="p">,</span>
                        <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>

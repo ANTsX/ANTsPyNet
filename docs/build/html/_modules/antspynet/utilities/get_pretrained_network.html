@@ -39,7 +39,7 @@
 <div class="viewcode-block" id="get_pretrained_network"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.get_pretrained_network">[docs]</a><span class="k">def</span> <span class="nf">get_pretrained_network</span><span class="p">(</span><span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Downloads pretrained network.</span>
+<span class="sd">    Download pretrained network/weights.</span>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
@@ -64,6 +64,7 @@
     <span class="k">def</span> <span class="nf">switch_networks</span><span class="p">(</span><span class="n">argument</span><span class="p">):</span>
         <span class="n">switcher</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;dbpn4x&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13347617&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mriSuperResolution&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/19430123&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainExtraction&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13729661&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainSegmentation&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13900010&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainSegmentationPatchBased&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/14249717&quot;</span><span class="p">,</span>
@@ -82,6 +83,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing file id.&quot;</span><span class="p">)</span>
 
     <span class="n">valid_list</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;dbpn4x&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;mriSuperResolution&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;brainExtraction&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;brainSegmentation&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;brainSegmentationPatchBased&quot;</span><span class="p">,</span>

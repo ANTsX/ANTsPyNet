@@ -48,6 +48,7 @@ Super-resolution
 .. autofunction:: antspynet.utilities.psnr
 .. autofunction:: antspynet.utilities.ssim
 .. autofunction:: antspynet.utilities.gmsd
+.. autofunction:: antspynet.utilities.apply_super_resolution_model_to_image
 
 Spatial transformer network
 ---------------------------
@@ -60,5 +61,6 @@ Miscellaneous
 
 .. autofunction:: antspynet.utilities.get_pretrained_network
 .. autoclass:: antspynet.utilities.Scale
+.. autofunction:: antspynet.utilities.regression_match_image
 
 
