@@ -35,12 +35,14 @@
 <span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span>
                           <span class="n">LeakyReLU</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span>
+                          <span class="n">Reshape</span><span class="p">,</span> <span class="n">Permute</span><span class="p">,</span> <span class="n">Multiply</span><span class="p">,</span>
                           <span class="n">Conv2D</span><span class="p">,</span> <span class="n">Conv2DTranspose</span><span class="p">,</span>
                           <span class="n">MaxPooling2D</span><span class="p">,</span> <span class="n">GlobalAveragePooling2D</span><span class="p">,</span>
                           <span class="n">UpSampling2D</span><span class="p">,</span>
                           <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span>
                           <span class="n">MaxPooling3D</span><span class="p">,</span> <span class="n">GlobalAveragePooling3D</span><span class="p">,</span>
                           <span class="n">UpSampling3D</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 
 <div class="viewcode-block" id="create_resnet_model_2d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_resnet_model_2d">[docs]</a><span class="k">def</span> <span class="nf">create_resnet_model_2d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
                            <span class="n">input_scalars_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -49,6 +51,7 @@
                            <span class="n">residual_block_schedule</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                            <span class="n">lowest_resolution</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
                            <span class="n">cardinality</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                           <span class="n">squeeze_and_excite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
                           <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -90,6 +93,9 @@
 <span class="sd">    cardinality : integer</span>
 <span class="sd">        perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,</span>
 <span class="sd">        instead, powers of 2---try &#39;32&#39;).</span>
+
+<span class="sd">    squeeze_and_excite : boolean</span>
+<span class="sd">        add the squeeze-and-excite block variant.</span>
 
 <span class="sd">    mode : string</span>
 <span class="sd">        &#39;classification&#39; or &#39;regression&#39;.  Default = &#39;classification&#39;.</span>
@@ -136,6 +142,31 @@
         <span class="n">grouped_model</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">convolution_layers</span><span class="p">)</span>
         <span class="k">return</span><span class="p">(</span><span class="n">grouped_model</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">squeeze_and_excite_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+        <span class="n">initial</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">:</span>
+            <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+        <span class="n">block</span> <span class="o">=</span> <span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">initial</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Reshape</span><span class="p">(</span><span class="n">target_shape</span><span class="o">=</span><span class="n">block_shape</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_filters</span><span class="o">//</span><span class="n">ratio</span><span class="p">,</span>
+                      <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_normal&#39;</span><span class="p">,</span>
+                      <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                      <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_normal&#39;</span><span class="p">,</span>
+                      <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_first&quot;</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">Permute</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Multiply</span><span class="p">()([</span><span class="n">initial</span><span class="p">,</span> <span class="n">block</span><span class="p">])</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">residual_block_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters_in</span><span class="p">,</span> <span class="n">number_of_filters_out</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">project_shortcut</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">shortcut</span> <span class="o">=</span> <span class="n">model</span>
 
@@ -163,6 +194,9 @@
                               <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
                               <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">shortcut</span><span class="p">)</span>
             <span class="n">shortcut</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">shortcut</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">squeeze_and_excite</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">squeeze_and_excite_2d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">shortcut</span><span class="p">,</span> <span class="n">model</span><span class="p">])</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
@@ -211,7 +245,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
-        <span class="n">layerActivation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+        <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
 
@@ -229,7 +263,6 @@
 
     <span class="k">return</span><span class="p">(</span><span class="n">resnet_model</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="create_resnet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_resnet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_resnet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
                            <span class="n">input_scalars_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                            <span class="n">number_of_classification_labels</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
@@ -237,6 +270,7 @@
                            <span class="n">residual_block_schedule</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                            <span class="n">lowest_resolution</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
                            <span class="n">cardinality</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                           <span class="n">squeeze_and_excite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
                           <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -278,6 +312,9 @@
 <span class="sd">    cardinality : integer</span>
 <span class="sd">        perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,</span>
 <span class="sd">        instead, powers of 2---try &#39;32&#39;).</span>
+
+<span class="sd">    squeeze_and_excite : boolean</span>
+<span class="sd">        add the squeeze-and-excite block variant.</span>
 
 <span class="sd">    mode : string</span>
 <span class="sd">        &#39;classification&#39; or &#39;regression&#39;.  Default = &#39;classification&#39;.</span>
@@ -324,6 +361,31 @@
         <span class="n">grouped_model</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">convolution_layers</span><span class="p">)</span>
         <span class="k">return</span><span class="p">(</span><span class="n">grouped_model</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">squeeze_and_excite_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+        <span class="n">initial</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">:</span>
+            <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
+
+        <span class="n">block</span> <span class="o">=</span> <span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">initial</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Reshape</span><span class="p">(</span><span class="n">target_shape</span><span class="o">=</span><span class="n">block_shape</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_filters</span><span class="o">//</span><span class="n">ratio</span><span class="p">,</span>
+                      <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_normal&#39;</span><span class="p">,</span>
+                      <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
+                      <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span>
+                      <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_normal&#39;</span><span class="p">,</span>
+                      <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_first&quot;</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">Permute</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Multiply</span><span class="p">()([</span><span class="n">initial</span><span class="p">,</span> <span class="n">block</span><span class="p">])</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">residual_block_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters_in</span><span class="p">,</span> <span class="n">number_of_filters_out</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">project_shortcut</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">shortcut</span> <span class="o">=</span> <span class="n">model</span>
 
@@ -351,6 +413,9 @@
                               <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
                               <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">shortcut</span><span class="p">)</span>
             <span class="n">shortcut</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">shortcut</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">squeeze_and_excite</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">squeeze_and_excite_3d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">shortcut</span><span class="p">,</span> <span class="n">model</span><span class="p">])</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
@@ -400,7 +465,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
-        <span class="n">layerActivation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+        <span class="n">layer_activation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
 

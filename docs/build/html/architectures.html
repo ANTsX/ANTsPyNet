@@ -321,7 +321,7 @@ that tensor is the image dimensions followed by the number of channels
 
 <dl class="function">
 <dt id="antspynet.architectures.create_resnet_model_2d">
-<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">input_scalars_size=0</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em>, <em class="sig-param">residual_block_schedule=(3</em>, <em class="sig-param">4</em>, <em class="sig-param">6</em>, <em class="sig-param">3)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">cardinality=1</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_model.html#create_resnet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_model_2d" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">input_scalars_size=0</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em>, <em class="sig-param">residual_block_schedule=(3</em>, <em class="sig-param">4</em>, <em class="sig-param">6</em>, <em class="sig-param">3)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">cardinality=1</em>, <em class="sig-param">squeeze_and_excite=False</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_model.html#create_resnet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_model_2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>2-D implementation of the ResNet deep learning architecture.</p>
 <p>Creates a keras model of the ResNet deep learning architecture for image
 classification.  The paper is available here:</p>
@@ -347,6 +347,7 @@ get concatenated to the fully connected layer at the end of the network.</p></li
 <li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the initial layer.</p></li>
 <li><p><strong>cardinality</strong> (<em>integer</em>) – perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
 instead, powers of 2—try ‘32’).</p></li>
+<li><p><strong>squeeze_and_excite</strong> (<em>boolean</em>) – add the squeeze-and-excite block variant.</p></li>
 <li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
 </ul>
 </dd>
@@ -366,7 +367,7 @@ instead, powers of 2—try ‘32’).</p></li>
 
 <dl class="function">
 <dt id="antspynet.architectures.create_resnet_model_3d">
-<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">input_scalars_size=0</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em>, <em class="sig-param">residual_block_schedule=(3</em>, <em class="sig-param">4</em>, <em class="sig-param">6</em>, <em class="sig-param">3)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">cardinality=1</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_model.html#create_resnet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_model_3d" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">input_scalars_size=0</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em>, <em class="sig-param">residual_block_schedule=(3</em>, <em class="sig-param">4</em>, <em class="sig-param">6</em>, <em class="sig-param">3)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">cardinality=1</em>, <em class="sig-param">squeeze_and_excite=False</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_model.html#create_resnet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_model_3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>3-D implementation of the ResNet deep learning architecture.</p>
 <p>Creates a keras model of the ResNet deep learning architecture for image
 classification.  The paper is available here:</p>
@@ -392,6 +393,7 @@ get concatenated to the fully connected layer at the end of the network.</p></li
 <li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the initial layer.</p></li>
 <li><p><strong>cardinality</strong> (<em>integer</em>) – perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
 instead, powers of 2—try ‘32’).</p></li>
+<li><p><strong>squeeze_and_excite</strong> (<em>boolean</em>) – add the squeeze-and-excite block variant.</p></li>
 <li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
 </ul>
 </dd>

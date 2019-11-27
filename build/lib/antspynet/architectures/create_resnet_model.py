@@ -2,12 +2,14 @@
 from keras.models import Model
 from keras.layers import (Input, Dropout, BatchNormalization, Add,
                           LeakyReLU, Concatenate, Lambda, Dense,
+                          Reshape, Permute, Multiply,
                           Conv2D, Conv2DTranspose,
                           MaxPooling2D, GlobalAveragePooling2D,
                           UpSampling2D,
                           Conv3D, Conv3DTranspose,
                           MaxPooling3D, GlobalAveragePooling3D,
                           UpSampling3D)
+import keras.backend as K
 
 def create_resnet_model_2d(input_image_size,
                            input_scalars_size=0,
@@ -16,6 +18,7 @@ def create_resnet_model_2d(input_image_size,
                            residual_block_schedule=(3, 4, 6, 3),
                            lowest_resolution=64,
                            cardinality=1,
+                           squeeze_and_excite=False,
                            mode='classification'
                           ):
     """
@@ -57,6 +60,9 @@ def create_resnet_model_2d(input_image_size,
     cardinality : integer
         perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
         instead, powers of 2---try '32').
+
+    squeeze_and_excite : boolean
+        add the squeeze-and-excite block variant.
 
     mode : string
         'classification' or 'regression'.  Default = 'classification'.
@@ -103,6 +109,31 @@ def create_resnet_model_2d(input_image_size,
         grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
+    def squeeze_and_excite_2d(model, ratio=16):
+        initial = model
+        number_of_filters = K.int_shape(initial)[1]
+        if K.image_data_format() == "channels_last":
+            number_of_filters = K.int_shape(initial)[-1]
+
+        block_shape = (1, 1, number_of_filters)
+
+        block = GlobalAveragePooling2D()(initial)
+        block = Reshape(target_shape=block_shape)(block)
+        block = Dense(units=number_of_filters//ratio,
+                      activation='relu',
+                      kernel_initializer='he_normal',
+                      use_bias=False)(block)
+        block = Dense(units=number_of_filters,
+                      activation='sigmoid',
+                      kernel_initializer='he_normal',
+                      use_bias=False)(block)
+
+        if K.image_data_format() == "channels_first":
+            block = Permute((3, 1, 2))(block)
+
+        x = Multiply()([initial, block])
+        return(x)
+
     def residual_block_2d(model, number_of_filters_in, number_of_filters_out, strides=(1, 1), project_shortcut=False):
         shortcut = model
 
@@ -130,6 +161,9 @@ def create_resnet_model_2d(input_image_size,
                               strides=strides,
                               padding='same')(shortcut)
             shortcut = BatchNormalization()(shortcut)
+
+        if squeeze_and_excite == True:
+            model = squeeze_and_excite_2d(model)
 
         model = Add()([shortcut, model])
         model = LeakyReLU()(model)
@@ -178,7 +212,7 @@ def create_resnet_model_2d(input_image_size,
         else:
             layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
@@ -196,7 +230,6 @@ def create_resnet_model_2d(input_image_size,
 
     return(resnet_model)
 
-
 def create_resnet_model_3d(input_image_size,
                            input_scalars_size=0,
                            number_of_classification_labels=1000,
@@ -204,6 +237,7 @@ def create_resnet_model_3d(input_image_size,
                            residual_block_schedule=(3, 4, 6, 3),
                            lowest_resolution=64,
                            cardinality=1,
+                           squeeze_and_excite=False,
                            mode='classification'
                           ):
     """
@@ -245,6 +279,9 @@ def create_resnet_model_3d(input_image_size,
     cardinality : integer
         perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
         instead, powers of 2---try '32').
+
+    squeeze_and_excite : boolean
+        add the squeeze-and-excite block variant.
 
     mode : string
         'classification' or 'regression'.  Default = 'classification'.
@@ -291,6 +328,31 @@ def create_resnet_model_3d(input_image_size,
         grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
+    def squeeze_and_excite_3d(model, ratio=16):
+        initial = model
+        number_of_filters = K.int_shape(initial)[1]
+        if K.image_data_format() == "channels_last":
+            number_of_filters = K.int_shape(initial)[-1]
+
+        block_shape = (1, 1, 1, number_of_filters)
+
+        block = GlobalAveragePooling3D()(initial)
+        block = Reshape(target_shape=block_shape)(block)
+        block = Dense(units=number_of_filters//ratio,
+                      activation='relu',
+                      kernel_initializer='he_normal',
+                      use_bias=False)(block)
+        block = Dense(units=number_of_filters,
+                      activation='sigmoid',
+                      kernel_initializer='he_normal',
+                      use_bias=False)(block)
+
+        if K.image_data_format() == "channels_first":
+            block = Permute((4, 1, 2, 3))(block)
+
+        x = Multiply()([initial, block])
+        return(x)
+
     def residual_block_3d(model, number_of_filters_in, number_of_filters_out, strides=(1, 1, 1), project_shortcut=False):
         shortcut = model
 
@@ -318,6 +380,9 @@ def create_resnet_model_3d(input_image_size,
                               strides=strides,
                               padding='same')(shortcut)
             shortcut = BatchNormalization()(shortcut)
+
+        if squeeze_and_excite == True:
+            model = squeeze_and_excite_3d(model)
 
         model = Add()([shortcut, model])
         model = LeakyReLU()(model)
@@ -367,7 +432,7 @@ def create_resnet_model_3d(input_image_size,
         else:
             layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
