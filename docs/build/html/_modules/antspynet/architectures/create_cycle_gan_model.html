@@ -34,15 +34,15 @@
 <span></span>
 <span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 
-<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Sequential</span>
-<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
-<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Sequential</span>
+<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="kn">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span>
                           <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">Reshape</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span>
                           <span class="n">Flatten</span><span class="p">,</span> <span class="n">LeakyReLU</span><span class="p">,</span> <span class="n">Conv2D</span><span class="p">,</span> <span class="n">Conv3D</span><span class="p">,</span>
                           <span class="n">UpSampling2D</span><span class="p">,</span> <span class="n">UpSampling3D</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">optimizers</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">optimizers</span>
 
-<span class="kn">from</span> <span class="nn">..utilities</span> <span class="k">import</span> <span class="n">InstanceNormalization</span>
+<span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">InstanceNormalization</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -78,7 +78,7 @@
 <span class="sd">        A Keras model defining the network.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image_size</span><span class="p">,</span> <span class="n">lambda_cycle_loss_weight</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image_size</span><span class="p">,</span> <span class="n">lambda_cycle_loss_weight</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
                  <span class="n">lambda_identity_loss_weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                  <span class="n">number_of_filters_at_base_layer</span><span class="o">=</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">)):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CycleGanModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -419,7 +419,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

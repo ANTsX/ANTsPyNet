@@ -7,6 +7,7 @@ from keras.layers import (Input, Dense, Activation, Flatten,
 from ..utilities import (SpatialTransformer2D, SpatialTransformer3D)
 
 import numpy as np
+import tensorflow as tf
 
 def create_simple_classification_with_spatial_transformer_network_model_2d(input_image_size,
                                                                            resampled_size=(30, 30),
@@ -78,8 +79,8 @@ def create_simple_classification_with_spatial_transformer_network_model_2d(input
     localization = Activation('relu')(localization)
 
     weights = get_initial_weights_2d(output_size=50)
-    localization = Dense(units=6,
-                         weights=weights)(localization)
+    localization = Dense(6, kernel_initializer = tf.constant_initializer(weights[0]),
+                            bias_initializer = tf.constant_initializer(weights[1]))(localization)
 
     outputs = SpatialTransformer2D(resampled_size=resampled_size,
                                    transform_type="affine",
@@ -175,8 +176,8 @@ def create_simple_classification_with_spatial_transformer_network_model_3d(input
     localization = Activation('relu')(localization)
 
     weights = get_initial_weights_3d(output_size=50)
-    localization = Dense(units=12,
-                         weights=weights)(localization)
+    localization = Dense(6, kernel_initializer = tf.constant_initializer(weights[0]),
+                            bias_initializer = tf.constant_initializer(weights[1]))(localization)
 
     outputs = SpatialTransformer3D(resampled_size=resampled_size,
                                    transform_type="affine",

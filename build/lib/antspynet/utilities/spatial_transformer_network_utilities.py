@@ -65,23 +65,33 @@ class SpatialTransformer2D(Layer):
         return(output_shape)
 
     def affine_transform_images(self, images, affine_transform_parameters, resampled_size):
-        batch_size = K.shape(images)[0]
-        number_of_channels = K.shape(images)[-1]
-        transform_parameters = K.reshape(affine_transform_parameters, shape=(batch_size, 2, 3))
+        batch_size = K.int_shape(images)[0]
+        number_of_channels = K.int_shape(images)[-1]
+        if batch_size is None:
+            transform_parameters = K.reshape(affine_transform_parameters, shape=(-1, 2, 3))
+        else:
+            transform_parameters = K.reshape(affine_transform_parameters, shape=(batch_size, 2, 3))
 
-        regular_grids = self.make_regular_grids(batch_size, resampled_size)
-        sampled_grids = K.batch_dot(transform_parameters, regular_grids)
+        regular_grid = self.make_regular_grid(resampled_size)
+        sampled_grids = K.dot(transform_parameters, regular_grid)
 
         if self.interpolator_type == 'linear':
             interpolated_image = self.linear_interpolate(images, sampled_grids, resampled_size)
         else:
             raise ValueError("Unsupported interpolator type.")
 
+        if batch_size is None:
+            new_output_shape = (-1, resampled_size[0], resampled_size[1], number_of_channels)
+        else:
+            new_output_shape = (batch_size, resampled_size[0], resampled_size[1], number_of_channels)
+
+        interpolated_image = K.reshape(interpolated_image, shape = new_output_shape)
+
         return(interpolated_image)
 
-    def make_regular_grids(self, batch_size, resampled_size):
-        x_linear_space = tf.lin_space(-1.0, 1.0, resampled_size[1])
-        y_linear_space = tf.lin_space(-1.0, 1.0, resampled_size[0])
+    def make_regular_grid(self, resampled_size):
+        x_linear_space = tf.linspace(-1.0, 1.0, resampled_size[1])
+        y_linear_space = tf.linspace(-1.0, 1.0, resampled_size[0])
 
         x_coords, y_coords = tf.meshgrid(x_linear_space, y_linear_space)
         x_coords = K.flatten(x_coords)
@@ -90,11 +100,10 @@ class SpatialTransformer2D(Layer):
         ones = K.ones_like(x_coords)
         regular_grid = K.concatenate([x_coords, y_coords, ones], axis = 0)
         regular_grid = K.flatten(regular_grid)
+        regular_grid = K.reshape(regular_grid,
+          (3, resampled_size[0] * resampled_size[1]))
 
-        regular_grids = K.tile(regular_grid, K.stack([batch_size]))
-        regular_grids = K.reshape(regular_grids, (batch_size, 3, resampled_size[0] * resampled_size[1]))
-
-        return(regular_grids)
+        return(regular_grid)
 
     def linear_interpolate(self, images, sampled_grids, resampled_size):
         batch_size = K.shape(images)[0]
@@ -222,24 +231,34 @@ class SpatialTransformer3D(Layer):
         return(output_shape)
 
     def affine_transform_images(self, images, affine_transform_parameters, resampled_size):
-        batch_size = K.shape(images)[0]
-        number_of_channels = K.shape(images)[-1]
-        transform_parameters = K.reshape(affine_transform_parameters, shape=(batch_size, 3, 4))
+        batch_size = K.int_shape(images)[0]
+        number_of_channels = K.int_shape(images)[-1]
+        if batch_size is None:
+            transform_parameters = K.reshape(affine_transform_parameters, shape=(-1, 3, 4))
+        else:
+            transform_parameters = K.reshape(affine_transform_parameters, shape=(batch_size, 3, 4))
 
-        regular_grids = self.make_regular_grids(batch_size, resampled_size)
-        sampled_grids = K.batch_dot(transform_parameters, regular_grids)
+        regular_grid = self.make_regular_grid(resampled_size)
+        sampled_grids = K.dot(transform_parameters, regular_grid)
 
         if self.interpolator_type == 'linear':
             interpolated_image = self.linear_interpolate(images, sampled_grids, resampled_size)
         else:
             raise ValueError("Unsupported interpolator type.")
 
+        if batch_size is None:
+            new_output_shape = (-1, resampled_size[0], resampled_size[1], resampled_size[2], number_of_channels)
+        else:
+            new_output_shape = (batch_size, resampled_size[0], resampled_size[1], resampled_size[2], number_of_channels)
+
+        interpolated_image = K.reshape(interpolated_image, shape = new_output_shape)
+
         return(interpolated_image)
 
-    def make_regular_grids(self, batch_size, resampled_size):
-        x_linear_space = tf.lin_space(-1.0, 1.0, resampled_size[1])
-        y_linear_space = tf.lin_space(-1.0, 1.0, resampled_size[0])
-        z_linear_space = tf.lin_space(-1.0, 1.0, resampled_size[2])
+    def make_regular_grid(self, resampled_size):
+        x_linear_space = tf.linspace(-1.0, 1.0, resampled_size[1])
+        y_linear_space = tf.linspace(-1.0, 1.0, resampled_size[0])
+        z_linear_space = tf.linspace(-1.0, 1.0, resampled_size[2])
 
         x_coords, y_coords, z_coords = tf.meshgrid(x_linear_space, y_linear_space, z_linear_space)
         x_coords = K.flatten(x_coords)
@@ -249,12 +268,10 @@ class SpatialTransformer3D(Layer):
         ones = K.ones_like(x_coords)
         regular_grid = K.concatenate([x_coords, y_coords, z_coords, ones], axis = 0)
         regular_grid = K.flatten(regular_grid)
+        regular_grid = K.reshape(regular_grid,
+          (4, resampled_size[0] * resampled_size[1] * resampled_size[2]))
 
-        regular_grids = K.tile(regular_grid, K.stack([batch_size]))
-        regular_grids = K.reshape(regular_grids,
-          (batch_size, 4, resampled_size[0] * resampled_size[1] * resampled_size[2]))
-
-        return(regular_grids)
+        return(regular_grid)
 
     def linear_interpolate(self, images, sampled_grids, resampled_size):
         batch_size = K.shape(images)[0]
