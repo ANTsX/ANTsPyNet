@@ -28,6 +28,12 @@ Mixture density networks
 .. autoclass:: antspynet.utilities.MixtureDensityLayer
 .. autofunction:: antspynet.utilities.get_mixture_density_loss_function
 
+Attention
+---------
+
+.. autoclass:: antspynet.utilities.AttentionLayer2D
+.. autoclass:: antspynet.utilities.AttentionLayer3D
+
 Clustering
 ----------
 
