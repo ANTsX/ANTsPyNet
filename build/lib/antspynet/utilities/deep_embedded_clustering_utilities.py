@@ -138,7 +138,10 @@ class DeepEmbeddedClusteringModel(object):
         clustering_layer = DeepEmbeddedClustering(
             self.number_of_clusters, name="clustering")(self.encoder.output) 
 
-        self.model = Model(inputs=self.encoder.input, outputs=clustering_layer)
+        if self.convolutional == True:
+            self.model = Model(inputs=self.encoder.input, outputs=[clustering_layer, self.autoencoder.output])
+        else:
+            self.model = Model(inputs=self.encoder.input, outputs=clustering_layer)
 
     def pretrain(self, x, optimizer='adam', epochs=200, batch_size=256):
         self.autoencoder.compile(optimizer=optimizer, loss='mse')
@@ -180,7 +183,10 @@ class DeepEmbeddedClusteringModel(object):
         for i in range(max_number_of_iterations):
 
             if i % update_interval == 0:
-                q = self.model.predict(x, verbose=0)
+                if self.convolutional == True:
+                    q, _ = self.model.predict(x, verbose=0)
+                else:
+                    q = self.model.predict(x, verbose=0)                    
                 p = self.target_distribution(q)
 
                 # Met stopping criterion
@@ -200,9 +206,11 @@ class DeepEmbeddedClusteringModel(object):
 
             if self.convolutional == True:
                 if len(self.input_image_size) == 3:
-                    loss = self.model.train_on_batch(x=x[batch_indices,:,:,:], y=p[batch_indices,:])
+                    loss = self.model.train_on_batch(x=x[batch_indices,:,:,:], 
+                                                     y=[p[batch_indices,:], x[batch_indices,:,:,:]])
                 else:
-                    loss = self.model.train_on_batch(x=x[batch_indices,:,:,:,:], y=p[batch_indices,:])
+                    loss = self.model.train_on_batch(x=x[batch_indices,:,:,:,:], 
+                                                     y=[p[batch_indices,:,:], x[batch_indices,:,:,:,:]])
             else:
                 loss = self.model.train_on_batch(x=x[batch_indices,:], y=p[batch_indices,:])
 
