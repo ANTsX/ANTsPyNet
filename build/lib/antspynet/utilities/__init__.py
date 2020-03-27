@@ -25,6 +25,8 @@ from .mixture_density_utilities import sample_from_output
 
 from .resample_tensor_utilities import ResampleTensorLayer2D, ResampleTensorLayer3D
 
+from .attention_utilities import AttentionLayer2D, AttentionLayer3D
+
 from .custom_metrics import multilabel_dice_coefficient
 from .custom_metrics import peak_signal_to_noise_ratio
 from .custom_metrics import pearson_correlation_coefficient

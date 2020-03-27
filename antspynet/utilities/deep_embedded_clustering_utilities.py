@@ -7,7 +7,9 @@ from keras import initializers
 
 import numpy as np
 
-from ..architectures import create_autoencoder_model
+from ..architectures import create_autoencoder_model 
+from ..architectures import create_convolutional_autoencoder_model_2d
+from ..architectures import create_convolutional_autoencoder_model_3d
 
 from sklearn.cluster import KMeans
 
