@@ -5,12 +5,16 @@ from keras.models import Model
 from keras.engine import Layer, InputSpec
 from keras import initializers
 
+import numpy as np
+
+from ..architectures import create_autoencoder_model
+
 from sklearn.cluster import KMeans
 
-class Clustering(Layer):
+class DeepEmbeddedClustering(Layer):
 
     """
-    Clustering layer.
+    Deep embedded lustering layer.
 
     Arguments
     ---------
@@ -30,21 +34,21 @@ class Clustering(Layer):
 
     """
 
-    def __init__(self, number_of_clusters=10, initial_cluster_weights=None, name='', **kwargs):
+    def __init__(self, number_of_clusters=10, initial_cluster_weights=None, alpha=1.0, **kwargs):
+        super(DeepEmbeddedClustering, self).__init__(**kwargs)
+
         self.number_of_clusters = number_of_clusters
         self.initial_cluster_weights = initial_cluster_weights
         self.alpha = alpha
-        self.name = name
-
-        super(Clustering, self).__init__(**kwargs)
+        self.input_spec = InputSpec(ndim=2)
 
     def build(self, input_shape):
-        self.input_spec = [InputSpec(shape=input_shape)]
+        self.input_spec = InputSpec(dtype=K.floatx(), shape=(None, input_shape[1]))
 
         if len(input_shape) != 2:
             raise ValueError("input_shape is not of length 2.")
 
-        self.clusters = self.add_weight(shape=[self.number_of_clusters, input_shape[1]],
+        self.clusters = self.add_weight(shape=(self.number_of_clusters, input_shape[1]),
                                         initializer=initializers.glorot_uniform(),
                                         name='clusters')
 
@@ -60,16 +64,16 @@ class Clustering(Layer):
 
         q = 1.0 / (1.0 + (K.sum(K.square(K.expand_dims(inputs, axis = 1)
             - self.clusters), axis=2) / self.alpha))
-        q = q^((self.alpha + 1.0) / 2.0)
+        q **= ((self.alpha + 1.0) / 2.0)
         q = K.transpose(K.transpose(q) / K.sum(q, axis=1))
-        return( q )
+        return(q)
 
     def compute_output_shape(self, input_shape):
-        return([input_shape[0], self.number_of_clusters])
+        return(input_shape[0], self.number_of_clusters)
 
     def get_config(self):
         config = {"momentum": self.momentum, "axis": self.axis}
-        base_config = super(Scale, self).get_config()
+        base_config = super(DeepEmbeddedClustering, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 class DeepEmbeddedClusteringModel(object):
@@ -117,22 +121,20 @@ class DeepEmbeddedClusteringModel(object):
                 raise ValueError("Need to specify the input image size for CNN.")
 
             if len(self.input_image_size) == 3:  # 2-D
-                ae = create_convolutional_autoencoder_model_2d(
+                self.autoencoder, self.encoder = create_convolutional_autoencoder_model_2d(
                        input_image_size=self.input_image_size,
                        number_of_filters_per_layer=self.number_of_units_per_layer)
             else:
-                ae = create_convolutional_autoencoder_model_3d(
+                self.autoencoder, self.encoder = create_convolutional_autoencoder_model_3d(
                        input_image_size=self.input_image_size,
                        number_of_filters_per_layer=self.number_of_units_per_layer)
 
-            self.autoencoder, self.encoder = ae.convolutional_autoencoder_model
-
         else:
-            ae = create_autoencoder_model(self.number_of_units_per_layer,
-                                        initializer=self.initializer )
-            self.autoencoder, self.encoder = ae.autoencoder_model
+            self.autoencoder, self.encoder = create_autoencoder_model(
+                self.number_of_units_per_layer, initializer=self.initializer)
 
-        clustering_layer = Clustering(self.number_of_clusters, name = "clustering")(self.encoder.output)
+        clustering_layer = DeepEmbeddedClustering(
+            self.number_of_clusters, name="clustering")(self.encoder.output) 
 
         self.model = Model(inputs=self.encoder.input, outputs=clustering_layer)
 
@@ -152,7 +154,7 @@ class DeepEmbeddedClusteringModel(object):
 
     def target_distribution(self, q):
         weight = q**2 / q.sum(0)
-        p = weight.T / weight.sum(1).T
+        p = (weight.T / weight.sum(1)).T
         return(p)
 
     def compile(self, optimizer='sgd', loss='kld', loss_weights=None):
@@ -174,23 +176,26 @@ class DeepEmbeddedClusteringModel(object):
         index_array = np.arange(x.shape[0])
 
         for i in range(max_number_of_iterations):
+
             if i % update_interval == 0:
                 q = self.model.predict(x, verbose=0)
                 p = self.target_distribution(q)
 
                 # Met stopping criterion
 
-                current_prediction <- q.argmax(1)
-                delta_label = (sum(current_prediction != previous_prediction).astype(np.float32) /
+                current_prediction = q.argmax(1)
+                delta_label = (np.sum(current_prediction != previous_prediction).astype(np.float32) /
                                current_prediction.shape[0])
                 previous_prediction = np.copy(current_prediction)
+
+                print("Iteration ", i, " (out of ", max_number_of_iterations, 
+                  "): loss = ", loss, ", delta_label = ", delta_label)
 
                 if i > 0 and delta_label < tolerance:
                     break
 
             batch_indices = index_array[index * batch_size:min((index + 1) * batch_size, x.shape[0])]
 
-            loss = None
             if self.convolutional == True:
                 if len(self.input_image_size) == 3:
                     loss = self.model.train_on_batch(x=x[batch_indices,:,:,:], y=p[batch_indices,:])

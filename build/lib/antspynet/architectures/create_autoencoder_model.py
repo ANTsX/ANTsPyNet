@@ -63,4 +63,4 @@ def create_autoencoder_model(number_of_units_per_layer,
     encoder_model = Model(inputs=inputs, outputs=encoder)
     autoencoder_model = Model(inputs=inputs, outputs=autoencoder)
 
-    return([autoencoder_model, encoder_model])
+    return(autoencoder_model, encoder_model)

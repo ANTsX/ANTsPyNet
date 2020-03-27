@@ -5,7 +5,7 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 # SPHINXBUILD   ?= sphinx-build
-SPHINXBUILD = /Users/ntustison/anaconda3/envs/r-tensorflow/bin/python3 -msphinx
+SPHINXBUILD = /Users/ntustison/anaconda3/bin/python3 -msphinx
 SOURCEDIR     = source
 BUILDDIR      = build
 

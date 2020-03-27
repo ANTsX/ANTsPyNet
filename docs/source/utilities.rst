@@ -31,7 +31,7 @@ Mixture density networks
 Clustering
 ----------
 
-.. autoclass:: antspynet.utilities.Clustering
+.. autoclass:: antspynet.utilities.DeepEmbeddedClustering
 .. autoclass:: antspynet.utilities.DeepEmbeddedClusteringModel
 
 Image patch
