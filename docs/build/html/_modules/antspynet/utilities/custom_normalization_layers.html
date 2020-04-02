@@ -7,11 +7,11 @@
     <title>antspynet.utilities.custom_normalization_layers &#8212; ANTsPyNet 0.0.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -31,9 +31,9 @@
           <div class="body" role="main">
             
   <h1>Source code for antspynet.utilities.custom_normalization_layers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
-<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">initializers</span><span class="p">,</span> <span class="n">regularizers</span><span class="p">,</span> <span class="n">constraints</span>
-<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">backend</span> <span class="k">as</span> <span class="n">K</span>
+<span></span><span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">initializers</span><span class="p">,</span> <span class="n">regularizers</span><span class="p">,</span> <span class="n">constraints</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">backend</span> <span class="k">as</span> <span class="n">K</span>
 
 
 <div class="viewcode-block" id="InstanceNormalization"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.InstanceNormalization">[docs]</a><span class="k">class</span> <span class="nc">InstanceNormalization</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
@@ -95,7 +95,7 @@
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">beta_initializer</span><span class="o">=</span><span class="s1">&#39;zeros&#39;</span><span class="p">,</span> <span class="n">gamma_initializer</span><span class="o">=</span><span class="s1">&#39;ones&#39;</span><span class="p">,</span>
                  <span class="n">beta_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gamma_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">beta_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gamma_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -232,7 +232,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -249,7 +249,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

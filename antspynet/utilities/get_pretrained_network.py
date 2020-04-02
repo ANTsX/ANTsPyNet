@@ -30,19 +30,20 @@ def get_pretrained_network(file_id=None, target_file_name=None):
 
     def switch_networks(argument):
         switcher = {
-            "dbpn4x": "https://ndownloader.figshare.com/files/13347617",
-            "mriSuperResolution": "https://ndownloader.figshare.com/files/19430123",
+            "brainAgeGender": "https://ndownloader.figshare.com/files/22179948",
+            # "brainAgeGender": "https://ndownloader.figshare.com/files/14394350",
             "brainExtraction": "https://ndownloader.figshare.com/files/13729661",
             "brainSegmentation": "https://ndownloader.figshare.com/files/13900010",
             "brainSegmentationPatchBased": "https://ndownloader.figshare.com/files/14249717",
-            "brainAgeGender": "https://ndownloader.figshare.com/files/14394350",
-            "denoising": "https://ndownloader.figshare.com/files/14235296",
-            "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
-            "protonLungMri": "https://ndownloader.figshare.com/files/13606799",
             "ctHumanLung": "https://ndownloader.figshare.com/files/20005217",
+            "dbpn4x": "https://ndownloader.figshare.com/files/13347617",
+            "denoising": "https://ndownloader.figshare.com/files/14235296",
             "functionalLungMri": "https://ndownloader.figshare.com/files/13824167",
             "hippMapp3rInitial": "https://ndownloader.figshare.com/files/18068408",
-            "hippMapp3rRefine": "https://ndownloader.figshare.com/files/18068411"
+            "hippMapp3rRefine": "https://ndownloader.figshare.com/files/18068411",
+            "mriSuperResolution": "https://ndownloader.figshare.com/files/19430123",
+            "protonLungMri": "https://ndownloader.figshare.com/files/13606799",
+            "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -50,18 +51,18 @@ def get_pretrained_network(file_id=None, target_file_name=None):
         raise ValueError("Missing file id.")
 
     valid_list = ("dbpn4x",
-                  "mriSuperResolution",
+                  "brainAgeGender",
                   "brainExtraction",
                   "brainSegmentation",
                   "brainSegmentationPatchBased",
-                  "brainAgeGender",
-                  "denoising",
-                  "wholeTumorSegmentationT2Flair",
-                  "protonLungMri",
                   "ctHumanLung",
+                  "denoising",
                   "functionalLungMri",
                   "hippMapp3rInitial",
                   "hippMapp3rRefine",
+                  "mriSuperResolution",
+                  "protonLungMri",
+                  "wholeTumorSegmentationT2Flair",
                   "show")
 
     if not file_id in valid_list:

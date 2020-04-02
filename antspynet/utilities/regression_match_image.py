@@ -7,6 +7,7 @@ import ants
 
 def regression_match_image(source_image,
                            reference_image,
+                           mask=None,
                            poly_order=1,
                            truncate=True):
     """
@@ -23,6 +24,9 @@ def regression_match_image(source_image,
 
     poly_order : integer
         Polynomial order of fit.  Default is 1 (linear fit).
+
+    mask : ANTsImage
+        Defines voxels for regression modeling.
 
     truncate : boolean
         Turns on/off the clipping of intensities.
@@ -42,8 +46,13 @@ def regression_match_image(source_image,
     if source_image.shape != reference_image.shape:
         raise ValueError("Images do not have the same dimension.")
 
-    source_intensities = np.expand_dims((source_image.numpy()).flatten(), axis=1)
-    reference_intensities = np.expand_dims((reference_image.numpy()).flatten(), axis=1)
+    if mask is None:
+        source_intensities = np.expand_dims((source_image.numpy()).flatten(), axis=1)
+        reference_intensities = np.expand_dims((reference_image.numpy()).flatten(), axis=1)
+    else:
+        mask_intensities = (mask.numpy()).flatten()
+        source_intensities = np.expand_dims(source_image.numpy().flatten()[np.where(mask_intensities != 0)], axis=1)
+        reference_intensities = np.expand_dims(source_image.numpy().flatten()[np.where(mask_intensities != 0)], axis=1)
 
     poly_features = PolynomialFeatures(degree=poly_order)
     source_intensities_poly = poly_features.fit_transform(source_intensities)

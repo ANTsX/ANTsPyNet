@@ -7,11 +7,11 @@
     <title>antspynet.utilities.deep_embedded_clustering_utilities &#8212; ANTsPyNet 0.0.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -34,13 +34,17 @@
 <span></span>
 <span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 
-<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="kn">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
-<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">initializers</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="k">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="k">import</span> <span class="n">initializers</span>
 
-<span class="kn">from</span> <span class="nn">..architectures</span> <span class="kn">import</span> <span class="n">create_autoencoder_model</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span> <span class="nn">..architectures</span> <span class="k">import</span> <span class="n">create_autoencoder_model</span> 
+<span class="kn">from</span> <span class="nn">..architectures</span> <span class="k">import</span> <span class="n">create_convolutional_autoencoder_model_2d</span>
+<span class="kn">from</span> <span class="nn">..architectures</span> <span class="k">import</span> <span class="n">create_convolutional_autoencoder_model_3d</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="k">import</span> <span class="n">KMeans</span>
 
 <div class="viewcode-block" id="DeepEmbeddedClustering"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.DeepEmbeddedClustering">[docs]</a><span class="k">class</span> <span class="nc">DeepEmbeddedClustering</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
 
@@ -65,21 +69,21 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_clusters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">initial_cluster_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_clusters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">initial_cluster_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DeepEmbeddedClustering</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span> <span class="o">=</span> <span class="n">number_of_clusters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_cluster_weights</span> <span class="o">=</span> <span class="n">initial_cluster_weights</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-
-        <span class="nb">super</span><span class="p">(</span><span class="n">DeepEmbeddedClustering</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span> <span class="o">=</span> <span class="n">InputSpec</span><span class="p">(</span><span class="n">ndim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">InputSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span> <span class="o">=</span> <span class="n">InputSpec</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">K</span><span class="o">.</span><span class="n">floatx</span><span class="p">(),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;input_shape is not of length 2.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">clusters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clusters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
                                         <span class="n">initializer</span><span class="o">=</span><span class="n">initializers</span><span class="o">.</span><span class="n">glorot_uniform</span><span class="p">(),</span>
                                         <span class="n">name</span><span class="o">=</span><span class="s1">&#39;clusters&#39;</span><span class="p">)</span>
 
@@ -104,7 +108,7 @@
 
     <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;momentum&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">momentum</span><span class="p">,</span> <span class="s2">&quot;axis&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">}</span>
-        <span class="n">base_config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Scale</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+        <span class="n">base_config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">DeepEmbeddedClustering</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base_config</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span></div>
 
 <div class="viewcode-block" id="DeepEmbeddedClusteringModel"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.DeepEmbeddedClusteringModel">[docs]</a><span class="k">class</span> <span class="nc">DeepEmbeddedClusteringModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -133,7 +137,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_units_per_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number_of_clusters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_units_per_layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number_of_clusters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
                  <span class="n">initializer</span><span class="o">=</span><span class="s1">&#39;glorot_uniform&#39;</span><span class="p">,</span> <span class="n">convolutional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">input_image_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">(</span><span class="n">DeepEmbeddedClusteringModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -167,7 +171,10 @@
         <span class="n">clustering_layer</span> <span class="o">=</span> <span class="n">DeepEmbeddedClustering</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">number_of_clusters</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;clustering&quot;</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">output</span><span class="p">)</span> 
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">clustering_layer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolutional</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">clustering_layer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span><span class="o">.</span><span class="n">output</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">clustering_layer</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">pretrain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">autoencoder</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">)</span>
@@ -185,7 +192,7 @@
 
     <span class="k">def</span> <span class="nf">target_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="n">q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">q</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">weight</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">weight</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">weight</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
         <span class="k">return</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;sgd&#39;</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;kld&#39;</span><span class="p">,</span> <span class="n">loss_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -207,28 +214,36 @@
         <span class="n">index_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_number_of_iterations</span><span class="p">):</span>
+
             <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">update_interval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolutional</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">q</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>                    
                 <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_distribution</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
 
                 <span class="c1"># Met stopping criterion</span>
 
-                <span class="n">current_prediction</span> <span class="o">&lt;-</span> <span class="n">q</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">delta_label</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">current_prediction</span> <span class="o">!=</span> <span class="n">previous_prediction</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span>
+                <span class="n">current_prediction</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">delta_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">current_prediction</span> <span class="o">!=</span> <span class="n">previous_prediction</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span>
                                <span class="n">current_prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">previous_prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">current_prediction</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Iteration &quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="s2">&quot; (out of &quot;</span><span class="p">,</span> <span class="n">max_number_of_iterations</span><span class="p">,</span> 
+                  <span class="s2">&quot;): loss = &quot;</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;, delta_label = &quot;</span><span class="p">,</span> <span class="n">delta_label</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">delta_label</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
                     <span class="k">break</span>
 
             <span class="n">batch_indices</span> <span class="o">=</span> <span class="n">index_array</span><span class="p">[</span><span class="n">index</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">:</span><span class="nb">min</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
-            <span class="n">loss</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convolutional</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_image_size</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:])</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:],</span> 
+                                                     <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:],</span> <span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:]])</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:])</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:,:],</span> 
+                                                     <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:],</span> <span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:,:,:,:]])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:],</span> <span class="n">y</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">,:])</span>
 
@@ -280,7 +295,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script type="text/javascript">$('#searchbox').show(0);</script>
 
 
 
@@ -297,7 +312,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
