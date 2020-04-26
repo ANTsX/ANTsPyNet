@@ -22,6 +22,8 @@ from .create_denseunet_model import create_denseunet_model_2d, create_denseunet_
 from .create_custom_unet_model import create_nobrainer_unet_model_3d
 from .create_custom_unet_model import create_hippmapp3r_unet_model_3d
 
+from .create_custom_model import create_simple_fully_convolutional_network_model_3d
+
 from .create_vanilla_gan_model import VanillaGanModel
 from .create_deep_convolutional_gan_model import DeepConvolutionalGanModel
 from .create_wasserstein_gan_model import WassersteinGanModel

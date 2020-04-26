@@ -67,6 +67,11 @@ Image voxelwise segmentation
 
 .. autofunction:: antspynet.architectures.create_hippmapp3r_unet_model_3d
 
+Custom
+------
+
+.. autofunction:: antspynet.architectures.create_simple_fully_convolutional_network_model_3d
+
 Generative adverserial networks
 -------------------------------
 
