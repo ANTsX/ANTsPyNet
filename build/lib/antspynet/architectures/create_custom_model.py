@@ -1,6 +1,6 @@
 from keras.models import Model
 from keras.layers import (Add, Activation, AveragePooling3D, BatchNormalization,
-                          Conv3D, Dropout, Input, MaxPooling3D, ReLU)
+                          Conv3D, Dropout, Input, MaxPooling3D, ReLU, ZeroPadding3D)
 
 def create_simple_fully_convolutional_network_model_3d(input_image_size,
                                                        number_of_filters_per_layer=(32, 64, 128, 256, 256, 64),
@@ -49,6 +49,7 @@ def create_simple_fully_convolutional_network_model_3d(input_image_size,
             outputs = Conv3D(filters=number_of_filters_per_layer[i],
                              kernel_size=(3, 3, 3),
                              padding='valid')(outputs)
+            outputs = ZeroPadding3D(padding=(1, 1, 1))(outputs)                 
             outputs = BatchNormalization(momentum=0.1,
                                          epsilon=1e-5)(outputs)
             outputs = MaxPooling3D(pool_size=(2, 2, 2),
@@ -56,7 +57,7 @@ def create_simple_fully_convolutional_network_model_3d(input_image_size,
         else:
             outputs = Conv3D(filters=number_of_filters_per_layer[i],
                              kernel_size=(1, 1, 1),
-                             padding='same')(outputs)
+                             padding='valid')(outputs)
             outputs = BatchNormalization(momentum=0.1,
                                          epsilon=1e-5)(outputs)
         outputs = ReLU()(outputs)
@@ -69,7 +70,7 @@ def create_simple_fully_convolutional_network_model_3d(input_image_size,
 
     outputs = Conv3D(filters=number_of_bins,
                      kernel_size=(1, 1, 1),
-                     padding='same',
+                     padding='valid',
                      activation = 'softmax')(outputs)
 
     model = Model(inputs=inputs, outputs=outputs)
