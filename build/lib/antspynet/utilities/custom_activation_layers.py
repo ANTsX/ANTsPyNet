@@ -1,5 +1,5 @@
 from keras.layers import Layer
-from keras import backend as K
+import tensorflow as tf
 
 class LogSoftmax(Layer):
 
@@ -23,7 +23,7 @@ class LogSoftmax(Layer):
         self.axis = axis
 
     def call(self, inputs):
-        return K.log_softmax(inputs, axis=self.axis)
+        return tf.nn.log_softmax(inputs, axis=self.axis)
 
     def get_config(self):
         config = {'axis': self.axis}
