@@ -104,6 +104,28 @@ next layer.</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="custom-activation-layers">
+<h2>Custom activation layers<a class="headerlink" href="#custom-activation-layers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="antspynet.utilities.LogSoftmax">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">LogSoftmax</code><span class="sig-paren">(</span><em class="sig-param">axis=-1</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_activation_layers.html#LogSoftmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.LogSoftmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log Softmax activation function.</p>
+<dl class="simple">
+<dt>Input shape:</dt><dd><p>Arbitrary. Use the keyword argument <cite>input_shape</cite>
+(tuple of integers, does not include the samples axis)
+when using this layer as the first layer in a model.</p>
+</dd>
+<dt>Output shape:</dt><dd><p>Same shape as the input.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> – Integer, axis along which the softmax normalization is applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="resample-tensor-layer">
 <h2>Resample tensor layer<a class="headerlink" href="#resample-tensor-layer" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -696,6 +718,7 @@ image.</p></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#custom-metrics">Custom metrics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-normalization-layers">Custom normalization layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-activation-layers">Custom activation layers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#resample-tensor-layer">Resample tensor layer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#mixture-density-networks">Mixture density networks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#attention">Attention</a></li>

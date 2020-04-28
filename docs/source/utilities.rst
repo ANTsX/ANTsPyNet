@@ -16,6 +16,11 @@ Custom normalization layers
 
 .. autoclass:: antspynet.utilities.InstanceNormalization
 
+Custom activation layers
+---------------------------
+
+.. autoclass:: antspynet.utilities.LogSoftmax
+
 Resample tensor layer
 ---------------------
 

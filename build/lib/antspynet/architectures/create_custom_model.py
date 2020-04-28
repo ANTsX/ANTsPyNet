@@ -1,6 +1,7 @@
 from keras.models import Model
 from keras.layers import (Add, Activation, AveragePooling3D, BatchNormalization,
                           Conv3D, Dropout, Input, MaxPooling3D, ReLU, ZeroPadding3D)
+from antspynet.utilities import LogSoftmax                          
 
 def create_simple_fully_convolutional_network_model_3d(input_image_size,
                                                        number_of_filters_per_layer=(32, 64, 128, 256, 256, 64),
@@ -70,8 +71,8 @@ def create_simple_fully_convolutional_network_model_3d(input_image_size,
 
     outputs = Conv3D(filters=number_of_bins,
                      kernel_size=(1, 1, 1),
-                     padding='valid',
-                     activation = 'softmax')(outputs)
+                     padding='valid')(outputs)
+    outputs = LogSoftmax()(outputs)
 
     model = Model(inputs=inputs, outputs=outputs)
 
