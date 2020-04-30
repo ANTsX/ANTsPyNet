@@ -44,6 +44,7 @@
                            <span class="n">template_transform_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">template</span><span class="o">=</span><span class="s2">&quot;biobank&quot;</span><span class="p">,</span>
                            <span class="n">do_bias_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">return_bias_field</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                            <span class="n">do_denoising</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                            <span class="n">intensity_matching_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">reference_image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -80,6 +81,10 @@
 
 <span class="sd">    do_bias_correction : boolean</span>
 <span class="sd">        Perform N4 bias field correction.</span>
+
+<span class="sd">    return_bias_field : boolean</span>
+<span class="sd">        If True, return bias field as an additional output *without* bias </span>
+<span class="sd">        correcting the preprocessed image.    </span>
 
 <span class="sd">    do_denoising : boolean</span>
 <span class="sd">        Perform non-local means denoising.</span>
@@ -178,15 +183,19 @@
                 <span class="n">transformlist</span><span class="o">=</span><span class="n">registration</span><span class="p">[</span><span class="s1">&#39;fwdtransforms&#39;</span><span class="p">],</span> <span class="n">interpolator</span><span class="o">=</span><span class="s2">&quot;genericLabel&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="c1"># Do bias correction</span>
+    <span class="n">bias_field</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">do_bias_correction</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocessing:  brain correction.&quot;</span><span class="p">)</span>
-
         <span class="n">n4_output</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">n4_output</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">n4_bias_field_correction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">shrink_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">n4_output</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">n4_bias_field_correction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">shrink_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">return_bias_field</span><span class="o">=</span><span class="n">return_bias_field</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">n4_output</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">n4_bias_field_correction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">shrink_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">n4_output</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">n4_bias_field_correction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">shrink_factor</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">return_bias_field</span><span class="o">=</span><span class="n">return_bias_field</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_bias_field</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">bias_field</span> <span class="o">=</span> <span class="n">n4_output</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">n4_output</span>        
 
     <span class="c1"># Denoising</span>
     <span class="k">if</span> <span class="n">do_denoising</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
@@ -225,6 +234,8 @@
     <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;preprocessed_image&#39;</span> <span class="p">:</span> <span class="n">preprocessed_image</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">return_dict</span><span class="p">[</span><span class="s1">&#39;brain_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span>
+    <span class="k">if</span> <span class="n">bias_field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">return_dict</span><span class="p">[</span><span class="s1">&#39;bias_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bias_field</span>
     <span class="k">if</span> <span class="n">transforms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">return_dict</span><span class="p">[</span><span class="s1">&#39;template_transforms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transforms</span>
   

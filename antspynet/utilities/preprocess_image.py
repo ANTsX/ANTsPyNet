@@ -11,6 +11,7 @@ def preprocess_brain_image(image,
                            template_transform_type=None,
                            template="biobank",
                            do_bias_correction=True,
+                           return_bias_field=False,
                            do_denoising=True,
                            intensity_matching_type=None,
                            reference_image=None,
@@ -47,6 +48,10 @@ def preprocess_brain_image(image,
 
     do_bias_correction : boolean
         Perform N4 bias field correction.
+
+    return_bias_field : boolean
+        If True, return bias field as an additional output *without* bias 
+        correcting the preprocessed image.    
 
     do_denoising : boolean
         Perform non-local means denoising.
@@ -145,15 +150,19 @@ def preprocess_brain_image(image,
                 transformlist=registration['fwdtransforms'], interpolator="genericLabel", verbose=verbose)
 
     # Do bias correction
+    bias_field = None
     if do_bias_correction == True:
         if verbose == True:
             print("Preprocessing:  brain correction.")
-
         n4_output = None
         if mask is None:
-            n4_output = ants.n4_bias_field_correction(preprocessed_image, shrink_factor=4, verbose=verbose)
+            n4_output = ants.n4_bias_field_correction(preprocessed_image, shrink_factor=4, return_bias_field=return_bias_field, verbose=verbose)
         else:
-            n4_output = ants.n4_bias_field_correction(preprocessed_image, mask, shrink_factor=4, verbose=verbose)
+            n4_output = ants.n4_bias_field_correction(preprocessed_image, mask, shrink_factor=4, return_bias_field=return_bias_field, verbose=verbose)
+        if return_bias_field == True:
+            bias_field = n4_output
+        else:
+            preprocessed_image = n4_output        
 
     # Denoising
     if do_denoising == True:
@@ -192,6 +201,8 @@ def preprocess_brain_image(image,
     return_dict = {'preprocessed_image' : preprocessed_image}
     if mask is not None:
         return_dict['brain_mask'] = mask
+    if bias_field is not None:
+        return_dict['bias_field'] = bias_field
     if transforms is not None:
         return_dict['template_transforms'] = transforms
   

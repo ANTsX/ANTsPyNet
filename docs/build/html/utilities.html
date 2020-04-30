@@ -649,7 +649,7 @@ tempfile.</p></li>
 
 <dl class="function">
 <dt id="antspynet.utilities.preprocess_brain_image">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">preprocess_brain_image</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">truncate_intensity=(0.01</em>, <em class="sig-param">0.99)</em>, <em class="sig-param">do_brain_extraction=True</em>, <em class="sig-param">template_transform_type=None</em>, <em class="sig-param">template='biobank'</em>, <em class="sig-param">do_bias_correction=True</em>, <em class="sig-param">do_denoising=True</em>, <em class="sig-param">intensity_matching_type=None</em>, <em class="sig-param">reference_image=None</em>, <em class="sig-param">intensity_normalization_type=None</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/preprocess_image.html#preprocess_brain_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.preprocess_brain_image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">preprocess_brain_image</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">truncate_intensity=(0.01</em>, <em class="sig-param">0.99)</em>, <em class="sig-param">do_brain_extraction=True</em>, <em class="sig-param">template_transform_type=None</em>, <em class="sig-param">template='biobank'</em>, <em class="sig-param">do_bias_correction=True</em>, <em class="sig-param">return_bias_field=False</em>, <em class="sig-param">do_denoising=True</em>, <em class="sig-param">intensity_matching_type=None</em>, <em class="sig-param">reference_image=None</em>, <em class="sig-param">intensity_normalization_type=None</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/preprocess_image.html#preprocess_brain_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.preprocess_brain_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Basic preprocessing pipeline for T1-weighted brain MRI</p>
 <p>Standard preprocessing steps that have been previously described
 in various papers including the cortical thickness pipeline:</p>
@@ -667,6 +667,8 @@ in various papers including the cortical thickness pipeline:</p>
 <li><p><strong>template</strong> (<em>ANTs image</em><em> (</em><em>not skull-stripped</em><em>)</em>) – Alternatively, one can specify the default “biobank” in which case the
 ANTs biobank template resampled to [192,224,192] is downloaded and used.</p></li>
 <li><p><strong>do_bias_correction</strong> (<em>boolean</em>) – Perform N4 bias field correction.</p></li>
+<li><p><strong>return_bias_field</strong> (<em>boolean</em>) – If True, return bias field as an additional output <em>without</em> bias
+correcting the preprocessed image.</p></li>
 <li><p><strong>do_denoising</strong> (<em>boolean</em>) – Perform non-local means denoising.</p></li>
 <li><p><strong>intensity_matching_type</strong> (<em>string</em>) – Either “regression” or “histogram” (the latter is currently not implemented).
 Only is performed if reference_image is not None.</p></li>
