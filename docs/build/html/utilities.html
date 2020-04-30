@@ -617,6 +617,84 @@ weights.</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="applications">
+<h2>Applications<a class="headerlink" href="#applications" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.utilities.brain_extraction">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">brain_extraction</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/brain_extraction.html#brain_extraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.brain_extraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform brain extraction using U-net and ANTs-based
+training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>ANTsImage</em>) – input image</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
+Since these can be resused, if is None, these data will be downloaded to a
+tempfile.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ANTs probability brain mask image.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">probability_brain_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">brain_image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.preprocess_brain_image">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">preprocess_brain_image</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">truncate_intensity=(0.01</em>, <em class="sig-param">0.99)</em>, <em class="sig-param">do_brain_extraction=True</em>, <em class="sig-param">template_transform_type=None</em>, <em class="sig-param">template='biobank'</em>, <em class="sig-param">do_bias_correction=True</em>, <em class="sig-param">do_denoising=True</em>, <em class="sig-param">intensity_matching_type=None</em>, <em class="sig-param">reference_image=None</em>, <em class="sig-param">intensity_normalization_type=None</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/preprocess_image.html#preprocess_brain_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.preprocess_brain_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic preprocessing pipeline for T1-weighted brain MRI</p>
+<p>Standard preprocessing steps that have been previously described
+in various papers including the cortical thickness pipeline:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/24879923">https://www.ncbi.nlm.nih.gov/pubmed/24879923</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>ANTsImage</em>) – input image</p></li>
+<li><p><strong>truncate_intensity</strong> (<em>2-length tuple</em>) – Defines the quantile threshold for truncating the image intensity</p></li>
+<li><p><strong>do_brain_extraction</strong> (<em>boolean</em>) – Perform brain extraction using antspynet tools (3D images only).</p></li>
+<li><p><strong>template_transform_type</strong> (<em>string</em>) – See details in help for ants.registration.  Typically “Rigid” or
+“Affine”.</p></li>
+<li><p><strong>template</strong> (<em>ANTs image</em><em> (</em><em>not skull-stripped</em><em>)</em>) – Alternatively, one can specify the default “biobank” in which case the
+ANTs biobank template resampled to [192,224,192] is downloaded and used.</p></li>
+<li><p><strong>do_bias_correction</strong> (<em>boolean</em>) – Perform N4 bias field correction.</p></li>
+<li><p><strong>do_denoising</strong> (<em>boolean</em>) – Perform non-local means denoising.</p></li>
+<li><p><strong>intensity_matching_type</strong> (<em>string</em>) – Either “regression” or “histogram” (the latter is currently not implemented).
+Only is performed if reference_image is not None.</p></li>
+<li><p><strong>reference_image</strong> (<em>ANTs image</em>) – Reference image for intensity matching.</p></li>
+<li><p><strong>intensity_normalization_type</strong> (<em>string</em>) – Either rescale the intensities to [0,1] (i.e., “01”) or zero-mean, unit variance
+(i.e., “0mean”).  If None normalization is not performed.</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
+Since these can be resused, if is None, these data will be downloaded to a
+tempfile.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ANTs image (i.e., source_image) matched to the (reference_image)</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">preprocess_brain_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">do_brain_extraction</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
 <div class="section" id="miscellaneous">
 <h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -726,6 +804,7 @@ image.</p></li>
 <li class="toctree-l2"><a class="reference internal" href="#image-patch">Image patch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#super-resolution">Super-resolution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#spatial-transformer-network">Spatial transformer network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#applications">Applications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
 </ul>
 </li>

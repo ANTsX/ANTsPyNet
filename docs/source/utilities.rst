@@ -67,6 +67,12 @@ Spatial transformer network
 .. autoclass:: antspynet.utilities.SpatialTransformer2D
 .. autoclass:: antspynet.utilities.SpatialTransformer3D
 
+Applications
+------------
+
+.. autofunction:: antspynet.utilities.brain_extraction
+.. autofunction:: antspynet.utilities.preprocess_brain_image
+
 Miscellaneous
 -------------
 
