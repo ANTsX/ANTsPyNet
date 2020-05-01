@@ -180,9 +180,9 @@ def preprocess_brain_image(image,
             print("Preprocessing:  intensity matching.")
 
         if intensity_matching_type == "regression":
-            preprocessed_image = regression_match_image(source_image, reference_image)
+            preprocessed_image = regression_match_image(preprocessed_image, reference_image)
         elif intensity_matching_type == "histogram":   
-            raise ValueError("Histogram matching not implemented yet.")
+            preprocessed_image = ants.histogram_match_image(preprocessed_image, reference_image)
         else: 
             raise ValueError("Unrecognized intensity_matching_type.")
 
