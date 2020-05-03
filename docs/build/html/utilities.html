@@ -670,8 +670,8 @@ ANTs biobank template resampled to [192,224,192] is downloaded and used.</p></li
 <li><p><strong>return_bias_field</strong> (<em>boolean</em>) – If True, return bias field as an additional output <em>without</em> bias
 correcting the preprocessed image.</p></li>
 <li><p><strong>do_denoising</strong> (<em>boolean</em>) – Perform non-local means denoising.</p></li>
-<li><p><strong>intensity_matching_type</strong> (<em>string</em>) – Either “regression” or “histogram” (the latter is currently not implemented).
-Only is performed if reference_image is not None.</p></li>
+<li><p><strong>intensity_matching_type</strong> (<em>string</em>) – Either “regression” or “histogram”. Only is performed if reference_image
+is not None.</p></li>
 <li><p><strong>reference_image</strong> (<em>ANTs image</em>) – Reference image for intensity matching.</p></li>
 <li><p><strong>intensity_normalization_type</strong> (<em>string</em>) – Either rescale the intensities to [0,1] (i.e., “01”) or zero-mean, unit variance
 (i.e., “0mean”).  If None normalization is not performed.</p></li>
@@ -768,6 +768,67 @@ image.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">source_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r64&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">matched_image</span> <span class="o">=</span> <span class="n">regression_match_image</span><span class="p">(</span><span class="n">source_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.randomly_transform_image_data">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">randomly_transform_image_data</code><span class="sig-paren">(</span><em class="sig-param">reference_image</em>, <em class="sig-param">input_image_list</em>, <em class="sig-param">segmentation_image_list=None</em>, <em class="sig-param">number_of_simulations=10</em>, <em class="sig-param">transform_type='affine'</em>, <em class="sig-param">sd_affine=1.0</em>, <em class="sig-param">deformation_transform_type='bspline'</em>, <em class="sig-param">number_of_random_points=1000</em>, <em class="sig-param">sd_noise=10.0</em>, <em class="sig-param">number_of_fitting_levels=4</em>, <em class="sig-param">mesh_size=1</em>, <em class="sig-param">sd_smoothing=4.0</em>, <em class="sig-param">input_image_interpolator='linear'</em>, <em class="sig-param">segmentation_image_interpolator='nearestNeighbor'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_transform_image_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.randomly_transform_image_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly transform image data (optional: with corresponding segmentations).</p>
+<p>Apply rigid, affine and/or deformable maps to an input set of training
+images.  The reference image domain defines the space in which this
+happens.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reference_image</strong> (<em>ANTsImage</em>) – Defines the spatial domain for all output images.  If the input images do
+not match the spatial domain of the reference image, we internally
+resample the target to the reference image.  This could have unexpected
+consequences.  Resampling to the reference domain is performed by testing
+using ants.image_physical_space_consistency then calling
+ants.resample_image_to_target with failure.</p></li>
+<li><p><strong>input_image_list</strong> (<em>list of lists of ANTsImages</em>) – List of lists of input images to warp.  The internal list sets contain one
+or more images (per subject) which are assumed to be mutually aligned.  The
+outer list contains multiple subject lists which are randomly sampled to
+produce output image list.</p></li>
+<li><p><strong>segmentation_image_list</strong> (<em>list of ANTsImages</em>) – List of segmentation images corresponding to the input image list (optional).</p></li>
+<li><p><strong>number_of_simulations</strong> (<em>integer</em>) – Number of output images.</p></li>
+<li><p><strong>transform_type</strong> (<em>string</em>) – One of the following options: “translation”, “rigid”, “scaleShear”, “affine”,
+“deformation”, “affineAndDeformation”.</p></li>
+<li><p><strong>sd_affine</strong> (<em>float</em>) – Parameter dictating deviation amount from identity for random linear
+transformations.</p></li>
+<li><p><strong>deformation_transform_type</strong> (<em>string</em>) – “bspline” or “exponential”.</p></li>
+<li><p><strong>number_of_random_points</strong> (<em>integer</em>) – Number of displacement points for the deformation field.</p></li>
+<li><p><strong>sd_noise</strong> (<em>float</em>) – Standard deviation of the displacement field.</p></li>
+<li><p><strong>number_of_fitting_levels</strong> (<em>integer</em>) – Number of fitting levels (bspline deformation only).</p></li>
+<li><p><strong>mesh_size</strong> (<em>int</em><em> or </em><em>n-D tuple</em>) – Determines fitting resolution (bspline deformation only).</p></li>
+<li><p><strong>sd_smoothing</strong> (<em>float</em>) – Standard deviation of the Gaussian smoothing in mm (exponential field only).</p></li>
+<li><p><strong>input_image_interpolator</strong> (<em>string</em>) – One of the following options “linear”, “gaussian”, “bspline”.</p></li>
+<li><p><strong>segmentation_image_interpolator</strong> (<em>string</em>) – One of the following options “nearestNeighbor” or “genericLabel”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of lists of transformed images</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image1</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image2</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">segmentation1</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span> <span class="s2">&quot;Otsu&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">segmentation2</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">image2</span><span class="p">,</span> <span class="s2">&quot;Otsu&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_images</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">image1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">image2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_segmentations</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_segmentations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segmentation1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_segmentations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segmentation2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">randomly_transform_image_data</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>              <span class="n">input_images</span><span class="p">,</span> <span class="n">input_segmentations</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

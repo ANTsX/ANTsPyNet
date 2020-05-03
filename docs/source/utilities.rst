@@ -79,5 +79,6 @@ Miscellaneous
 .. autofunction:: antspynet.utilities.get_pretrained_network
 .. autoclass:: antspynet.utilities.Scale
 .. autofunction:: antspynet.utilities.regression_match_image
+.. autofunction:: antspynet.utilities.randomly_transform_image_data
 
 
