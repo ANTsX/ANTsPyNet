@@ -164,10 +164,7 @@ def create_densenet_model_2d(input_image_size,
 
     layer_activation = ''
     if mode == 'classification':
-        if number_of_classification_labels == 2:
-            layer_activation = 'sigmoid'
-        else:
-            layer_activation = 'softmax'
+        layer_activation = 'softmax'
     elif mode == 'regression':
         layerActivation = 'linear'
     else:
@@ -337,10 +334,7 @@ def create_densenet_model_3d(input_image_size,
 
     layer_activation = ''
     if mode == 'classification':
-        if number_of_classification_labels == 2:
-            layer_activation = 'sigmoid'
-        else:
-            layer_activation = 'softmax'
+        layer_activation = 'softmax'
     elif mode == 'regression':
         layerActivation = 'linear'
     else:

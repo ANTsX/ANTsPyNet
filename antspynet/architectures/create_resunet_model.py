@@ -332,10 +332,7 @@ def create_resunet_model_2d(input_image_size,
     convActivation = ''
 
     if mode == 'classification':
-        if number_of_outputs == 2:
-            convActivation = 'sigmoid'
-        else:
-            convActivation = 'softmax'
+        convActivation = 'softmax'
     elif mode == 'regression':
         convActivation = 'linear'
     else:
@@ -671,10 +668,7 @@ def create_resunet_model_3d(input_image_size,
     convActivation = ''
 
     if mode == 'classification':
-        if number_of_outputs == 2:
-            convActivation = 'sigmoid'
-        else:
-            convActivation = 'softmax'
+        convActivation = 'softmax'
     elif mode == 'regression':
         convActivation = 'linear'
     else:
