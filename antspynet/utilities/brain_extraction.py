@@ -49,6 +49,7 @@ def brain_extraction(image,
 
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..architectures import create_nobrainer_unet_model_3d
 
     classes = ("background", "brain")
     number_of_classification_labels = len(classes)
@@ -187,14 +188,15 @@ def brain_extraction(image,
 
         if verbose == True:
             print("NoBrainer:  preprocessing (intensity truncation and resampling).")
-        
+          
+        image_array = image.numpy()
         image_robust_range = np.quantile(image_array[np.where(image_array != 0)], (0.02, 0.98))
         threshold_value = 0.10 * (image_robust_range[1] - image_robust_range[0]) + image_robust_range[0]
 
         thresholded_mask = ants.threshold_image(image, -10000, threshold_value, 0, 1)
         thresholded_image = image * thresholded_mask
 
-        image_resampled = ants.resample_image(image, (256, 256, 256), use_voxels=True)
+        image_resampled = ants.resample_image(thresholded_image, (256, 256, 256), use_voxels=True)
         image_array = np.expand_dims(image_resampled.numpy(), axis=0)
         image_array = np.expand_dims(image_array, axis=-1)
         
