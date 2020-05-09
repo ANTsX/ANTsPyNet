@@ -28,7 +28,7 @@ def brain_extraction(image,
         input image
 
     modality : string
-        Modality image type.  Options include "t1", "fa", "t1nobrainer".
+        Modality image type.  Options include "t1", "bold", "fa", "t1nobrainer".
 
     output_directory : string
         Destination directory for storing the downloaded template and model weights.  
@@ -51,10 +51,13 @@ def brain_extraction(image,
     from ..utilities import get_pretrained_network
     from ..architectures import create_nobrainer_unet_model_3d
 
+    if image.dimension != 3:
+        raise ValueError( "Image dimension must be 3." )  
+
     classes = ("background", "brain")
     number_of_classification_labels = len(classes)
 
-    image_mods = ["T1"]
+    image_mods = [modality]
     channel_size = len(image_mods)
 
     if modality != "t1nobrainer":
@@ -64,6 +67,37 @@ def brain_extraction(image,
         # ANTs-based
         #
         ##################### 
+
+        weights_file_name = None
+        if modality == "t1":
+            if output_directory is not None:
+                weights_file_name = output_directory + "/brainExtractionWeights.h5"
+                if not os.path.exists(weights_file_name):
+                    if verbose == True:
+                        print("Brain extraction:  downloading weights.")
+                    weights_file_name = get_pretrained_network("brainExtraction", weights_file_name)
+            else:    
+                weights_file_name = get_pretrained_network("brainExtraction")
+        elif modality == "bold":
+            if output_directory is not None:
+                weights_file_name = output_directory + "/brainExtractionBoldWeights.h5"
+                if not os.path.exists(weights_file_name):
+                    if verbose == True:
+                        print("Brain extraction:  downloading weights.")
+                    weights_file_name = get_pretrained_network("brainExtractionBOLD", weights_file_name)
+            else:    
+                weights_file_name = get_pretrained_network("brainExtractionBOLD")
+        elif modality == "fa":
+            if output_directory is not None:
+                weights_file_name = output_directory + "/brainExtractionFaWeights.h5"
+                if not os.path.exists(weights_file_name):
+                    if verbose == True:
+                        print("Brain extraction:  downloading weights.")
+                    weights_file_name = get_pretrained_network("brainExtractionFA", weights_file_name)
+            else:    
+                weights_file_name = get_pretrained_network("brainExtractionFA")
+        else:
+            raise ValueError("Unknown modality type.")    
 
         reorient_template_file_name = None
         reorient_template_file_exists = False
@@ -98,28 +132,6 @@ def brain_extraction(image,
             number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
             convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
             weight_decay = 1e-5)
-
-        weights_file_name = None
-        if modality == "t1":
-            if output_directory is not None:
-                weights_file_name = output_directory + "/brainExtractionWeights.h5"
-                if not os.path.exists(weights_file_name):
-                    if verbose == True:
-                        print("Brain extraction:  downloading weights.")
-                    weights_file_name = get_pretrained_network("brainExtraction", weights_file_name)
-            else:    
-                weights_file_name = get_pretrained_network("brainExtraction")
-        elif modality == "fa":
-            if output_directory is not None:
-                weights_file_name = output_directory + "/brainExtractionFaWeights.h5"
-                if not os.path.exists(weights_file_name):
-                    if verbose == True:
-                        print("Brain extraction:  downloading weights.")
-                    weights_file_name = get_pretrained_network("brainExtractionFA", weights_file_name)
-            else:    
-                weights_file_name = get_pretrained_network("brainExtractionFA")
-        else:
-            raise ValueError("Unknown modality type.")    
 
         unet_model.load_weights(weights_file_name)
 
