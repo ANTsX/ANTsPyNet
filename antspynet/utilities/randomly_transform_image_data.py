@@ -7,7 +7,7 @@ def randomly_transform_image_data(reference_image,
                                   segmentation_image_list=None,
                                   number_of_simulations=10,
                                   transform_type='affine',
-                                  sd_affine=0.25,
+                                  sd_affine=0.02,
                                   deformation_transform_type="bspline",
                                   number_of_random_points=1000,
                                   sd_noise=10.0,
@@ -85,18 +85,19 @@ def randomly_transform_image_data(reference_image,
     Example
     -------
     >>> import ants
-    >>> image1 = ants.image_read(get_ants_data("r16")) 
-    >>> image2 = ants.image_read(get_ants_data("r64")) 
-    >>> segmentation1 = ants.threshold_image(image1, "Otsu", 3)
-    >>> segmentation2 = ants.threshold_image(image2, "Otsu", 3)
-    >>> input_images=list()
-    >>> input_images.append(list(image1))
-    >>> input_images.append(list(image2))
-    >>> input_segmentations=list()
-    >>> input_segmentations.append(segmentation1)
-    >>> input_segmentations.append(segmentation2)
-    >>> data = ants.randomly_transform_image_data(image1, 
-    >>>               input_images, input_segmentations)
+    >>> image1_list = list()
+    >>> image1_list.append(ants.image_read(ants.get_ants_data("r16")))
+    >>> image2_list = list()
+    >>> image2_list.append(ants.image_read(ants.get_ants_data("r64"))) 
+    >>> input_segmentations = list()
+    >>> input_segmentations.append(ants.threshold_image(image1, "Otsu", 3))
+    >>> input_segmentations.append(ants.threshold_image(image2, "Otsu", 3))
+    >>> input_images = list()
+    >>> input_images.append(image1_list)
+    >>> input_images.append(image2_list)
+    >>> data = antspynet.randomly_transform_image_data(image1, 
+    >>>     input_images, input_segmentations, sd_affine=0.02,
+    >>>     transform_type = "affineAndDeformation" )
     """
 
     def polar_decomposition(X):
