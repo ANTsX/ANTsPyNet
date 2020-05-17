@@ -71,6 +71,7 @@ Applications
 ------------
 
 .. autofunction:: antspynet.utilities.brain_extraction
+.. autofunction:: antspynet.utilities.lung_extraction
 .. autofunction:: antspynet.utilities.preprocess_brain_image
 
 Miscellaneous
