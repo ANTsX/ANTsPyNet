@@ -1,13 +1,14 @@
 from keras.models import Model
-from keras.layers import (Input, Concatenate, Dropout,
+from keras.layers import (Input, Concatenate, Dropout, Add, Activation, 
+                          multiply,
                           Conv2D, Conv2DTranspose, MaxPooling2D,
-                          UpSampling2D,
+                          UpSampling2D, 
                           Conv3D, Conv3DTranspose, MaxPooling3D,
                           UpSampling3D)
 from keras import regularizers
 
 def create_unet_model_2d(input_image_size,
-                         number_of_outputs=1,
+                         number_of_outputs=2,
                          number_of_layers=4,
                          number_of_filters_at_base_layer=32,
                          convolution_kernel_size=(3, 3),
@@ -16,6 +17,7 @@ def create_unet_model_2d(input_image_size,
                          strides=(2, 2),
                          dropout_rate=0.0,
                          weight_decay=0.0,
+                         add_attention_gating=False,
                          mode='classification'
                         ):
     """
@@ -74,6 +76,9 @@ def create_unet_model_2d(input_image_size,
         Weighting parameter for L2 regularization of the kernel weights of the
         convolution layers.  Default = 0.0.
 
+    add_attention_gating :  boolean
+        Whether or not to include attention gating.    
+
     mode :  string
         `classification` or `regression`.  Default = `classification`.
 
@@ -87,6 +92,21 @@ def create_unet_model_2d(input_image_size,
     >>> model = create_unet_model_2d((128, 128, 1))
     >>> model.summary()
     """
+
+    def attention_gate_2d(x, g, inter_shape):
+        x_theta = Conv2D(filters=inter_shape,
+                         kernel_size=(1, 1),
+                         strides=(1, 1))(x)
+        g_phi = Conv2D(filters=inter_shape,
+                       kernel_size=(1, 1),
+                       strides=(1, 1))(g)
+        f = Add()([x_theta, g_phi])
+        f_psi = Conv2D(filters=1,
+                       kernel_size=(1, 1),
+                       strides=(1, 1))(f)
+        alpha = Activation('sigmoid')(f_psi)
+        attention = multiply([x, alpha])
+        return attention
 
     inputs = Input(shape = input_image_size)
 
@@ -131,7 +151,14 @@ def create_unet_model_2d(input_image_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
         deconv = UpSampling2D(size=pool_size)(deconv)
-        outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
+
+        if add_attention_gating == True:
+            outputs = attention_gate_2d(deconv, 
+              encoding_convolution_layers[number_of_layers-i-1],
+              number_of_filters // 4)
+            outputs = Concatenate(axis=3)([deconv, outputs])
+        else:
+            outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         outputs = Conv2D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
@@ -168,7 +195,7 @@ def create_unet_model_2d(input_image_size,
 
 
 def create_unet_model_3d(input_image_size,
-                         number_of_outputs=1,
+                         number_of_outputs=2,
                          number_of_layers=4,
                          number_of_filters_at_base_layer=32,
                          convolution_kernel_size=(3, 3, 3),
@@ -177,6 +204,7 @@ def create_unet_model_3d(input_image_size,
                          strides=(2, 2, 2),
                          dropout_rate=0.0,
                          weight_decay=0.0,
+                         add_attention_gating=False,
                          mode='classification'
                         ):
     """
@@ -235,6 +263,9 @@ def create_unet_model_3d(input_image_size,
         Weighting parameter for L2 regularization of the kernel weights of the
         convolution layers.  Default = 0.0.
 
+    add_attention_gating :  boolean
+        Whether or not to include attention gating.    
+
     mode :  string
         `classification` or `regression`.  Default = `classification`.
 
@@ -248,6 +279,21 @@ def create_unet_model_3d(input_image_size,
     >>> model = create_unet_model_3d((128, 128, 128, 1))
     >>> model.summary()
     """
+
+    def attention_gate_3d(x, g, inter_shape):
+        x_theta = Conv3D(filters=inter_shape,
+                         kernel_size=(1, 1, 1),
+                         strides=(1, 1, 1))(x)
+        g_phi = Conv3D(filters=inter_shape,
+                       kernel_size=(1, 1, 1),
+                       strides=(1, 1, 1))(g)
+        f = Add()([x_theta, g_phi])
+        f_psi = Conv3D(filters=1,
+                       kernel_size=(1, 1, 1),
+                       strides=(1, 1, 1))(f)
+        alpha = Activation('sigmoid')(f_psi)
+        attention = multiply([x, alpha])
+        return attention
 
     inputs = Input(shape = input_image_size)
 
@@ -292,7 +338,14 @@ def create_unet_model_3d(input_image_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
         deconv = UpSampling3D(size=pool_size)(deconv)
-        outputs = Concatenate(axis=4)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
+
+        if add_attention_gating == True:
+            outputs = attention_gate_3d(deconv, 
+              encoding_convolution_layers[number_of_layers-i-1],
+              number_of_filters // 4)
+            outputs = Concatenate(axis=4)([deconv, outputs])
+        else:
+            outputs = Concatenate(axis=4)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         outputs = Conv3D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
