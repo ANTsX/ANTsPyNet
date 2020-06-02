@@ -10,6 +10,7 @@ Custom metrics
 .. autofunction:: antspynet.utilities.pearson_correlation_coefficient
 .. autofunction:: antspynet.utilities.categorical_focal_gain
 .. autofunction:: antspynet.utilities.categorical_focal_loss
+.. autofunction:: antspynet.utilities.weighted_categorical_crossentropy
 
 Custom normalization layers
 ---------------------------
