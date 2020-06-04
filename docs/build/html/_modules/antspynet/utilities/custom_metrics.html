@@ -110,7 +110,6 @@
 
     <span class="k">return</span><span class="p">(</span><span class="n">categorical_focal_gain_fixed</span><span class="p">)</span></div>
 
-
 <div class="viewcode-block" id="categorical_focal_loss"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.categorical_focal_loss">[docs]</a><span class="k">def</span> <span class="nf">categorical_focal_loss</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">categorical_focal_loss_fixed</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
@@ -121,6 +120,19 @@
         <span class="k">return</span><span class="p">(</span><span class="o">-</span><span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="k">return</span><span class="p">(</span><span class="n">categorical_focal_loss_fixed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="weighted_categorical_crossentropy"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.weighted_categorical_crossentropy">[docs]</a><span class="k">def</span> <span class="nf">weighted_categorical_crossentropy</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+
+    <span class="n">weights_tensor</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">weighted_categorical_crossentropy_fixed</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+        <span class="n">y_pred</span> <span class="o">/=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(),</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">K</span><span class="o">.</span><span class="n">epsilon</span><span class="p">())</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">*</span> <span class="n">K</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">*</span> <span class="n">weights_tensor</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">weighted_categorical_crossentropy_fixed</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

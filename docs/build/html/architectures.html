@@ -36,21 +36,1752 @@
 <h1>Architectures<a class="headerlink" href="#architectures" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="autoencoder">
 <h2>Autoencoder<a class="headerlink" href="#autoencoder" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.architectures.create_autoencoder_model">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_autoencoder_model</code><span class="sig-paren">(</span><em class="sig-param">number_of_units_per_layer</em>, <em class="sig-param">activation='relu'</em>, <em class="sig-param">initializer='glorot_uniform'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_autoencoder_model.html#create_autoencoder_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_autoencoder_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the Vgg deep learning architecture.</p>
+<p>Builds an autoencoder based on the specified array definining the
+number of units in the encoding branch.  Ported to Keras R from the
+Keras python implementation here:</p>
+<p><a class="reference external" href="https://github.com/XifengGuo/DEC-keras">https://github.com/XifengGuo/DEC-keras</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_units_per_layer</strong> (<em>tuple</em>) – A tuple defining the number of units in the encoding branch.</p></li>
+<li><p><strong>activation</strong> (<em>string</em>) – Activation type for the dense layers</p></li>
+<li><p><strong>initializer</strong> (<em>string</em>) – Initializer type for the dense layers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An encoder and autoencoder Keras model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_autoencoder_model</span><span class="p">((</span><span class="mi">784</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_convolutional_autoencoder_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_convolutional_autoencoder_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_filters_per_layer=(32</em>, <em class="sig-param">64</em>, <em class="sig-param">128</em>, <em class="sig-param">10)</em>, <em class="sig-param">convolution_kernel_size=(5</em>, <em class="sig-param">5)</em>, <em class="sig-param">deconvolution_kernel_size=(5</em>, <em class="sig-param">5)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_convolutional_autoencoder_model.html#create_convolutional_autoencoder_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_convolutional_autoencoder_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function for creating a 2-D symmetric convolutional autoencoder model.</p>
+<p>Builds an autoencoder based on the specified array definining the
+number of units in the encoding branch.  Ported from the Keras python
+implementation here:</p>
+<p><a class="reference external" href="https://github.com/XifengGuo/DEC-keras">https://github.com/XifengGuo/DEC-keras</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – A tuple defining the shape of the 2-D input image</p></li>
+<li><p><strong>number_of_units_per_layer</strong> (<em>tuple</em>) – A tuple defining the number of units in the encoding branch.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple</em><em> or </em><em>scalar</em>) – Kernel size for convolution</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple</em><em> or </em><em>scalar</em>) – Kernel size for deconvolution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A convolutional encoder and autoencoder Keras model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras models</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autoencoder</span><span class="p">,</span> <span class="n">encoder</span> <span class="o">=</span> <span class="n">create_convolutional_autoencoder_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">autoencoder</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoder</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_convolutional_autoencoder_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_convolutional_autoencoder_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_filters_per_layer=(32</em>, <em class="sig-param">64</em>, <em class="sig-param">128</em>, <em class="sig-param">10)</em>, <em class="sig-param">convolution_kernel_size=(5</em>, <em class="sig-param">5</em>, <em class="sig-param">5)</em>, <em class="sig-param">deconvolution_kernel_size=(5</em>, <em class="sig-param">5</em>, <em class="sig-param">5)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_convolutional_autoencoder_model.html#create_convolutional_autoencoder_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_convolutional_autoencoder_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function for creating a 3-D symmetric convolutional autoencoder model.</p>
+<p>Builds an autoencoder based on the specified array definining the
+number of units in the encoding branch.  Ported from the Keras python
+implementation here:</p>
+<p><a class="reference external" href="https://github.com/XifengGuo/DEC-keras">https://github.com/XifengGuo/DEC-keras</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – A tuple defining the shape of the 3-D input image</p></li>
+<li><p><strong>number_of_units_per_layer</strong> (<em>tuple</em>) – A tuple defining the number of units in the encoding branch.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple</em><em> or </em><em>scalar</em>) – Kernel size for convolution</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple</em><em> or </em><em>scalar</em>) – Kernel size for deconvolution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A convolutional encoder and autoencoder Keras model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras models</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">autoencoder</span><span class="p">,</span> <span class="n">encoder</span> <span class="o">=</span> <span class="n">create_convolutional_autoencoder_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">autoencoder</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoder</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="image-classification-regression">
 <h2>Image classification/regression<a class="headerlink" href="#image-classification-regression" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.architectures.create_alexnet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_alexnet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">number_of_dense_units=4096</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_alexnet_model.html#create_alexnet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_alexnet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the AlexNet deep learning architecture.</p>
+<p>Creates a keras model of the AlexNet deep learning architecture for image
+recognition based on the paper</p>
+<ol class="upperalpha simple">
+<li><p>Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification with Deep Convolutional Neural Networks.</p></li>
+</ol>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf">http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/duggalrahul/AlexNet-Experiments-Keras/">https://github.com/duggalrahul/AlexNet-Experiments-Keras/</a>
+<a class="reference external" href="https://github.com/lunardog/convnets-keras/">https://github.com/lunardog/convnets-keras/</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of segmentation labels.</p></li>
+<li><p><strong>number_of_dense_units</strong> (<em>integer</em>) – Number of dense units.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Optional regularization parameter between [0, 1]. Default = 0.0.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_alexnet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_alexnet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_alexnet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">number_of_dense_units=4096</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_alexnet_model.html#create_alexnet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_alexnet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the AlexNet deep learning architecture.</p>
+<p>Creates a keras model of the AlexNet deep learning architecture for image
+recognition based on the paper</p>
+<ol class="upperalpha simple">
+<li><p>Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification with Deep Convolutional Neural Networks.</p></li>
+</ol>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf">http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/duggalrahul/AlexNet-Experiments-Keras/">https://github.com/duggalrahul/AlexNet-Experiments-Keras/</a>
+<a class="reference external" href="https://github.com/lunardog/convnets-keras/">https://github.com/lunardog/convnets-keras/</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of segmentation labels.</p></li>
+<li><p><strong>number_of_dense_units</strong> (<em>integer</em>) – Number of dense units.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Optional regularization parameter between [0, 1]. Default = 0.0.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_alexnet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_densenet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_densenet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">number_of_filters=16</em>, <em class="sig-param">depth=7</em>, <em class="sig-param">number_of_dense_blocks=1</em>, <em class="sig-param">growth_rate=12</em>, <em class="sig-param">dropout_rate=0.2</em>, <em class="sig-param">weight_decay=0.0001</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_densenet_model.html#create_densenet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_densenet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the Wide ResNet deep learning architecture.</p>
+<p>Creates a keras model of the DenseNet deep learning architecture for image
+recognition based on the paper</p>
+<p>G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected
+Convolutional Networks Networks</p>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1608.06993">https://arxiv.org/abs/1608.06993</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/tdeboissiere/DeepLearningImplementations/blob/master/DenseNet/densenet.py">https://github.com/tdeboissiere/DeepLearningImplementations/blob/master/DenseNet/densenet.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>integer</em>) – Number of filters.</p></li>
+<li><p><strong>depth</strong> (<em>integer</em>) – Number of layers—must be equal to 3 * N + 4 where N is an integer (default = 7).</p></li>
+<li><p><strong>number_of_dense_blocks</strong> (<em>integer</em>) – Number of dense blocks number of dense blocks to add to the end (default = 1).</p></li>
+<li><p><strong>growth_rate</strong> (<em>integer</em>) – Number of filters to add for each dense block layer (default = 12).</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Per drop out layer rate (default = 0.2).</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weight decay (default = 1e-4).</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_densenet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_densenet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_densenet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">number_of_filters=16</em>, <em class="sig-param">depth=7</em>, <em class="sig-param">number_of_dense_blocks=1</em>, <em class="sig-param">growth_rate=12</em>, <em class="sig-param">dropout_rate=0.2</em>, <em class="sig-param">weight_decay=0.0001</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_densenet_model.html#create_densenet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_densenet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the Wide ResNet deep learning architecture.</p>
+<p>Creates a keras model of the DenseNet deep learning architecture for image
+recognition based on the paper</p>
+<p>G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected
+Convolutional Networks Networks</p>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1608.06993">https://arxiv.org/abs/1608.06993</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/tdeboissiere/DeepLearningImplementations/blob/master/DenseNet/densenet.py">https://github.com/tdeboissiere/DeepLearningImplementations/blob/master/DenseNet/densenet.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>integer</em>) – Number of filters.</p></li>
+<li><p><strong>depth</strong> (<em>integer</em>) – Number of layers—must be equal to 3 * N + 4 where N is an integer (default = 7).</p></li>
+<li><p><strong>number_of_dense_blocks</strong> (<em>integer</em>) – Number of dense blocks number of dense blocks to add to the end (default = 1).</p></li>
+<li><p><strong>growth_rate</strong> (<em>integer</em>) – Number of filters to add for each dense block layer (default = 12).</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Per drop out layer rate (default = 0.2).</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weight decay (default = 1e-4).</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_densenet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_resnet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">input_scalars_size=0</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em>, <em class="sig-param">residual_block_schedule=(3</em>, <em class="sig-param">4</em>, <em class="sig-param">6</em>, <em class="sig-param">3)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">cardinality=1</em>, <em class="sig-param">squeeze_and_excite=False</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_model.html#create_resnet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the ResNet deep learning architecture.</p>
+<p>Creates a keras model of the ResNet deep learning architecture for image
+classification.  The paper is available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1512.03385">https://arxiv.org/abs/1512.03385</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://gist.github.com/mjdietzx/0cb95922aac14d446a6530f87b3a04ce">https://gist.github.com/mjdietzx/0cb95922aac14d446a6530f87b3a04ce</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>input_scalars_size</strong> (<em>integer</em>) – Optional integer specifying the size of the input vector for scalars that
+get concatenated to the fully connected layer at the end of the network.</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>layers</strong> (<em>tuple</em>) – A tuple determining the number of ‘filters’ defined at for each layer.</p></li>
+<li><p><strong>residual_block_schedule</strong> (<em>tuple</em>) – A tuple defining the how many residual blocks repeats for each layer.</p></li>
+<li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the initial layer.</p></li>
+<li><p><strong>cardinality</strong> (<em>integer</em>) – perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
+instead, powers of 2—try ‘32’).</p></li>
+<li><p><strong>squeeze_and_excite</strong> (<em>boolean</em>) – add the squeeze-and-excite block variant.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_resnet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_resnet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">input_scalars_size=0</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em>, <em class="sig-param">residual_block_schedule=(3</em>, <em class="sig-param">4</em>, <em class="sig-param">6</em>, <em class="sig-param">3)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">cardinality=1</em>, <em class="sig-param">squeeze_and_excite=False</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_model.html#create_resnet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the ResNet deep learning architecture.</p>
+<p>Creates a keras model of the ResNet deep learning architecture for image
+classification.  The paper is available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1512.03385">https://arxiv.org/abs/1512.03385</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://gist.github.com/mjdietzx/0cb95922aac14d446a6530f87b3a04ce">https://gist.github.com/mjdietzx/0cb95922aac14d446a6530f87b3a04ce</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>input_scalars_size</strong> (<em>integer</em>) – Optional integer specifying the size of the input vector for scalars that
+get concatenated to the fully connected layer at the end of the network.</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>layers</strong> (<em>tuple</em>) – A tuple determining the number of ‘filters’ defined at for each layer.</p></li>
+<li><p><strong>residual_block_schedule</strong> (<em>tuple</em>) – A tuple defining the how many residual blocks repeats for each layer.</p></li>
+<li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the initial layer.</p></li>
+<li><p><strong>cardinality</strong> (<em>integer</em>) – perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
+instead, powers of 2—try ‘32’).</p></li>
+<li><p><strong>squeeze_and_excite</strong> (<em>boolean</em>) – add the squeeze-and-excite block variant.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_resnet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_simple_classification_with_spatial_transformer_network_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_simple_classification_with_spatial_transformer_network_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">resampled_size=(30</em>, <em class="sig-param">30)</em>, <em class="sig-param">number_of_classification_labels=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_simple_classification_with_spatial_transformer_network_model.html#create_simple_classification_with_spatial_transformer_network_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_simple_classification_with_spatial_transformer_network_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the spatial transformer network.</p>
+<p>Creates a keras model of the spatial transformer network:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1506.02025">https://arxiv.org/abs/1506.02025</a></p>
+</div></blockquote>
+<p>based on the following python Keras model:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/oarriaga/STN.keras/blob/master/src/models/STN.py">https://github.com/oarriaga/STN.keras/blob/master/src/models/STN.py</a></p>
+</div></blockquote>
+<p>&#64;param inputImageSize Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.
+&#64;param resampledSize resampled size of the transformed input images.
+&#64;param numberOfClassificationLabels Number of classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>resampled_size</strong> (<em>tuple of length 2</em>) – Resampled size of the transformed input images.</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of units in the final dense layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_simple_classification_with_spatial_transformer_network_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_simple_classification_with_spatial_transformer_network_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_simple_classification_with_spatial_transformer_network_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">resampled_size=(30</em>, <em class="sig-param">30</em>, <em class="sig-param">30)</em>, <em class="sig-param">number_of_classification_labels=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_simple_classification_with_spatial_transformer_network_model.html#create_simple_classification_with_spatial_transformer_network_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_simple_classification_with_spatial_transformer_network_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the spatial transformer network.</p>
+<p>Creates a keras model of the spatial transformer network:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1506.02025">https://arxiv.org/abs/1506.02025</a></p>
+</div></blockquote>
+<p>based on the following python Keras model:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/oarriaga/STN.keras/blob/master/src/models/STN.py">https://github.com/oarriaga/STN.keras/blob/master/src/models/STN.py</a></p>
+</div></blockquote>
+<p>&#64;param inputImageSize Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.
+&#64;param resampledSize resampled size of the transformed input images.
+&#64;param numberOfClassificationLabels Number of classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>resampled_size</strong> (<em>tuple of length 3</em>) – Resampled size of the transformed input images.</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of units in the final dense layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_simple_classification_with_spatial_transformer_network_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="image-super-resolution">
 <h2>Image super-resolution<a class="headerlink" href="#image-super-resolution" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.architectures.create_deep_back_projection_network_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_deep_back_projection_network_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_base_filters=64</em>, <em class="sig-param">number_of_feature_filters=256</em>, <em class="sig-param">number_of_back_projection_stages=7</em>, <em class="sig-param">convolution_kernel_size=(12</em>, <em class="sig-param">12)</em>, <em class="sig-param">strides=(8</em>, <em class="sig-param">8)</em>, <em class="sig-param">last_convolution=(3</em>, <em class="sig-param">3)</em>, <em class="sig-param">number_of_loss_functions=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_deep_back_projection_network_model.html#create_deep_back_projection_network_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_deep_back_projection_network_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the deep back-projection network.</p>
+<p>Creates a keras model of the deep back-project network for image super
+resolution.  More information is provided at the authors’ website:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://www.toyota-ti.ac.jp/Lab/Denshi/iim/members/muhammad.haris/projects/DBPN.html">https://www.toyota-ti.ac.jp/Lab/Denshi/iim/members/muhammad.haris/projects/DBPN.html</a></p>
+</div></blockquote>
+<p>with the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1803.02735">https://arxiv.org/abs/1803.02735</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following keras (python)
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/rajatkb/DBPN-Keras">https://github.com/rajatkb/DBPN-Keras</a></p>
+</div></blockquote>
+<p>with help from the original author’s Caffe and Pytorch implementations:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/alterzero/DBPN-caffe">https://github.com/alterzero/DBPN-caffe</a>
+<a class="reference external" href="https://github.com/alterzero/DBPN-Pytorch">https://github.com/alterzero/DBPN-Pytorch</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Number of outputs (e.g., 3 for RGB images).</p></li>
+<li><p><strong>number_of_feature_filters</strong> (<em>integer</em>) – Number of feature filters.</p></li>
+<li><p><strong>number_of_base_filters</strong> (<em>integer</em>) – Number of base filters.</p></li>
+<li><p><strong>number_of_back_projection_stages</strong> (<em>integer</em>) – Number of up-down-projection stages.
+This number includes the final up block.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 2</em>) – Kernel size for certain convolutional layers.  The strides are dependent on
+the scale factor discussed in original paper.  Factors used in the original
+implementation are as follows:
+2x –&gt; convolution_kernel_size=(6, 6),
+4x –&gt; convolution_kernel_size=(8, 8),
+8x –&gt; convolution_kernel_size=(12, 12).  We default to 8x parameters.</p></li>
+<li><p><strong>strides</strong> (<em>tuple of length 2</em>) – Strides for certain convolutional layers.  This and the
+convolution_kernel_size are dependent on the scale factor discussed in
+original paper.  Factors used in the original implementation are as follows:
+2x –&gt; strides = (2, 2),
+4x –&gt; strides = (4, 4),
+8x –&gt; strides = (8, 8). We default to 8x parameters.</p></li>
+<li><p><strong>last_convolution</strong> (<em>tuple of length 2</em>) – The kernel size for the last convolutional layer.</p></li>
+<li><p><strong>number_of_loss_functions</strong> (<em>integer</em>) – The number of data targets, e.g. 2 for 2 targets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_deep_back_projection_network_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_deep_back_projection_network_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_deep_back_projection_network_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_base_filters=64</em>, <em class="sig-param">number_of_feature_filters=256</em>, <em class="sig-param">number_of_back_projection_stages=7</em>, <em class="sig-param">convolution_kernel_size=(12</em>, <em class="sig-param">12</em>, <em class="sig-param">12)</em>, <em class="sig-param">strides=(8</em>, <em class="sig-param">8</em>, <em class="sig-param">8)</em>, <em class="sig-param">last_convolution=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">number_of_loss_functions=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_deep_back_projection_network_model.html#create_deep_back_projection_network_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_deep_back_projection_network_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the deep back-projection network.</p>
+<p>Creates a keras model of the deep back-project network for image super
+resolution.  More information is provided at the authors’ website:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://www.toyota-ti.ac.jp/Lab/Denshi/iim/members/muhammad.haris/projects/DBPN.html">https://www.toyota-ti.ac.jp/Lab/Denshi/iim/members/muhammad.haris/projects/DBPN.html</a></p>
+</div></blockquote>
+<p>with the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1803.02735">https://arxiv.org/abs/1803.02735</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following keras (python)
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/rajatkb/DBPN-Keras">https://github.com/rajatkb/DBPN-Keras</a></p>
+</div></blockquote>
+<p>with help from the original author’s Caffe and Pytorch implementations:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/alterzero/DBPN-caffe">https://github.com/alterzero/DBPN-caffe</a>
+<a class="reference external" href="https://github.com/alterzero/DBPN-Pytorch">https://github.com/alterzero/DBPN-Pytorch</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Number of outputs (e.g., 3 for RGB images).</p></li>
+<li><p><strong>number_of_feature_filters</strong> (<em>integer</em>) – Number of feature filters.</p></li>
+<li><p><strong>number_of_base_filters</strong> (<em>integer</em>) – Number of base filters.</p></li>
+<li><p><strong>number_of_back_projection_stages</strong> (<em>integer</em>) – Number of up-down-projection stages.
+This number includes the final up block.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 3</em>) – Kernel size for certain convolutional layers.  The strides are dependent on
+the scale factor discussed in original paper.  Factors used in the original
+implementation are as follows:
+2x –&gt; convolution_kernel_size=(6, 6, 6),
+4x –&gt; convolution_kernel_size=(8, 8, 8),
+8x –&gt; convolution_kernel_size=(12, 12, 12).  We default to 8x parameters.</p></li>
+<li><p><strong>strides</strong> (<em>tuple of length 3</em>) – Strides for certain convolutional layers.  This and the
+convolution_kernel_size are dependent on the scale factor discussed in
+original paper.  Factors used in the original implementation are as follows:
+2x –&gt; strides = (2, 2, 2),
+4x –&gt; strides = (4, 4, 4),
+8x –&gt; strides = (8, 8, 8). We default to 8x parameters.</p></li>
+<li><p><strong>last_convolution</strong> (<em>tuple of length 3</em>) – The kernel size for the last convolutional layer.</p></li>
+<li><p><strong>number_of_loss_functions</strong> (<em>integer</em>) – The number of data targets, e.g. 2 for 2 targets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_deep_back_projection_network_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_deep_denoise_super_resolution_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_deep_denoise_super_resolution_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">layers=2</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3)</em>, <em class="sig-param">pool_size=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">strides=(2</em>, <em class="sig-param">2)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_deep_denoise_super_resolution_model.html#create_deep_denoise_super_resolution_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_deep_denoise_super_resolution_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the denoising autoencoder image super resolution deep learning architecture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>layers</strong> (<em>integer</em>) – Number of architecture layers.</p></li>
+<li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the beginning and end of the architecture.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>2-d tuple</em>) – specifies the kernel size during the encoding path.</p></li>
+<li><p><strong>pool_size</strong> (<em>2-d tuple</em>) – Defines the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>2-d tuple</em>) – Defines the stride length in each direction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_deep_denoise_super_resolution_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_deep_denoise_super_resolution_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_deep_denoise_super_resolution_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">layers=2</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">pool_size=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">strides=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_deep_denoise_super_resolution_model.html#create_deep_denoise_super_resolution_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_deep_denoise_super_resolution_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the denoising autoencoder image super resolution deep learning architecture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>layers</strong> (<em>integer</em>) – Number of architecture layers.</p></li>
+<li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the beginning and end of the architecture.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>3-d tuple</em>) – specifies the kernel size during the encoding path.</p></li>
+<li><p><strong>pool_size</strong> (<em>3-d tuple</em>) – Defines the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>3-d tuple</em>) – Defines the stride length in each direction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_deep_denoise_super_resolution_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_denoising_auto_encoder_super_resolution_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_denoising_auto_encoder_super_resolution_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size, convolution_kernel_sizes=[(3, 3), (5, 5)], number_of_encoding_layers=2, number_of_filters=64</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_denoising_auto_encoder_super_resolution_model.html#create_denoising_auto_encoder_super_resolution_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_denoising_auto_encoder_super_resolution_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the denoising autoencoder image super resolution deep learning architecture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_sizes</strong> (<em>list of 2-d tuples</em>) – specifies the kernel size at each convolution layer.  Default values are
+the same as given in the original paper.  The length of kernel size list
+must be 1 greater than the tuple length of the number of filters.</p></li>
+<li><p><strong>number_of_encoding_layers</strong> (<em>integer</em>) – The number of encoding layers.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>integer</em>) – The number of filters for each encoding layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_denoising_auto_encoder_super_resolution_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_denoising_auto_encoder_super_resolution_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_denoising_auto_encoder_super_resolution_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size, convolution_kernel_sizes=[(3, 3, 3), (5, 5, 5)], number_of_encoding_layers=2, number_of_filters=64</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_denoising_auto_encoder_super_resolution_model.html#create_denoising_auto_encoder_super_resolution_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_denoising_auto_encoder_super_resolution_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the denoising autoencoder image super resolution deep learning architecture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_sizes</strong> (<em>list of 3-d tuples</em>) – specifies the kernel size at each convolution layer.  Default values are
+the same as given in the original paper.  The length of kernel size list
+must be 1 greater than the tuple length of the number of filters.</p></li>
+<li><p><strong>number_of_encoding_layers</strong> (<em>integer</em>) – The number of encoding layers.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>integer</em>) – The number of filters for each encoding layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_denoising_auto_encoder_super_resolution_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_expanded_super_resolution_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_expanded_super_resolution_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size, convolution_kernel_sizes=[(9, 9), (1, 1), (3, 3), (5, 5), (5, 5)], number_of_filters=(64, 32, 32, 32)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_expanded_super_resolution_model.html#create_expanded_super_resolution_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_expanded_super_resolution_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the expanded  image super resolution deep learning architecture.</p>
+<p>Creates a keras model of the image super resolution deep learning framework.
+based on the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1501.00092">https://arxiv.org/pdf/1501.00092</a></p>
+</div></blockquote>
+<p>This particular implementation is based on the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Image-Super-Resolution">https://github.com/titu1994/Image-Super-Resolution</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_sizes</strong> (<em>list of 2-d tuples</em>) – specifies the kernel size at each convolution layer.  Default values are
+the same as given in the original paper.  The length of kernel size list
+must be 1 greater than the tuple length of the number of filters.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>tuple</em>) – Contains the number of filters for each convolutional layer.  Default values
+are the same as given in the original paper.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_expanded_super_resolution_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_expanded_super_resolution_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_expanded_super_resolution_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size, convolution_kernel_sizes=[(9, 9, 9), (1, 1, 1), (3, 3, 3), (5, 5, 5), (5, 5, 5)], number_of_filters=(64, 32, 32, 32)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_expanded_super_resolution_model.html#create_expanded_super_resolution_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_expanded_super_resolution_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the expanded  image super resolution deep learning architecture.</p>
+<p>Creates a keras model of the image super resolution deep learning framework.
+based on the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1501.00092">https://arxiv.org/pdf/1501.00092</a></p>
+</div></blockquote>
+<p>This particular implementation is based on the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Image-Super-Resolution">https://github.com/titu1994/Image-Super-Resolution</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_sizes</strong> (<em>list of 3-d tuples</em>) – specifies the kernel size at each convolution layer.  Default values are
+the same as given in the original paper.  The length of kernel size list
+must be 1 greater than the tuple length of the number of filters.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>tuple</em>) – Contains the number of filters for each convolutional layer.  Default values
+are the same as given in the original paper.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_expanded_super_resolution_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_image_super_resolution_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_image_super_resolution_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size, convolution_kernel_sizes=[(9, 9), (1, 1), (5, 5)], number_of_filters=(64, 32)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_image_super_resolution_model.html#create_image_super_resolution_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_image_super_resolution_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the image super resolution deep learning architecture.</p>
+<p>Creates a keras model of the image super resolution deep learning framework.
+based on the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1501.00092">https://arxiv.org/pdf/1501.00092</a></p>
+</div></blockquote>
+<p>This particular implementation is based on the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Image-Super-Resolution">https://github.com/titu1994/Image-Super-Resolution</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_sizes</strong> (<em>list of 2-d tuples</em>) – specifies the kernel size at each convolution layer.  Default values are
+the same as given in the original paper.  The length of kernel size list
+must be 1 greater than the tuple length of the number of filters.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>tuple</em>) – Contains the number of filters for each convolutional layer.  Default values
+are the same as given in the original paper.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_image_super_resolution_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_image_super_resolution_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_image_super_resolution_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size, convolution_kernel_sizes=[(9, 9, 9), (1, 1, 1), (5, 5, 5)], number_of_filters=(64, 32)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_image_super_resolution_model.html#create_image_super_resolution_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_image_super_resolution_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the image super resolution deep learning architecture.</p>
+<p>Creates a keras model of the image super resolution deep learning framework.
+based on the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1501.00092">https://arxiv.org/pdf/1501.00092</a></p>
+</div></blockquote>
+<p>This particular implementation is based on the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Image-Super-Resolution">https://github.com/titu1994/Image-Super-Resolution</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_sizes</strong> (<em>list of 3-d tuples</em>) – specifies the kernel size at each convolution layer.  Default values are
+the same as given in the original paper.  The length of kernel size list
+must be 1 greater than the tuple length of the number of filters.</p></li>
+<li><p><strong>number_of_filters</strong> (<em>tuple</em>) – Contains the number of filters for each convolutional layer.  Default values
+are the same as given in the original paper.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_image_super_resolution_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_resnet_super_resolution_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_super_resolution_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3)</em>, <em class="sig-param">number_of_filters=64</em>, <em class="sig-param">number_of_residual_blocks=5</em>, <em class="sig-param">number_of_resnet_blocks=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_super_resolution_model.html#create_resnet_super_resolution_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_super_resolution_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the ResNet image super resolution architecture.</p>
+<p>Creates a keras model of the expanded image super resolution deep learning
+framework based on the following python implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Image-Super-Resolution">https://github.com/titu1994/Image-Super-Resolution</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>2-d tuple</em>) – Specifies the kernel size</p></li>
+<li><p><strong>number_of_filters</strong> (<em>integer</em>) – The number of filters for each encoding layer.</p></li>
+<li><p><strong>number_of_residual_blocks</strong> (<em>integer</em>) – Number of residual blocks.</p></li>
+<li><p><strong>number_of_resnet_blocks</strong> (<em>integer</em>) – Number of resnet blocks.  Each block will double the upsampling amount.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_resnet_super_resolution_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_resnet_super_resolution_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resnet_super_resolution_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">number_of_filters=64</em>, <em class="sig-param">number_of_residual_blocks=5</em>, <em class="sig-param">number_of_resnet_blocks=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resnet_super_resolution_model.html#create_resnet_super_resolution_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resnet_super_resolution_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the ResNet image super resolution architecture.</p>
+<p>Creates a keras model of the expanded image super resolution deep learning
+framework based on the following python implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Image-Super-Resolution">https://github.com/titu1994/Image-Super-Resolution</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>3-d tuple</em>) – Specifies the kernel size</p></li>
+<li><p><strong>number_of_filters</strong> (<em>integer</em>) – The number of filters for each encoding layer.</p></li>
+<li><p><strong>number_of_residual_blocks</strong> (<em>integer</em>) – Number of residual blocks.</p></li>
+<li><p><strong>number_of_resnet_blocks</strong> (<em>integer</em>) – Number of resnet blocks.  Each block will double the upsampling amount.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_resnet_super_resolution_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_vgg_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_vgg_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4</em>, <em class="sig-param">4)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3)</em>, <em class="sig-param">pool_size=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">strides=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">number_of_dense_units=4096</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">style=19</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_vgg_model.html#create_vgg_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_vgg_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the Vgg deep learning architecture.</p>
+<p>Creates a keras model of the Vgg deep learning architecture for image
+recognition based on the paper</p>
+<p>K. Simonyan and A. Zisserman, Very Deep Convolutional Networks for
+Large-Scale Image Recognition</p>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1409.1556">https://arxiv.org/abs/1409.1556</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://gist.github.com/baraldilorenzo/8d096f48a1be4a2d660d">https://gist.github.com/baraldilorenzo/8d096f48a1be4a2d660d</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>layers</strong> (<em>tuple</em>) – A tuple determining the number of ‘filters’ defined at for each layer.</p></li>
+<li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the beginning.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple</em>) – 2-d vector definining the kernel size during the encoding path</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple</em>) – 2-d vector defining the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>tuple</em>) – 2-d vector describing the stride length in each direction.</p></li>
+<li><p><strong>number_of_dense_units</strong> (<em>integer</em>) – Number of units in the last layers.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>style</strong> (<em>integer</em>) – ‘16’ or ‘19’ for VGG16 or VGG19, respectively.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_vgg_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_vgg_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_vgg_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">layers=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4</em>, <em class="sig-param">4)</em>, <em class="sig-param">lowest_resolution=64</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">pool_size=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">strides=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">number_of_dense_units=4096</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">style=19</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_vgg_model.html#create_vgg_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_vgg_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the Vgg deep learning architecture.</p>
+<p>Creates a keras model of the Vgg deep learning architecture for image
+recognition based on the paper</p>
+<p>K. Simonyan and A. Zisserman, Very Deep Convolutional Networks for
+Large-Scale Image Recognition</p>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1409.1556">https://arxiv.org/abs/1409.1556</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://gist.github.com/baraldilorenzo/8d096f48a1be4a2d660d">https://gist.github.com/baraldilorenzo/8d096f48a1be4a2d660d</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>layers</strong> (<em>tuple</em>) – A tuple determining the number of ‘filters’ defined at for each layer.</p></li>
+<li><p><strong>lowest_resolution</strong> (<em>integer</em>) – Number of filters at the beginning.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple</em>) – 3-d vector definining the kernel size during the encoding path</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple</em>) – 3-d vector defining the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>tuple</em>) – 3-d vector describing the stride length in each direction.</p></li>
+<li><p><strong>number_of_dense_units</strong> (<em>integer</em>) – Number of units in the last layers.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>style</strong> (<em>integer</em>) – ‘16’ or ‘19’ for VGG16 or VGG19, respectively.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_vgg_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_wide_resnet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_wide_resnet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">depth=2</em>, <em class="sig-param">width=1</em>, <em class="sig-param">residual_block_schedule=(16</em>, <em class="sig-param">32</em>, <em class="sig-param">64)</em>, <em class="sig-param">pool_size=(8</em>, <em class="sig-param">8)</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0005</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_wide_resnet_model.html#create_wide_resnet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_wide_resnet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the Wide ResNet deep learning architecture.</p>
+<p>Creates a keras model of the Wide ResNet deep learning architecture for image
+classification/regression.  The paper is available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1512.03385">https://arxiv.org/abs/1512.03385</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Wide-Residual-Networks">https://github.com/titu1994/Wide-Residual-Networks</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>depth</strong> (<em>integer</em>) – Determines the depth of the network.  Related to the actual number of
+layers by number_of_layers = depth * 6 + 4.    Default = 2 (such that
+number_of_layers = 16).</p></li>
+<li><p><strong>width</strong> (<em>integer</em>) – Determines the width of the network.  Default = 1.</p></li>
+<li><p><strong>residual_block_schedule</strong> (<em>tuple</em>) – Determines the number of filters per convolutional block. Default =
+(16, 32, 64).</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple</em>) – Pool size for final average pooling layer.  Default = (8, 8).</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for regularization of the kernel weights of the
+convolution layers.  Default = 0.0005.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_wide_resnet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_wide_resnet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_wide_resnet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_classification_labels=1000</em>, <em class="sig-param">depth=2</em>, <em class="sig-param">width=1</em>, <em class="sig-param">residual_block_schedule=(16</em>, <em class="sig-param">32</em>, <em class="sig-param">64)</em>, <em class="sig-param">pool_size=(8</em>, <em class="sig-param">8</em>, <em class="sig-param">8)</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0005</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_wide_resnet_model.html#create_wide_resnet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_wide_resnet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the Wide ResNet deep learning architecture.</p>
+<p>Creates a keras model of the Wide ResNet deep learning architecture for image
+classification/regression.  The paper is available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1512.03385">https://arxiv.org/abs/1512.03385</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/titu1994/Wide-Residual-Networks">https://github.com/titu1994/Wide-Residual-Networks</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_classification_labels</strong> (<em>integer</em>) – Number of classification labels.</p></li>
+<li><p><strong>depth</strong> (<em>integer</em>) – Determines the depth of the network.  Related to the actual number of
+layers by number_of_layers = depth * 6 + 4.    Default = 2 (such that
+number_of_layers = 16).</p></li>
+<li><p><strong>width</strong> (<em>integer</em>) – Determines the width of the network.  Default = 1.</p></li>
+<li><p><strong>residual_block_schedule</strong> (<em>tuple</em>) – Determines the number of filters per convolutional block. Default =
+(16, 32, 64).</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple</em>) – Pool size for final average pooling layer.  Default = (8, 8, 8).</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for regularization of the kernel weights of the
+convolution layers.  Default = 0.0005.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_wide_resnet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="image-voxelwise-segmentation">
 <h2>Image voxelwise segmentation<a class="headerlink" href="#image-voxelwise-segmentation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.architectures.create_unet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_unet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=2</em>, <em class="sig-param">number_of_layers=4</em>, <em class="sig-param">number_of_filters_at_base_layer=32</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3)</em>, <em class="sig-param">deconvolution_kernel_size=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">pool_size=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">strides=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0</em>, <em class="sig-param">add_attention_gating=False</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_unet_model.html#create_unet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_unet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the U-net deep learning architecture.</p>
+<p>Creates a keras model of the U-net deep learning architecture for image
+segmentation and regression.  More information is provided at the authors’
+website:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/">https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/</a></p>
+</div></blockquote>
+<p>with the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1505.04597">https://arxiv.org/abs/1505.04597</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/joelthelion/ultrasound-nerve-segmentation">https://github.com/joelthelion/ultrasound-nerve-segmentation</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For <cite>classification</cite> this is the number of
+segmentation labels.  For <cite>regression</cite> this is the number of outputs.</p></li>
+<li><p><strong>number_of_layers</strong> (<em>integer</em>) – number of encoding/decoding layers.</p></li>
+<li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – number of filters at the beginning and end of the <cite>U</cite>.  Doubles at each
+descending/ascending layer.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 2</em>) – Defines the kernel size during the encoding.</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 2</em>) – Defines the kernel size during the decoding.</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple of length 2</em>) – Defines the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>tuple of length 2</em>) – Strides for the convolutional layers.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
+convolution layers.  Default = 0.0.</p></li>
+<li><p><strong>add_attention_gating</strong> (<em>boolean</em>) – Whether or not to include attention gating.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – <cite>classification</cite> or <cite>regression</cite>.  Default = <cite>classification</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D keras model defining the U-net network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_unet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_unet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_unet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=2</em>, <em class="sig-param">number_of_layers=4</em>, <em class="sig-param">number_of_filters_at_base_layer=32</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">deconvolution_kernel_size=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">pool_size=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">strides=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0</em>, <em class="sig-param">add_attention_gating=False</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_unet_model.html#create_unet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_unet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the U-net deep learning architecture.</p>
+<p>Creates a keras model of the U-net deep learning architecture for image
+segmentation and regression.  More information is provided at the authors’
+website:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/">https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/</a></p>
+</div></blockquote>
+<p>with the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1505.04597">https://arxiv.org/abs/1505.04597</a></p>
+</div></blockquote>
+<p>This particular implementation was influenced by the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/joelthelion/ultrasound-nerve-segmentation">https://github.com/joelthelion/ultrasound-nerve-segmentation</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For <cite>classification</cite> this is the number of
+segmentation labels.  For <cite>regression</cite> this is the number of outputs.</p></li>
+<li><p><strong>number_of_layers</strong> (<em>integer</em>) – number of encoding/decoding layers.</p></li>
+<li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – number of filters at the beginning and end of the <cite>U</cite>.  Doubles at each
+descending/ascending layer.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 3</em>) – Defines the kernel size during the encoding.</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 3</em>) – Defines the kernel size during the decoding.</p></li>
+<li><p><strong>pool_size</strong> (<em>tuple of length 3</em>) – Defines the region for each pooling layer.</p></li>
+<li><p><strong>strides</strong> (<em>tuple of length 3</em>) – Strides for the convolutional layers.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
+convolution layers.  Default = 0.0.</p></li>
+<li><p><strong>add_attention_gating</strong> (<em>boolean</em>) – Whether or not to include attention gating.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – <cite>classification</cite> or <cite>regression</cite>.  Default = <cite>classification</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D keras model defining the U-net network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_unet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_resunet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resunet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_filters_at_base_layer=32</em>, <em class="sig-param">bottle_neck_block_depth_schedule=(3</em>, <em class="sig-param">4)</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3)</em>, <em class="sig-param">deconvolution_kernel_size=(2</em>, <em class="sig-param">2)</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resunet_model.html#create_resunet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resunet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the Resnet + U-net deep learning architecture.</p>
+<p>Creates a keras model of the U-net + ResNet deep learning architecture for
+image segmentation and regression with the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1608.04117">https://arxiv.org/abs/1608.04117</a></p>
+</div></blockquote>
+<p>This particular implementation was ported from the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/veugene/fcn_maker/">https://github.com/veugene/fcn_maker/</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For ‘classification’ this is the number of
+segmentation labels.  For ‘regression’ this is the number of outputs.</p></li>
+<li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – Number of filters at the beginning and end of the ‘U’.  Doubles at each
+descending/ascending layer.</p></li>
+<li><p><strong>bottle_neck_block_depth_schedule</strong> (<em>tuple</em>) – Tuple that provides the encoding layer schedule for the number of bottleneck
+blocks per long skip connection.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 2</em>) – 2-d vector defining the kernel size during the encoding path</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 2</em>) – 2-d vector defining the kernel size during the decoding</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
+convolution layers.  Default = 0.0.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_resunet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_resunet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_resunet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_filters_at_base_layer=32</em>, <em class="sig-param">bottle_neck_block_depth_schedule=(3</em>, <em class="sig-param">4)</em>, <em class="sig-param">convolution_kernel_size=(3</em>, <em class="sig-param">3</em>, <em class="sig-param">3)</em>, <em class="sig-param">deconvolution_kernel_size=(2</em>, <em class="sig-param">2</em>, <em class="sig-param">2)</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_resunet_model.html#create_resunet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_resunet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3-D implementation of the Resnet + U-net deep learning architecture.</p>
+<p>Creates a keras model of the U-net + ResNet deep learning architecture for
+image segmentation and regression with the paper available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1608.04117">https://arxiv.org/abs/1608.04117</a></p>
+</div></blockquote>
+<p>This particular implementation was ported from the following python
+implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/veugene/fcn_maker/">https://github.com/veugene/fcn_maker/</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For ‘classification’ this is the number of
+segmentation labels.  For ‘regression’ this is the number of outputs.</p></li>
+<li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – Number of filters at the beginning and end of the ‘U’.  Doubles at each
+descending/ascending layer.</p></li>
+<li><p><strong>bottle_neck_block_depth_schedule</strong> (<em>tuple</em>) – Tuple that provides the encoding layer schedule for the number of bottleneck
+blocks per long skip connection.</p></li>
+<li><p><strong>convolution_kernel_size</strong> (<em>tuple of length 3</em>) – 3-d vector defining the kernel size during the encoding path</p></li>
+<li><p><strong>deconvolution_kernel_size</strong> (<em>tuple of length 3</em>) – 3-d vector defining the kernel size during the decoding</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
+convolution layers.  Default = 0.0.</p></li>
+<li><p><strong>mode</strong> (<em>string</em>) – ‘classification’ or ‘regression’.  Default = ‘classification’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_resunet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_denseunet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_denseunet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_layers_per_dense_block=(6</em>, <em class="sig-param">12</em>, <em class="sig-param">36</em>, <em class="sig-param">24)</em>, <em class="sig-param">growth_rate=48</em>, <em class="sig-param">initial_number_of_filters=96</em>, <em class="sig-param">reduction_rate=0.0</em>, <em class="sig-param">depth=7</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0001</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_denseunet_model.html#create_denseunet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_denseunet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the dense U-net deep learning architecture.</p>
+<p>Creates a keras model of the dense U-net deep learning architecture for
+image segmentation</p>
+<p>X. Li, H. Chen, X. Qi, Q. Dou, C.-W. Fu, P.-A. Heng. H-DenseUNet: Hybrid
+Densely Connected UNet for Liver and Tumor Segmentation from CT Volumes</p>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1709.07330.pdf">https://arxiv.org/pdf/1709.07330.pdf</a></p>
+</div></blockquote>
+<p>with the author’s implementation available at:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/xmengli999/H-DenseUNet">https://github.com/xmengli999/H-DenseUNet</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 3</em>) – Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For ‘classification’ this is the number of
+segmentation labels.  For ‘regression’ this is the number of outputs.</p></li>
+<li><p><strong>number_of_layers_per_dense_blocks</strong> (<em>tuple</em>) – Number of dense blocks per layer.</p></li>
+<li><p><strong>growth_rate</strong> (<em>integer</em>) – Number of filters to add for each dense block layer (default = 48).</p></li>
+<li><p><strong>initial_number_of_filters</strong> (<em>integer</em>) – Number of filters at the beginning (default = 96).</p></li>
+<li><p><strong>reduction_rate</strong> (<em>scalar</em>) – Reduction factor of transition blocks.</p></li>
+<li><p><strong>depth</strong> (<em>integer</em>) – Number of layers—must be equal to 3 * N + 4 where N is an integer
+(default = 7).</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
+convolution layers (default = 1e-4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_denseunet_model_2d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_denseunet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_denseunet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_outputs=1</em>, <em class="sig-param">number_of_layers_per_dense_block=(6</em>, <em class="sig-param">12</em>, <em class="sig-param">36</em>, <em class="sig-param">24)</em>, <em class="sig-param">growth_rate=48</em>, <em class="sig-param">initial_number_of_filters=96</em>, <em class="sig-param">reduction_rate=0.0</em>, <em class="sig-param">depth=7</em>, <em class="sig-param">dropout_rate=0.0</em>, <em class="sig-param">weight_decay=0.0001</em>, <em class="sig-param">mode='classification'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_denseunet_model.html#create_denseunet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_denseunet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2-D implementation of the dense U-net deep learning architecture.</p>
+<p>Creates a keras model of the dense U-net deep learning architecture for
+image segmentation</p>
+<p>X. Li, H. Chen, X. Qi, Q. Dou, C.-W. Fu, P.-A. Heng. H-DenseUNet: Hybrid
+Densely Connected UNet for Liver and Tumor Segmentation from CT Volumes</p>
+<p>available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1709.07330.pdf">https://arxiv.org/pdf/1709.07330.pdf</a></p>
+</div></blockquote>
+<p>with the author’s implementation available at:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/xmengli999/H-DenseUNet">https://github.com/xmengli999/H-DenseUNet</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The
+shape (or dimension) of that tensor is the image dimensions followed by
+the number of channels (e.g., red, green, and blue).  The batch size
+(i.e., number of training images) is not specified a priori.</p></li>
+<li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For ‘classification’ this is the number of
+segmentation labels.  For ‘regression’ this is the number of outputs.</p></li>
+<li><p><strong>number_of_layers_per_dense_blocks</strong> (<em>tuple</em>) – Number of dense blocks per layer.</p></li>
+<li><p><strong>growth_rate</strong> (<em>integer</em>) – Number of filters to add for each dense block layer (default = 48).</p></li>
+<li><p><strong>initial_number_of_filters</strong> (<em>integer</em>) – Number of filters at the beginning (default = 96).</p></li>
+<li><p><strong>reduction_rate</strong> (<em>scalar</em>) – Reduction factor of transition blocks.</p></li>
+<li><p><strong>depth</strong> (<em>integer</em>) – Number of layers—must be equal to 3 * N + 4 where N is an integer
+(default = 7).</p></li>
+<li><p><strong>dropout_rate</strong> (<em>scalar</em>) – Float between 0 and 1 to use between dense layers.</p></li>
+<li><p><strong>weight_decay</strong> (<em>scalar</em>) – Weighting parameter for L2 regularization of the kernel weights of the
+convolution layers (default = 1e-4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_denseunet_model_3d</span><span class="p">((</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_nobrainer_unet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_nobrainer_unet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_custom_unet_model.html#create_nobrainer_unet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_nobrainer_unet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the “NoBrainer” U-net architecture</p>
+<p>Creates a keras model of the U-net deep learning architecture for image
+segmentation available at:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/neuronets/nobrainer/">https://github.com/neuronets/nobrainer/</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D keras model defining the U-net network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_nobrainer_unet_model_3d</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.architectures.create_hippmapp3r_unet_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_hippmapp3r_unet_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">do_first_network=True</em>, <em class="sig-param">data_format='channels_last'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_custom_unet_model.html#create_hippmapp3r_unet_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_hippmapp3r_unet_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the “HippMapp3r” U-net architecture</p>
+<p>Creates a keras model implementation of the u-net architecture
+described here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://onlinelibrary.wiley.com/doi/pdf/10.1002/hbm.24811">https://onlinelibrary.wiley.com/doi/pdf/10.1002/hbm.24811</a></p>
+</div></blockquote>
+<p>with the implementation available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/mgoubran/HippMapp3r">https://github.com/mgoubran/HippMapp3r</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>do_first_network</strong> (<em>boolean</em>) – Boolean dictating if the model built should be the first (initial) network
+or second (refinement) network.</p></li>
+<li><p><strong>data_format</strong> (<em>string</em>) – One of “channels_first” or “channels_last”.  We do this for this specific
+architecture as the original weights were saved in “channels_first” format.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D keras model defining the U-net network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shape_initial_stage</span> <span class="o">=</span> <span class="p">(</span><span class="mi">160</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_initial_stage</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">create_hippmapp3r_unet_model_3d</span><span class="p">((</span><span class="o">*</span><span class="n">shape_initial_stage</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_initial_stage</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">antspynet</span><span class="o">.</span><span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;hippMapp3rInitial&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_refine_stage</span> <span class="o">=</span> <span class="p">(</span><span class="mi">112</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_refine_stage</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">create_hippmapp3r_unet_model_3d</span><span class="p">((</span><span class="o">*</span><span class="n">shape_refine_stage</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_refine_stage</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">antspynet</span><span class="o">.</span><span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;hippMapp3rRefine&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="custom">
 <h2>Custom<a class="headerlink" href="#custom" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="antspynet.architectures.create_simple_fully_convolutional_network_model_3d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_simple_fully_convolutional_network_model_3d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">number_of_filters_per_layer=(32</em>, <em class="sig-param">64</em>, <em class="sig-param">128</em>, <em class="sig-param">256</em>, <em class="sig-param">256</em>, <em class="sig-param">64)</em>, <em class="sig-param">number_of_bins=40</em>, <em class="sig-param">dropout_rate=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_custom_model.html#create_simple_fully_convolutional_network_model_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_simple_fully_convolutional_network_model_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the “SCFN” architecture for Brain/Gender prediction</p>
+<p>Creates a keras model implementation of the Simple Fully Convolutional
+Network model from the FMRIB group:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/ha-ha-ha-han/UKBiobank_deep_pretrain">https://github.com/ha-ha-ha-han/UKBiobank_deep_pretrain</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>number_of_filters_per_layer</strong> (<em>array</em>) – number of filters for the convolutional layers.</p></li>
+<li><p><strong>number_of_bins</strong> (<em>integer</em>) – number of bins for final softmax output.</p></li>
+<li><p><strong>dropout_rate</strong> (<em>float between 0 and 1</em>) – Optional dropout rate before final convolution layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-D keras model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">create_simple_fully_convolutional_network_model_3d</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="generative-adverserial-networks">
 <h2>Generative adverserial networks<a class="headerlink" href="#generative-adverserial-networks" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="antspynet.architectures.VanillaGanModel">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">VanillaGanModel</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">latent_dimension=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_vanilla_gan_model.html#VanillaGanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.VanillaGanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vanilla GAN model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>latent_dimension</strong> (<em>integer</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.architectures.DeepConvolutionalGanModel">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">DeepConvolutionalGanModel</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">latent_dimension=100</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_deep_convolutional_gan_model.html#DeepConvolutionalGanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.DeepConvolutionalGanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>GAN model using CNNs</p>
+<p>Deep convolutional generative adverserial network from the paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1511.06434">https://arxiv.org/abs/1511.06434</a></p>
+</div></blockquote>
+<p>and ported from the Keras (python) implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py">https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>latent_dimension</strong> (<em>integer</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.architectures.WassersteinGanModel">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">WassersteinGanModel</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">latent_dimension=100</em>, <em class="sig-param">number_of_critic_iterations=5</em>, <em class="sig-param">clip_value=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_wasserstein_gan_model.html#WassersteinGanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.WassersteinGanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wasserstein GAN model</p>
+<p>Wasserstein generative adverserial network from the paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1701.07875">https://arxiv.org/abs/1701.07875</a></p>
+</div></blockquote>
+<p>and ported from the Keras implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/eriklindernoren/Keras-GAN/blob/master/srgan/srgan.py">https://github.com/eriklindernoren/Keras-GAN/blob/master/srgan/srgan.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>latent_dimension</strong> (<em>integer</em>) – Default = 100.</p></li>
+<li><p><strong>number_of_critic_iterations</strong> (<em>integer</em>) – Default = 5.</p></li>
+<li><p><strong>clip_value</strong> (<em>float</em>) – Default = 0.01.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.architectures.ImprovedWassersteinGanModel">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">ImprovedWassersteinGanModel</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">latent_dimension=100</em>, <em class="sig-param">number_of_critic_iterations=5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_improved_wasserstein_gan_model.html#ImprovedWassersteinGanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.ImprovedWassersteinGanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Improved Wasserstein GAN model</p>
+<p>Improved Wasserstein generative adverserial network from the paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1704.00028">https://arxiv.org/abs/1704.00028</a></p>
+</div></blockquote>
+<p>and ported from the Keras implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/eriklindernoren/Keras-GAN/blob/master/wgan_gp/wgan_gp.py">https://github.com/eriklindernoren/Keras-GAN/blob/master/wgan_gp/wgan_gp.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>latent_dimension</strong> (<em>integer</em>) – Default = 100.</p></li>
+<li><p><strong>number_of_critic_iterations</strong> (<em>integer</em>) – Default = 5.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.architectures.CycleGanModel">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">CycleGanModel</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em>, <em class="sig-param">lambda_cycle_loss_weight=10.0</em>, <em class="sig-param">lambda_identity_loss_weight=1.0</em>, <em class="sig-param">number_of_filters_at_base_layer=(32</em>, <em class="sig-param">64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_cycle_gan_model.html#CycleGanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.CycleGanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cycle GAN model</p>
+<p>Cycle generative adverserial network from the paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/pdf/1703.10593">https://arxiv.org/pdf/1703.10593</a></p>
+</div></blockquote>
+<p>and ported from the Keras (python) implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/eriklindernoren/Keras-GAN/blob/master/cyclegan/cyclegan.py">https://github.com/eriklindernoren/Keras-GAN/blob/master/cyclegan/cyclegan.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>latent_dimension</strong> (<em>integer</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="antspynet.architectures.SuperResolutionGanModel">
+<em class="property">class </em><code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">SuperResolutionGanModel</code><span class="sig-paren">(</span><em class="sig-param">low_resolution_image_size</em>, <em class="sig-param">scale_factor=2</em>, <em class="sig-param">use_image_net_weights=True</em>, <em class="sig-param">number_of_residual_blocks=16</em>, <em class="sig-param">number_of_filters_at_base_layer=(64</em>, <em class="sig-param">64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_super_resolution_gan_model.html#SuperResolutionGanModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.SuperResolutionGanModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Super resolution GAN model</p>
+<p>Super resolution generative adverserial network from the paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1609.04802">https://arxiv.org/abs/1609.04802</a></p>
+</div></blockquote>
+<p>and ported from the Keras implementation:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/eriklindernoren/Keras-GAN/blob/master/wgan/wgan.py">https://github.com/eriklindernoren/Keras-GAN/blob/master/wgan/wgan.py</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_size</strong> (<em>tuple</em>) – Used for specifying the input tensor shape.  The shape (or dimension) of
+that tensor is the image dimensions followed by the number of channels
+(e.g., red, green, and blue).</p></li>
+<li><p><strong>low_resolution_image_size</strong> (<em>tuple</em>) – Size of the input image.</p></li>
+<li><p><strong>scale_factor</strong> (<em>integer</em>) – Upsampling factor for the output super-resolution image.</p></li>
+<li><p><strong>use_image_net_weights</strong> (<em>boolean</em>) – Determines whether or not one uses the image-net weights.  Only valid for
+2-D images.</p></li>
+<li><p><strong>number_of_residual_blocks</strong> (<em>16</em>) – Number of residual blocks used in constructing the generator.</p></li>
+<li><p><strong>number_of_filters_at_base_layer</strong> (<em>tuple of length 2</em>) – Number of filters at the base layer for the generator and discriminator,
+respectively.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Keras model defining the network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </div>
 

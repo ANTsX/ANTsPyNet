@@ -88,11 +88,11 @@ def categorical_focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
 
     return(categorical_focal_loss_fixed)
 
-def weighted_categorical_crossentropy(y_true, y_pred, weights)
+def weighted_categorical_crossentropy(y_true, y_pred, weights):
 
     weights_tensor = K.variable(weights)
 
-    def weighted_categorical_crossentropy_fixed(y_true, y_pred)
+    def weighted_categorical_crossentropy_fixed(y_true, y_pred):
         y_pred /= K.sum(y_pred, axis=-1, keepdims=True)  
         y_pred = K.clip(y_pred, K.epsilon(), 1.0 - K.epsilon())
         loss = y_true * K.log(y_pred) * weights_tensor
