@@ -83,4 +83,5 @@ Miscellaneous
 .. autofunction:: antspynet.utilities.regression_match_image
 .. autofunction:: antspynet.utilities.randomly_transform_image_data
 .. autofunction:: antspynet.utilities.crop_image_center
+.. autofunction:: antspynet.utilities.sysu_media_wmh_segmentation
 

@@ -1,7 +1,8 @@
 from keras.models import Model
 from keras.layers import (Add, Activation, Concatenate, ReLU, LeakyReLU,
                           Conv3D, Conv3DTranspose, Input, MaxPooling3D,
-                          SpatialDropout3D, UpSampling3D)
+                          SpatialDropout3D, UpSampling3D, 
+                          Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 from ..utilities import InstanceNormalization
 
 def create_nobrainer_unet_model_3d(input_image_size):
@@ -316,10 +317,110 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
 
     return(unet_model)
 
+def create_sysu_media_unet_model_2d(input_image_size):
+    """
+    Implementation of the sysu_media U-net architecture
 
+    Creates a keras model implementation of the u-net architecture
+    in the 2017 MICCAI WMH challenge by the sysu_medial team described 
+    here:
+   
+        https://pubmed.ncbi.nlm.nih.gov/30125711/
+   
+    with the original implementation available here:
+   
+        https://github.com/hongweilibran/wmh_ibbmTum
 
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        This will be (200, 200, 2) for t1/flair input and (200, 200, 1)} for 
+        flair-only input.
 
+    Returns
+    -------
+    Keras model
+        A 2-D keras model defining the U-net network.
 
+    Example
+    -------
+    >>> image_size = (200, 200)
+    >>> model = antspynet.create_sysu_media_unet_model_2d((*image_size, 1))
+    """
 
+    def get_crop_shape( target_layer, reference_layer ):
+        
+        delta = target_layer.get_shape()[1] - reference_layer.get_shape()[1]
+        if delta % 2 != 0:
+            cropShape0 = (int(delta/2), int(delta/2) + 1)
+        else:
+            cropShape0 = (int(delta/2), int(delta/2))
 
+        delta = target_layer.get_shape()[2] - reference_layer.get_shape()[2]
+        if delta % 2 != 0:
+            cropShape1 = (int(delta/2), int(delta/2) + 1)
+        else:
+            cropShape1 = (int(delta/2), int(delta/2))
 
+        return((cropShape0, cropShape1))    
+
+    inputs = Input(shape=input_image_size)
+
+    number_of_filters = (64, 96, 128, 256, 512)
+ 
+    # encoding layers
+
+    encoding_layers = list()
+
+    outputs = inputs 
+    for i in range(len(number_of_filters)):
+
+        kernel1 = 3
+        kernel2 = 3
+        if i == 0:
+            kernel1 = 5
+            kernel2 = 5
+        elif i == 3:
+            kernel1 = 3
+            kernel2 = 4
+
+        outputs = Conv2D(filters=number_of_filters[i], 
+                         kernel_size=kernel1, 
+                         padding = 'same' )(outputs)
+        outputs = Activation('relu')(outputs)
+        outputs = Conv2D(filters=number_of_filters[i], 
+                         kernel_size=kernel2, 
+                         padding = 'same' )(outputs)
+        outputs = Activation('relu')(outputs)
+        encoding_layers.append(outputs)
+        if i < 4:
+            outputs = MaxPooling2D(pool_size=(2, 2))(outputs)
+
+    # decoding layers
+
+    for i in range(len(encoding_layers)-2, -1, -1):
+        upsample_layer = UpSampling2D(size=(2, 2))(outputs)
+        crop_shape = get_crop_shape(encoding_layers[i], upsample_layer)
+        cropped_layer = Cropping2D(cropping=crop_shape)(encoding_layers[i])
+        outputs = Concatenate(axis=-1)([upsample_layer, cropped_layer])
+        outputs = Conv2D(filters=number_of_filters[i],
+                         kernel_size=3,
+                         padding='same')(outputs)
+        outputs = Activation('relu')(outputs)
+        outputs = Conv2D(filters=number_of_filters[i],
+                         kernel_size=3,
+                         padding='same')(outputs)
+        outputs = Activation('relu')(outputs)
+                         
+    # final
+    
+    crop_shape = get_crop_shape(inputs, outputs)
+    outputs = ZeroPadding2D(padding=crop_shape)(outputs)
+    outputs = Conv2D(filters=1,
+                     kernel_size=1,
+                     activation='sigmoid',
+                     padding='same')(outputs)
+
+    unet_model = Model(inputs=inputs, outputs=outputs)
+
+    return(unet_model)

@@ -67,6 +67,8 @@ Image voxelwise segmentation
 
 .. autofunction:: antspynet.architectures.create_hippmapp3r_unet_model_3d
 
+.. autofunction:: antspynet.utilities.create_sysu_media_unet_model_2d
+
 Custom
 ------
 

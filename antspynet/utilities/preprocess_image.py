@@ -77,7 +77,8 @@ def preprocess_brain_image(image,
 
     Returns
     -------
-    ANTs image (i.e., source_image) matched to the (reference_image).
+    Dictionary with preprocessing information ANTs image (i.e., source_image) matched to the 
+    (reference_image).
 
     Example
     -------

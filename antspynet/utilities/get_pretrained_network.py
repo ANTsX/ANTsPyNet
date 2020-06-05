@@ -46,6 +46,12 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "hippMapp3rRefine": "https://ndownloader.figshare.com/files/18068411",
             "mriSuperResolution": "https://ndownloader.figshare.com/files/19430123",
             "protonLungMri": "https://ndownloader.figshare.com/files/13606799",
+            "sysuMediaWmhFlairOnlyModel0": "https://ndownloader.figshare.com/files/22898441",
+            "sysuMediaWmhFlairOnlyModel1": "https://ndownloader.figshare.com/files/22898570",
+            "sysuMediaWmhFlairOnlyModel2": "https://ndownloader.figshare.com/files/22898438",
+            "sysuMediaWmhFlairT1Model0": "https://ndownloader.figshare.com/files/22898450",
+            "sysuMediaWmhFlairT1Model1": "https://ndownloader.figshare.com/files/22898453",
+            "sysuMediaWmhFlairT1Model2": "https://ndownloader.figshare.com/files/22898459",
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045"
         }
         return(switcher.get(argument, "Invalid argument."))
@@ -69,6 +75,12 @@ def get_pretrained_network(file_id=None, target_file_name=None):
                   "mriSuperResolution",
                   "protonLungMri",
                   "wholeTumorSegmentationT2Flair",
+                  "sysuMediaWmhFlairOnlyModel0",
+                  "sysuMediaWmhFlairOnlyModel1",
+                  "sysuMediaWmhFlairOnlyModel2",
+                  "sysuMediaWmhFlairT1Model0",
+                  "sysuMediaWmhFlairT1Model1",
+                  "sysuMediaWmhFlairT1Model2",
                   "show")
 
     if not file_id in valid_list:
