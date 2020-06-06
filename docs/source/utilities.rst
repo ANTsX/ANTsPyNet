@@ -74,6 +74,8 @@ Applications
 .. autofunction:: antspynet.utilities.brain_extraction
 .. autofunction:: antspynet.utilities.lung_extraction
 .. autofunction:: antspynet.utilities.preprocess_brain_image
+.. autofunction:: antspynet.utilities.sysu_media_wmh_segmentation
+.. autofunction:: antspynet.utilities.deep_flash
 
 Miscellaneous
 -------------
@@ -83,5 +85,4 @@ Miscellaneous
 .. autofunction:: antspynet.utilities.regression_match_image
 .. autofunction:: antspynet.utilities.randomly_transform_image_data
 .. autofunction:: antspynet.utilities.crop_image_center
-.. autofunction:: antspynet.utilities.sysu_media_wmh_segmentation
 

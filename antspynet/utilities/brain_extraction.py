@@ -164,7 +164,7 @@ def brain_extraction(image,
         ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 0]),
             origin=origin, spacing=spacing, direction=direction))
         probability_images_array.append(
-        ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 1]),
+            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 1]),
             origin=origin, spacing=spacing, direction=direction))
 
         if verbose == True:

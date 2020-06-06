@@ -236,4 +236,4 @@ def sysu_media_wmh_segmentation(flair,
     probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm), 
         probability_image_warped, flair)
 
-    return( probability_image )
+    return(probability_image)

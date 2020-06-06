@@ -43,8 +43,8 @@ def preprocess_brain_image(image,
         "Affine".    
 
     template : ANTs image (not skull-stripped)
-        Alternatively, one can specify the default "biobank" in which case the 
-        ANTs biobank template resampled to [192,224,192] is downloaded and used.  
+        Alternatively, one can specify the default "biobank" or "croppedMni152"
+        to download and use premade templates.
 
     do_bias_correction : boolean
         Perform N4 bias field correction.
@@ -114,11 +114,14 @@ def preprocess_brain_image(image,
     transforms = None
     if template_transform_type is not None:
         template_image = None
-        if isinstance(template, str) and template == "biobank":
+        if isinstance(template, str):
             template_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
             template_file.close()
             template_file_name = template_file.name
-            template_url = "https://ndownloader.figshare.com/files/22429242"
+            if template == "biobank":
+                template_url = "https://ndownloader.figshare.com/files/22429242"
+            elif template == "croppedMni152":
+                template_url = "https://ndownloader.figshare.com/files/22933754"
             if not os.path.exists(template_file_name):
                 r = requests.get(template_url)
                 with open(template_file_name, 'wb') as f:

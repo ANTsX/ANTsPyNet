@@ -76,8 +76,8 @@
 <span class="sd">        &quot;Affine&quot;.    </span>
 
 <span class="sd">    template : ANTs image (not skull-stripped)</span>
-<span class="sd">        Alternatively, one can specify the default &quot;biobank&quot; in which case the </span>
-<span class="sd">        ANTs biobank template resampled to [192,224,192] is downloaded and used.  </span>
+<span class="sd">        Alternatively, one can specify the default &quot;biobank&quot; or &quot;croppedMni152&quot;</span>
+<span class="sd">        to download and use premade templates.</span>
 
 <span class="sd">    do_bias_correction : boolean</span>
 <span class="sd">        Perform N4 bias field correction.</span>
@@ -147,11 +147,14 @@
     <span class="n">transforms</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">template_transform_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">template_image</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;biobank&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">template_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
             <span class="n">template_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">template_file_name</span> <span class="o">=</span> <span class="n">template_file</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22429242&quot;</span>
+            <span class="k">if</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;biobank&quot;</span><span class="p">:</span>
+                <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22429242&quot;</span>
+            <span class="k">elif</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;croppedMni152&quot;</span><span class="p">:</span>
+                <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22933754&quot;</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">):</span>
                 <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">template_url</span><span class="p">)</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>

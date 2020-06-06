@@ -700,8 +700,8 @@ in various papers including the cortical thickness pipeline:</p>
 <li><p><strong>do_brain_extraction</strong> (<em>boolean</em>) – Perform brain extraction using antspynet tools (3D images only).</p></li>
 <li><p><strong>template_transform_type</strong> (<em>string</em>) – See details in help for ants.registration.  Typically “Rigid” or
 “Affine”.</p></li>
-<li><p><strong>template</strong> (<em>ANTs image</em><em> (</em><em>not skull-stripped</em><em>)</em>) – Alternatively, one can specify the default “biobank” in which case the
-ANTs biobank template resampled to [192,224,192] is downloaded and used.</p></li>
+<li><p><strong>template</strong> (<em>ANTs image</em><em> (</em><em>not skull-stripped</em><em>)</em>) – Alternatively, one can specify the default “biobank” or “croppedMni152”
+to download and use premade templates.</p></li>
 <li><p><strong>do_bias_correction</strong> (<em>boolean</em>) – Perform N4 bias field correction.</p></li>
 <li><p><strong>return_bias_field</strong> (<em>boolean</em>) – If True, return bias field as an additional output <em>without</em> bias
 correcting the preprocessed image.</p></li>
@@ -729,6 +729,109 @@ tempfile.</p></li>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">preprocess_brain_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">do_brain_extraction</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.sysu_media_wmh_segmentation">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">sysu_media_wmh_segmentation</code><span class="sig-paren">(</span><em class="sig-param">flair</em>, <em class="sig-param">t1=None</em>, <em class="sig-param">brain_mask=None</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">use_ensemble=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/white_matter_hyperintensity_segmentation.html#sysu_media_wmh_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.sysu_media_wmh_segmentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform WMH segmentation using the winning submission in the MICCAI
+2017 challenge by the sysu_media team using FLAIR or T1/FLAIR.  The
+MICCAI challenge is discussed in</p>
+<p><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/30908194/">https://pubmed.ncbi.nlm.nih.gov/30908194/</a></p>
+<p>with the sysu_media’s team entry is discussed in</p>
+<blockquote>
+<div><p><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/30125711/">https://pubmed.ncbi.nlm.nih.gov/30125711/</a></p>
+</div></blockquote>
+<p>with the original implementation available here:</p>
+<p><a class="reference external" href="https://github.com/hongweilibran/wmh_ibbmTum">https://github.com/hongweilibran/wmh_ibbmTum</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>flair</strong> (<em>ANTsImage</em>) – input 3-D FLAIR brain image.</p></li>
+<li><p><strong>t1</strong> (<em>ANTsImage</em>) – input 3-D T1 brain image.</p></li>
+<li><p><strong>brain_mask</strong> (<em>ANTsImage</em>) – input 3-D brain mask image.  If not specified, getMask()
+is used to estimate a mask which is not recommended.</p></li>
+<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – perform n4 bias correction?</p></li>
+<li><p><strong>use_ensemble</strong> (<em>boolean</em>) – check whether to use all 3 sets of weights.</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
+Since these can be resused, if is None, these data will be downloaded to a
+tempfile.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>WMH segmentation probability image</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;flair.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probability_mask</span> <span class="o">=</span> <span class="n">sysu_media_wmh_segmentation</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.deep_flash">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_flash</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hippocampal/Enthorhinal segmentation using “Deep Flash”</p>
+<p>Perform hippocampal/entorhinal segmentation in T1 images using
+labels from Mike Yassa’s lab</p>
+<p><a class="reference external" href="https://faculty.sites.uci.edu/myassa/">https://faculty.sites.uci.edu/myassa/</a></p>
+<dl class="simple">
+<dt>The labeling is as follows:</dt><dd><p>Label 0 :  background
+Label 5 :  left aLEC
+Label 6 :  right aLEC
+Label 7 :  left pMEC
+Label 8 :  right pMEC
+Label 9 :  left perirhinal
+Label 10:  right perirhinal
+Label 11:  left parahippocampal
+Label 12:  right parahippocampal
+Label 13:  left DG/CA3
+Label 14:  right DG/CA3
+Label 15:  left CA1
+Label 16:  right CA1
+Label 17:  left subiculum
+Label 18:  right subiculum</p>
+</dd>
+<dt>Preprocessing on the training data consisted of:</dt><dd><ul class="simple">
+<li><p>n4 bias correction,</p></li>
+<li><p>denoising,</p></li>
+<li><p>brain extraction, and</p></li>
+<li><p>affine registration to MNI.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The input T1 should undergo the same steps.  If the input T1 is the raw
+T1, these steps can be performed by the internal preprocessing, i.e. set
+do_preprocessing = True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
+<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
+Since these can be resused, if is None, these data will be downloaded to a
+tempfile.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>List consisting of the segmentation image and probability images for</em></p></li>
+<li><p><em>each label.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;t1.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flash</span> <span class="o">=</span> <span class="n">deep_flash</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -893,48 +996,6 @@ transformations.</p></li>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cropped_image</span> <span class="o">=</span> <span class="n">crop_image_center</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">))</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="antspynet.utilities.sysu_media_wmh_segmentation">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">sysu_media_wmh_segmentation</code><span class="sig-paren">(</span><em class="sig-param">flair</em>, <em class="sig-param">t1=None</em>, <em class="sig-param">brain_mask=None</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">use_ensemble=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/white_matter_hyperintensity_segmentation.html#sysu_media_wmh_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.sysu_media_wmh_segmentation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform WMH segmentation using the winning submission in the MICCAI
-2017 challenge by the sysu_media team using FLAIR or T1/FLAIR.  The
-MICCAI challenge is discussed in</p>
-<p><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/30908194/">https://pubmed.ncbi.nlm.nih.gov/30908194/</a></p>
-<p>with the sysu_media’s team entry is discussed in</p>
-<blockquote>
-<div><p><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/30125711/">https://pubmed.ncbi.nlm.nih.gov/30125711/</a></p>
-</div></blockquote>
-<p>with the original implementation available here:</p>
-<p><a class="reference external" href="https://github.com/hongweilibran/wmh_ibbmTum">https://github.com/hongweilibran/wmh_ibbmTum</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>flair</strong> (<em>ANTsImage</em>) – input 3-D FLAIR brain image.</p></li>
-<li><p><strong>t1</strong> (<em>ANTsImage</em>) – input 3-D T1 brain image.</p></li>
-<li><p><strong>brain_mask</strong> (<em>ANTsImage</em>) – input 3-D brain mask image.  If not specified, getMask()
-is used to estimate a mask which is not recommended.</p></li>
-<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – perform n4 bias correction?</p></li>
-<li><p><strong>use_ensemble</strong> (<em>boolean</em>) – check whether to use all 3 sets of weights.</p></li>
-<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
-Since these can be resused, if is None, these data will be downloaded to a
-tempfile.</p></li>
-<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>WMH segmentation probability image</p>
-</dd>
-</dl>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;flair.nii.gz&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probability_mask</span> <span class="o">=</span> <span class="n">sysu_media_wmh_segmentation</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
