@@ -5,6 +5,8 @@ from keras.layers import (Add, Activation, Concatenate, ReLU, LeakyReLU,
                           Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 from ..utilities import InstanceNormalization
 
+import keras.backend as K
+
 def create_nobrainer_unet_model_3d(input_image_size):
     """
     Implementation of the "NoBrainer" U-net architecture
@@ -350,13 +352,13 @@ def create_sysu_media_unet_model_2d(input_image_size):
 
     def get_crop_shape( target_layer, reference_layer ):
         
-        delta = target_layer.get_shape()[1] - reference_layer.get_shape()[1]
+        delta = K.int_shape(target_layer)[1] - K.int_shape(reference_layer)[1]
         if delta % 2 != 0:
             cropShape0 = (int(delta/2), int(delta/2) + 1)
         else:
             cropShape0 = (int(delta/2), int(delta/2))
 
-        delta = target_layer.get_shape()[2] - reference_layer.get_shape()[2]
+        delta = K.int_shape(target_layer)[2] - K.int_shape(reference_layer)[2]
         if delta % 2 != 0:
             cropShape1 = (int(delta/2), int(delta/2) + 1)
         else:
