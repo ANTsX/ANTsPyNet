@@ -32,7 +32,8 @@ def get_pretrained_network(file_id=None, target_file_name=None):
         switcher = {
             "brainAgeGender": "https://ndownloader.figshare.com/files/22179948",
             # "brainAgeGender": "https://ndownloader.figshare.com/files/14394350",
-            "brainExtraction": "https://ndownloader.figshare.com/files/13729661",
+            "brainExtraction": "https://ndownloader.figshare.com/files/22944632",
+            # "brainExtraction": "https://ndownloader.figshare.com/files/13729661",
             "brainExtractionBOLD": "https://ndownloader.figshare.com/files/22761977",
             "brainExtractionFA": "https://ndownloader.figshare.com/files/22761926",
             "brainExtractionNoBrainer": "https://ndownloader.figshare.com/files/22598039",
