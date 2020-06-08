@@ -634,8 +634,20 @@ ported from the</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>image</strong> (<em>ANTsImage</em>) – input image</p></li>
-<li><p><strong>modality</strong> (<em>string</em>) – Modality image type.  Options include “t1”, “bold”, “fa”, “t1nobrainer”.</p></li>
+<li><p><strong>image</strong> (<em>ANTsImage</em>) – input image (or list of images for multi-modal scenarios).</p></li>
+<li><p><strong>modality</strong> (<em>string</em>) – <dl class="simple">
+<dt>Modality image type.  Options include:</dt><dd><ul>
+<li><p>”t1”</p></li>
+<li><p>”t1nobrainer”</p></li>
+<li><p>”bold”</p></li>
+<li><p>”fa”</p></li>
+<li><p>”t1t2infant”</p></li>
+<li><p>”t1infant”</p></li>
+<li><p>”t2infant”</p></li>
+</ul>
+</dd>
+</dl>
+</p></li>
 <li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
 Since these can be resused, if is None, these data will be downloaded to a
 tempfile.</p></li>

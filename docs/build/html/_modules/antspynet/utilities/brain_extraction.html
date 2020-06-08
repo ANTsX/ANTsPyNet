@@ -58,10 +58,17 @@
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
 <span class="sd">    image : ANTsImage</span>
-<span class="sd">        input image</span>
+<span class="sd">        input image (or list of images for multi-modal scenarios).</span>
 
 <span class="sd">    modality : string</span>
-<span class="sd">        Modality image type.  Options include &quot;t1&quot;, &quot;bold&quot;, &quot;fa&quot;, &quot;t1nobrainer&quot;.</span>
+<span class="sd">        Modality image type.  Options include:</span>
+<span class="sd">            * &quot;t1&quot; </span>
+<span class="sd">            * &quot;t1nobrainer&quot;</span>
+<span class="sd">            * &quot;bold&quot; </span>
+<span class="sd">            * &quot;fa&quot; </span>
+<span class="sd">            * &quot;t1t2infant&quot;</span>
+<span class="sd">            * &quot;t1infant&quot;</span>
+<span class="sd">            * &quot;t2infant&quot;</span>
 
 <span class="sd">    output_directory : string</span>
 <span class="sd">        Destination directory for storing the downloaded template and model weights.  </span>
@@ -84,14 +91,21 @@
     <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">get_pretrained_network</span>
     <span class="kn">from</span> <span class="nn">..architectures</span> <span class="kn">import</span> <span class="n">create_nobrainer_unet_model_3d</span>
 
-    <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">dimension</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Image dimension must be 3.&quot;</span> <span class="p">)</span>  
-
     <span class="n">classes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;background&quot;</span><span class="p">,</span> <span class="s2">&quot;brain&quot;</span><span class="p">)</span>
     <span class="n">number_of_classification_labels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
 
-    <span class="n">image_mods</span> <span class="o">=</span> <span class="p">[</span><span class="n">modality</span><span class="p">]</span>
-    <span class="n">channel_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_mods</span><span class="p">)</span>
+    <span class="n">channel_size</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">channel_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+    <span class="n">input_images</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">channel_size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">input_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">input_images</span> <span class="o">=</span> <span class="n">image</span>
+
+    <span class="k">if</span> <span class="n">input_images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dimension</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Image dimension must be 3.&quot;</span> <span class="p">)</span>  
 
     <span class="k">if</span> <span class="n">modality</span> <span class="o">!=</span> <span class="s2">&quot;t1nobrainer&quot;</span><span class="p">:</span>
 
@@ -102,35 +116,39 @@
         <span class="c1">##################### </span>
 
         <span class="n">weights_file_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="s2">&quot;/brainExtractionWeights.h5&quot;</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading weights.&quot;</span><span class="p">)</span>
-                    <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtraction&quot;</span><span class="p">,</span> <span class="n">weights_file_name</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtraction&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;bold&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="s2">&quot;/brainExtractionBoldWeights.h5&quot;</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading weights.&quot;</span><span class="p">)</span>
-                    <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionBOLD&quot;</span><span class="p">,</span> <span class="n">weights_file_name</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionBOLD&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;fa&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="s2">&quot;/brainExtractionFaWeights.h5&quot;</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading weights.&quot;</span><span class="p">)</span>
-                    <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionFA&quot;</span><span class="p">,</span> <span class="n">weights_file_name</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>    
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionFA&quot;</span><span class="p">)</span>
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionWeights.h5&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtraction&quot;</span>
+        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;bold&quot;</span><span class="p">:</span>    
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionBoldWeights.h5&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionBOLD&quot;</span>
+        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;fa&quot;</span><span class="p">:</span>    
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionFaWeights.h5&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionFA&quot;</span>
+        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1t2infant&quot;</span><span class="p">:</span>    
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionInfantT1T2Weights.h5&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT1T2&quot;</span>
+        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1infant&quot;</span><span class="p">:</span>    
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionInfantT1Weights.h5&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT1&quot;</span>
+        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t2infant&quot;</span><span class="p">:</span>    
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionInfantT2Weights.h5&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT2&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown modality type.&quot;</span><span class="p">)</span>    
+
+        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="n">weights_file_name</span>
+
+        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading weights.&quot;</span><span class="p">)</span>
+                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">,</span> <span class="n">weights_file_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>    
+            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">)</span>
 
         <span class="n">reorient_template_file_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">reorient_template_file_exists</span> <span class="o">=</span> <span class="kc">False</span>
@@ -172,16 +190,16 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  normalizing image to the template.&quot;</span><span class="p">)</span>
         
         <span class="n">center_of_mass_template</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">(</span><span class="n">reorient_template</span><span class="p">)</span>
-        <span class="n">center_of_mass_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="n">center_of_mass_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">(</span><span class="n">input_images</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">translation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">center_of_mass_image</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">center_of_mass_template</span><span class="p">)</span>
         <span class="n">xfrm</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">create_ants_transform</span><span class="p">(</span><span class="n">transform_type</span><span class="o">=</span><span class="s2">&quot;Euler3DTransform&quot;</span><span class="p">,</span>
             <span class="n">center</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">center_of_mass_template</span><span class="p">),</span> <span class="n">translation</span><span class="o">=</span><span class="n">translation</span><span class="p">)</span>
-        <span class="n">warped_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">apply_ants_transform_to_image</span><span class="p">(</span><span class="n">xfrm</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">reorient_template</span><span class="p">)</span>
-        <span class="n">warped_image</span> <span class="o">=</span> <span class="p">(</span><span class="n">warped_image</span> <span class="o">-</span> <span class="n">warped_image</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">warped_image</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
 
-        <span class="n">batchX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">warped_image</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">batchX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">batchX</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">batchX</span> <span class="o">=</span> <span class="p">(</span><span class="n">batchX</span> <span class="o">-</span> <span class="n">batchX</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">batchX</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="n">batchX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">resampled_image_size</span><span class="p">,</span> <span class="n">channel_size</span><span class="p">))</span>    
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_images</span><span class="p">)):</span>
+            <span class="n">warped_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">apply_ants_transform_to_image</span><span class="p">(</span><span class="n">xfrm</span><span class="p">,</span> <span class="n">input_images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">reorient_template</span><span class="p">)</span>
+            <span class="n">warped_array</span> <span class="o">=</span> <span class="n">warped_image</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">batchX</span><span class="p">[</span><span class="mi">0</span><span class="p">,:,:,:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">warped_array</span> <span class="o">-</span> <span class="n">warped_array</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">warped_array</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  prediction and decoding.&quot;</span><span class="p">)</span>
@@ -203,7 +221,7 @@
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  renormalize probability mask to native space.&quot;</span><span class="p">)</span>
         <span class="n">probability_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">apply_ants_transform_to_image</span><span class="p">(</span>
-            <span class="n">ants</span><span class="o">.</span><span class="n">invert_ants_transform</span><span class="p">(</span><span class="n">xfrm</span><span class="p">),</span> <span class="n">probability_images_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">image</span><span class="p">)</span>
+            <span class="n">ants</span><span class="o">.</span><span class="n">invert_ants_transform</span><span class="p">(</span><span class="n">xfrm</span><span class="p">),</span> <span class="n">probability_images_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">input_images</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="k">return</span><span class="p">(</span><span class="n">probability_image</span><span class="p">)</span>    
     
