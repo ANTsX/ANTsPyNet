@@ -33,7 +33,10 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "brainAgeGender": "https://ndownloader.figshare.com/files/22179948",
             # "brainAgeGender": "https://ndownloader.figshare.com/files/14394350",
             "brainExtraction": "https://ndownloader.figshare.com/files/22944632",
-            # "brainExtraction": "https://ndownloader.figshare.com/files/13729661",
+            # "brainExtraction": "https://ndownloader.figshare.com/files/13729661",  # old weights
+            "brainExtractionT2": "https://ndownloader.figshare.com/files/23066153",
+            "brainExtractionFLAIR": "https://ndownloader.figshare.com/files/23066153",
+            # "brainExtractionFLAIR": "https://ndownloader.figshare.com/files/23064758", # these weights dont' work now so simply use T2 for now
             "brainExtractionBOLD": "https://ndownloader.figshare.com/files/22761977",
             "brainExtractionFA": "https://ndownloader.figshare.com/files/22761926",
             "brainExtractionNoBrainer": "https://ndownloader.figshare.com/files/22598039",
@@ -67,6 +70,8 @@ def get_pretrained_network(file_id=None, target_file_name=None):
     valid_list = ("dbpn4x",
                   "brainAgeGender",
                   "brainExtraction",
+                  "brainExtractionT2",
+                  "brainExtractionFLAIR",
                   "brainExtractionBOLD",
                   "brainExtractionFA",
                   "brainExtractionNoBrainer",

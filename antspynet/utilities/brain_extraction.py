@@ -16,8 +16,8 @@ def brain_extraction(image,
                      verbose=None):
 
     """
-    Perform brain extraction using U-net and ANTs-based training data.  "NoBrainer" 
-    is also possible where brain extraction uses U-net and FreeSurfer training data 
+    Perform brain extraction using U-net and ANTs-based training data.  "NoBrainer"
+    is also possible where brain extraction uses U-net and FreeSurfer training data
     ported from the
 
     https://github.com/neuronets/nobrainer-models
@@ -29,21 +29,23 @@ def brain_extraction(image,
 
     modality : string
         Modality image type.  Options include:
-            * "t1" 
-            * "t1nobrainer"
-            * "bold" 
-            * "fa" 
-            * "t1t2infant"
-            * "t1infant"
-            * "t2infant"
+            * "t1": T1-weighted MRI---ANTs-trained.
+            * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
+            * "flair": FLAIR MRI.
+            * "t2": T2 MRI.
+            * "bold": 3-D BOLD MRI.
+            * "fa": Fractional anisotropy.
+            * "t1t2infant": Combined T1-w/T2-w infant MRI h/t Martin Styner.
+            * "t1infant": T1-w infant MRI h/t Martin Styner.
+            * "t2infant": T2-w infant MRI h/t Martin Styner.
 
     output_directory : string
-        Destination directory for storing the downloaded template and model weights.  
-        Since these can be resused, if is None, these data will be downloaded to a 
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
         tempfile.
 
     verbose : boolean
-        Print progress to the screen.    
+        Print progress to the screen.
 
     Returns
     -------
@@ -72,7 +74,7 @@ def brain_extraction(image,
         input_images = image
 
     if input_images[0].dimension != 3:
-        raise ValueError( "Image dimension must be 3." )  
+        raise ValueError( "Image dimension must be 3." )
 
     if modality != "t1nobrainer":
 
@@ -80,7 +82,7 @@ def brain_extraction(image,
         #
         # ANTs-based
         #
-        ##################### 
+        #####################
 
         weights_file_name = None
         weights_file_name_prefix = None
@@ -88,23 +90,29 @@ def brain_extraction(image,
         if modality == "t1":
             weights_file_name = "/brainExtractionWeights.h5"
             weights_file_name_prefix = "brainExtraction"
-        elif modality == "bold":    
+        elif modality == "bold":
             weights_file_name = "/brainExtractionBoldWeights.h5"
             weights_file_name_prefix = "brainExtractionBOLD"
-        elif modality == "fa":    
+        elif modality == "t2":
+            weights_file_name = "/brainExtractionT2Weights.h5"
+            weights_file_name_prefix = "brainExtractionT2"
+        elif modality == "flair":
+            weights_file_name = "/brainExtractionFlairWeights.h5"
+            weights_file_name_prefix = "brainExtractionFLAIR"
+        elif modality == "fa":
             weights_file_name = "/brainExtractionFaWeights.h5"
             weights_file_name_prefix = "brainExtractionFA"
-        elif modality == "t1t2infant":    
+        elif modality == "t1t2infant":
             weights_file_name = "/brainExtractionInfantT1T2Weights.h5"
             weights_file_name_prefix = "brainExtractionInfantT1T2"
-        elif modality == "t1infant":    
+        elif modality == "t1infant":
             weights_file_name = "/brainExtractionInfantT1Weights.h5"
             weights_file_name_prefix = "brainExtractionInfantT1"
-        elif modality == "t2infant":    
+        elif modality == "t2infant":
             weights_file_name = "/brainExtractionInfantT2Weights.h5"
             weights_file_name_prefix = "brainExtractionInfantT2"
         else:
-            raise ValueError("Unknown modality type.")    
+            raise ValueError("Unknown modality type.")
 
         if output_directory is not None:
             weights_file_name = output_directory + weights_file_name
@@ -114,7 +122,7 @@ def brain_extraction(image,
                 if verbose == True:
                     print("Brain extraction:  downloading weights.")
                 weights_file_name = get_pretrained_network(weights_file_name_prefix, weights_file_name)
-        else:    
+        else:
             weights_file_name = get_pretrained_network(weights_file_name_prefix)
 
         reorient_template_file_name = None
@@ -155,14 +163,14 @@ def brain_extraction(image,
 
         if verbose == True:
             print("Brain extraction:  normalizing image to the template.")
-        
+
         center_of_mass_template = ants.get_center_of_mass(reorient_template)
         center_of_mass_image = ants.get_center_of_mass(input_images[0])
         translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template)
         xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
             center=np.asarray(center_of_mass_template), translation=translation)
 
-        batchX = np.zeros((1, *resampled_image_size, channel_size))    
+        batchX = np.zeros((1, *resampled_image_size, channel_size))
         for i in range(len(input_images)):
             warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[i], reorient_template)
             warped_array = warped_image.numpy()
@@ -190,15 +198,15 @@ def brain_extraction(image,
         probability_image = ants.apply_ants_transform_to_image(
             ants.invert_ants_transform(xfrm), probability_images_array[1], input_images[0])
 
-        return(probability_image)    
-    
-    else:    
+        return(probability_image)
+
+    else:
 
         #####################
         #
         # NoBrainer
         #
-        ##################### 
+        #####################
 
         if verbose == True:
             print("NoBrainer:  generating network.")
@@ -212,13 +220,13 @@ def brain_extraction(image,
                 if verbose == True:
                     print("Brain extraction:  downloading weights.")
                 weights_file_name = get_pretrained_network("brainExtractionNoBrainer", weights_file_name)
-        else:    
+        else:
             weights_file_name = get_pretrained_network("brainExtractionNoBrainer")
         model.load_weights(weights_file_name)
 
         if verbose == True:
             print("NoBrainer:  preprocessing (intensity truncation and resampling).")
-          
+
         image_array = image.numpy()
         image_robust_range = np.quantile(image_array[np.where(image_array != 0)], (0.02, 0.98))
         threshold_value = 0.10 * (image_robust_range[1] - image_robust_range[0]) + image_robust_range[0]
@@ -229,14 +237,14 @@ def brain_extraction(image,
         image_resampled = ants.resample_image(thresholded_image, (256, 256, 256), use_voxels=True)
         image_array = np.expand_dims(image_resampled.numpy(), axis=0)
         image_array = np.expand_dims(image_array, axis=-1)
-        
+
         if verbose == True:
             print("NoBrainer:  predicting mask.")
 
         brain_mask_array = np.squeeze(model.predict(image_array, verbose=verbose))
         brain_mask_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(brain_mask_array))
         brain_mask_image = ants.resample_image(brain_mask_resampled, image.shape, use_voxels=True, interp_type=1)
-       
+
         spacing = ants.get_spacing(image)
         spacing_product = spacing[0] * spacing[1] * spacing[2]
         minimum_brain_volume = round(649933.7/spacing_product)

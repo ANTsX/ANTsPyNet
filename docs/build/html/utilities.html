@@ -637,13 +637,15 @@ ported from the</p>
 <li><p><strong>image</strong> (<em>ANTsImage</em>) – input image (or list of images for multi-modal scenarios).</p></li>
 <li><p><strong>modality</strong> (<em>string</em>) – <dl class="simple">
 <dt>Modality image type.  Options include:</dt><dd><ul>
-<li><p>”t1”</p></li>
-<li><p>”t1nobrainer”</p></li>
-<li><p>”bold”</p></li>
-<li><p>”fa”</p></li>
-<li><p>”t1t2infant”</p></li>
-<li><p>”t1infant”</p></li>
-<li><p>”t2infant”</p></li>
+<li><p>”t1”: T1-weighted MRI—ANTs-trained.</p></li>
+<li><p>”t1nobrainer”: T1-weighted MRI—FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.</p></li>
+<li><p>”flair”: FLAIR MRI.</p></li>
+<li><p>”t2”: T2 MRI.</p></li>
+<li><p>”bold”: 3-D BOLD MRI.</p></li>
+<li><p>”fa”: Fractional anisotropy.</p></li>
+<li><p>”t1t2infant”: Combined T1-w/T2-w infant MRI h/t Martin Styner.</p></li>
+<li><p>”t1infant”: T1-w infant MRI h/t Martin Styner.</p></li>
+<li><p>”t2infant”: T2-w infant MRI h/t Martin Styner.</p></li>
 </ul>
 </dd>
 </dl>
@@ -747,7 +749,7 @@ tempfile.</p></li>
 
 <dl class="function">
 <dt id="antspynet.utilities.sysu_media_wmh_segmentation">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">sysu_media_wmh_segmentation</code><span class="sig-paren">(</span><em class="sig-param">flair</em>, <em class="sig-param">t1=None</em>, <em class="sig-param">brain_mask=None</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">use_ensemble=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/white_matter_hyperintensity_segmentation.html#sysu_media_wmh_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.sysu_media_wmh_segmentation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">sysu_media_wmh_segmentation</code><span class="sig-paren">(</span><em class="sig-param">flair</em>, <em class="sig-param">t1=None</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">use_ensemble=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/white_matter_hyperintensity_segmentation.html#sysu_media_wmh_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.sysu_media_wmh_segmentation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform WMH segmentation using the winning submission in the MICCAI
 2017 challenge by the sysu_media team using FLAIR or T1/FLAIR.  The
 MICCAI challenge is discussed in</p>
@@ -761,10 +763,8 @@ MICCAI challenge is discussed in</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>flair</strong> (<em>ANTsImage</em>) – input 3-D FLAIR brain image.</p></li>
-<li><p><strong>t1</strong> (<em>ANTsImage</em>) – input 3-D T1 brain image.</p></li>
-<li><p><strong>brain_mask</strong> (<em>ANTsImage</em>) – input 3-D brain mask image.  If not specified, getMask()
-is used to estimate a mask which is not recommended.</p></li>
+<li><p><strong>flair</strong> (<em>ANTsImage</em>) – input 3-D FLAIR brain image (not skull-stripped).</p></li>
+<li><p><strong>t1</strong> (<em>ANTsImage</em>) – input 3-D T1 brain image (not skull-stripped).</p></li>
 <li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – perform n4 bias correction?</p></li>
 <li><p><strong>use_ensemble</strong> (<em>boolean</em>) – check whether to use all 3 sets of weights.</p></li>
 <li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.

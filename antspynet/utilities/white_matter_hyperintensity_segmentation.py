@@ -4,54 +4,49 @@ import keras
 
 import ants
 
-def sysu_media_wmh_segmentation(flair, 
-                                t1=None, 
-                                brain_mask=None, 
-                                do_preprocessing=True, 
-                                use_ensemble=True, 
-                                output_directory=None, 
+def sysu_media_wmh_segmentation(flair,
+                                t1=None,
+                                do_preprocessing=True,
+                                use_ensemble=True,
+                                output_directory=None,
                                 verbose=False):
 
     """
     Perform WMH segmentation using the winning submission in the MICCAI
-    2017 challenge by the sysu_media team using FLAIR or T1/FLAIR.  The 
-    MICCAI challenge is discussed in 
-    
+    2017 challenge by the sysu_media team using FLAIR or T1/FLAIR.  The
+    MICCAI challenge is discussed in
+
     https://pubmed.ncbi.nlm.nih.gov/30908194/
-   
-    with the sysu_media's team entry is discussed in 
-   
+
+    with the sysu_media's team entry is discussed in
+
      https://pubmed.ncbi.nlm.nih.gov/30125711/
-   
+
     with the original implementation available here:
-   
+
     https://github.com/hongweilibran/wmh_ibbmTum
 
     Arguments
     ---------
     flair : ANTsImage
-        input 3-D FLAIR brain image.
+        input 3-D FLAIR brain image (not skull-stripped).
 
     t1 : ANTsImage
-        input 3-D T1 brain image.
+        input 3-D T1 brain image (not skull-stripped).
 
-    brain_mask : ANTsImage
-        input 3-D brain mask image.  If not specified, getMask()
-        is used to estimate a mask which is not recommended.
-    
     do_preprocessing : boolean
         perform n4 bias correction?
 
     use_ensemble : boolean
-        check whether to use all 3 sets of weights.  
+        check whether to use all 3 sets of weights.
 
     output_directory : string
-        Destination directory for storing the downloaded template and model weights.  
-        Since these can be resused, if is None, these data will be downloaded to a 
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
         tempfile.
 
     verbose : boolean
-        Print progress to the screen.    
+        Print progress to the screen.
 
     Returns
     -------
@@ -81,13 +76,13 @@ def sysu_media_wmh_segmentation(flair,
         return(cropped_image)
 
     if flair.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )  
+        raise ValueError( "Image dimension must be 3." )
 
     ################################
     #
     # Preprocess images
     #
-    ################################  
+    ################################
 
     flair_preprocessed = flair
     if do_preprocessing == True:
@@ -98,7 +93,7 @@ def sysu_media_wmh_segmentation(flair,
             do_denoising=False,
             output_directory=output_directory,
             verbose=verbose)
-        flair_preprocessed = flair_preprocessing["preprocessed_image"]    
+        flair_preprocessed = flair_preprocessing["preprocessed_image"]
 
     number_of_channels = 1
     if t1 is not None:
@@ -111,24 +106,24 @@ def sysu_media_wmh_segmentation(flair,
                 do_denoising=False,
                 output_directory=output_directory,
                 verbose=verbose)
-            t1_preprocessed = t1_preprocessing["preprocessed_image"]    
+            t1_preprocessed = t1_preprocessing["preprocessed_image"]
         number_of_channels = 2
 
     ################################
     #
-    # Estimate mask (if not specified)
+    # Estimate mask
     #
-    ################################  
+    ################################
 
-    if brain_mask is None:
-        if verbose == True:
-            print("Estimating brain mask.")
-        if t1 is not None:
-            brain_mask = ants.get_mask(t1, cleanup=2)
-        else:    
-            brain_mask = ants.get_mask(flair, cleanup=2)
+    brain_mask = None
+    if verbose == True:
+        print("Estimating brain mask.")
+    if t1 is not None:
+        brain_mask = ants.brainExtraction(t1, modality="t1")
+    else:
+        brain_mask = ants.brainExtraction(flair, modality="flair")
 
-    reference_image = ants.make_image((200, 200, 200), 
+    reference_image = ants.make_image((200, 200, 200),
                                       voxval=1,
                                       spacing=(1, 1, 1),
                                       origin=(0, 0, 0),
@@ -140,7 +135,7 @@ def sysu_media_wmh_segmentation(flair,
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.asarray(center_of_mass_reference), translation=translation)
     flair_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reference_image)
-    brain_mask_warped = ants.threshold_image( 
+    brain_mask_warped = ants.threshold_image(
         ants.apply_ants_transform_to_image(xfrm, brain_mask, reference_image), 0.5, 1.1, 1, 0 )
 
     if t1 is not None:
@@ -150,7 +145,7 @@ def sysu_media_wmh_segmentation(flair,
     #
     # Gaussian normalize intensity based on brain mask
     #
-    ################################  
+    ################################
 
     mean_flair = flair_preprocessed_warped[brain_mask_warped > 0].mean()
     std_flair = flair_preprocessed_warped[brain_mask_warped > 0].std()
@@ -165,7 +160,7 @@ def sysu_media_wmh_segmentation(flair,
     #
     # Build models and load weights
     #
-    ################################  
+    ################################
 
     number_of_models = 1
     if use_ensemble == True:
@@ -181,7 +176,7 @@ def sysu_media_wmh_segmentation(flair,
                     if verbose == True:
                         print("White matter hyperintensity:  downloading model weights.")
                     weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), weights_file_name)
-            else:    
+            else:
                 weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i))
         else:
             if output_directory is not None:
@@ -190,9 +185,9 @@ def sysu_media_wmh_segmentation(flair,
                     if verbose == True:
                         print("White matter hyperintensity:  downloading model weights.")
                     weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), weights_file_name)
-            else:    
+            else:
                 weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i))
-        
+
         unet_models.append(create_sysu_media_unet_model_2d((200, 200, number_of_channels)))
         unet_models[i].load_weights(weights_file_name)
 
@@ -200,7 +195,7 @@ def sysu_media_wmh_segmentation(flair,
     #
     # Extract slices
     #
-    ################################  
+    ################################
 
     number_of_axial_slices = flair_preprocessed_warped.shape[2]
 
@@ -219,11 +214,11 @@ def sysu_media_wmh_segmentation(flair,
     #
     # Do prediction and then restack into the image
     #
-    ################################  
+    ################################
 
     if verbose == True:
         print("Prediction.")
-  
+
     prediction = unet_models[0].predict(batchX, verbose=verbose)
     if number_of_models > 1:
        for i in range(1, number_of_models, 1):
@@ -233,7 +228,7 @@ def sysu_media_wmh_segmentation(flair,
     prediction_array = np.transpose(np.squeeze(prediction), (1, 2, 0))
     prediction_image = pad_or_crop_image_to_size(ants.from_numpy(prediction_array), flair_preprocessed_warped.shape)
     probability_image_warped = ants.copy_image_info(flair_preprocessed_warped, prediction_image)
-    probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm), 
+    probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm),
         probability_image_warped, flair)
 
     return(probability_image)
