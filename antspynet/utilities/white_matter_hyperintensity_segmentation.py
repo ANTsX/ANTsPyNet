@@ -59,9 +59,10 @@ def sysu_media_wmh_segmentation(flair,
     """
 
     from ..architectures import create_sysu_media_unet_model_2d
+    from ..utilities import brain_extraction
+    from ..utilities import crop_image_center
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
-    from ..utilities import crop_image_center
 
     def pad_or_crop_image_to_size(image, size):
         image_size = np.array(image.shape)
@@ -119,9 +120,9 @@ def sysu_media_wmh_segmentation(flair,
     if verbose == True:
         print("Estimating brain mask.")
     if t1 is not None:
-        brain_mask = ants.brainExtraction(t1, modality="t1")
+        brain_mask = brain_extraction(t1, modality="t1")
     else:
-        brain_mask = ants.brainExtraction(flair, modality="flair")
+        brain_mask = brain_extraction(flair, modality="flair")
 
     reference_image = ants.make_image((200, 200, 200),
                                       voxval=1,
