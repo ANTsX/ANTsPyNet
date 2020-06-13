@@ -8,6 +8,7 @@ def sysu_media_wmh_segmentation(flair,
                                 t1=None,
                                 do_preprocessing=True,
                                 use_ensemble=True,
+                                use_axial_slices_only=True,
                                 output_directory=None,
                                 verbose=False):
 
@@ -44,6 +45,11 @@ def sysu_media_wmh_segmentation(flair,
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
         tempfile.
+
+    use_axial_slices_only : boolean
+        If True, use original implementation which was trained on axial slices.
+        If False, use ANTsXNet variant implementation which applies the slice-by-slice
+        models to all 3 dimensions and averages the results.
 
     verbose : boolean
         Print progress to the screen.
@@ -198,18 +204,32 @@ def sysu_media_wmh_segmentation(flair,
     #
     ################################
 
-    number_of_axial_slices = flair_preprocessed_warped.shape[2]
+    dimensions_to_predict = [2]
+    if use_axial_slices_only == False:
+        dimensions_to_predict = list(range(3))
 
-    if verbose == True:
-        print("Extracting slices.")
+    total_number_of_slices = 0
+    for d in range(len(dimensions_to_predict)):
+        total_number_of_slices += flair_preprocessed_warped.shape[dimensions_to_predict[d]]
 
-    batchX = np.zeros((number_of_axial_slices, 200, 200, number_of_channels))
-    for i in range(number_of_axial_slices):
-        flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, 2, i), (200, 200))
-        batchX[i,:,:,0] = flair_slice.numpy()
-        if number_of_channels == 2:
-            t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, 2, i), (200, 200))
-            batchX[i,:,:,1] = t1_slice.numpy()
+    batchX = np.zeros((total_number_of_slices, 200, 200, number_of_channels))
+
+    slice_count = 0
+    for d in range(len(dimensions_to_predict)):
+        number_of_slices = flair_preprocessed_warped.shape[dimensions_to_predict[d]]
+
+        if verbose == True:
+            print("Extracting slices for dimension ", d, ".")
+
+        for i in range(number_of_slices):
+            flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), (200, 200))
+            batchX[slice_count,:,:,0] = flair_slice.numpy()
+            if number_of_channels == 2:
+                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), (200, 200))
+                batchX[slice_count,:,:,1] = t1_slice.numpy()
+
+            slice_count += 1
+
 
     ################################
     #
@@ -226,10 +246,26 @@ def sysu_media_wmh_segmentation(flair,
            prediction += unet_models[i].predict(batchX, verbose=verbose)
     prediction /= number_of_models
 
-    prediction_array = np.transpose(np.squeeze(prediction), (1, 2, 0))
-    prediction_image = pad_or_crop_image_to_size(ants.from_numpy(prediction_array), flair_preprocessed_warped.shape)
-    probability_image_warped = ants.copy_image_info(flair_preprocessed_warped, prediction_image)
+    permutations = list()
+    permutations.append((0, 1, 2))
+    permutations.append((1, 0, 2))
+    permutations.append((1, 2, 0))
+
+    prediction_image_average = ants.image_clone(flair_preprocessed_warped) * 0
+
+    current_start_slice = 0
+    for d in range(len(dimensions_to_predict)):
+        current_end_slice = current_start_slice + flair_preprocessed_warped.shape[dimensions_to_predict[d]] - 1
+        which_batch_slices = range(current_start_slice, current_end_slice)
+        prediction_per_dimension = prediction[which_batch_slices,:,:,:]
+        prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[d])
+        prediction_image = ants.copy_image_info(flair_preprocessed_warped,
+          pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+            flair_preprocessed_warped.shape))
+        prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
+        current_start_slice = current_end_slice + 1
+
     probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm),
-        probability_image_warped, flair)
+        prediction_image_average, flair)
 
     return(probability_image)
