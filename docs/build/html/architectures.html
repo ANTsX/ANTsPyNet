@@ -1561,6 +1561,39 @@ architecture as the original weights were saved in “channels_first” format.<
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="antspynet.architectures.create_sysu_media_unet_model_2d">
+<code class="sig-prename descclassname">antspynet.architectures.</code><code class="sig-name descname">create_sysu_media_unet_model_2d</code><span class="sig-paren">(</span><em class="sig-param">input_image_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/architectures/create_custom_unet_model.html#create_sysu_media_unet_model_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.architectures.create_sysu_media_unet_model_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the sysu_media U-net architecture</p>
+<p>Creates a keras model implementation of the u-net architecture
+in the 2017 MICCAI WMH challenge by the sysu_medial team described
+here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/30125711/">https://pubmed.ncbi.nlm.nih.gov/30125711/</a></p>
+</div></blockquote>
+<p>with the original implementation available here:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/hongweilibran/wmh_ibbmTum">https://github.com/hongweilibran/wmh_ibbmTum</a></p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input_image_size</strong> (<em>tuple of length 4</em>) – This will be (200, 200, 2) for t1/flair input and (200, 200, 1)} for
+flair-only input.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 2-D keras model defining the U-net network.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Keras model</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">create_sysu_media_unet_model_2d</span><span class="p">((</span><span class="o">*</span><span class="n">image_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="custom">
 <h2>Custom<a class="headerlink" href="#custom" title="Permalink to this headline">¶</a></h2>

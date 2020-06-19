@@ -5,35 +5,24 @@ import keras
 
 import ants
 
-def deep_flash(t1,
-               do_preprocessing=True,
-               output_directory=None,
-               verbose=False):
+def deep_atropos(t1,
+                 do_preprocessing=True,
+                 output_directory=None,
+                 verbose=False):
 
     """
-    Hippocampal/Enthorhinal segmentation using "Deep Flash"
+    Six-tissue segmentation.
 
-    Perform hippocampal/entorhinal segmentation in T1 images using
-    labels from Mike Yassa's lab
-
-    https://faculty.sites.uci.edu/myassa/
+    Perform Atropos-style six tissue segmentation using deep learning.
 
     The labeling is as follows:
     Label 0 :  background
-    Label 5 :  left aLEC
-    Label 6 :  right aLEC
-    Label 7 :  left pMEC
-    Label 8 :  right pMEC
-    Label 9 :  left perirhinal
-    Label 10:  right perirhinal
-    Label 11:  left parahippocampal
-    Label 12:  right parahippocampal
-    Label 13:  left DG/CA3
-    Label 14:  right DG/CA3
-    Label 15:  left CA1
-    Label 16:  right CA1
-    Label 17:  left subiculum
-    Label 18:  right subiculum
+    Label 1 :  CSF
+    Label 2 :  gray matter
+    Label 3 :  white matter
+    Label 4 :  deep gray matter
+    Label 5 :  brain stem
+    Label 6 :  cerebellum
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
@@ -68,7 +57,7 @@ def deep_flash(t1,
     Example
     -------
     >>> image = ants.image_read("t1.nii.gz")
-    >>> flash = deep_flash(image)
+    >>> flash = deep_atropos(image)
     """
 
     from ..architectures import create_unet_model_3d
@@ -76,18 +65,6 @@ def deep_flash(t1,
     from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
     from ..utilities import crop_image_center
-
-    def pad_or_crop_image_to_size(image, size):
-        image_size = np.array(image.shape)
-        delta = image_size - np.array(size)
-
-        if np.any(delta < 0):
-            pad_size = abs(delta.min())
-            pad_shape = image_size + pad_size
-            image = ants.pad_image(image, shape=pad_shape)
-
-        cropped_image = crop_image_center(image, size)
-        return(cropped_image)
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -128,13 +105,13 @@ def deep_flash(t1,
 
     weights_file_name = None
     if output_directory is not None:
-        weights_file_name = output_directory + "/deepFlashWeights.h5"
+        weights_file_name = output_directory + "/sixTissueWeights.h5"
         if not os.path.exists(weights_file_name):
             if verbose == True:
-                print("Deep Flash:  downloading model weights.")
-            weights_file_name = get_pretrained_network("deepFlashWeights", weights_file_name)
+                print("Deep Atropos:  downloading model weights.")
+            weights_file_name = get_pretrained_network("sixTissueBrainSegmentation", weights_file_name)
     else:
-        weights_file_name = get_pretrained_network("deepFlash")
+        weights_file_name = get_pretrained_network("sixTissueBrainSegmentation")
 
     unet_model.load_weights(weights_file_name)
 
@@ -147,7 +124,7 @@ def deep_flash(t1,
     if verbose == True:
         print("Prediction.")
 
-    cropped_image = pad_or_crop_image_to_size(t1_preprocessed, template_size)
+    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (171, 205, 159))
 
     batchX = np.expand_dims(cropped_image.numpy(), axis=0)
     batchX = np.expand_dims(batchX, axis=-1)

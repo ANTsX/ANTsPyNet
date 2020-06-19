@@ -831,8 +831,8 @@ tempfile.</p></li>
 <p>Perform hippocampal/entorhinal segmentation in T1 images using
 labels from Mike Yassa’s lab</p>
 <p><a class="reference external" href="https://faculty.sites.uci.edu/myassa/">https://faculty.sites.uci.edu/myassa/</a></p>
-<dl class="simple">
-<dt>The labeling is as follows:</dt><dd><p>Label 0 :  background
+<p>The labeling is as follows:
+Label 0 :  background
 Label 5 :  left aLEC
 Label 6 :  right aLEC
 Label 7 :  left pMEC
@@ -847,7 +847,7 @@ Label 15:  left CA1
 Label 16:  right CA1
 Label 17:  left subiculum
 Label 18:  right subiculum</p>
-</dd>
+<dl class="simple">
 <dt>Preprocessing on the training data consisted of:</dt><dd><ul class="simple">
 <li><p>n4 bias correction,</p></li>
 <li><p>denoising,</p></li>
@@ -881,6 +881,202 @@ tempfile.</p></li>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;t1.nii.gz&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flash</span> <span class="o">=</span> <span class="n">deep_flash</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.deep_atropos">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_atropos</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_atropos.html#deep_atropos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_atropos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Six-tissue segmentation.</p>
+<p>Perform Atropos-style six tissue segmentation using deep learning.</p>
+<p>The labeling is as follows:
+Label 0 :  background
+Label 1 :  CSF
+Label 2 :  gray matter
+Label 3 :  white matter
+Label 4 :  deep gray matter
+Label 5 :  brain stem
+Label 6 :  cerebellum</p>
+<dl class="simple">
+<dt>Preprocessing on the training data consisted of:</dt><dd><ul class="simple">
+<li><p>n4 bias correction,</p></li>
+<li><p>denoising,</p></li>
+<li><p>brain extraction, and</p></li>
+<li><p>affine registration to MNI.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The input T1 should undergo the same steps.  If the input T1 is the raw
+T1, these steps can be performed by the internal preprocessing, i.e. set
+do_preprocessing = True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
+<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
+Since these can be resused, if is None, these data will be downloaded to a
+tempfile.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>List consisting of the segmentation image and probability images for</em></p></li>
+<li><p><em>each label.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;t1.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flash</span> <span class="o">=</span> <span class="n">deep_atropos</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.desikan_killiany_tourville_labeling">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">desikan_killiany_tourville_labeling</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/desikan_killiany_tourville_labeling.html#desikan_killiany_tourville_labeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.desikan_killiany_tourville_labeling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cortical and deep gray matter labeling using Desikan-Killiany-Tourville</p>
+<p>Perform Atropos-style six tissue segmentation using deep learning</p>
+<p>The labeling is as follows:
+Label 0: background
+Label 4: left lateral ventricle
+Label 5: left inferior lateral ventricle
+Label 6: left cerebellem exterior
+Label 7: left cerebellum white matter
+Label 10: left thalamus proper
+Label 11: left caudate
+Label 12: left putamen
+Label 13: left pallidium
+Label 15: 4th ventricle
+Label 16: brain stem
+Label 17: left hippocampus
+Label 18: left amygdala
+Label 24: CSF
+Label 25: left lesion
+Label 26: left accumbens area
+Label 28: left ventral DC
+Label 30: left vessel
+Label 43: right lateral ventricle
+Label 44: right inferior lateral ventricle
+Label 45: right cerebellum exterior
+Label 46: right cerebellum white matter
+Label 49: right thalamus proper
+Label 50: right caudate
+Label 51: right putamen
+Label 52: right palladium
+Label 53: right hippocampus
+Label 54: right amygdala
+Label 57: right lesion
+Label 58: right accumbens area
+Label 60: right ventral DC
+Label 62: right vessel
+Label 72: 5th ventricle
+Label 85: optic chasm
+Label 91: left basal forebrain
+Label 92: right basal forebrain
+Label 630: cerebellar vermal lobules I-V
+Label 631: cerebellar vermal lobules VI-VII
+Label 632: cerebellar vermal lobules VIII-X
+Label 1002: left caudal anterior cingulate
+Label 1003: left caudal middle frontal
+Label 1005: left cuneus
+Label 1006: left entorhinal
+Label 1007: left fusiform
+Label 1008: left inferior parietal
+Label 1009: left inferior temporal
+Label 1010: left isthmus cingulate
+Label 1011: left lateral occipital
+Label 1012: left lateral orbitofrontal
+Label 1013: left lingual
+Label 1014: left medial orbitofrontal
+Label 1015: left middle temporal
+Label 1016: left parahippocampal
+Label 1017: left paracentral
+Label 1018: left pars opercularis
+Label 1019: left pars orbitalis
+Label 1020: left pars triangularis
+Label 1021: left pericalcarine
+Label 1022: left postcentral
+Label 1023: left posterior cingulate
+Label 1024: left precentral
+Label 1025: left precuneus
+Label 1026: left rostral anterior cingulate
+Label 1027: left rostral middle frontal
+Label 1028: left superior frontal
+Label 1029: left superior parietal
+Label 1030: left superior temporal
+Label 1031: left supramarginal
+Label 1034: left transverse temporal
+Label 1035: left insula
+Label 2002: right caudal anterior cingulate
+Label 2003: right caudal middle frontal
+Label 2005: right cuneus
+Label 2006: right entorhinal
+Label 2007: right fusiform
+Label 2008: right inferior parietal
+Label 2009: right inferior temporal
+Label 2010: right isthmus cingulate
+Label 2011: right lateral occipital
+Label 2012: right lateral orbitofrontal
+Label 2013: right lingual
+Label 2014: right medial orbitofrontal
+Label 2015: right middle temporal
+Label 2016: right parahippocampal
+Label 2017: right paracentral
+Label 2018: right pars opercularis
+Label 2019: right pars orbitalis
+Label 2020: right pars triangularis
+Label 2021: right pericalcarine
+Label 2022: right postcentral
+Label 2023: right posterior cingulate
+Label 2024: right precentral
+Label 2025: right precuneus
+Label 2026: right rostral anterior cingulate
+Label 2027: right rostral middle frontal
+Label 2028: right superior frontal
+Label 2029: right superior parietal
+Label 2030: right superior temporal
+Label 2031: right supramarginal
+Label 2034: right transverse temporal
+Label 2035: right insula</p>
+<dl class="simple">
+<dt>Preprocessing on the training data consisted of:</dt><dd><ul class="simple">
+<li><p>n4 bias correction,</p></li>
+<li><p>denoising,</p></li>
+<li><p>brain extraction, and</p></li>
+<li><p>affine registration to MNI.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The input T1 should undergo the same steps.  If the input T1 is the raw
+T1, these steps can be performed by the internal preprocessing, i.e. set
+do_preprocessing = True</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
+<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
+<li><p><strong>output_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
+Since these can be resused, if is None, these data will be downloaded to a
+tempfile.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>List consisting of the segmentation image and probability images for</em></p></li>
+<li><p><em>each label.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;t1.nii.gz&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flash</span> <span class="o">=</span> <span class="n">desikan_killiany_tourville_labeling</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
