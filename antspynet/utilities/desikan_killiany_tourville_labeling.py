@@ -189,7 +189,8 @@ def desikan_killiany_tourville_labeling(t1,
     ################################
 
     template_size = (160, 192, 160)
-    labels = (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
+    labels = (0, 4, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 26,
+        28, 30, 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 58, 60, 91, 92, 630, 631, 632)
 
     unet_model = create_unet_model_3d((*template_size, 1),
         number_of_outputs = len(labels),
@@ -218,7 +219,7 @@ def desikan_killiany_tourville_labeling(t1,
     if verbose == True:
         print("Prediction.")
 
-    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (171, 205, 159))
+    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (172, 206, 160))
 
     batchX = np.expand_dims(cropped_image.numpy(), axis=0)
     batchX = np.expand_dims(batchX, axis=-1)

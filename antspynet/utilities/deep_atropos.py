@@ -95,7 +95,7 @@ def deep_atropos(t1,
     ################################
 
     template_size = (160, 192, 160)
-    labels = (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
+    labels = (0, 1, 2, 3, 4, 5, 6)
 
     unet_model = create_unet_model_3d((*template_size, 1),
         number_of_outputs = len(labels),
@@ -124,7 +124,7 @@ def deep_atropos(t1,
     if verbose == True:
         print("Prediction.")
 
-    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (171, 205, 159))
+    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (172, 206, 160))
 
     batchX = np.expand_dims(cropped_image.numpy(), axis=0)
     batchX = np.expand_dims(batchX, axis=-1)
