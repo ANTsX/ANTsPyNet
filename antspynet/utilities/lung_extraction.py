@@ -16,7 +16,7 @@ def lung_extraction(image,
                     verbose=None):
 
     """
-    Perform proton or ct lung extraction using U-net.  
+    Perform proton or ct lung extraction using U-net.
 
     Arguments
     ---------
@@ -27,16 +27,16 @@ def lung_extraction(image,
         Modality image type.  Options include "ct" and "proton".
 
     output_directory : string
-        Destination directory for storing the downloaded template and model weights.  
-        Since these can be resused, if is None, these data will be downloaded to a 
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
         tempfile.
 
     verbose : boolean
-        Print progress to the screen.    
+        Print progress to the screen.
 
     Returns
     -------
-    Dictionary of ANTs probability images.
+    Dictionary of ANTs segmentation and probability images.
 
     Example
     -------
@@ -47,7 +47,7 @@ def lung_extraction(image,
     from ..utilities import get_pretrained_network
 
     if image.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )  
+        raise ValueError( "Image dimension must be 3." )
 
 
     image_mods = [modality]
@@ -63,7 +63,7 @@ def lung_extraction(image,
                 if verbose == True:
                     print("Lung extraction:  downloading weights.")
                 weights_file_name = get_pretrained_network("protonLungMri", weights_file_name)
-        else:    
+        else:
             weights_file_name = get_pretrained_network("protonLungMri")
 
         classes = ("background", "left_lung", "right_lung")
@@ -105,7 +105,7 @@ def lung_extraction(image,
 
         if verbose == True:
             print("Lung extraction:  normalizing image to the template.")
-        
+
         center_of_mass_template = ants.get_center_of_mass(reorient_template * 0 + 1)
         center_of_mass_image = ants.get_center_of_mass(image * 0 + 1)
         translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template)
@@ -136,10 +136,15 @@ def lung_extraction(image,
             probability_images_array[i] = ants.apply_ants_transform_to_image(
                 ants.invert_ants_transform(xfrm), probability_images_array[i], image)
 
-        return_dict = {'left_lung' : probability_images_array[1],
-                       'right_lung' : probability_images_array[2]}
-        return(return_dict)                       
- 
+        image_matrix = ants.image_list_to_matrix(probability_images_array, image * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
+
+        return_dict = {'segmentation_image' : segmentation_image,
+                       'probability_images' : probability_images_array}
+        return(return_dict)
+
     elif modality == "ct":
         if output_directory is not None:
             weights_file_name = output_directory + "/ctLungSegmentationWeights.h5"
@@ -147,7 +152,7 @@ def lung_extraction(image,
                 if verbose == True:
                     print("Lung extraction:  downloading weights.")
                 weights_file_name = get_pretrained_network("ctHumanLung", weights_file_name)
-        else:    
+        else:
             weights_file_name = get_pretrained_network("ctHumanLung")
 
         classes = ("background", "left_lung", "right_lung", "trachea")
@@ -189,7 +194,7 @@ def lung_extraction(image,
 
         if verbose == True:
             print("Lung extraction:  normalizing image to the template.")
-        
+
         center_of_mass_template = ants.get_center_of_mass(reorient_template * 0 + 1)
         center_of_mass_image = ants.get_center_of_mass(image * 0 + 1)
         translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template)
@@ -220,11 +225,15 @@ def lung_extraction(image,
             probability_images_array[i] = ants.apply_ants_transform_to_image(
                 ants.invert_ants_transform(xfrm), probability_images_array[i], image)
 
-        return_dict = {'left_lung' : probability_images_array[1],
-                       'right_lung' : probability_images_array[2],
-                       'trachea' : probability_images_array[3]}
-        return(return_dict)                       
-    
+        image_matrix = ants.image_list_to_matrix(probability_images_array, image * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
+
+        return_dict = {'segmentation_image' : segmentation_image,
+                       'probability_images' : probability_images_array}
+        return(return_dict)
+
 
 
 
