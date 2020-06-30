@@ -35,8 +35,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "brainExtraction": "https://ndownloader.figshare.com/files/22944632",
             # "brainExtraction": "https://ndownloader.figshare.com/files/13729661",  # old weights
             "brainExtractionT2": "https://ndownloader.figshare.com/files/23066153",
-            "brainExtractionFLAIR": "https://ndownloader.figshare.com/files/23066153",
-            # "brainExtractionFLAIR": "https://ndownloader.figshare.com/files/23064758", # these weights dont' work now so simply use T2 for now
+            "brainExtractionFLAIR": "https://ndownloader.figshare.com/files/23562194",
             "brainExtractionBOLD": "https://ndownloader.figshare.com/files/22761977",
             "brainExtractionFA": "https://ndownloader.figshare.com/files/22761926",
             "brainExtractionNoBrainer": "https://ndownloader.figshare.com/files/22598039",
