@@ -31,7 +31,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
     def switch_networks(argument):
         switcher = {
             "brainAgeGender": "https://ndownloader.figshare.com/files/22179948",
-            # "brainAgeGender": "https://ndownloader.figshare.com/files/14394350",
+            "brainAgeDeepBrainNet": "https://ndownloader.figshare.com/files/23573402",
             "brainExtraction": "https://ndownloader.figshare.com/files/22944632",
             # "brainExtraction": "https://ndownloader.figshare.com/files/13729661",  # old weights
             "brainExtractionT2": "https://ndownloader.figshare.com/files/23066153",
@@ -70,6 +70,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
 
     valid_list = ("dbpn4x",
                   "brainAgeGender",
+                  "brainAgeDeepBrainNet",
                   "brainExtraction",
                   "brainExtractionT2",
                   "brainExtractionFLAIR",

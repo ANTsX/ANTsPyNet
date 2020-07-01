@@ -32,10 +32,10 @@
             
   <h1>Source code for antspynet.architectures.create_unet_model</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> 
-                          <span class="n">multiply</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span>
+                          <span class="n">multiply</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span>
                           <span class="n">Conv2D</span><span class="p">,</span> <span class="n">Conv2DTranspose</span><span class="p">,</span> <span class="n">MaxPooling2D</span><span class="p">,</span>
-                          <span class="n">UpSampling2D</span><span class="p">,</span> 
+                          <span class="n">UpSampling2D</span><span class="p">,</span>
                           <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">MaxPooling3D</span><span class="p">,</span>
                           <span class="n">UpSampling3D</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">regularizers</span>
@@ -110,7 +110,7 @@
 <span class="sd">        convolution layers.  Default = 0.0.</span>
 
 <span class="sd">    add_attention_gating :  boolean</span>
-<span class="sd">        Whether or not to include attention gating.    </span>
+<span class="sd">        Whether or not to include attention gating.</span>
 
 <span class="sd">    mode :  string</span>
 <span class="sd">        `classification` or `regression`.  Default = `classification`.</span>
@@ -134,6 +134,7 @@
                        <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span><span class="n">g</span><span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">x_theta</span><span class="p">,</span> <span class="n">g_phi</span><span class="p">])</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">f</span><span class="p">)</span>
         <span class="n">f_psi</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                        <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span><span class="n">f</span><span class="p">)</span>
@@ -186,7 +187,7 @@
         <span class="n">deconv</span> <span class="o">=</span> <span class="n">UpSampling2D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)(</span><span class="n">deconv</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">add_attention_gating</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">outputs</span> <span class="o">=</span> <span class="n">attention_gate_2d</span><span class="p">(</span><span class="n">deconv</span><span class="p">,</span> 
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">attention_gate_2d</span><span class="p">(</span><span class="n">deconv</span><span class="p">,</span>
               <span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">number_of_layers</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
               <span class="n">number_of_filters</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)([</span><span class="n">deconv</span><span class="p">,</span> <span class="n">outputs</span><span class="p">])</span>
@@ -297,7 +298,7 @@
 <span class="sd">        convolution layers.  Default = 0.0.</span>
 
 <span class="sd">    add_attention_gating :  boolean</span>
-<span class="sd">        Whether or not to include attention gating.    </span>
+<span class="sd">        Whether or not to include attention gating.</span>
 
 <span class="sd">    mode :  string</span>
 <span class="sd">        `classification` or `regression`.  Default = `classification`.</span>
@@ -321,6 +322,7 @@
                        <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span><span class="n">g</span><span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">x_theta</span><span class="p">,</span> <span class="n">g_phi</span><span class="p">])</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">f</span><span class="p">)</span>
         <span class="n">f_psi</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                        <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span><span class="n">f</span><span class="p">)</span>
@@ -373,7 +375,7 @@
         <span class="n">deconv</span> <span class="o">=</span> <span class="n">UpSampling3D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)(</span><span class="n">deconv</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">add_attention_gating</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">outputs</span> <span class="o">=</span> <span class="n">attention_gate_3d</span><span class="p">(</span><span class="n">deconv</span><span class="p">,</span> 
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">attention_gate_3d</span><span class="p">(</span><span class="n">deconv</span><span class="p">,</span>
               <span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">number_of_layers</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
               <span class="n">number_of_filters</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">4</span><span class="p">)([</span><span class="n">deconv</span><span class="p">,</span> <span class="n">outputs</span><span class="p">])</span>

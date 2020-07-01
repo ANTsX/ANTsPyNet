@@ -79,6 +79,7 @@ Applications
 .. autofunction:: antspynet.utilities.deep_flash
 .. autofunction:: antspynet.utilities.deep_atropos
 .. autofunction:: antspynet.utilities.desikan_killiany_tourville_labeling
+.. autofunction:: antspynet.utilities.brain_age
 
 Miscellaneous
 -------------
