@@ -81,8 +81,8 @@ def reconstruct_image_from_patches(patches,
     count = 0
     if dimensionality == 2:
         if np.all(np.equal(stride_length_tuple, 1)):
-            for i in range(image_size[0] - patch_size[0]):
-                for j in range(image_size[1] - patch_size[1]):
+            for i in range(image_size[0] - patch_size[0] + 1):
+                for j in range(image_size[1] - patch_size[1] + 1):
                     start_index = (i, j)
                     end_index = tuple(np.add(start_index, patch_size))
 
@@ -120,8 +120,8 @@ def reconstruct_image_from_patches(patches,
                         image_array[i, j, :] /= factor
         else:
             count_array = np.zeros(image_array.shape[0:dimensionality])
-            for i in range(0, image_size[0] - patch_size[0], stride_length_tuple[0]):
-                for j in range(0, image_size[1] - patch_size[1], stride_length_tuple[1]):
+            for i in range(0, image_size[0] - patch_size[0] + 1, stride_length_tuple[0]):
+                for j in range(0, image_size[1] - patch_size[1] + 1, stride_length_tuple[1]):
                     start_index = (i, j)
                     end_index = tuple(np.add(start_index, patch_size))
 
@@ -150,9 +150,9 @@ def reconstruct_image_from_patches(patches,
     else:
 
         if np.all(np.equal(stride_length_tuple, 1)):
-            for i in range(image_size[0] - patch_size[0]):
-                for j in range(image_size[1] - patch_size[1]):
-                    for k in range(image_size[2] - patch_size[2]):
+            for i in range(image_size[0] - patch_size[0] + 1):
+                for j in range(image_size[1] - patch_size[1] + 1):
+                    for k in range(image_size[2] - patch_size[2] + 1):
                         start_index = (i, j, k)
                         end_index = tuple(np.add(start_index, patch_size))
 
@@ -186,9 +186,9 @@ def reconstruct_image_from_patches(patches,
                             count += 1
 
             if not domain_image_is_mask:
-                for i in range(image_size[0]):
-                    for j in range(image_size[1]):
-                        for k in range(image_size[2]):
+                for i in range(image_size[0] + 1):
+                    for j in range(image_size[1] + 1):
+                        for k in range(image_size[2] + 1):
                             factor = (min(i + 1, patch_size[0], image_size[0] - i) *
                                       min(j + 1, patch_size[1], image_size[1] - j) *
                                       min(k + 1, patch_size[2], image_size[2] - k))
@@ -196,9 +196,9 @@ def reconstruct_image_from_patches(patches,
                             image_array[i, j, k, :] /= factor
         else:
             count_array = np.zeros(image_array.shape[0:dimensionality])
-            for i in range(0, image_size[0] - patch_size[0], stride_length_tuple[0]):
-                for j in range(0, image_size[1] - patch_size[1], stride_length_tuple[1]):
-                    for k in range(0, image_size[2] - patch_size[2], stride_length_tuple[2]):
+            for i in range(0, image_size[0] - patch_size[0] + 1, stride_length_tuple[0]):
+                for j in range(0, image_size[1] - patch_size[1] + 1, stride_length_tuple[1]):
+                    for k in range(0, image_size[2] - patch_size[2] + 1, stride_length_tuple[2]):
                         start_index = (i, j, k)
                         end_index = tuple(np.add(start_index, patch_size))
 

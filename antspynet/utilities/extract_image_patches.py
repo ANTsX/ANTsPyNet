@@ -98,7 +98,7 @@ def extract_image_patches(image,
 
         indices = []
         for d in range(dimensionality):
-            indices.append(range(0, image_size[d] - patch_size[d], stride_length_tuple[d]))
+            indices.append(range(0, image_size[d] - patch_size[d] + 1, stride_length_tuple[d]))
             number_of_extracted_patches *= len(indices[d])
 
         if return_as_array:
