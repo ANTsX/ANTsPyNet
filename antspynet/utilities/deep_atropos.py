@@ -64,7 +64,8 @@ def deep_atropos(t1,
     from ..utilities import get_pretrained_network
     from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
-    from ..utilities import crop_image_center
+    from ..utilities import extract_image_patches
+    from ..utilities import reconstruct_image_from_patches
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -94,24 +95,30 @@ def deep_atropos(t1,
     #
     ################################
 
-    template_size = (160, 192, 160)
+    patch_size = (112, 112, 112)
+    stride_length = (t1_preprocessed.shape[0] - patch_size[0],
+                     t1_preprocessed.shape[1] - patch_size[1],
+                     t1_preprocessed.shape[2] - patch_size[2])
+
+    classes = ("background", "csf", "gray matter", "white matter",
+               "deep gray matter", "brain stem", "cerebellum")
     labels = (0, 1, 2, 3, 4, 5, 6)
 
-    unet_model = create_unet_model_3d((*template_size, 1),
+    unet_model = create_unet_model_3d((*patch_size, 1),
         number_of_outputs = len(labels),
-        number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
+        number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
         weight_decay = 1e-5, add_attention_gating=True)
 
     weights_file_name = None
     if output_directory is not None:
-        weights_file_name = output_directory + "/sixTissueWeights.h5"
+        weights_file_name = output_directory + "/sixTissueOctantSegmentationWeights.h5"
         if not os.path.exists(weights_file_name):
             if verbose == True:
                 print("Deep Atropos:  downloading model weights.")
             weights_file_name = get_pretrained_network("sixTissueBrainSegmentation", weights_file_name)
     else:
-        weights_file_name = get_pretrained_network("sixTissueBrainSegmentation")
+        weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation")
 
     unet_model.load_weights(weights_file_name)
 
@@ -124,35 +131,26 @@ def deep_atropos(t1,
     if verbose == True:
         print("Prediction.")
 
-    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (172, 206, 160))
-
-    batchX = np.expand_dims(cropped_image.numpy(), axis=0)
-    batchX = np.expand_dims(batchX, axis=-1)
-    batchX = (batchX - batchX.mean()) / batchX.std()
-
+    t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
+    image_patches = extract_image_patches(t1_preprocessed, patch_size=patch_size,
+                                          max_number_of_patches="all", stride_length=stride_length,
+                                          return_as_array=True)
+    batchX = np.expand_dims(image_patches, axis=-1)
     predicted_data = unet_model.predict(batchX, verbose=verbose)
-
-    origin = cropped_image.origin
-    spacing = cropped_image.spacing
-    direction = cropped_image.direction
 
     probability_images = list()
     for i in range(len(labels)):
-        probability_image = \
-            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
-            origin=origin, spacing=spacing, direction=direction)
-        if i > 0:
-            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
-        else:
-            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+        print("Reconstructing image", classes[i])
+        reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
+            domain_image=t1_preprocessed, stride_length=stride_length)
 
         if do_preprocessing == True:
             probability_images.append(ants.apply_transforms(fixed=t1,
-                moving=decropped_image,
+                moving=reconstructed_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
         else:
-            probability_images.append(decropped_image)
+            probability_images.append(reconstructed_image)
 
     image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)

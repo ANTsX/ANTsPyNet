@@ -80,7 +80,7 @@ def brain_age(t1,
             template="croppedMni152",
             template_transform_type="AffineFast",
             do_bias_correction=True,
-            do_denoising=False,
+            do_denoising=True,
             output_directory=output_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
@@ -114,12 +114,11 @@ def brain_age(t1,
 
     for i in range(len(which_slices)):
 
-        # The model requires a three-channel input.  The paper doesn't specify but I'm
-        # guessing that the previous and next slice are included.
+        slice = (ants.slice_image(t1_preprocessed, axis=2, idx=which_slices[i])).numpy()
 
-        batchX[i,:,:,0] = (ants.slice_image(t1_preprocessed, axis=2, idx=which_slices[i] - 1)).numpy()
-        batchX[i,:,:,1] = (ants.slice_image(t1_preprocessed, axis=2, idx=which_slices[i]    )).numpy()
-        batchX[i,:,:,2] = (ants.slice_image(t1_preprocessed, axis=2, idx=which_slices[i] + 1)).numpy()
+        batchX[i,:,:,0] = slice
+        batchX[i,:,:,1] = slice
+        batchX[i,:,:,2] = slice
 
 
     if verbose == True:
