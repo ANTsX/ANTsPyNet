@@ -8,12 +8,12 @@ import ants
 
 def brain_age(t1,
               do_preprocessing=True,
+              number_of_simulations=0,
+              sd_affine=0.01,
               output_directory=None,
               verbose=False):
 
     """
-    Brain Age
-
     Estimate BrainAge from a T1-weighted MR image using the DeepBrainNet
     architecture and weights described here:
 
@@ -44,6 +44,12 @@ def brain_age(t1,
         Since these can be resused, if is None, these data will be downloaded to a
         tempfile.
 
+    number_of_simulations : integer
+        Number of random affine perturbations to transform the input.
+
+    sd_affine : float
+        Define the standard deviation of the affine transformation parameter.
+
     verbose : boolean
         Print progress to the screen.
 
@@ -56,12 +62,12 @@ def brain_age(t1,
     -------
     >>> image = ants.image_read("t1.nii.gz")
     >>> deep = brain_age(image)
-    >>> print("Predicted age: ", deep['predicted_age'])
-
+    >>> print("Predicted age: ", deep['predicted_age']
     """
 
     from ..utilities import preprocess_brain_image
     from ..utilities import get_pretrained_network
+    from ..utilities import randomly_transform_image_data
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -112,19 +118,43 @@ def brain_age(t1,
 
     batchX = np.zeros((len(which_slices), *t1_preprocessed.shape[0:2], 3))
 
-    for i in range(len(which_slices)):
+    input_image = list()
+    input_image.append(t1_preprocessed)
 
-        slice = (ants.slice_image(t1_preprocessed, axis=2, idx=which_slices[i])).numpy()
+    input_image_list = list()
+    input_image_list.append(input_image)
 
-        batchX[i,:,:,0] = slice
-        batchX[i,:,:,1] = slice
-        batchX[i,:,:,2] = slice
+    if number_of_simulations > 0:
+        data_augmentation = randomly_transform_image_data(
+            reference_image=t1_preprocessed,
+            input_image_list=input_image_list,
+            number_of_simulations=number_of_simulations,
+            transform_type='affine',
+            sd_affine=sd_affine,
+            input_image_interpolator='linear')
 
+    brain_age_per_slice = None
+    for i in range(number_of_simulations + 1):
 
-    if verbose == True:
-        print("Brain age (DeepBrainNet):  predicting brain age per slice.")
+        batch_image = t1_preprocessed
+        if i > 0:
+            batch_image = data_augmentation['simulated_images'][i-1][0]
 
-    brain_age_per_slice = model.predict(batchX, verbose=verbose)
+        for j in range(len(which_slices)):
+
+            slice = (ants.slice_image(batch_image, axis=2, idx=which_slices[j])).numpy()
+            batchX[i,:,:,0] = slice
+            batchX[i,:,:,1] = slice
+            batchX[i,:,:,2] = slice
+
+        if verbose == True:
+            print("Brain age (DeepBrainNet):  predicting brain age per slice (batch = ", i, ")")
+
+        if i == 0:
+            brain_age_per_slice = model.predict(batchX, verbose=verbose)
+        else:
+            prediction = model.predict(batchX, verbose=verbose)
+            brain_age_per_slice += (prediction - brain_age_per_slice) /  (i+1)
 
     predicted_age = statistics.median(brain_age_per_slice)[0]
 
