@@ -16,6 +16,8 @@ def desikan_killiany_tourville_labeling(t1,
     Perform Atropos-style six tissue segmentation using deep learning
 
     The labeling is as follows:
+
+    Inner labels:
     Label 0: background
     Label 4: left lateral ventricle
     Label 5: left inferior lateral ventricle
@@ -55,6 +57,8 @@ def desikan_killiany_tourville_labeling(t1,
     Label 630: cerebellar vermal lobules I-V
     Label 631: cerebellar vermal lobules VI-VII
     Label 632: cerebellar vermal lobules VIII-X
+
+    Outer labels:
     Label 1002: left caudal anterior cingulate
     Label 1003: left caudal middle frontal
     Label 1005: left cuneus
@@ -184,7 +188,79 @@ def desikan_killiany_tourville_labeling(t1,
 
     ################################
     #
-    # Build model and load weights
+    # Build outer model and load weights
+    #
+    ################################
+
+    template_size = (96, 112, 96)
+    labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
+                 2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
+
+    unet_model = create_unet_model_3d((*template_size, 1),
+        number_of_outputs = len(labels),
+        number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
+        convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
+        weight_decay = 1e-5, add_attention_gating=True)
+
+    weights_file_name = None
+    if output_directory is not None:
+        weights_file_name = output_directory + "/dktLabelingOuter.h5"
+        if not os.path.exists(weights_file_name):
+            if verbose == True:
+                print("DesikianKillianyTourville:  downloading model weights.")
+            weights_file_name = get_pretrained_network("dktOuter", weights_file_name)
+    else:
+        weights_file_name = get_pretrained_network("dktOuter")
+
+    unet_model.load_weights(weights_file_name)
+
+    ################################
+    #
+    # Do prediction and normalize to native space
+    #
+    ################################
+
+    if verbose == True:
+        print("Outer model Prediction.")
+
+    downsampled_image = ants.resample_image(t1_preprocessed, template_size, use_voxels=True, interp_type=0)
+
+    batchX = np.expand_dims(downsampled_image.numpy(), axis=0)
+    batchX = np.expand_dims(batchX, axis=-1)
+    batchX = (batchX - batchX.mean()) / batchX.std()
+
+    predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+    origin = downsampled_image.origin
+    spacing = downsampled_image.spacing
+    direction = downsampled_image.direction
+
+    probability_images = list()
+    for i in range(len(labels)):
+        probability_image = \
+            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
+            origin=origin, spacing=spacing, direction=direction)
+        resampled_image = ants.resample_image( probability_image, t1_preprocessed.shape, use_voxels=True, interp_type=0)
+        if do_preprocessing == True:
+            probability_images.append(ants.apply_transforms(fixed=t1,
+                moving=resampled_image,
+                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+        else:
+            probability_images.append(resampled_image)
+
+    image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
+    segmentation_matrix = np.argmax(image_matrix, axis=0)
+    segmentation_image = ants.matrix_to_images(
+        np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
+
+    dkt_label_image = ants.image_clone(segmentation_image)
+    for i in range(len(labels)):
+        dkt_label_image[segmentation_image==i] = labels[i]
+
+    ################################
+    #
+    # Build inner model and load weights
     #
     ################################
 
@@ -254,10 +330,15 @@ def desikan_killiany_tourville_labeling(t1,
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
-    relabeled_image = ants.image_clone(segmentation_image)
-    for i in range(len(labels)):
-        relabeled_image[segmentation_image==i] = labels[i]
+    ################################
+    #
+    # Incorporate the inner model results into the final label image.
+    # Note that we purposely prioritize the inner label results.
+    #
+    ################################
 
-    return_dict = {'segmentation_image'  : relabeled_image,
-                   'probability_images' : probability_images}
-    return(return_dict)
+    for i in range(len(labels)):
+        if labels[i] > 0:
+            dkt_label_image[segmentation_image==i] = labels[i]
+
+    return(dkt_label_image)
