@@ -55,7 +55,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "hippMapp3rRefine": "https://ndownloader.figshare.com/files/18068411",
             "mriSuperResolution": "https://ndownloader.figshare.com/files/19430123",
             "protonLungMri": "https://ndownloader.figshare.com/files/13606799",
-            "sixTissueOctantBrainSegmentation": "https://ndownloader.figshare.com/files/23615024",
+            "sixTissueOctantBrainSegmentation": "https://ndownloader.figshare.com/files/23776025",
             "sysuMediaWmhFlairOnlyModel0": "https://ndownloader.figshare.com/files/22898441",
             "sysuMediaWmhFlairOnlyModel1": "https://ndownloader.figshare.com/files/22898570",
             "sysuMediaWmhFlairOnlyModel2": "https://ndownloader.figshare.com/files/22898438",
