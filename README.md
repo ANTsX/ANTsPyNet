@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ANTsX/ANTsPyNet.svg?branch=master)](https://travis-ci.org/ANTsX/ANTsPyNet)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
 # ANTsPyNet
 
@@ -15,7 +16,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * U-Net + ResNet (2-D, 3-D)
     * [Michal Drozdzal, Eugene Vorontsov, Gabriel Chartrand, Samuel Kadoury, and Chris Pal.  The Importance of Skip Connections in Biomedical Image Segmentation.](https://arxiv.org/abs/1608.04117)
 * Dense U-Net (2-D, 3-D)
-    * [X. Li, H. Chen, X. Qi, Q. Dou, C.-W. Fu, P.-A. Heng. H-DenseUNet: Hybrid Densely Connected UNet for Liver and Tumor Segmentation from CT Volumes.](https://arxiv.org/pdf/1709.07330.pdf)    
+    * [X. Li, H. Chen, X. Qi, Q. Dou, C.-W. Fu, P.-A. Heng. H-DenseUNet: Hybrid Densely Connected UNet for Liver and Tumor Segmentation from CT Volumes.](https://arxiv.org/pdf/1709.07330.pdf)
 
 ### Image classification/regression
 
@@ -27,7 +28,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.  Deep Residual Learning for Image Recognition.](https://arxiv.org/abs/1512.03385)
     * [Saining Xie and Ross Girshick and Piotr Dollár and Zhuowen Tu and Kaiming He.  Aggregated Residual Transformations for Deep Neural Networks.](https://arxiv.org/abs/1611.05431)
 * WideResNet (2-D, 3-D)
-    * [Sergey Zagoruyko and Nikos Komodakis.  Wide Residual Networks.](http://arxiv.org/abs/1605.07146)    
+    * [Sergey Zagoruyko and Nikos Komodakis.  Wide Residual Networks.](http://arxiv.org/abs/1605.07146)
 * DenseNet (2-D, 3-D)
     * [G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected Convolutional Networks Networks.](https://arxiv.org/abs/1608.06993)
 
@@ -43,12 +44,12 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * Deep denoise super-resolution (DDSRCNN) (2-D, 3-D)
     * [Xiao-Jiao Mao, Chunhua Shen, and Yu-Bin Yang.  Image Restoration Using Convolutional Auto-encoders with Symmetric Skip Connections](https://arxiv.org/abs/1606.08921)
 * ResNet super-resolution (SRResNet) (2-D, 3-D)
-    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, and Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)    
+    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, and Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
 * Deep back-projection network (DBPN) (2-D, 3-D)
     * [Muhammad Haris, Greg Shakhnarovich, Norimichi Ukita.  Deep Back-Projection Networks For Super-Resolution.](https://arxiv.org/abs/1803.02735)
 * Super resolution GAN
     * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
-    
+
 ### Registration and transforms
 
 * Spatial transformer network (STN) (2-D, 3-D)
@@ -68,7 +69,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * [Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros.  Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.](https://arxiv.org/abs/1703.10593)
 * Super resolution GAN
     * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
-    
+
 ### Clustering
 
 * Deep embedded clustering (DEC)
@@ -92,7 +93,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
        $ cd ANTsPyNet
        $ python setup.py install
        ```
-       
+
 ## Publications
 
 * Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026)
