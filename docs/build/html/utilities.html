@@ -941,7 +941,8 @@ tempfile.</p></li>
 <code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">desikan_killiany_tourville_labeling</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">output_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/desikan_killiany_tourville_labeling.html#desikan_killiany_tourville_labeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.desikan_killiany_tourville_labeling" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cortical and deep gray matter labeling using Desikan-Killiany-Tourville</p>
 <p>Perform Atropos-style six tissue segmentation using deep learning</p>
-<p>The labeling is as follows:
+<p>The labeling is as follows:</p>
+<p>Inner labels:
 Label 0: background
 Label 4: left lateral ventricle
 Label 5: left inferior lateral ventricle
@@ -980,7 +981,8 @@ Label 91: left basal forebrain
 Label 92: right basal forebrain
 Label 630: cerebellar vermal lobules I-V
 Label 631: cerebellar vermal lobules VI-VII
-Label 632: cerebellar vermal lobules VIII-X
+Label 632: cerebellar vermal lobules VIII-X</p>
+<p>Outer labels:
 Label 1002: left caudal anterior cingulate
 Label 1003: left caudal middle frontal
 Label 1005: left cuneus
@@ -1269,7 +1271,7 @@ transformations.</p></li>
 
 <dl class="function">
 <dt id="antspynet.utilities.crop_image_center">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">crop_image_center</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">crop_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/crop_image_center.html#crop_image_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.crop_image_center" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">crop_image_center</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">crop_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#crop_image_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.crop_image_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crop the center of an image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1289,6 +1291,60 @@ transformations.</p></li>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cropped_image</span> <span class="o">=</span> <span class="n">crop_image_center</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.pad_or_crop_image_to_size">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">pad_or_crop_image_to_size</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#pad_or_crop_image_to_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.pad_or_crop_image_to_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad or crop an image to a specified size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>ANTsImage</em>) – Input image</p></li>
+<li><p><strong>size</strong> (<em>tuple</em>) – size of output image</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A cropped or padded image</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">padded_image</span> <span class="o">=</span> <span class="n">pad_or_crop_image_to_size</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="mi">333</span><span class="p">,</span> <span class="mi">333</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.pad_image_by_factor">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">pad_image_by_factor</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">factor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#pad_image_by_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.pad_image_by_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad an image based on a factor.</p>
+<p>Pad image of size (x, y, z) to (x’, y’, z’) where (x’, y’, z’)
+is a divisible by a user-specified factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>ANTsImage</em>) – Input image</p></li>
+<li><p><strong>factor</strong> (<em>scalar</em><em> or </em><em>n-D tuple</em>) – Padding factor</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A padded image</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">padded_image</span> <span class="o">=</span> <span class="n">pad_image_by_factor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

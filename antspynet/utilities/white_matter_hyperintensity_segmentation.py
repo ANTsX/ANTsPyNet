@@ -70,18 +70,6 @@ def sysu_media_wmh_segmentation(flair,
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
 
-    def pad_or_crop_image_to_size(image, size):
-        image_size = np.array(image.shape)
-        delta = image_size - np.array(size)
-
-        if np.any(delta < 0):
-            pad_size = abs(delta.min())
-            pad_shape = image_size + pad_size
-            image = ants.pad_image(image, shape=pad_shape)
-
-        cropped_image = crop_image_center(image, size)
-        return(cropped_image)
-
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
