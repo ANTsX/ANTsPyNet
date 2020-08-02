@@ -254,7 +254,7 @@ def apply_super_resolution_model_to_image(image,
     -------
     >>> import ants
     >>> image = ants.image_read(ants.get_ants_data('r16'))
-    >>> image_sr = apply_deep_back_projection_model(image, get_pretrained_network("dbpn4x"))
+    >>> image_sr = apply_super_resolution_model_to_image(image, get_pretrained_network("dbpn4x"))
     """
 
     channel_axis = 0
