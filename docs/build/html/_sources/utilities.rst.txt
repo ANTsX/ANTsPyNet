@@ -80,6 +80,7 @@ Applications
 .. autofunction:: antspynet.utilities.deep_atropos
 .. autofunction:: antspynet.utilities.desikan_killiany_tourville_labeling
 .. autofunction:: antspynet.utilities.brain_age
+.. autofunction:: antspynet.utilities.mri_super_resolution
 
 Miscellaneous
 -------------
