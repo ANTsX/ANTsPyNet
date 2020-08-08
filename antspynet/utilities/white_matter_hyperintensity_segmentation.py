@@ -69,6 +69,7 @@ def sysu_media_wmh_segmentation(flair,
     from ..utilities import crop_image_center
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
+    from ..utilities import pad_or_crop_image_to_size
 
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )

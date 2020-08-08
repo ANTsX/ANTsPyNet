@@ -76,6 +76,7 @@ def deep_flash(t1,
     from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
     from ..utilities import crop_image_center
+    from ..utilities import pad_or_crop_image_to_size
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
