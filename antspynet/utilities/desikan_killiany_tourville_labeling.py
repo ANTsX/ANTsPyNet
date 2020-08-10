@@ -1,7 +1,12 @@
 import os
+import shutil
 
 import numpy as np
 import keras
+
+import requests
+import tempfile
+import sys
 
 import ants
 
@@ -188,6 +193,40 @@ def desikan_killiany_tourville_labeling(t1,
 
     ################################
     #
+    # Download spatial priors for outer model
+    #
+    ################################
+
+    spatial_priors_file_name = None
+    spatial_priors_file_exists = False
+    if output_directory is not None:
+        spatial_priors_file_name = output_directory + "/priorDktLabels.nii.gz"
+        if os.path.exists(spatial_priors_file_name):
+            spatial_priors_file_exists = True
+
+    spatial_priors = None
+    if output_directory is None or spatial_priors_file_exists == False:
+        spatial_priors_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
+        spatial_priors_file.close()
+        priors_file_name = spatial_priors_file.name
+        priors_url = "https://ndownloader.figshare.com/files/24139802"
+
+        if not os.path.exists(priors_file_name):
+            if verbose == True:
+                print("Downloading label spatial priors.")
+            r = requests.get(priors_url)
+            with open(priors_file_name, 'wb') as f:
+                f.write(r.content)
+        spatial_priors = ants.image_read(priors_file_name)
+        if output_directory is not None:
+            shutil.copy(priors_file_name, spatial_priors_file_name)
+    else:
+        spatial_priors = ants.image_read(spatial_priors_file_name)
+
+    priors_image_list = ants.ndimage_to_list(spatial_priors)
+
+    ################################
+    #
     # Build outer model and load weights
     #
     ################################
@@ -195,8 +234,9 @@ def desikan_killiany_tourville_labeling(t1,
     template_size = (96, 112, 96)
     labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
                  2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
+    channel_size = 1 + len(priors_image_list)
 
-    unet_model = create_unet_model_3d((*template_size, 1),
+    unet_model = create_unet_model_3d((*template_size, channel_size),
         number_of_outputs = len(labels),
         number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
@@ -204,13 +244,13 @@ def desikan_killiany_tourville_labeling(t1,
 
     weights_file_name = None
     if output_directory is not None:
-        weights_file_name = output_directory + "/dktLabelingOuter.h5"
+        weights_file_name = output_directory + "/dktLabelingOuterWithSpatialPriors.h5"
         if not os.path.exists(weights_file_name):
             if verbose == True:
                 print("DesikianKillianyTourville:  downloading model weights.")
-            weights_file_name = get_pretrained_network("dktOuter", weights_file_name)
+            weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors", weights_file_name)
     else:
-        weights_file_name = get_pretrained_network("dktOuter")
+        weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors")
 
     unet_model.load_weights(weights_file_name)
 
@@ -224,10 +264,15 @@ def desikan_killiany_tourville_labeling(t1,
         print("Outer model Prediction.")
 
     downsampled_image = ants.resample_image(t1_preprocessed, template_size, use_voxels=True, interp_type=0)
+    image_array = downsampled_image.numpy()
+    image_array = (image_array - image_array.mean()) / image_array.std()
 
-    batchX = np.expand_dims(downsampled_image.numpy(), axis=0)
-    batchX = np.expand_dims(batchX, axis=-1)
-    batchX = (batchX - batchX.mean()) / batchX.std()
+    batchX = np.zeros((1, *template_size, channel_size))
+    batchX[0,:,:,:,0] = image_array
+
+    for i in range(len(priors_image_list)):
+        resampled_prior_image = ants.resample_image(priors_image_list[i], template_size, use_voxels=True, interp_type=0)
+        batchX[0,:,:,:,i+1] = resampled_prior_image.numpy()
 
     predicted_data = unet_model.predict(batchX, verbose=verbose)
 

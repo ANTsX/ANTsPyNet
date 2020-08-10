@@ -1,5 +1,6 @@
 import os
 import shutil
+
 import numpy as np
 import keras
 
@@ -8,7 +9,6 @@ import tempfile
 import sys
 
 import ants
-
 
 def brain_extraction(image,
                      modality="t1",
