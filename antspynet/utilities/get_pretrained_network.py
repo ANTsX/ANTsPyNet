@@ -50,7 +50,7 @@ def get_pretrained_network(file_id=None, target_file_name=None):
             "denoising": "https://ndownloader.figshare.com/files/14235296",
             "dktInner": "https://ndownloader.figshare.com/files/23266943",
             "dktOuter": "https://ndownloader.figshare.com/files/23765132",
-            "dktOuterWithSpatialPriors": "https://ndownloader.figshare.com/files/24181622",
+            "dktOuterWithSpatialPriors": "https://ndownloader.figshare.com/files/24230768",
             "functionalLungMri": "https://ndownloader.figshare.com/files/13824167",
             "hippMapp3rInitial": "https://ndownloader.figshare.com/files/18068408",
             "hippMapp3rRefine": "https://ndownloader.figshare.com/files/18068411",
