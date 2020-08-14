@@ -31,7 +31,8 @@ def brain_extraction(image,
         Modality image type.  Options include:
             * "t1": T1-weighted MRI---ANTs-trained.
             * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
-            * "t1combined": Brian's combination of "t1" and "t1nobrainer".
+            * "t1combined": Brian's combination of "t1" and "t1nobrainer".  One can also specify
+                            "t1combined[X]" where X is the morphological radius.  X = 12 by default.
             * "flair": FLAIR MRI.
             * "t2": T2 MRI.
             * "bold": 3-D BOLD MRI.
@@ -77,21 +78,24 @@ def brain_extraction(image,
     if input_images[0].dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if modality == "t1combined":
+    if "t1combined" in modality:
+
         brain_extraction_t1 = brain_extraction(image, modality="t1",
           output_directory=output_directory, verbose=verbose)
         brain_mask = ants.iMath_get_largest_component(
           ants.threshold_image(brain_extraction_t1, 0.5, 10000))
 
         # Need to change with voxel resolution
-        magic_number = 12
+        morphological_radius = 12
+        if '[' in modality and ']' in modality:
+            morphological_radius = int(modality.split("[")[1].split("]")[0])
 
-        brain_extraction_t1nobrainer = brain_extraction(image * ants.iMath_MD(brain_mask, radius=magic_number),
+        brain_extraction_t1nobrainer = brain_extraction(image * ants.iMath_MD(brain_mask, radius=morphological_radius),
           modality = "t1nobrainer", output_directory=output_directory, verbose=verbose)
         brain_extraction_combined = ants.iMath_fill_holes(
           ants.iMath_get_largest_component(brain_extraction_t1nobrainer * brain_mask))
 
-        brain_extraction_combined = brain_extraction_combined + ants.iMath_ME(brain_mask, magic_number) + brain_mask
+        brain_extraction_combined = brain_extraction_combined + ants.iMath_ME(brain_mask, morphological_radius) + brain_mask
 
         return(brain_extraction_combined)
 

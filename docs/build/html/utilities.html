@@ -567,7 +567,7 @@ poly_order=regression_order.</p></li>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">image_sr</span> <span class="o">=</span> <span class="n">apply_deep_back_projection_model</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;dbpn4x&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_sr</span> <span class="o">=</span> <span class="n">apply_super_resolution_model_to_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;dbpn4x&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -639,6 +639,11 @@ ported from the</p>
 <dt>Modality image type.  Options include:</dt><dd><ul>
 <li><p>”t1”: T1-weighted MRI—ANTs-trained.</p></li>
 <li><p>”t1nobrainer”: T1-weighted MRI—FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.</p></li>
+<li><dl class="simple">
+<dt>”t1combined”: Brian’s combination of “t1” and “t1nobrainer”.  One can also specify</dt><dd><p>”t1combined[X]” where X is the morphological radius.  X = 12 by default.</p>
+</dd>
+</dl>
+</li>
 <li><p>”flair”: FLAIR MRI.</p></li>
 <li><p>”t2”: T2 MRI.</p></li>
 <li><p>”bold”: 3-D BOLD MRI.</p></li>
