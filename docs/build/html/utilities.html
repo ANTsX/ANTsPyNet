@@ -1165,6 +1165,51 @@ tempfile.</p></li>
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="antspynet.utilities.neural_style_transfer">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">neural_style_transfer</code><span class="sig-paren">(</span><em class="sig-param">content_image, style_image, initial_combination_image=None, number_of_iterations=4000, initial_learning_rate=10.0, total_variation_weight=1e-06, content_weight=2.5e-08, style_weight=1e-06, style_layer_names=['block1_conv1', 'block2_conv1', 'block3_conv1', 'block4_conv1', 'block5_conv1'], content_layer_names=['block5_conv2'], verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
+<dd><p>The popular neural style transfer described here:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/1508.06576">https://arxiv.org/abs/1508.06576</a></p>
+<p>and taken from François Chollet’s implementation</p>
+<p><a class="reference external" href="https://keras.io/examples/generative/neural_style_transfer/">https://keras.io/examples/generative/neural_style_transfer/</a></p>
+<p>in order to possibly modify and experiment with medical images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content_image</strong> (<em>ANTsImage</em><em> (</em><em>1</em><em> or </em><em>3-component</em><em>)</em>) – Content (or base) image.</p></li>
+<li><p><strong>style_image</strong> (<em>ANTsImage</em>) – Style (or reference) image.</p></li>
+<li><p><strong>initial_combination_image</strong> (<em>ANTsImage</em><em> (</em><em>1</em><em> or </em><em>3-component</em><em>)</em>) – Starting point for the optimization.  Allows one to start from the
+output from a previous run.  Otherwise, start from the content image.</p></li>
+<li><p><strong>number_of_iterations</strong> (<em>integer</em>) – Number of gradient steps taken during optimization.</p></li>
+<li><p><strong>initial_iteration_rate</strong> (<em>float</em>) – Parameter for SGD optimization with exponential decay.</p></li>
+<li><p><strong>total_variation_weight</strong> (<em>float</em>) – A penalty on the regularization term to keep the features
+of the output image locally coherent.</p></li>
+<li><p><strong>style_weight</strong> (<em>float</em>) – Weight of the style term in the optimization function.  The
+style term computes the sum of the L2 norm between the Gram
+matrices of the different layers (using ImageNet-trained VGG)
+of the style and content images.</p></li>
+<li><p><strong>style_layer_names</strong> (<em>list of strings</em>) – Names of VGG layers from which to compute the style loss.</p></li>
+<li><p><strong>content_layer_names</strong> (<em>list of strings</em>) – Names of VGG layers from which to compute the content loss.</p></li>
+<li><p><strong>content_weight</strong> (<em>float</em>) – Weight of the content term in the optimization function.  The
+style term computes the sum of the L2 norm between the Gram
+matrices of the different layers (using ImageNet-trained VGG)
+of the content and output images.</p></li>
+<li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ANTs 3-component image.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">neural_style_transfer</span><span class="p">(</span><span class="n">content_image</span><span class="p">,</span> <span class="n">style_image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="miscellaneous">
 <h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
