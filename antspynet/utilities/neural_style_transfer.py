@@ -22,7 +22,7 @@ def neural_style_transfer(content_image,
                                 "block5_conv1",
                             ],
                           content_layer_names=[
-                              "block5_conv2"
+                                "block5_conv2"
                             ],
                           verbose=False):
 
@@ -204,7 +204,7 @@ def neural_style_transfer(content_image,
         return loss, gradients
 
     optimizer = tf.keras.optimizers.SGD(tf.keras.optimizers.schedules.ExponentialDecay(
-        initial_learning_rate=10.0, decay_steps=100, decay_rate=0.96))
+        initial_learning_rate=initial_learning_rate, decay_steps=100, decay_rate=0.96))
 
     for i in range(number_of_iterations):
         loss, gradients = compute_loss_and_gradients(content_array, style_array,
