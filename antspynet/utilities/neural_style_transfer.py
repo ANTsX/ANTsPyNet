@@ -10,7 +10,7 @@ def neural_style_transfer(content_image,
                           style_image,
                           initial_combination_image=None,
                           number_of_iterations=4000,
-                          initial_learning_rate=10.0,
+                          learning_rate=0.2,
                           total_variation_weight=1e-6,
                           content_weight=2.5e-8,
                           style_weight=1e-6,
@@ -149,7 +149,8 @@ def neural_style_transfer(content_image,
             layer_features = features[layer_name]
             content_features = layer_features[0,:, :, :]
             combination_features = layer_features[2, :, :, :]
-            total_loss = total_loss + content_weight * content_loss(content_features, combination_features)
+            total_loss = total_loss + ((content_weight / len(content_layer_names)) *
+              content_loss(content_features, combination_features))
 
         # style loss
         for layer_name in style_layer_names:
@@ -203,8 +204,7 @@ def neural_style_transfer(content_image,
         gradients = tape.gradient(loss, combination_tensor)
         return loss, gradients
 
-    optimizer = tf.keras.optimizers.SGD(tf.keras.optimizers.schedules.ExponentialDecay(
-        initial_learning_rate=initial_learning_rate, decay_steps=100, decay_rate=0.96))
+    optimizer = tf.optimizers.Adam(learning_rate=learning_rate, beta_1=0.99, epsilon=0.1)
 
     for i in range(number_of_iterations):
         loss, gradients = compute_loss_and_gradients(content_array, style_array,
