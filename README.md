@@ -7,80 +7,77 @@ A collection of deep learning architectures and applications ported to the pytho
 
 Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/ANTsPyNet/).
 
+![ANTsXNetTools](docs/figures/coreANTsXNetTools.png)
+
 ## Architectures
 
 ### Image voxelwise segmentation/regression
 
-* U-Net (2-D, 3-D)
-    * [O. Ronneberger, P. Fischer, and T. Brox.  U-Net: Convolutional Networks for Biomedical Image Segmentation.](https://arxiv.org/abs/1505.04597)
-* U-Net + ResNet (2-D, 3-D)
-    * [Michal Drozdzal, Eugene Vorontsov, Gabriel Chartrand, Samuel Kadoury, and Chris Pal.  The Importance of Skip Connections in Biomedical Image Segmentation.](https://arxiv.org/abs/1608.04117)
-* Dense U-Net (2-D, 3-D)
-    * [X. Li, H. Chen, X. Qi, Q. Dou, C.-W. Fu, P.-A. Heng. H-DenseUNet: Hybrid Densely Connected UNet for Liver and Tumor Segmentation from CT Volumes.](https://arxiv.org/pdf/1709.07330.pdf)
+* [U-Net (2-D, 3-D)](https://arxiv.org/abs/1505.04597)
+* [U-Net + ResNet (2-D, 3-D)](https://arxiv.org/abs/1608.04117)
+* [Dense U-Net (2-D, 3-D)](https://arxiv.org/pdf/1709.07330.pdf)
 
 ### Image classification/regression
 
-* AlexNet (2-D, 3-D)
-    * [A. Krizhevsky, and I. Sutskever, and G. Hinton. ImageNet Classification with Deep Convolutional Neural Networks.](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
-* VGG (2-D, 3-D)
-    * [K. Simonyan and A. Zisserman. Very Deep Convolutional Networks for Large-Scale Image Recognition.](https://arxiv.org/abs/1409.1556)
-* ResNet/ResNeXt (2-D, 3-D)
-    * [Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.  Deep Residual Learning for Image Recognition.](https://arxiv.org/abs/1512.03385)
-    * [Saining Xie and Ross Girshick and Piotr Dollár and Zhuowen Tu and Kaiming He.  Aggregated Residual Transformations for Deep Neural Networks.](https://arxiv.org/abs/1611.05431)
-* WideResNet (2-D, 3-D)
-    * [Sergey Zagoruyko and Nikos Komodakis.  Wide Residual Networks.](http://arxiv.org/abs/1605.07146)
-* DenseNet (2-D, 3-D)
-    * [G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten. Densely Connected Convolutional Networks Networks.](https://arxiv.org/abs/1608.06993)
+* [AlexNet (2-D, 3-D)](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
+* [VGG (2-D, 3-D)](https://arxiv.org/abs/1409.1556)
+* [ResNet (2-D, 3-D)](https://arxiv.org/abs/1512.03385)
+* [ResNeXt (2-D, 3-D)](https://arxiv.org/abs/1611.05431)
+* [WideResNet (2-D, 3-D)](http://arxiv.org/abs/1605.07146)
+* [DenseNet (2-D, 3-D)](https://arxiv.org/abs/1608.06993)
 
 ### Object detection
 
 ### Image super-resolution
 
-* Super-resolution convolutional neural network (SRCNN) (2-D, 3-D)
-    * [Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang.  Image Super-Resolution Using Deep Convolutional Networks.](https://arxiv.org/abs/1501.00092)
-* Expanded super-resolution (ESRCNN) (2-D, 3-D)
-    * [Chao Dong, Chen Change Loy, Kaiming He, and Xiaoou Tang.  Image Super-Resolution Using Deep Convolutional Networks.](https://arxiv.org/abs/1501.00092)
-* Denoising auto encoder super-resolution (DSRCNN) (2-D, 3-D)
-* Deep denoise super-resolution (DDSRCNN) (2-D, 3-D)
-    * [Xiao-Jiao Mao, Chunhua Shen, and Yu-Bin Yang.  Image Restoration Using Convolutional Auto-encoders with Symmetric Skip Connections](https://arxiv.org/abs/1606.08921)
-* ResNet super-resolution (SRResNet) (2-D, 3-D)
-    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, and Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
-* Deep back-projection network (DBPN) (2-D, 3-D)
-    * [Muhammad Haris, Greg Shakhnarovich, Norimichi Ukita.  Deep Back-Projection Networks For Super-Resolution.](https://arxiv.org/abs/1803.02735)
-* Super resolution GAN
-    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
+* [Super-resolution convolutional neural network (SRCNN) (2-D, 3-D)](https://arxiv.org/abs/1501.00092)
+* [Expanded super-resolution (ESRCNN) (2-D, 3-D)](https://arxiv.org/abs/1501.00092)
+* [Denoising auto encoder super-resolution (DSRCNN) (2-D, 3-D)]()
+* [Deep denoise super-resolution (DDSRCNN) (2-D, 3-D)](https://arxiv.org/abs/1606.08921)
+* [ResNet super-resolution (SRResNet) (2-D, 3-D)](https://arxiv.org/abs/1609.04802)
+* [Deep back-projection network (DBPN) (2-D, 3-D)](https://arxiv.org/abs/1803.02735)
+* [Super resolution GAN](https://arxiv.org/abs/1609.04802)
 
 ### Registration and transforms
 
-* Spatial transformer network (STN) (2-D, 3-D)
-    * [Max Jaderberg, Karen Simonyan, Andrew Zisserman, and Koray Kavukcuoglu.  Spatial Transformer Networks.](https://arxiv.org/abs/1506.02025)
+* [Spatial transformer network (STN) (2-D, 3-D)](https://arxiv.org/abs/1506.02025)
 
 ### Generative adverserial networks
 
-* Generative adverserial network (GAN)
-    * [Ian J. Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, Yoshua Bengio.  Generative Adverserial Networks.](https://arxiv.org/abs/1406.2661)
-* Deep Convolutional GAN
-    * [Alec Radford, Luke Metz, Soumith Chintala.  Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks.](https://arxiv.org/abs/1511.06434)
-* Wasserstein GAN
-    * [Martin Arjovsky, Soumith Chintala, Léon Bottou.  Wasserstein GAN.](https://arxiv.org/abs/1701.07875)
-* Improved Wasserstein GAN
-    * [Ishaan Gulrajani, Faruk Ahmed, Martin Arjovsky, Vincent Dumoulin, Aaron Courville.  Improved Training of Wasserstein GANs.](https://arxiv.org/abs/1704.00028)
-* Cycle GAN
-    * [Jun-Yan Zhu, Taesung Park, Phillip Isola, Alexei A. Efros.  Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.](https://arxiv.org/abs/1703.10593)
-* Super resolution GAN
-    * [Christian Ledig, Lucas Theis, Ferenc Huszar, Jose Caballero, Andrew Cunningham, Alejandro Acosta, Andrew Aitken, Alykhan Tejani, Johannes Totz, Zehan Wang, Wenzhe Shi.  Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.](https://arxiv.org/abs/1609.04802)
+* [Generative adverserial network (GAN)](https://arxiv.org/abs/1406.2661)
+* [Deep Convolutional GAN](https://arxiv.org/abs/1511.06434)
+* [Wasserstein GAN](https://arxiv.org/abs/1701.07875)
+* [Improved Wasserstein GAN](https://arxiv.org/abs/1704.00028)
+* [Cycle GAN](https://arxiv.org/abs/1703.10593)
+* [Super resolution GAN](https://arxiv.org/abs/1609.04802)
 
 ### Clustering
 
-* Deep embedded clustering (DEC)
-    * [Junyuan Xie, Ross Girshick, and Ali Farhadi.  Unsupervised Deep Embedding for Clustering Analysis.](https://arxiv.org/abs/1511.06335)
-* Deep convolutional embedded clustering (DCEC)
-    * [Xifeng Guo, Xinwang Liu, En Zhu, and Jianping Yin.  Deep Clustering with Convolutional Autoencoders.](https://xifengguo.github.io/papers/ICONIP17-DCEC.pdf)
+* [Deep embedded clustering (DEC)](https://arxiv.org/abs/1511.06335)
+* [Deep convolutional embedded clustering (DCEC)](https://xifengguo.github.io/papers/ICONIP17-DCEC.pdf)
 
-### Miscellaneous
+## Applications
 
-* Mixture density networks (MDN)
-    * [Christopher M. Bishop.  Mixture Density Networks.](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
+* MRI super-resolution
+* Multi-modal brain extraction
+    * T1 (ANTs and FreeSurfer)
+    * T2
+    * FA
+    * BOLD
+* Lung extraction
+    * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
+    * CT
+* Six-tissue Atropos brain segmentation
+* [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
+* [Hippmapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
+* [White matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
+* [Neural style transfer](https://arxiv.org/abs/1508.06576)
+* Deep Flash
+* Desikan-Killiany-Tourville cortical labeling
+
+## Miscellaneous
+
+* [Mixture density networks (MDN)](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
 
 --------------------------------------
 
@@ -96,7 +93,9 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 ## Publications
 
-* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026)
+* Andrew T. Grainger, Arun Krishnaraj, Michael H. Quinones, Nicholas J. Tustison, Samantha Epstein, Daniela Fuller, Aakash Jha, Kevin L. Allman, Weibin Shi. Deep Learning-based Quantification of Abdominal Subcutaneous and Visceral Fat Volume on CT Images, _Academic Radiology_.  [in press](https://www.academicradiology.org/article/S1076-6332(20)30426-8/pdf)
+
+* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_, 64:142-153, Dec 2019.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026) 
 
 * Nicholas J. Tustison, Brian B. Avants, Zixuan Lin, Xue Feng, Nicholas Cullen, Jaime F. Mata, Lucia Flors, James C. Gee, Talissa A. Altes, John P. Mugler III, and Kun Qing.  Convolutional Neural Networks with Template-Based Data Augmentation for Functional Lung Image Quantification, _Academic Radiology_, 26(3):412-423, Mar 2019. [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
 
