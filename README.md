@@ -7,6 +7,8 @@ A collection of deep learning architectures and applications ported to the pytho
 
 Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/ANTsPyNet/).
 
+![ANTsXNetTools](docs/figures/coreANTsXNetTools.png)
+
 ## Architectures
 
 ### Image voxelwise segmentation/regression
