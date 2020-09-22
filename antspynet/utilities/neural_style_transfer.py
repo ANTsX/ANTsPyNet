@@ -14,10 +14,14 @@ def neural_style_transfer(content_image,
                           total_variation_weight=8.5e-5,
                           content_weight=0.025,
                           style_weights=[1.0],
-                          style_layer_names="all",
+                          style_layer_names=[
+                            'block1_conv1', 
+                            'block2_conv1', 
+                            'block3_conv1', 
+                            'block4_conv1', 
+                            'block5_conv1'],
                           content_layer_names=[
-                                "block5_conv2"
-                            ],
+                            'block5_conv2'],
                           verbose=False,
                           output_prefix=None):
 
@@ -52,8 +56,8 @@ def neural_style_transfer(content_image,
     number_of_iterations : integer
         Number of gradient steps taken during optimization.
 
-    initial_iteration_rate : float
-        Parameter for SGD optimization with exponential decay.
+    learning_rate : float
+        Parameter for Adam optimization.
 
     total_variation_weight : float
         A penalty on the regularization term to keep the features
@@ -69,7 +73,7 @@ def neural_style_transfer(content_image,
 
     style_layer_names : list of strings
         Names of VGG layers from which to compute the style loss.  If "all",
-        this layers used are ['block1_conv1', 'block1_conv2', 'block2_conv1', 
+        the layers used are ['block1_conv1', 'block1_conv2', 'block2_conv1', 
         'block2_conv2', 'block3_conv1', 'block3_conv2', 'block3_conv3', 
         'block3_conv4', 'block4_conv1', 'block4_conv2', 'block4_conv3', 
         'block4_conv4', 'block5_conv1', 'block5_conv2', 'block5_conv3', 
@@ -143,15 +147,9 @@ def neural_style_transfer(content_image,
 
 
     def gram_matrix(x):
-        # Original in Chollet's implementation
-        # x = tf.transpose(x, (2, 0, 1))
-        # features = tf.reshape(x, (tf.shape(x)[0], -1))
-        # gram = tf.matmul(features, tf.transpose(features))
-
-        # Improvement in Titu1994's implementation
-        # Feature-wise outer product using shifted activations
-        features = tf.keras.backend.batch_flatten(tf.keras.backend.permute_dimensions(x, (2, 0, 1)))
-        gram = tf.keras.backend.dot(features - 1, tf.transpose(features - 1))
+        features = tf.keras.backend.batch_flatten(
+            tf.keras.backend.permute_dimensions(x, (2, 0, 1)))
+        gram = tf.keras.backend.dot(features, tf.keras.backend.transpose(features))
         return(gram)
 
     def style_loss(style_features, combination_features, image_shape):
@@ -187,25 +185,16 @@ def neural_style_transfer(content_image,
             total_loss = total_loss + ((content_weight / len(content_layer_names)) *
               content_loss(content_features, combination_features))
 
-        # Improvement 3 : Chained Inference without blurring
-        for i in range(len(style_layer_names) - 1):
-            # Get ith feature layer
+        # style loss
+        for i in range(len(style_layer_names)):
             layer_features = features[style_layer_names[i]]
             style_features = layer_features[1, :, :, :]
             combination_features = layer_features[2, :, :, :]
-            loss_i = style_loss(style_features, combination_features, image_shape)
-
-            # Get (i+1)th feature layer
-            layer_features = features[style_layer_names[i+1]]
-            style_features = layer_features[1, :, :, :]
-            combination_features = layer_features[2, :, :, :]
-            loss_ip1 = style_loss(style_features, combination_features, image_shape)
-          
-            loss = loss_i - loss_ip1 
-            total_loss = total_loss + loss * style_weights[i] / (2 ** len(style_layer_names) - (i + 1))
+            total_loss = total_loss + (style_loss(style_features, combination_features, image_shape) * 
+              style_weights[i] / len(style_layer_names))
 
         # total variation loss
-        total_loss += total_variation_weight * total_variation_loss(combination_tensor)
+        total_loss = total_loss + total_variation_weight * total_variation_loss(combination_tensor)
 
         return(total_loss)
 

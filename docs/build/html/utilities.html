@@ -1167,7 +1167,7 @@ tempfile.</p></li>
 
 <dl class="function">
 <dt id="antspynet.utilities.neural_style_transfer">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">neural_style_transfer</code><span class="sig-paren">(</span><em class="sig-param">content_image, style_image, initial_combination_image=None, number_of_iterations=10, learning_rate=0.2, total_variation_weight=8.5e-05, content_weight=0.025, style_weights=[1.0], style_layer_names='all', content_layer_names=['block5_conv2'], verbose=False, output_prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">neural_style_transfer</code><span class="sig-paren">(</span><em class="sig-param">content_image, style_image, initial_combination_image=None, number_of_iterations=10, learning_rate=0.2, total_variation_weight=8.5e-05, content_weight=0.025, style_weights=[1.0], style_layer_names=['block1_conv1', 'block2_conv1', 'block3_conv1', 'block4_conv1', 'block5_conv1'], content_layer_names=['block5_conv2'], verbose=False, output_prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
 <dd><p>The popular neural style transfer described here:</p>
 <p><a class="reference external" href="https://arxiv.org/abs/1508.06576">https://arxiv.org/abs/1508.06576</a></p>
 <p>and taken from François Chollet’s implementation</p>
@@ -1194,7 +1194,7 @@ style term computes the sum of the L2 norm between the Gram
 matrices of the different layers (using ImageNet-trained VGG)
 of the style and content images.</p></li>
 <li><p><strong>style_layer_names</strong> (<em>list of strings</em>) – Names of VGG layers from which to compute the style loss.  If “all”,
-this layers used are [‘block1_conv1’, ‘block1_conv2’, ‘block2_conv1’,
+the layers used are [‘block1_conv1’, ‘block1_conv2’, ‘block2_conv1’,
 ‘block2_conv2’, ‘block3_conv1’, ‘block3_conv2’, ‘block3_conv3’,
 ‘block3_conv4’, ‘block4_conv1’, ‘block4_conv2’, ‘block4_conv3’,
 ‘block4_conv4’, ‘block5_conv1’, ‘block5_conv2’, ‘block5_conv3’,
