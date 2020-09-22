@@ -57,25 +57,17 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 ## Applications
 
 * MRI super-resolution
-
 * Multi-modal brain extraction
    * T1 (ANTs and FreeSurfer)
    * T2
    * FA
    * BOLD
-
 * Six-tissue Atropos brain segmentation
-
 * [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
-
 * [Hippmapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
-
 * [White matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
-
 * [Neural style transfer](https://arxiv.org/abs/1508.06576)
-
 * Deep Flash
-
 * Desikan-Killiany-Tourville cortical labeling
 
 ## Miscellaneous
