@@ -93,7 +93,9 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 ## Publications
 
-* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026)
+* Andrew T. Grainger, Arun Krishnaraj, Michael H. Quinones, Nicholas J. Tustison, Samantha Epstein, Daniela Fuller, Aakash Jha, Kevin L. Allman, Weibin Shi. Deep Learning-based Quantification of Abdominal Subcutaneous and Visceral Fat Volume on CT Images, _Academic Radiology_.  [in press](https://www.academicradiology.org/article/S1076-6332(20)30426-8/pdf)
+
+* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_, 64:142-153, Dec 2019.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026) 
 
 * Nicholas J. Tustison, Brian B. Avants, Zixuan Lin, Xue Feng, Nicholas Cullen, Jaime F. Mata, Lucia Flors, James C. Gee, Talissa A. Altes, John P. Mugler III, and Kun Qing.  Convolutional Neural Networks with Template-Based Data Augmentation for Functional Lung Image Quantification, _Academic Radiology_, 26(3):412-423, Mar 2019. [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
 
