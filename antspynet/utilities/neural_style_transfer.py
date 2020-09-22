@@ -12,23 +12,20 @@ def neural_style_transfer(content_image,
                           number_of_iterations=10,
                           learning_rate=0.2,
                           total_variation_weight=8.5e-5,
-                          content_weight=0.025,
-                          style_weights=[1.0],
-                          style_layer_names=[
-                            'block1_conv1', 
-                            'block2_conv1', 
-                            'block3_conv1', 
-                            'block4_conv1', 
-                            'block5_conv1'],
+                          style_layer_weights=[1.0],
+                          style_layer_names="all",
+                          content_layer_weights=[0.025],
                           content_layer_names=[
                             'block5_conv2'],
+                          use_shifted_activations=True,
+                          use_chained_inference=True,  
                           verbose=False,
                           output_prefix=None):
 
     """
     The popular neural style transfer described here:
 
-    https://arxiv.org/abs/1508.06576
+    https://arxiv.org/abs/1508.06576 and https://arxiv.org/abs/1605.04603
 
     and taken from François Chollet's implementation
 
@@ -63,7 +60,7 @@ def neural_style_transfer(content_image,
         A penalty on the regularization term to keep the features
         of the output image locally coherent.
 
-    style_weights : list of floats
+    style_layer_weights : list of floats
         Weights of the style term in the optimization function for each
         style layer.  Can either specify a single scalar to be used for
         all the layers or one for each layer.  The
@@ -77,17 +74,23 @@ def neural_style_transfer(content_image,
         'block2_conv2', 'block3_conv1', 'block3_conv2', 'block3_conv3', 
         'block3_conv4', 'block4_conv1', 'block4_conv2', 'block4_conv3', 
         'block4_conv4', 'block5_conv1', 'block5_conv2', 'block5_conv3', 
-        'block5_conv4'].  This is a proposed improvement from both Chollet's
-        implementation/original paper.
+        'block5_conv4'].  This is a proposed improvement from 
+        https://arxiv.org/abs/1605.04603.  In the original implementation, the
+        layers used are: ['block1_conv1', 'block2_conv1', 'block3_conv1', 
+         'block4_conv1', 'block5_conv1'].
+
+    content_layer_weights : list of floats
+        Weights of the content layers in the optimization function.  
 
     content_layer_names : list of strings
         Names of VGG layers from which to compute the content loss.
 
-    content_weight : float
-        Weight of the content term in the optimization function.  The
-        style term computes the sum of the L2 norm between the Gram
-        matrices of the different layers (using ImageNet-trained VGG)
-        of the content and output images.
+    use_shifted_activations : boolean
+        Use shifted activations in calculating the Gram matrix (improvement
+        mentioned in https://arxiv.org/abs/1605.04603).
+
+    use_chained_inference : boolean
+        Another proposed improvement from https://arxiv.org/abs/1605.04603.
 
     verbose : boolean
         Print progress to the screen.
@@ -146,15 +149,18 @@ def neural_style_transfer(content_image,
         return(image)
 
 
-    def gram_matrix(x):
-        features = tf.keras.backend.batch_flatten(
+    def gram_matrix(x, shifted_activations=False):
+        F = tf.keras.backend.batch_flatten(
             tf.keras.backend.permute_dimensions(x, (2, 0, 1)))
-        gram = tf.keras.backend.dot(features, tf.keras.backend.transpose(features))
+        if shifted_activations:    
+            F = F - 1
+        gram = tf.keras.backend.dot(F, tf.keras.backend.transpose(F))
         return(gram)
 
+
     def style_loss(style_features, combination_features, image_shape):
-        style_gram = gram_matrix(style_features)
-        content_gram = gram_matrix(combination_features)
+        style_gram = gram_matrix(style_features, use_shifted_activations)
+        content_gram = gram_matrix(combination_features, use_shifted_activations)
         size = image_shape[0] * image_shape[1]
         number_of_channels = 3
         loss = tf.reduce_sum(tf.square(style_gram - content_gram)) / (4.0 * (number_of_channels ** 2) * (size ** 2))
@@ -178,20 +184,35 @@ def neural_style_transfer(content_image,
         total_loss = tf.zeros(shape=())
 
         # content loss
-        for layer_name in content_layer_names:
-            layer_features = features[layer_name]
+        for i in range(len(content_layer_names)):
+            layer_features = features[content_layer_names[i]]
             content_features = layer_features[0,:, :, :]
             combination_features = layer_features[2, :, :, :]
-            total_loss = total_loss + ((content_weight / len(content_layer_names)) *
-              content_loss(content_features, combination_features))
+            total_loss = total_loss + (content_loss(content_features, combination_features) *
+               content_layer_weights[i] / len(content_layer_names))
 
         # style loss
-        for i in range(len(style_layer_names)):
-            layer_features = features[style_layer_names[i]]
-            style_features = layer_features[1, :, :, :]
-            combination_features = layer_features[2, :, :, :]
-            total_loss = total_loss + (style_loss(style_features, combination_features, image_shape) * 
-              style_weights[i] / len(style_layer_names))
+        if use_chained_inference:            
+            for i in range(len(style_layer_names) - 1):
+                layer_features = features[style_layer_names[i]]
+                style_features = layer_features[1, :, :, :]
+                combination_features = layer_features[2, :, :, :]
+                loss = style_loss(style_features, combination_features, image_shape)
+
+                layer_features = features[style_layer_names[i+1]]
+                style_features = layer_features[1, :, :, :]
+                combination_features = layer_features[2, :, :, :]
+                loss_p1 = style_loss(style_features, combination_features, image_shape)
+
+                total_loss = total_loss + (style_layer_weights[i] * (loss - loss_p1) /
+                   (2 ** (len(style_layer_names) - (i + 1))))                
+        else:
+            for i in range(len(style_layer_names)):
+                layer_features = features[style_layer_names[i]]
+                style_features = layer_features[1, :, :, :]
+                combination_features = layer_features[2, :, :, :]
+                total_loss = total_loss + (style_loss(style_features, combination_features, image_shape) * 
+                    style_layer_weights[i] / len(style_layer_names))
 
         # total variation loss
         total_loss = total_loss + total_variation_weight * total_variation_loss(combination_tensor)
@@ -207,10 +228,15 @@ def neural_style_transfer(content_image,
             'block3_conv4', 'block4_conv1', 'block4_conv2', 'block4_conv3', 
             'block4_conv4', 'block5_conv1', 'block5_conv2', 'block5_conv3', 
             'block5_conv4']
-    if len(style_weights) == 1:
-        style_weights = style_weights * len(style_layer_names)
-    elif not len(style_weights) == len(style_layer_names):
-        raise ValueError("Length of weights must be 1 or the length of the style layer names.")
+    if len(style_layer_weights) == 1:
+        style_layer_weights = style_layer_weights * len(style_layer_names)
+    elif not len(style_layer_weights) == len(style_layer_names):
+        raise ValueError("Length of style weights must be 1 or the length of the style layer names.")
+
+    if len(content_layer_weights) == 1:
+        content_layer_weights = content_layer_weights * len(content_layer_names)
+    elif not len(content_layer_weights) == len(content_layer_names):
+        raise ValueError("Length of content weights must be 1 or the length of the style layer names.")
 
     model = vgg19.VGG19(weights="imagenet", include_top=False)
 
@@ -269,4 +295,4 @@ def neural_style_transfer(content_image,
             
     combination_array = combination_tensor.numpy()
     combination_image = postprocess_array(combination_array, content_image)
-    return(combination_image)
+    return(combination_image) 
