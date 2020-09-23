@@ -60,10 +60,13 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 * MRI super-resolution
 * Multi-modal brain extraction
-    * T1 (ANTs and FreeSurfer)
+    * T1 
+    * T1 ["no brainer"](https://github.com/neuronets/nobrainer)
+    * FLAIR
     * T2
     * FA
     * BOLD
+    * [T1/T2 infant](https://www.med.unc.edu/psych/research/psychiatry-department-research-programs/early-brain-development-research/)
 * Lung extraction
     * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
     * CT
