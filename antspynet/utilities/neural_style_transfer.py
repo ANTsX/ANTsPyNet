@@ -7,12 +7,12 @@ from tensorflow.keras.applications import vgg19
 import ants
 
 def neural_style_transfer(content_image,
-                          style_image,
+                          style_images,
                           initial_combination_image=None,
                           number_of_iterations=10,
                           learning_rate=0.2,
                           total_variation_weight=8.5e-5,
-                          style_layer_weights=[1.0],
+                          style_image_weights=1.0,
                           style_layer_names="all",
                           content_layer_weights=[0.025],
                           content_layer_names=[
@@ -42,7 +42,7 @@ def neural_style_transfer(content_image,
     content_image : ANTsImage (1 or 3-component)
         Content (or base) image.
 
-    style_image : ANTsImage
+    style_images : ANTsImage or list of ANTsImages
         Style (or reference) image.
 
     initial_combination_image : ANTsImage (1 or 3-component)
@@ -60,10 +60,10 @@ def neural_style_transfer(content_image,
         A penalty on the regularization term to keep the features
         of the output image locally coherent.
 
-    style_layer_weights : list of floats
+    style_image_weights : float or list of floats
         Weights of the style term in the optimization function for each
-        style layer.  Can either specify a single scalar to be used for
-        all the layers or one for each layer.  The
+        style image.  Can either specify a single scalar to be used for
+        all the images or one for each image.  The
         style term computes the sum of the L2 norm between the Gram
         matrices of the different layers (using ImageNet-trained VGG)
         of the style and content images.
@@ -177,8 +177,16 @@ def neural_style_transfer(content_image,
         loss = tf.reduce_sum(tf.pow(a + b, 1.25))
         return(loss)
 
-    def compute_total_loss(content_array, style_array, combination_tensor, feature_model, content_layer_names, style_layer_names, image_shape):
-        input_tensor = tf.concat([content_array, style_array, combination_tensor], axis=0)
+    def compute_total_loss(content_array, style_array_list, combination_tensor, feature_model, content_layer_names, style_layer_names, image_shape):
+        number_of_style_images = len(style_array_list)
+
+        input_arrays = list()
+        input_arrays.append(content_array)
+        for i in range(number_of_style_images):
+            input_arrays.append(style_array_list[i])
+        input_arrays.append(combination_tensor)    
+        input_tensor = tf.concat(input_arrays, axis=0)
+        
         features = feature_model(input_tensor)
 
         total_loss = tf.zeros(shape=())
@@ -195,32 +203,64 @@ def neural_style_transfer(content_image,
         if use_chained_inference:            
             for i in range(len(style_layer_names) - 1):
                 layer_features = features[style_layer_names[i]]
-                style_features = layer_features[1, :, :, :]
-                combination_features = layer_features[2, :, :, :]
-                loss = style_loss(style_features, combination_features, image_shape)
+                style_features = layer_features[1:(number_of_style_images + 1), :, :, :]
+                combination_features = layer_features[number_of_style_images + 1, :, :, :]
+                loss = list()
+                for j in range(number_of_style_images):
+                    loss.append(style_loss(style_features[j], combination_features, image_shape))
 
                 layer_features = features[style_layer_names[i+1]]
-                style_features = layer_features[1, :, :, :]
-                combination_features = layer_features[2, :, :, :]
-                loss_p1 = style_loss(style_features, combination_features, image_shape)
+                style_features = layer_features[1:(number_of_style_images + 1), :, :, :]
+                combination_features = layer_features[number_of_style_images + 1, :, :, :]
+                loss_p1 = list()
+                for j in range(number_of_style_images):
+                    loss_p1.append(style_loss(style_features[j], combination_features, image_shape))
 
-                total_loss = total_loss + (style_layer_weights[i] * (loss - loss_p1) /
-                   (2 ** (len(style_layer_names) - (i + 1))))                
+                for j in range(number_of_style_images):
+                    loss_difference = loss[j] - loss_p1[j]
+                    total_loss = total_loss + (style_image_weights[j] * loss_difference /
+                        (2 ** (len(style_layer_names) - (i + 1))))                
+
         else:
             for i in range(len(style_layer_names)):
                 layer_features = features[style_layer_names[i]]
                 style_features = layer_features[1, :, :, :]
                 combination_features = layer_features[2, :, :, :]
                 total_loss = total_loss + (style_loss(style_features, combination_features, image_shape) * 
-                    style_layer_weights[i] / len(style_layer_names))
+                    style_image_weights[0] / len(style_layer_names))
 
         # total variation loss
         total_loss = total_loss + total_variation_weight * total_variation_loss(combination_tensor)
 
         return(total_loss)
 
-    if style_image.dimension != 2 or content_image.dimension != 2:
-        raise ValueError("Input images must be 2-D.")
+
+    number_of_style_images = 1
+    if isinstance(style_images, list):
+        number_of_style_images = len(style_images)
+
+    style_image_list = list()
+    if number_of_style_images == 1:
+        style_image_list.append(style_images)
+    else:
+        style_image_list = style_images
+
+    if isinstance(style_image_weights, (int, float)): 
+        style_image_weights = [style_image_weights] * len(style_image_list)
+    else:    
+        if len(style_image_weights) == 1:
+            style_image_weights = style_image_weights * len(style_image_list)
+        elif not len(style_image_weights) == len(style_image_list):
+            raise ValueError("Length of style weights must be 1 or the number of style images.")
+
+    if content_image.dimension != 2:
+        raise ValueError("Input content image must be 2-D.")
+
+    for i in range(number_of_style_images):
+        if style_image_list[i].dimension != 2:
+            raise ValueError("Input style images must be 2-D.")
+        if style_image_list[i].shape != content_image.shape:
+            raise ValueError("Input images must have matching dimensions/shapes.")
 
     if style_layer_names == "all":
         style_layer_names = ['block1_conv1', 'block1_conv2', 'block2_conv1', 
@@ -228,10 +268,6 @@ def neural_style_transfer(content_image,
             'block3_conv4', 'block4_conv1', 'block4_conv2', 'block4_conv3', 
             'block4_conv4', 'block5_conv1', 'block5_conv2', 'block5_conv3', 
             'block5_conv4']
-    if len(style_layer_weights) == 1:
-        style_layer_weights = style_layer_weights * len(style_layer_names)
-    elif not len(style_layer_weights) == len(style_layer_names):
-        raise ValueError("Length of style weights must be 1 or the length of the style layer names.")
 
     if len(content_layer_weights) == 1:
         content_layer_weights = content_layer_weights * len(content_layer_names)
@@ -246,8 +282,10 @@ def neural_style_transfer(content_image,
     feature_model = tf.keras.Model(inputs=model.inputs, outputs=outputs_dictionary)
 
     # Preprocess data
-    style_array = preprocess_ants_image(style_image)
     content_array = preprocess_ants_image(content_image)
+    style_array_list = list()
+    for i in range(number_of_style_images):
+        style_array_list.append(preprocess_ants_image(style_image_list[i]))
 
     image_shape = (content_array.shape[1], content_array.shape[2], 3)
 
@@ -265,10 +303,10 @@ def neural_style_transfer(content_image,
     # to compile it, and thus make it fast.
 
     @tf.function
-    def compute_loss_and_gradients(content_array, style_array, combination_tensor,
+    def compute_loss_and_gradients(content_array, style_array_list, combination_tensor,
       feature_model, content_layer_names, style_layer_names, image_shape):
         with tf.GradientTape() as tape:
-            loss = compute_total_loss(content_array, style_array, combination_tensor,
+            loss = compute_total_loss(content_array, style_array_list, combination_tensor,
                                       feature_model, content_layer_names,
                                       style_layer_names, image_shape)
         gradients = tape.gradient(loss, combination_tensor)
@@ -278,7 +316,7 @@ def neural_style_transfer(content_image,
 
     for i in range(number_of_iterations):
         start_time = time.time()
-        loss, gradients = compute_loss_and_gradients(content_array, style_array,
+        loss, gradients = compute_loss_and_gradients(content_array, style_array_list,
                               combination_tensor, feature_model, content_layer_names,
                               style_layer_names, image_shape)
         end_time = time.time()                              
