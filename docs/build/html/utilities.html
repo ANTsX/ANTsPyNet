@@ -1167,9 +1167,9 @@ tempfile.</p></li>
 
 <dl class="function">
 <dt id="antspynet.utilities.neural_style_transfer">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">neural_style_transfer</code><span class="sig-paren">(</span><em class="sig-param">content_image, style_image, initial_combination_image=None, number_of_iterations=10, learning_rate=0.2, total_variation_weight=8.5e-05, content_weight=0.025, style_weights=[1.0], style_layer_names=['block1_conv1', 'block2_conv1', 'block3_conv1', 'block4_conv1', 'block5_conv1'], content_layer_names=['block5_conv2'], verbose=False, output_prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">neural_style_transfer</code><span class="sig-paren">(</span><em class="sig-param">content_image, style_images, initial_combination_image=None, number_of_iterations=10, learning_rate=1.0, total_variation_weight=8.5e-05, content_weight=0.025, style_image_weights=1.0, content_layer_names=['block5_conv2'], style_layer_names='all', content_mask=None, style_masks=None, use_shifted_activations=True, use_chained_inference=True, verbose=False, output_prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
 <dd><p>The popular neural style transfer described here:</p>
-<p><a class="reference external" href="https://arxiv.org/abs/1508.06576">https://arxiv.org/abs/1508.06576</a></p>
+<p><a class="reference external" href="https://arxiv.org/abs/1508.06576">https://arxiv.org/abs/1508.06576</a> and <a class="reference external" href="https://arxiv.org/abs/1605.04603">https://arxiv.org/abs/1605.04603</a></p>
 <p>and taken from François Chollet’s implementation</p>
 <p><a class="reference external" href="https://keras.io/examples/generative/neural_style_transfer/">https://keras.io/examples/generative/neural_style_transfer/</a></p>
 <p>and titu1994’s modifications:</p>
@@ -1179,32 +1179,39 @@ tempfile.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>content_image</strong> (<em>ANTsImage</em><em> (</em><em>1</em><em> or </em><em>3-component</em><em>)</em>) – Content (or base) image.</p></li>
-<li><p><strong>style_image</strong> (<em>ANTsImage</em>) – Style (or reference) image.</p></li>
+<li><p><strong>style_images</strong> (<em>ANTsImage</em><em> or </em><em>list of ANTsImages</em>) – Style (or reference) image.</p></li>
 <li><p><strong>initial_combination_image</strong> (<em>ANTsImage</em><em> (</em><em>1</em><em> or </em><em>3-component</em><em>)</em>) – Starting point for the optimization.  Allows one to start from the
 output from a previous run.  Otherwise, start from the content image.
 Note that the original paper starts with a noise image.</p></li>
 <li><p><strong>number_of_iterations</strong> (<em>integer</em>) – Number of gradient steps taken during optimization.</p></li>
-<li><p><strong>initial_iteration_rate</strong> (<em>float</em>) – Parameter for SGD optimization with exponential decay.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – Parameter for Adam optimization.</p></li>
 <li><p><strong>total_variation_weight</strong> (<em>float</em>) – A penalty on the regularization term to keep the features
 of the output image locally coherent.</p></li>
-<li><p><strong>style_weights</strong> (<em>list of floats</em>) – Weights of the style term in the optimization function for each
-style layer.  Can either specify a single scalar to be used for
-all the layers or one for each layer.  The
+<li><p><strong>content_weight</strong> (<em>float</em>) – Weight of the content layers in the optimization function.</p></li>
+<li><p><strong>style_image_weights</strong> (<em>float</em><em> or </em><em>list of floats</em>) – Weights of the style term in the optimization function for each
+style image.  Can either specify a single scalar to be used for
+all the images or one for each image.  The
 style term computes the sum of the L2 norm between the Gram
 matrices of the different layers (using ImageNet-trained VGG)
 of the style and content images.</p></li>
-<li><p><strong>style_layer_names</strong> (<em>list of strings</em>) – Names of VGG layers from which to compute the style loss.  If “all”,
+<li><p><strong>content_layer_names</strong> (<em>list of strings</em>) – Names of VGG layers from which to compute the content loss.</p></li>
+<li><p><strong>style_layer_names</strong> (<em>list of strings</em>) – <p>Names of VGG layers from which to compute the style loss.  If “all”,
 the layers used are [‘block1_conv1’, ‘block1_conv2’, ‘block2_conv1’,
 ‘block2_conv2’, ‘block3_conv1’, ‘block3_conv2’, ‘block3_conv3’,
 ‘block3_conv4’, ‘block4_conv1’, ‘block4_conv2’, ‘block4_conv3’,
 ‘block4_conv4’, ‘block5_conv1’, ‘block5_conv2’, ‘block5_conv3’,
-‘block5_conv4’].  This is a proposed improvement from both Chollet’s
-implementation/original paper.</p></li>
-<li><p><strong>content_layer_names</strong> (<em>list of strings</em>) – Names of VGG layers from which to compute the content loss.</p></li>
-<li><p><strong>content_weight</strong> (<em>float</em>) – Weight of the content term in the optimization function.  The
-style term computes the sum of the L2 norm between the Gram
-matrices of the different layers (using ImageNet-trained VGG)
-of the content and output images.</p></li>
+‘block5_conv4’].  This is a proposed improvement from
+<a class="reference external" href="https://arxiv.org/abs/1605.04603">https://arxiv.org/abs/1605.04603</a>.  In the original implementation, the
+layers used are: [‘block1_conv1’, ‘block2_conv1’, ‘block3_conv1’,</p>
+<blockquote>
+<div><p>’block4_conv1’, ‘block5_conv1’].</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>content_mask</strong> (<em>ANTsImage</em>) – Specify the region for content consideration.</p></li>
+<li><p><strong>style_masks</strong> (<em>ANTsImage</em><em> or </em><em>list of ANTsImages</em>) – Specify the region for style consideration.</p></li>
+<li><p><strong>use_shifted_activations</strong> (<em>boolean</em>) – Use shifted activations in calculating the Gram matrix (improvement
+mentioned in <a class="reference external" href="https://arxiv.org/abs/1605.04603">https://arxiv.org/abs/1605.04603</a>).</p></li>
+<li><p><strong>use_chained_inference</strong> (<em>boolean</em>) – Another proposed improvement from <a class="reference external" href="https://arxiv.org/abs/1605.04603">https://arxiv.org/abs/1605.04603</a>.</p></li>
 <li><p><strong>verbose</strong> (<em>boolean</em>) – Print progress to the screen.</p></li>
 </ul>
 </dd>
