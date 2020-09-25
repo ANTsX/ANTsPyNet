@@ -1,13 +1,16 @@
 
-import keras.backend as K
+import tensorflow as tf
 
-from keras.models import Model, Sequential
-from keras.engine import Layer, InputSpec
-from keras.layers import (Input, Add, BatchNormalization,
-                          Conv2D, Conv3D, Dense, ReLU, LeakyReLU,
-                          UpSampling2D, UpSampling3D)
-from keras.applications import VGG19
-from keras import optimizers
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.layers import (Input, Add, BatchNormalization,
+                                     Conv2D, Conv3D, Dense, ReLU, LeakyReLU,
+                                     UpSampling2D, UpSampling3D)
+from tensorflow.keras.optimizers import Adam
+
+from tensorflow.keras.applications import vgg19
 
 from . import create_vgg_model_2d, create_vgg_model_3d
 
@@ -86,7 +89,7 @@ class SuperResolutionGanModel(object):
         else:
             raise ValueError("Incorrect size for low_resolution_image_size.")
 
-        optimizer = optimizers.adam(lr=0.0002, beta_1=0.5)
+        optimizer = Adam(lr=0.0002, beta_1=0.5)
 
         # Images
 
@@ -146,7 +149,7 @@ class SuperResolutionGanModel(object):
         if self.dimensionality == 2:
             if self.use_image_net_weights == True:
                 vgg_tmp = create_vgg_model_2d((224, 224, 3), style=19)
-                keras_vgg = VGG19(weights='imagenet')
+                keras_vgg = vgg19(weights='imagenet')
                 vgg_tmp.set_weights(keras_vgg.get_weights())
             else:
                 vgg_tmp = create_vgg_model_2d(

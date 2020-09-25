@@ -1,12 +1,14 @@
 
-import keras.backend as K
+import tensorflow as tf
 
-from keras.models import Model, Sequential
-from keras.engine import Layer, InputSpec
-from keras.layers import (Input, Concatenate, Dense, Activation,
-                          BatchNormalization, Reshape,  Dropout,
-                          Flatten, LeakyReLU, Conv2D, Conv3D)
-from keras import optimizers
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.layers import (Input, Concatenate, Dense, Activation,
+                                     BatchNormalization, Reshape, Dropout,
+                                     Flatten, LeakyReLU, Conv2D, Conv3D)
+from tensorflow.keras.optimizers import Adam
 
 from . import (create_convolutional_autoencoder_model_2d,
                create_convolutional_autoencoder_model_3d)
@@ -59,7 +61,7 @@ class DeepConvolutionalGanModel(object):
         else:
             raise ValueError("Incorrect size for input_image_size.")
 
-        optimizer = optimizers.adam(lr=0.0002, beta_1=0.5)
+        optimizer = Adam(lr=0.0002, beta_1=0.5)
 
         self.discriminator = self.build_discriminator()
 

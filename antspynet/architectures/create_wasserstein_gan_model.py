@@ -1,12 +1,13 @@
+import tensorflow as tf
 
-import keras.backend as K
+import tensorflow.keras.backend as K
 
-from keras.models import Model, Sequential
-from keras.engine import Layer, InputSpec
-from keras.layers import (Input, Concatenate, Dense, Activation,
-                          BatchNormalization, Reshape,  Dropout,
-                          Flatten, LeakyReLU, Conv2D, Conv3D)
-from keras import optimizers
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.layers import (Input, Concatenate, Dense, Activation,
+                                     BatchNormalization, Reshape, Dropout,
+                                     Flatten, LeakyReLU, Conv2D, Conv3D)
+from tensorflow.keras.optimizers import RMSprop
 
 from . import (create_convolutional_autoencoder_model_2d,
                create_convolutional_autoencoder_model_3d)
@@ -69,7 +70,7 @@ class WassersteinGanModel(object):
         else:
             raise ValueError("Incorrect size for input_image_size.")
 
-        optimizer = optimizers.rmsprop(lr=0.00005)
+        optimizer = RMSprop(lr=0.00005)
 
         self.critic = self.build_critic()
         self.critic.compile(loss=self.wasserstein_loss, optimizer=optimizer,
