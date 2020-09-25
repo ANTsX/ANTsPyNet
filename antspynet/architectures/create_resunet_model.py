@@ -1,15 +1,18 @@
 
-import keras.backend as K
+import tensorflow as tf
 
-from keras.models import Model
-from keras.layers import (Input, Dropout, BatchNormalization, Add,
-                          ThresholdedReLU, Concatenate, Dense,
-                          Conv2D, Conv2DTranspose,
-                          MaxPooling2D, UpSampling2D,
-                          Conv3D, Conv3DTranspose,
-                          MaxPooling3D, UpSampling3D)
-from keras import regularizers
-from keras import initializers
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Dropout, BatchNormalization, Add,
+                                     ThresholdedReLU, Concatenate, Dense,
+                                     Conv2D, Conv2DTranspose,
+                                     MaxPooling2D, UpSampling2D,
+                                     Conv3D, Conv3DTranspose,
+                                     MaxPooling3D, UpSampling3D)
+
+from tensorflow.keras import initializers
+from tensorflow.keras import regularizers
 
 def create_resunet_model_2d(input_image_size,
                             number_of_outputs=1,

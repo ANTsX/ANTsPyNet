@@ -1,13 +1,17 @@
 
-import keras.backend as K
 
-from keras.models import Model
-from keras.layers import (Input, Dropout, BatchNormalization,
-                          Activation, Dense, Concatenate,
-                          Conv2D, Conv2DTranspose, GlobalAveragePooling2D,
-                          Conv3D, Conv3DTranspose, GlobalAveragePooling3D)
-from keras import initializers
-from keras import regularizers
+import tensorflow as tf
+
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Dropout, BatchNormalization,
+                                     Activation, Dense, Concatenate,
+                                     Conv2D, Conv2DTranspose, GlobalAveragePooling2D,
+                                     Conv3D, Conv3DTranspose, GlobalAveragePooling3D)
+
+from tensorflow.keras import initializers
+from tensorflow.keras import regularizers
 
 def create_densenet_model_2d(input_image_size,
                              number_of_classification_labels=1000,

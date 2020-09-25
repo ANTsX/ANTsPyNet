@@ -1,11 +1,16 @@
-from keras.models import Model
-from keras.layers import (Add, Activation, Concatenate, ReLU, LeakyReLU,
-                          Conv3D, Conv3DTranspose, Input, MaxPooling3D,
-                          SpatialDropout3D, UpSampling3D, 
-                          Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
+
+import tensorflow as tf
+
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Add, Activation, Concatenate, ReLU, LeakyReLU,
+                                     Conv3D, Conv3DTranspose, Input, MaxPooling3D,
+                                     SpatialDropout3D, UpSampling3D, 
+                                     Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
+
 from ..utilities import InstanceNormalization
 
-import keras.backend as K
 
 def create_nobrainer_unet_model_3d(input_image_size):
     """

@@ -1,15 +1,18 @@
 
-from keras.models import Model
-from keras.layers import (Input, Dropout, BatchNormalization, Add,
-                          LeakyReLU, Concatenate, Lambda, Dense,
-                          Reshape, Permute, Multiply,
-                          Conv2D, Conv2DTranspose,
-                          MaxPooling2D, GlobalAveragePooling2D,
-                          UpSampling2D,
-                          Conv3D, Conv3DTranspose,
-                          MaxPooling3D, GlobalAveragePooling3D,
-                          UpSampling3D)
-import keras.backend as K
+import tensorflow as tf
+
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Dropout, BatchNormalization, Add,
+                                     LeakyReLU, Concatenate, Lambda, Dense,
+                                     Reshape, Permute, Multiply,
+                                     Conv2D, Conv2DTranspose,
+                                     MaxPooling2D, GlobalAveragePooling2D,
+                                     UpSampling2D,
+                                     Conv3D, Conv3DTranspose,
+                                     MaxPooling3D, GlobalAveragePooling3D,
+                                     UpSampling3D)
 
 def create_resnet_model_2d(input_image_size,
                            input_scalars_size=0,

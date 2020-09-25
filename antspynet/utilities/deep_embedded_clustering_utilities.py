@@ -1,9 +1,9 @@
 
-import keras.backend as K
+import tensorflow.keras.backend as K
 
-from keras.models import Model
-from keras.engine import Layer, InputSpec
-from keras import initializers
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Layer, InputSpec
+from tensorflow.keras import initializers
 
 import numpy as np
 

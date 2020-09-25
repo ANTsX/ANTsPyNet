@@ -1,15 +1,19 @@
 
-import keras.backend as K
 
-from keras.models import Model
-from keras.layers import (Input, Dropout, BatchNormalization, Add,
-                          Concatenate, Dense, Activation,
-                          Conv2D, Conv2DTranspose, AveragePooling2D,
-                          MaxPooling2D, UpSampling2D, ZeroPadding2D,
-                          Conv3D, Conv3DTranspose, AveragePooling3D,
-                          MaxPooling3D, UpSampling3D, ZeroPadding3D)
-from keras import regularizers
-from keras import initializers
+import tensorflow as tf
+
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Dropout, BatchNormalization, Add,
+                                     Concatenate, Dense, Activation,
+                                     Conv2D, Conv2DTranspose, AveragePooling2D,
+                                     MaxPooling2D, UpSampling2D, ZeroPadding2D,
+                                     Conv3D, Conv3DTranspose, AveragePooling3D,
+                                     MaxPooling3D, UpSampling3D, ZeroPadding3D)
+
+from tensorflow.keras import initializers
+from tensorflow.keras import regularizers
 
 from ..utilities import Scale
 

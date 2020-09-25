@@ -1,4 +1,4 @@
-from keras.layers import Layer
+from tensorflow.keras.layers import Layer
 import tensorflow as tf
 
 class LogSoftmax(Layer):

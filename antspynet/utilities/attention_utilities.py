@@ -1,10 +1,10 @@
 
-import keras.backend as K
-from keras.engine import Layer, InputSpec
-from keras.layers import Concatenate
-from keras import initializers
-
 import tensorflow as tf
+
+import tensorflow.keras.backend as K
+from tensorflow.keras.layers import Layer, InputSpec, Concatenate
+from tensorflow.keras.keras import initializers
+
 
 class AttentionLayer2D(Layer):
 

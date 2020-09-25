@@ -1,12 +1,14 @@
 
-import keras.backend as K
+import tensorflow as tf
 
-from keras.models import Model
-from keras.layers import (Input, Lambda, Concatenate, Flatten, Dense,
-                          Conv2D, Conv2DTranspose, MaxPooling2D,
-                          ZeroPadding2D,
-                          Conv3D, Conv3DTranspose, MaxPooling3D,
-                          ZeroPadding3D)
+import tensorflow.keras.backend as K
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Lambda, Concatenate, Flatten, Dense,
+                                    Conv2D, Conv2DTranspose, MaxPooling2D,
+                                    ZeroPadding2D,
+                                    Conv3D, Conv3DTranspose, MaxPooling3D,
+                                    ZeroPadding3D)
 
 def create_alexnet_model_2d(input_image_size,
                             number_of_classification_labels=1000,
