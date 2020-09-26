@@ -116,7 +116,7 @@ def neural_style_transfer(content_image,
     >>> image = neural_style_transfer(content_image, style_image)
     """
 
-    def preprocess_ants_image(image, doScaleAndCenter=True):
+    def preprocess_ants_image(image, do_scale_and_center=True):
         array = None
         if image.components == 1:
             array = image.numpy()
@@ -131,7 +131,7 @@ def neural_style_transfer(content_image,
         else:
             raise ValueError("Unexpected number of components.")
 
-        if doScaleAndCenter == True:
+        if do_scale_and_center == True:
             for i in range(3):
                 array[:,:,i] = (array[:,:,i] - array[:,:,i].min()) / (array[:,:,i].max() - array[:,:,i].min())
             array *= 255.0
@@ -369,7 +369,7 @@ def neural_style_transfer(content_image,
     if initial_combination_image is None:
         combination_tensor = tf.Variable(np.copy(content_array))
     else:
-        initial_combination_tensor = preprocess_ants_image(initial_combination_image, doScaleAndCenter=False)
+        initial_combination_tensor = preprocess_ants_image(initial_combination_image, do_scale_and_center=False)
         combination_tensor = tf.Variable(initial_combination_tensor)
 
     if not image_shape == (combination_tensor.shape[1], combination_tensor.shape[2], 3):
