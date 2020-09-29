@@ -3,7 +3,7 @@ import tensorflow as tf
 
 import tensorflow.keras.backend as K
 from tensorflow.keras.layers import Layer, InputSpec, Concatenate
-from tensorflow.keras.keras import initializers
+from tensorflow.keras import initializers
 
 
 class AttentionLayer2D(Layer):
