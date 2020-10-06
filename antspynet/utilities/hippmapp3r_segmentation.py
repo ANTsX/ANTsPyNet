@@ -9,7 +9,7 @@ import sys
 import ants
 
 
-def hippmapp3r_segmentation(image,
+def hippmapp3r_segmentation(t1_image,
                             output_directory=None,
                             verbose=False):
 
@@ -41,25 +41,41 @@ def hippmapp3r_segmentation(image,
 
     Returns
     -------
-    ANTs probability hippocampal image.
+    ANTs labeled hippocampal image.
 
     Example
     -------
-    >>> probability_mask = hippmapp3r_segmentation(t1)
+    >>> mask = hippmapp3r_segmentation(t1)
     """
 
     from ..architectures import create_hippmapp3r_unet_model_3d
     from ..utilities import get_pretrained_network
 
-    if image.dimension != 3:
+    if t1_image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )  
-
-
 
     if verbose == True:
         print("*************  Initial stage segmentation  ***************")
         print("  (warning:  steps are somewhat different in the publication.)")
         print("")
+
+    # Normalize to mprage_hippmapp3r space
+    if verbose == True:
+        print("    HippMapp3r: template normalization.") 
+    template_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
+    template_url = "https://ndownloader.figshare.com/files/24984689"
+    template_file.close()
+    template_file_name = template_file.name
+    if not os.path.exists(template_file_name):
+        r = requests.get(template_url)
+        with open(template_file_name, 'wb') as f:
+            f.write(r.content)    
+    template_image = ants.image_read(template_file_name)
+    registration = ants.registration(fixed=template_image, moving=t1_image,
+        type_of_transform="antsRegistrationSyNQuick[t]", verbose=verbose)
+    image = registration['warpedmovout']    
+    transforms = dict(fwdtransforms=registration['fwdtransforms'],
+                        invtransforms=registration['invtransforms'])
 
     # Threshold at 10th percentile of non-zero voxels in "robust range (fslmaths)"
     if verbose == True:
@@ -174,9 +190,24 @@ def hippmapp3r_segmentation(image,
                                   lower[1]:upper[1],
                                   lower[2]:upper[2]] = prediction_refine_stage
     probability_mask_refine_stage_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(prediction_refine_stage_array))                                  
-    probability_mask_refine_stage = ants.resample_image_to_target(probability_mask_refine_stage_resampled, image)          
 
-    return(probability_mask_refine_stage)
+    segmentation_image_resampled = ants.label_clusters(
+        ants.threshold_image(probability_mask_refine_stage_resampled, 0.0, 0.5, 0, 1), min_cluster_size=10)
+    segmentation_image_resampled[segmentation_image_resampled > 2] = 0
+    geom = ants.label_geometry_measures(segmentation_image_resampled)
+    if len(geom['VolumeInMillimeters']) < 2:
+        raise ValueError("Error: left and right hippocampus not found.")
+
+    if geom['Centroid_x'][0] < geom['Centroid_x'][1]:
+        segmentation_image_resampled[segmentation_image_resampled == 1] = 3
+        segmentation_image_resampled[segmentation_image_resampled == 2] = 1
+        segmentation_image_resampled[segmentation_image_resampled == 3] = 2
+
+    segmentation_image = ants.apply_transforms(fixed=t1_image,
+      moving=segmentation_image_resampled, transformlist=transforms['invtransforms'],
+      whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
+
+    return(segmentation_image)
     
 
 
