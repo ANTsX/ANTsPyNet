@@ -32,17 +32,20 @@
             
   <h1>Source code for antspynet.architectures.create_resunet_model</h1><div class="highlight"><pre>
 <span></span>
-<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span>
-                          <span class="n">ThresholdedReLU</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span>
-                          <span class="n">Conv2D</span><span class="p">,</span> <span class="n">Conv2DTranspose</span><span class="p">,</span>
-                          <span class="n">MaxPooling2D</span><span class="p">,</span> <span class="n">UpSampling2D</span><span class="p">,</span>
-                          <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span>
-                          <span class="n">MaxPooling3D</span><span class="p">,</span> <span class="n">UpSampling3D</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">regularizers</span>
-<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">initializers</span>
+<span class="kn">import</span> <span class="nn">tensorflow.keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Input</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span>
+                                     <span class="n">ThresholdedReLU</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span>
+                                     <span class="n">Conv2D</span><span class="p">,</span> <span class="n">Conv2DTranspose</span><span class="p">,</span>
+                                     <span class="n">MaxPooling2D</span><span class="p">,</span> <span class="n">UpSampling2D</span><span class="p">,</span>
+                                     <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span>
+                                     <span class="n">MaxPooling3D</span><span class="p">,</span> <span class="n">UpSampling3D</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.keras</span> <span class="kn">import</span> <span class="n">initializers</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras</span> <span class="kn">import</span> <span class="n">regularizers</span>
 
 <div class="viewcode-block" id="create_resunet_model_2d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_resunet_model_2d">[docs]</a><span class="k">def</span> <span class="nf">create_resunet_model_2d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
                             <span class="n">number_of_outputs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>

@@ -9,7 +9,8 @@ import sys
 import ants
 
 
-def hippmapp3r_segmentation(t1_image,
+def hippmapp3r_segmentation(t1,
+                            do_preprocessing=True,
                             output_directory=None,
                             verbose=False):
 
@@ -26,10 +27,20 @@ def hippmapp3r_segmentation(t1_image,
    
     https://hippmapp3r.readthedocs.io/en/latest/
 
+    Preprocessing consists of:
+       * n4 bias correction and
+       * brain extraction
+    The input T1 should undergo the same steps.  If the input T1 is the raw
+    T1, these steps can be performed by the internal preprocessing, i.e. set
+    do_preprocessing = True
+
     Arguments
     ---------
-    image : ANTsImage
+    t1 : ANTsImage
         input image
+
+    do_preprocessing : boolean
+        See description above.
 
     output_directory : string
         Destination directory for storing the downloaded template and model weights.  
@@ -50,13 +61,29 @@ def hippmapp3r_segmentation(t1_image,
 
     from ..architectures import create_hippmapp3r_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..utilities import preprocess_brain_image
 
-    if t1_image.dimension != 3:
+    if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )  
 
     if verbose == True:
+        print("*************  Preprocessing  ***************")
+        print("")
+
+    t1_preprocessed = t1
+    if do_preprocessing == True:
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=None,
+            do_brain_extraction=True,
+            template=None,
+            do_bias_correction=True,
+            do_denoising=False,
+            output_directory=output_directory,
+            verbose=verbose)
+        t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
+
+    if verbose == True:
         print("*************  Initial stage segmentation  ***************")
-        print("  (warning:  steps are somewhat different in the publication.)")
         print("")
 
     # Normalize to mprage_hippmapp3r space
@@ -71,7 +98,7 @@ def hippmapp3r_segmentation(t1_image,
         with open(template_file_name, 'wb') as f:
             f.write(r.content)    
     template_image = ants.image_read(template_file_name)
-    registration = ants.registration(fixed=template_image, moving=t1_image,
+    registration = ants.registration(fixed=template_image, moving=t1_preprocessed,
         type_of_transform="antsRegistrationSyNQuick[t]", verbose=verbose)
     image = registration['warpedmovout']    
     transforms = dict(fwdtransforms=registration['fwdtransforms'],
@@ -96,12 +123,13 @@ def hippmapp3r_segmentation(t1_image,
     image_normalized = (image - mean_image) / sd_image
     image_normalized = image_normalized * thresholded_mask
 
-    # Resample image
+    # Trim and resample image
     if verbose == True:
-        print("    HippMapp3r: resample to (160, 160, 128).")
+        print("    HippMapp3r: trim and resample to (160, 160, 128).")
 
+    image_cropped = ants.crop_image(image_normalized, thresholded_mask, 1)
     shape_initial_stage = (160, 160, 128)
-    image_resampled = ants.resample_image(image_normalized, shape_initial_stage, use_voxels=True, interp_type=1)
+    image_resampled = ants.resample_image(image_cropped, shape_initial_stage, use_voxels=True, interp_type=1)
     
     if verbose == True:
         print("    HippMapp3r: generate first network and download weights.")
@@ -203,7 +231,7 @@ def hippmapp3r_segmentation(t1_image,
         segmentation_image_resampled[segmentation_image_resampled == 2] = 1
         segmentation_image_resampled[segmentation_image_resampled == 3] = 2
 
-    segmentation_image = ants.apply_transforms(fixed=t1_image,
+    segmentation_image = ants.apply_transforms(fixed=t1,
       moving=segmentation_image_resampled, transformlist=transforms['invtransforms'],
       whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
 
