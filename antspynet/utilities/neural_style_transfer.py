@@ -269,10 +269,20 @@ def neural_style_transfer(content_image,
         else:
             for i in range(len(style_layer_names)):
                 layer_features = features[style_layer_names[i]]
-                style_features = layer_features[1, :, :, :]
-                combination_features = layer_features[2, :, :, :]
-                total_loss = total_loss + (style_loss(style_features, combination_features, image_shape) *
-                    style_image_weights[0] / len(style_layer_names))
+                style_features = layer_features[1:(number_of_style_images + 1), :, :, :]
+                combination_features = layer_features[number_of_style_images + 1, :, :, :]
+                for j in range(number_of_style_images):
+                    loss = list()
+                    if style_mask_tensor_list is None:
+                        loss.append(style_loss(style_features[j], combination_features, image_shape,
+                                    style_mask=None, content_mask=content_mask_tensor))
+                    else:
+                        loss.append(style_loss(style_features[j], combination_features, image_shape,
+                                    style_mask=style_mask_tensor_list[j], content_mask=content_mask_tensor))
+
+                for j in range(number_of_style_images):
+                    total_loss = total_loss + (loss[j] * style_image_weights[j] / len(style_layer_names))
+
 
         # total variation loss
         total_loss = total_loss + total_variation_weight * total_variation_loss(combination_tensor)
