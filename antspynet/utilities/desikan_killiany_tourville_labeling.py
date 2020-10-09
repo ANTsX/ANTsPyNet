@@ -18,7 +18,7 @@ def desikan_killiany_tourville_labeling(t1,
     """
     Cortical and deep gray matter labeling using Desikan-Killiany-Tourville
 
-    Perform Atropos-style six tissue segmentation using deep learning
+    Perform DKT labeling using deep learning
 
     The labeling is as follows:
 
