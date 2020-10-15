@@ -1,5 +1,3 @@
-import os
-
 import statistics
 import numpy as np
 import tensorflow.keras as keras
@@ -137,9 +135,9 @@ def brain_age(t1,
         for j in range(len(which_slices)):
 
             slice = (ants.slice_image(batch_image, axis=2, idx=which_slices[j])).numpy()
-            batchX[i,:,:,0] = slice
-            batchX[i,:,:,1] = slice
-            batchX[i,:,:,2] = slice
+            batchX[j,:,:,0] = slice
+            batchX[j,:,:,1] = slice
+            batchX[j,:,:,2] = slice
 
         if verbose == True:
             print("Brain age (DeepBrainNet):  predicting brain age per slice (batch = ", i, ")")
@@ -148,7 +146,7 @@ def brain_age(t1,
             brain_age_per_slice = model.predict(batchX, verbose=verbose)
         else:
             prediction = model.predict(batchX, verbose=verbose)
-            brain_age_per_slice += (prediction - brain_age_per_slice) /  (i+1)
+            brain_age_per_slice = brain_age_per_slice + (prediction - brain_age_per_slice) /  (i+1)
 
     predicted_age = statistics.median(brain_age_per_slice)[0]
 
