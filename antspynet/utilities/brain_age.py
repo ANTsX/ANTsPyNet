@@ -8,7 +8,7 @@ def brain_age(t1,
               do_preprocessing=True,
               number_of_simulations=0,
               sd_affine=0.01,
-              output_directory=None,
+              antsxnet_cache_directory=None,
               verbose=False):
 
     """
@@ -37,7 +37,7 @@ def brain_age(t1,
     do_preprocessing : boolean
         See description above.
 
-    output_directory : string
+    antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
@@ -70,8 +70,8 @@ def brain_age(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if output_directory == None:
-        output_directory = "ANTsXNet"
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
 
     ################################
     #
@@ -88,7 +88,7 @@ def brain_age(t1,
             template_transform_type="AffineFast",
             do_bias_correction=True,
             do_denoising=True,
-            output_directory=output_directory,
+            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
@@ -100,7 +100,7 @@ def brain_age(t1,
     #
     ################################
 
-    model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet", output_directory=output_directory)
+    model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet", antsxnet_cache_directory=antsxnet_cache_directory)
     model = keras.models.load_model(model_weights_file_name)
 
     # The paper only specifies that 80 slices are used for prediction.  I just picked

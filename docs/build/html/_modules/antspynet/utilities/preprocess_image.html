@@ -46,7 +46,7 @@
                            <span class="n">intensity_matching_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">reference_image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">intensity_normalization_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                           <span class="n">output_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
@@ -97,7 +97,7 @@
 <span class="sd">        Either rescale the intensities to [0,1] (i.e., &quot;01&quot;) or zero-mean, unit variance</span>
 <span class="sd">        (i.e., &quot;0mean&quot;).  If None normalization is not performed.</span>
 
-<span class="sd">    output_directory : string</span>
+<span class="sd">    antsxnet_cache_directory : string</span>
 <span class="sd">        Destination directory for storing the downloaded template and model weights.</span>
 <span class="sd">        Since these can be resused, if is None, these data will be downloaded to a</span>
 <span class="sd">        ~/.keras/ANTsXNet/.</span>
@@ -122,8 +122,8 @@
 
     <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_clone</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">output_directory</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_directory</span> <span class="o">=</span> <span class="s2">&quot;ANTsXNet&quot;</span>
+    <span class="k">if</span> <span class="n">antsxnet_cache_directory</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">antsxnet_cache_directory</span> <span class="o">=</span> <span class="s2">&quot;ANTsXNet&quot;</span>
 
     <span class="c1"># Truncate intensity</span>
     <span class="k">if</span> <span class="n">truncate_intensity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -140,7 +140,7 @@
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocessing:  brain extraction.&quot;</span><span class="p">)</span>
 
-        <span class="n">probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">probability_mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Template normalization</span>
@@ -156,7 +156,7 @@
                 <span class="n">template_file_name</span> <span class="o">=</span> <span class="s2">&quot;croppedMNI152.nii.gz&quot;</span>
                 <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22933754&quot;</span>
             <span class="n">template_file_name_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span>
-                <span class="n">template_url</span><span class="p">,</span> <span class="n">cache_subdir</span> <span class="o">=</span> <span class="n">output_directory</span><span class="p">)</span>
+                <span class="n">template_url</span><span class="p">,</span> <span class="n">cache_subdir</span> <span class="o">=</span> <span class="n">antsxnet_cache_directory</span><span class="p">)</span>
             <span class="n">template_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">template_file_name_path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">template_image</span> <span class="o">=</span> <span class="n">template</span>
@@ -168,7 +168,7 @@
             <span class="n">transforms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">fwdtransforms</span><span class="o">=</span><span class="n">registration</span><span class="p">[</span><span class="s1">&#39;fwdtransforms&#39;</span><span class="p">],</span>
                               <span class="n">invtransforms</span><span class="o">=</span><span class="n">registration</span><span class="p">[</span><span class="s1">&#39;invtransforms&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">template_probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">template_image</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="n">template_probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">template_image</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="n">template_mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">template_probability_mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">template_brain_image</span> <span class="o">=</span> <span class="n">template_mask</span> <span class="o">*</span> <span class="n">template_image</span>
 

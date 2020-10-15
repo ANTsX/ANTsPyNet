@@ -13,7 +13,7 @@ def preprocess_brain_image(image,
                            intensity_matching_type=None,
                            reference_image=None,
                            intensity_normalization_type=None,
-                           output_directory=None,
+                           antsxnet_cache_directory=None,
                            verbose=True):
 
     """
@@ -64,7 +64,7 @@ def preprocess_brain_image(image,
         Either rescale the intensities to [0,1] (i.e., "01") or zero-mean, unit variance
         (i.e., "0mean").  If None normalization is not performed.
 
-    output_directory : string
+    antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
@@ -89,8 +89,8 @@ def preprocess_brain_image(image,
 
     preprocessed_image = ants.image_clone(image)
 
-    if output_directory == None:
-        output_directory = "ANTsXNet"
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
 
     # Truncate intensity
     if truncate_intensity is not None:
@@ -107,7 +107,7 @@ def preprocess_brain_image(image,
         if verbose == True:
             print("Preprocessing:  brain extraction.")
 
-        probability_mask = brain_extraction(preprocessed_image, output_directory=output_directory, verbose=verbose)
+        probability_mask = brain_extraction(preprocessed_image, antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
 
     # Template normalization
@@ -123,7 +123,7 @@ def preprocess_brain_image(image,
                 template_file_name = "croppedMNI152.nii.gz"
                 template_url = "https://ndownloader.figshare.com/files/22933754"
             template_file_name_path = tf.keras.utils.get_file(template_file_name,
-                template_url, cache_subdir = output_directory)
+                template_url, cache_subdir = antsxnet_cache_directory)
             template_image = ants.image_read(template_file_name_path)
         else:
             template_image = template
@@ -135,7 +135,7 @@ def preprocess_brain_image(image,
             transforms = dict(fwdtransforms=registration['fwdtransforms'],
                               invtransforms=registration['invtransforms'])
         else:
-            template_probability_mask = brain_extraction(template_image, output_directory=output_directory, verbose=verbose)
+            template_probability_mask = brain_extraction(template_image, antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
             template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)
             template_brain_image = template_mask * template_image
 
