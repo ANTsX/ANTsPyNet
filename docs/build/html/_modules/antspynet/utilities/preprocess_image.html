@@ -31,11 +31,8 @@
           <div class="body" role="main">
             
   <h1>Source code for antspynet.utilities.preprocess_image</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">os</span>
-
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">ants</span>
 
 <div class="viewcode-block" id="preprocess_brain_image"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.preprocess_brain_image">[docs]</a><span class="k">def</span> <span class="nf">preprocess_brain_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
@@ -55,7 +52,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Basic preprocessing pipeline for T1-weighted brain MRI</span>
 
-<span class="sd">    Standard preprocessing steps that have been previously described </span>
+<span class="sd">    Standard preprocessing steps that have been previously described</span>
 <span class="sd">    in various papers including the cortical thickness pipeline:</span>
 
 <span class="sd">         https://www.ncbi.nlm.nih.gov/pubmed/24879923</span>
@@ -72,8 +69,8 @@
 <span class="sd">        Perform brain extraction using antspynet tools (3D images only).</span>
 
 <span class="sd">    template_transform_type : string</span>
-<span class="sd">        See details in help for ants.registration.  Typically &quot;Rigid&quot; or </span>
-<span class="sd">        &quot;Affine&quot;.    </span>
+<span class="sd">        See details in help for ants.registration.  Typically &quot;Rigid&quot; or</span>
+<span class="sd">        &quot;Affine&quot;.</span>
 
 <span class="sd">    template : ANTs image (not skull-stripped)</span>
 <span class="sd">        Alternatively, one can specify the default &quot;biobank&quot; or &quot;croppedMni152&quot;</span>
@@ -83,34 +80,34 @@
 <span class="sd">        Perform N4 bias field correction.</span>
 
 <span class="sd">    return_bias_field : boolean</span>
-<span class="sd">        If True, return bias field as an additional output *without* bias </span>
-<span class="sd">        correcting the preprocessed image.    </span>
+<span class="sd">        If True, return bias field as an additional output *without* bias</span>
+<span class="sd">        correcting the preprocessed image.</span>
 
 <span class="sd">    do_denoising : boolean</span>
 <span class="sd">        Perform non-local means denoising.</span>
 
 <span class="sd">    intensity_matching_type : string</span>
-<span class="sd">        Either &quot;regression&quot; or &quot;histogram&quot;. Only is performed if reference_image </span>
+<span class="sd">        Either &quot;regression&quot; or &quot;histogram&quot;. Only is performed if reference_image</span>
 <span class="sd">        is not None.</span>
 
 <span class="sd">    reference_image : ANTs image</span>
-<span class="sd">        Reference image for intensity matching.   </span>
+<span class="sd">        Reference image for intensity matching.</span>
 
 <span class="sd">    intensity_normalization_type : string</span>
-<span class="sd">        Either rescale the intensities to [0,1] (i.e., &quot;01&quot;) or zero-mean, unit variance </span>
+<span class="sd">        Either rescale the intensities to [0,1] (i.e., &quot;01&quot;) or zero-mean, unit variance</span>
 <span class="sd">        (i.e., &quot;0mean&quot;).  If None normalization is not performed.</span>
 
 <span class="sd">    output_directory : string</span>
-<span class="sd">        Destination directory for storing the downloaded template and model weights.  </span>
-<span class="sd">        Since these can be resused, if is None, these data will be downloaded to a </span>
-<span class="sd">        tempfile.</span>
+<span class="sd">        Destination directory for storing the downloaded template and model weights.</span>
+<span class="sd">        Since these can be resused, if is None, these data will be downloaded to a</span>
+<span class="sd">        ~/.keras/ANTsXNet/.</span>
 
 <span class="sd">    verbose : boolean</span>
-<span class="sd">        Print progress to the screen.    </span>
+<span class="sd">        Print progress to the screen.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Dictionary with preprocessing information ANTs image (i.e., source_image) matched to the </span>
+<span class="sd">    Dictionary with preprocessing information ANTs image (i.e., source_image) matched to the</span>
 <span class="sd">    (reference_image).</span>
 
 <span class="sd">    Example</span>
@@ -125,21 +122,24 @@
 
     <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_clone</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">output_directory</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_directory</span> <span class="o">=</span> <span class="s2">&quot;ANTsXNet&quot;</span>
+
     <span class="c1"># Truncate intensity</span>
     <span class="k">if</span> <span class="n">truncate_intensity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">quantiles</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">truncate_intensity</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">image</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">truncate_intensity</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocessing:  truncate intensities ( low =&quot;</span><span class="p">,</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;, high =&quot;</span><span class="p">,</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;).&quot;</span><span class="p">)</span>
-        
-        <span class="n">preprocessed_image</span><span class="p">[</span><span class="n">image</span> <span class="o">&lt;</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  
-        <span class="n">preprocessed_image</span><span class="p">[</span><span class="n">image</span> <span class="o">&gt;</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  
+
+        <span class="n">preprocessed_image</span><span class="p">[</span><span class="n">image</span> <span class="o">&lt;</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">preprocessed_image</span><span class="p">[</span><span class="n">image</span> <span class="o">&gt;</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">quantiles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># Brain extraction</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">do_brain_extraction</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocessing:  brain extraction.&quot;</span><span class="p">)</span>
-        
+
         <span class="n">probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">probability_mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -148,20 +148,18 @@
     <span class="k">if</span> <span class="n">template_transform_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">template_image</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">template_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
-            <span class="n">template_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="n">template_file_name</span> <span class="o">=</span> <span class="n">template_file</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">template_file_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">if</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;biobank&quot;</span><span class="p">:</span>
+                <span class="n">template_file_name</span> <span class="o">=</span> <span class="s2">&quot;biobank_resampled.nii.gz&quot;</span>
                 <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22429242&quot;</span>
             <span class="k">elif</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;croppedMni152&quot;</span><span class="p">:</span>
+                <span class="n">template_file_name</span> <span class="o">=</span> <span class="s2">&quot;croppedMNI152.nii.gz&quot;</span>
                 <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22933754&quot;</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">):</span>
-                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">template_url</span><span class="p">)</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-            <span class="n">template_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">)</span>
+            <span class="n">template_file_name_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span>
+                <span class="n">template_url</span><span class="p">,</span> <span class="n">cache_subdir</span> <span class="o">=</span> <span class="n">output_directory</span><span class="p">)</span>
+            <span class="n">template_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">template_file_name_path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">template_image</span> <span class="o">=</span> <span class="n">template</span>    
+            <span class="n">template_image</span> <span class="o">=</span> <span class="n">template</span>
 
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">registration</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">registration</span><span class="p">(</span><span class="n">fixed</span><span class="o">=</span><span class="n">template_image</span><span class="p">,</span> <span class="n">moving</span><span class="o">=</span><span class="n">preprocessed_image</span><span class="p">,</span>
@@ -169,7 +167,7 @@
             <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">registration</span><span class="p">[</span><span class="s1">&#39;warpedmovout&#39;</span><span class="p">]</span>
             <span class="n">transforms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">fwdtransforms</span><span class="o">=</span><span class="n">registration</span><span class="p">[</span><span class="s1">&#39;fwdtransforms&#39;</span><span class="p">],</span>
                               <span class="n">invtransforms</span><span class="o">=</span><span class="n">registration</span><span class="p">[</span><span class="s1">&#39;invtransforms&#39;</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>                      
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">template_probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">template_image</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
             <span class="n">template_mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">template_probability_mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
             <span class="n">template_brain_image</span> <span class="o">=</span> <span class="n">template_mask</span> <span class="o">*</span> <span class="n">template_image</span>
@@ -199,7 +197,7 @@
         <span class="k">if</span> <span class="n">return_bias_field</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">bias_field</span> <span class="o">=</span> <span class="n">n4_output</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">n4_output</span>        
+            <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">n4_output</span>
 
     <span class="c1"># Denoising</span>
     <span class="k">if</span> <span class="n">do_denoising</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
@@ -218,9 +216,9 @@
 
         <span class="k">if</span> <span class="n">intensity_matching_type</span> <span class="o">==</span> <span class="s2">&quot;regression&quot;</span><span class="p">:</span>
             <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">regression_match_image</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">intensity_matching_type</span> <span class="o">==</span> <span class="s2">&quot;histogram&quot;</span><span class="p">:</span>   
+        <span class="k">elif</span> <span class="n">intensity_matching_type</span> <span class="o">==</span> <span class="s2">&quot;histogram&quot;</span><span class="p">:</span>
             <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">histogram_match_image</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span> 
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized intensity_matching_type.&quot;</span><span class="p">)</span>
 
     <span class="c1"># Intensity normalization</span>
@@ -232,7 +230,7 @@
             <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="p">(</span><span class="n">preprocessed_image</span> <span class="o">-</span> <span class="n">preprocessed_image</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">/</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">preprocessed_image</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
         <span class="k">elif</span> <span class="n">intensity_normalization_type</span> <span class="o">==</span> <span class="s2">&quot;0mean&quot;</span><span class="p">:</span>
             <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="p">(</span><span class="n">preprocessed_image</span> <span class="o">-</span> <span class="n">preprocessed_image</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="n">preprocessed_image</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span> 
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized intensity_normalization_type.&quot;</span><span class="p">)</span>
 
     <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;preprocessed_image&#39;</span> <span class="p">:</span> <span class="n">preprocessed_image</span><span class="p">}</span>
@@ -242,8 +240,8 @@
         <span class="n">return_dict</span><span class="p">[</span><span class="s1">&#39;bias_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bias_field</span>
     <span class="k">if</span> <span class="n">transforms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">return_dict</span><span class="p">[</span><span class="s1">&#39;template_transforms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">transforms</span>
-  
-    <span class="k">return</span><span class="p">(</span><span class="n">return_dict</span><span class="p">)</span>  </div>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">return_dict</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

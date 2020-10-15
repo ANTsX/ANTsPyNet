@@ -1,13 +1,5 @@
-import os
-import shutil
-
 import numpy as np
-import tensorflow.keras as keras
-
-import requests
-import tempfile
-import sys
-
+import tensorflow as tf
 import ants
 
 def desikan_killiany_tourville_labeling(t1,
@@ -147,7 +139,7 @@ def desikan_killiany_tourville_labeling(t1,
     output_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -171,6 +163,9 @@ def desikan_killiany_tourville_labeling(t1,
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
+
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
     ################################
     #
@@ -197,32 +192,11 @@ def desikan_killiany_tourville_labeling(t1,
     #
     ################################
 
-    spatial_priors_file_name = None
-    spatial_priors_file_exists = False
-    if output_directory is not None:
-        spatial_priors_file_name = output_directory + "/priorDktLabels.nii.gz"
-        if os.path.exists(spatial_priors_file_name):
-            spatial_priors_file_exists = True
-
-    spatial_priors = None
-    if output_directory is None or spatial_priors_file_exists == False:
-        spatial_priors_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
-        spatial_priors_file.close()
-        priors_file_name = spatial_priors_file.name
-        priors_url = "https://ndownloader.figshare.com/files/24139802"
-
-        if not os.path.exists(priors_file_name):
-            if verbose == True:
-                print("Downloading label spatial priors.")
-            r = requests.get(priors_url)
-            with open(priors_file_name, 'wb') as f:
-                f.write(r.content)
-        spatial_priors = ants.image_read(priors_file_name)
-        if output_directory is not None:
-            shutil.copy(priors_file_name, spatial_priors_file_name)
-    else:
-        spatial_priors = ants.image_read(spatial_priors_file_name)
-
+    spatial_priors_file_name = "priorDktLabels.nii.gz"
+    spatial_priors_url = "https://ndownloader.figshare.com/files/24139802"
+    spatial_priors_file_name_path = tf.keras.utils.get_file(spatial_priors_file_name,
+      spatial_priors_url, cache_subdir = output_directory)
+    spatial_priors = ants.image_read(spatial_priors_file_name_path)
     priors_image_list = ants.ndimage_to_list(spatial_priors)
 
     ################################
@@ -243,15 +217,7 @@ def desikan_killiany_tourville_labeling(t1,
         weight_decay = 1e-5, add_attention_gating=True)
 
     weights_file_name = None
-    if output_directory is not None:
-        weights_file_name = output_directory + "/dktLabelingOuterWithSpatialPriors.h5"
-        if not os.path.exists(weights_file_name):
-            if verbose == True:
-                print("DesikianKillianyTourville:  downloading model weights.")
-            weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors", weights_file_name)
-    else:
-        weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors")
-
+    weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors", output_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################
@@ -319,16 +285,7 @@ def desikan_killiany_tourville_labeling(t1,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
         weight_decay = 1e-5, add_attention_gating=True)
 
-    weights_file_name = None
-    if output_directory is not None:
-        weights_file_name = output_directory + "/dktLabelingInner.h5"
-        if not os.path.exists(weights_file_name):
-            if verbose == True:
-                print("DesikianKillianyTourville:  downloading model weights.")
-            weights_file_name = get_pretrained_network("dktInner", weights_file_name)
-    else:
-        weights_file_name = get_pretrained_network("dktInner")
-
+    weights_file_name = get_pretrained_network("dktInner", output_directory=output_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################

@@ -1,8 +1,4 @@
-import os
-
 import numpy as np
-import tensorflow.keras as keras
-
 import ants
 
 def deep_atropos(t1,
@@ -44,7 +40,7 @@ def deep_atropos(t1,
     output_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -69,6 +65,9 @@ def deep_atropos(t1,
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
+
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
     ################################
     #
@@ -110,16 +109,7 @@ def deep_atropos(t1,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
         weight_decay = 1e-5, add_attention_gating=True)
 
-    weights_file_name = None
-    if output_directory is not None:
-        weights_file_name = output_directory + "/sixTissueOctantSegmentationWeights.h5"
-        if not os.path.exists(weights_file_name):
-            if verbose == True:
-                print("Deep Atropos:  downloading model weights.")
-            weights_file_name = get_pretrained_network("sixTissueBrainSegmentation", weights_file_name)
-    else:
-        weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation")
-
+    weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", output_directory=output_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################

@@ -1,5 +1,3 @@
-import os
-
 import statistics
 import numpy as np
 import tensorflow.keras as keras
@@ -42,7 +40,7 @@ def brain_age(t1,
     output_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
+        ~/.keras/ANTsXNet/.
 
     number_of_simulations : integer
         Number of random affine perturbations to transform the input.
@@ -72,6 +70,9 @@ def brain_age(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
+    if output_directory == None:
+        output_directory = "ANTsXNet"
+
     ################################
     #
     # Preprocess images
@@ -99,16 +100,7 @@ def brain_age(t1,
     #
     ################################
 
-    model_weights_file_name = None
-    if output_directory is not None:
-        model_weights_file_name = output_directory + "/DeepBrainNetModel.h5"
-        if not os.path.exists(model_weights_file_name):
-            if verbose == True:
-                print("Brain age (DeepBrainNet):  downloading model weights.")
-            model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet", model_weights_file_name)
-    else:
-        model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet")
-
+    model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet", output_directory=output_directory)
     model = keras.models.load_model(model_weights_file_name)
 
     # The paper only specifies that 80 slices are used for prediction.  I just picked
@@ -143,9 +135,9 @@ def brain_age(t1,
         for j in range(len(which_slices)):
 
             slice = (ants.slice_image(batch_image, axis=2, idx=which_slices[j])).numpy()
-            batchX[i,:,:,0] = slice
-            batchX[i,:,:,1] = slice
-            batchX[i,:,:,2] = slice
+            batchX[j,:,:,0] = slice
+            batchX[j,:,:,1] = slice
+            batchX[j,:,:,2] = slice
 
         if verbose == True:
             print("Brain age (DeepBrainNet):  predicting brain age per slice (batch = ", i, ")")
@@ -154,7 +146,7 @@ def brain_age(t1,
             brain_age_per_slice = model.predict(batchX, verbose=verbose)
         else:
             prediction = model.predict(batchX, verbose=verbose)
-            brain_age_per_slice += (prediction - brain_age_per_slice) /  (i+1)
+            brain_age_per_slice = brain_age_per_slice + (prediction - brain_age_per_slice) /  (i+1)
 
     predicted_age = statistics.median(brain_age_per_slice)[0]
 

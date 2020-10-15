@@ -1,7 +1,5 @@
-import os
-import numpy as np
-import keras
 
+import numpy as np
 import ants
 
 def sysu_media_wmh_segmentation(flair,
@@ -41,15 +39,15 @@ def sysu_media_wmh_segmentation(flair,
     use_ensemble : boolean
         check whether to use all 3 sets of weights.
 
-    output_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
-
     use_axial_slices_only : boolean
         If True, use original implementation which was trained on axial slices.
         If False, use ANTsXNet variant implementation which applies the slice-by-slice
         models to all 3 dimensions and averages the results.
+
+    output_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -73,6 +71,9 @@ def sysu_media_wmh_segmentation(flair,
 
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
+
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
     ################################
     #
@@ -164,26 +165,10 @@ def sysu_media_wmh_segmentation(flair,
 
     unet_models = list()
     for i in range(number_of_models):
-        weights_file_name = None
         if number_of_channels == 1:
-            if output_directory is not None:
-                weights_file_name = output_directory + "sysuMediaWmhFlairOnlyModel" + str(i) + ".h5"
-                if not os.path.exists(weights_file_name):
-                    if verbose == True:
-                        print("White matter hyperintensity:  downloading model weights.")
-                    weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), weights_file_name)
-            else:
-                weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i))
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), output_directory=output_directory)
         else:
-            if output_directory is not None:
-                weights_file_name = output_directory + "sysuMediaWmhFlairT1Model" + str(i) + ".h5"
-                if not os.path.exists(weights_file_name):
-                    if verbose == True:
-                        print("White matter hyperintensity:  downloading model weights.")
-                    weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), weights_file_name)
-            else:
-                weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i))
-
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), output_directory=output_directory)
         unet_models.append(create_sysu_media_unet_model_2d((200, 200, number_of_channels)))
         unet_models[i].load_weights(weights_file_name)
 
