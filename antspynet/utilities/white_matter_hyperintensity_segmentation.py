@@ -7,7 +7,7 @@ def sysu_media_wmh_segmentation(flair,
                                 do_preprocessing=True,
                                 use_ensemble=True,
                                 use_axial_slices_only=True,
-                                output_directory=None,
+                                antsxnet_cache_directory=None,
                                 verbose=False):
 
     """
@@ -44,7 +44,7 @@ def sysu_media_wmh_segmentation(flair,
         If False, use ANTsXNet variant implementation which applies the slice-by-slice
         models to all 3 dimensions and averages the results.
 
-    output_directory : string
+    antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
@@ -72,8 +72,8 @@ def sysu_media_wmh_segmentation(flair,
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if output_directory == None:
-        output_directory = "ANTsXNet"
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
 
     ################################
     #
@@ -88,7 +88,7 @@ def sysu_media_wmh_segmentation(flair,
             do_brain_extraction=False,
             do_bias_correction=True,
             do_denoising=False,
-            output_directory=output_directory,
+            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         flair_preprocessed = flair_preprocessing["preprocessed_image"]
 
@@ -101,7 +101,7 @@ def sysu_media_wmh_segmentation(flair,
                 do_brain_extraction=False,
                 do_bias_correction=True,
                 do_denoising=False,
-                output_directory=output_directory,
+                antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             t1_preprocessed = t1_preprocessing["preprocessed_image"]
         number_of_channels = 2
@@ -166,9 +166,9 @@ def sysu_media_wmh_segmentation(flair,
     unet_models = list()
     for i in range(number_of_models):
         if number_of_channels == 1:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), output_directory=output_directory)
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), antsxnet_cache_directory=antsxnet_cache_directory)
         else:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), output_directory=output_directory)
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), antsxnet_cache_directory=antsxnet_cache_directory)
         unet_models.append(create_sysu_media_unet_model_2d((200, 200, number_of_channels)))
         unet_models[i].load_weights(weights_file_name)
 

@@ -3,7 +3,7 @@ import ants
 
 def deep_atropos(t1,
                  do_preprocessing=True,
-                 output_directory=None,
+                 antsxnet_cache_directory=None,
                  verbose=False):
 
     """
@@ -37,7 +37,7 @@ def deep_atropos(t1,
     do_preprocessing : boolean
         See description above.
 
-    output_directory : string
+    antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
@@ -66,8 +66,8 @@ def deep_atropos(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if output_directory == None:
-        output_directory = "ANTsXNet"
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
 
     ################################
     #
@@ -84,7 +84,7 @@ def deep_atropos(t1,
             template_transform_type="AffineFast",
             do_bias_correction=True,
             do_denoising=True,
-            output_directory=output_directory,
+            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
@@ -109,7 +109,7 @@ def deep_atropos(t1,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
         weight_decay = 1e-5, add_attention_gating=True)
 
-    weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", output_directory=output_directory)
+    weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################

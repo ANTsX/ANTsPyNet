@@ -4,7 +4,7 @@ import ants
 
 def lung_extraction(image,
                     modality="proton",
-                    output_directory=None,
+                    antsxnet_cache_directory=None,
                     verbose=None):
 
     """
@@ -18,7 +18,7 @@ def lung_extraction(image,
     modality : string
         Modality image type.  Options include "ct" and "proton".
 
-    output_directory : string
+    antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
@@ -41,8 +41,8 @@ def lung_extraction(image,
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if output_directory == None:
-        output_directory = "ANTsXNet"
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
 
     image_mods = [modality]
     channel_size = len(image_mods)
@@ -51,7 +51,7 @@ def lung_extraction(image,
     unet_model = None
 
     if modality == "proton":
-        weights_file_name = get_pretrained_network("protonLungMri", output_directory=output_directory)
+        weights_file_name = get_pretrained_network("protonLungMri", antsxnet_cache_directory=antsxnet_cache_directory)
 
         classes = ("background", "left_lung", "right_lung")
         number_of_classification_labels = len(classes)
@@ -59,7 +59,7 @@ def lung_extraction(image,
         reorient_template_file_name = "protonLungTemplate.nii.gz"
         reorient_template_url = "https://ndownloader.figshare.com/files/22707338"
         reorient_template_file_name_path = tf.keras.utils.get_file(reorient_template_file_name,
-            reorient_template_url, cache_subdir = output_directory)
+            reorient_template_url, cache_subdir = antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
 
         resampled_image_size = reorient_template.shape
@@ -120,7 +120,7 @@ def lung_extraction(image,
 
         reorient_template_url = "https://ndownloader.figshare.com/files/22707335"
         reorient_template_file_name_path = tf.keras.utils.get_file(reorient_template_file_name,
-            reorient_template_url, cache_subdir = output_directory)
+            reorient_template_url, cache_subdir = antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 
