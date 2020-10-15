@@ -1,14 +1,6 @@
-import os
-import shutil
 import numpy as np
-import keras
-
-import requests
-import tempfile
-import sys
-
+import tensorflow as tf
 import ants
-
 
 def lung_extraction(image,
                     modality="proton",
@@ -29,7 +21,7 @@ def lung_extraction(image,
     output_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -49,6 +41,8 @@ def lung_extraction(image,
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
     image_mods = [modality]
     channel_size = len(image_mods)
@@ -57,43 +51,16 @@ def lung_extraction(image,
     unet_model = None
 
     if modality == "proton":
-        if output_directory is not None:
-            weights_file_name = output_directory + "/protonLungSegmentationWeights.h5"
-            if not os.path.exists(weights_file_name):
-                if verbose == True:
-                    print("Lung extraction:  downloading weights.")
-                weights_file_name = get_pretrained_network("protonLungMri", weights_file_name)
-        else:
-            weights_file_name = get_pretrained_network("protonLungMri")
+        weights_file_name = get_pretrained_network("protonLungMri", output_directory=output_directory)
 
         classes = ("background", "left_lung", "right_lung")
         number_of_classification_labels = len(classes)
 
-        reorient_template_file_name = None
-        reorient_template_file_exists = False
-        if output_directory is not None:
-            reorient_template_file_name = output_directory + "/protonLungTemplate.nii.gz"
-            if os.path.exists(reorient_template_file_name):
-                reorient_template_file_exists = True
-
-        reorient_template = None
-        if output_directory is None or reorient_template_file_exists == False:
-            reorient_template_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
-            reorient_template_file.close()
-            template_file_name = reorient_template_file.name
-            template_url = "https://ndownloader.figshare.com/files/22707338"
-
-            if not os.path.exists(template_file_name):
-                if verbose == True:
-                    print("Lung extraction:  downloading template.")
-                r = requests.get(template_url)
-                with open(template_file_name, 'wb') as f:
-                    f.write(r.content)
-            reorient_template = ants.image_read(template_file_name)
-            if output_directory is not None:
-                shutil.copy(template_file_name, reorient_template_file_name)
-        else:
-            reorient_template = ants.image_read(reorient_template_file_name)
+        reorient_template_file_name = "protonLungTemplate.nii.gz"
+        reorient_template_url = "https://ndownloader.figshare.com/files/22707338"
+        reorient_template_file_name_path = tf.keras.utils.get_file(reorient_template_file_name,
+            reorient_template_url, cache_subdir = output_directory)
+        reorient_template = ants.image_read(reorient_template_file_name_path)
 
         resampled_image_size = reorient_template.shape
 
@@ -146,44 +113,15 @@ def lung_extraction(image,
         return(return_dict)
 
     elif modality == "ct":
-        if output_directory is not None:
-            weights_file_name = output_directory + "/ctLungSegmentationWeights.h5"
-            if not os.path.exists(weights_file_name):
-                if verbose == True:
-                    print("Lung extraction:  downloading weights.")
-                weights_file_name = get_pretrained_network("ctHumanLung", weights_file_name)
-        else:
-            weights_file_name = get_pretrained_network("ctHumanLung")
+        weights_file_name = get_pretrained_network("ctHumanLung")
 
         classes = ("background", "left_lung", "right_lung", "trachea")
         number_of_classification_labels = len(classes)
 
-        reorient_template_file_name = None
-        reorient_template_file_exists = False
-        if output_directory is not None:
-            reorient_template_file_name = output_directory + "/ctLungTemplate.nii.gz"
-            if os.path.exists(reorient_template_file_name):
-                reorient_template_file_exists = True
-
-        reorient_template = None
-        if output_directory is None or reorient_template_file_exists == False:
-            reorient_template_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
-            reorient_template_file.close()
-            template_file_name = reorient_template_file.name
-            template_url = "https://ndownloader.figshare.com/files/22707335"
-
-            if not os.path.exists(template_file_name):
-                if verbose == True:
-                    print("Lung extraction:  downloading template.")
-                r = requests.get(template_url)
-                with open(template_file_name, 'wb') as f:
-                    f.write(r.content)
-            reorient_template = ants.image_read(template_file_name)
-            if output_directory is not None:
-                shutil.copy(template_file_name, reorient_template_file_name)
-        else:
-            reorient_template = ants.image_read(reorient_template_file_name)
-
+        reorient_template_url = "https://ndownloader.figshare.com/files/22707335"
+        reorient_template_file_name_path = tf.keras.utils.get_file(reorient_template_file_name,
+            reorient_template_url, cache_subdir = output_directory)
+        reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),

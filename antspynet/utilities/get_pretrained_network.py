@@ -1,9 +1,6 @@
-import requests
-import tempfile
+import tensorflow as tf
 
-from os import path
-
-def get_pretrained_network(file_id=None, target_file_name=None):
+def get_pretrained_network(file_id=None, target_file_name=None, output_directory=None):
 
     """
     Download pretrained network/weights.
@@ -18,6 +15,10 @@ def get_pretrained_network(file_id=None, target_file_name=None):
 
     target_file_name string
        Optional target filename.
+
+    output_directory string
+       Optional target output.  If not specified these data will be downloaded
+       to the subdirectory ~/.keras/ANTsXNet/.
 
     Returns
     -------
@@ -114,19 +115,12 @@ def get_pretrained_network(file_id=None, target_file_name=None):
     url = switch_networks(file_id)
 
     if target_file_name == None:
-        target_file = tempfile.NamedTemporaryFile(suffix=".h5")
-        target_file.close()
-        target_file_name = target_file.name
+        target_file_name = file_id + ".h5"
 
-    if not path.exists(target_file_name):
-        r = requests.get(url)
-        with open(target_file_name, 'wb') as f:
-            f.write(r.content)
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
-    return(target_file_name)
+    target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
+        cache_subdir = output_directory)
 
-
-
-
-
-
+    return(target_file_name_path)

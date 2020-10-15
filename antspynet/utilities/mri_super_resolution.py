@@ -1,8 +1,5 @@
-import os
-
 import numpy as np
 import tensorflow as tf
-
 import ants
 
 
@@ -19,7 +16,7 @@ def mri_super_resolution(image, output_directory=None, verbose=False):
     output_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -41,18 +38,10 @@ def mri_super_resolution(image, output_directory=None, verbose=False):
     if image.dimension != 3:
         raise ValueError("Image dimension must be 3.")
 
-    model_and_weights_file_name = None
-    if output_directory is not None:
-        model_and_weights_file_name = output_directory + "/mindmapsSR_16_ANINN222_0.h5"
-        if not os.path.exists(model_and_weights_file_name):
-            if verbose == True:
-                print("MRI super-resolution:  downloading model weights.")
-            model_and_weights_file_name = get_pretrained_network(
-                "mriSuperResolution", model_and_weights_file_name
-            )
-    else:
-        model_and_weights_file_name = get_pretrained_network("mriSuperResolution")
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
+    model_and_weights_file_name = get_pretrained_network("mriSuperResolution", output_directory=output_directory)
     model_sr = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
 
     image_sr = apply_super_resolution_model_to_image(

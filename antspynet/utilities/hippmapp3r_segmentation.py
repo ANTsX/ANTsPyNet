@@ -1,13 +1,6 @@
-import os
 import numpy as np
-import keras
-
-import requests
-import tempfile
-import sys
-
+import tensorflow as tf
 import ants
-
 
 def hippmapp3r_segmentation(t1,
                             do_preprocessing=True,
@@ -16,15 +9,15 @@ def hippmapp3r_segmentation(t1,
 
     """
     Perform HippMapp3r (hippocampal) segmentation described in
-   
+
      https://www.ncbi.nlm.nih.gov/pubmed/31609046
-   
+
     with models and architecture ported from
-   
+
     https://github.com/mgoubran/HippMapp3r
-   
+
     Additional documentation and attribution resources found at
-   
+
     https://hippmapp3r.readthedocs.io/en/latest/
 
     Preprocessing consists of:
@@ -43,12 +36,12 @@ def hippmapp3r_segmentation(t1,
         See description above.
 
     output_directory : string
-        Destination directory for storing the downloaded template and model weights.  
-        Since these can be resused, if is None, these data will be downloaded to a 
-        tempfile.
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
-        Print progress to the screen.    
+        Print progress to the screen.
 
     Returns
     -------
@@ -64,7 +57,10 @@ def hippmapp3r_segmentation(t1,
     from ..utilities import preprocess_brain_image
 
     if t1.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )  
+        raise ValueError( "Image dimension must be 3." )
+
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
     if verbose == True:
         print("*************  Preprocessing  ***************")
@@ -88,25 +84,23 @@ def hippmapp3r_segmentation(t1,
 
     # Normalize to mprage_hippmapp3r space
     if verbose == True:
-        print("    HippMapp3r: template normalization.") 
-    template_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
-    template_url = "https://ndownloader.figshare.com/files/24984689"
-    template_file.close()
-    template_file_name = template_file.name
-    if not os.path.exists(template_file_name):
-        r = requests.get(template_url)
-        with open(template_file_name, 'wb') as f:
-            f.write(r.content)    
-    template_image = ants.image_read(template_file_name)
+        print("    HippMapp3r: template normalization.")
+
+    template_file_name = "mprage_hippmapp3r.nii.gz"
+    template_url = "https://ndownloader.figshare.com/files/24139802"
+    template_file_name_path = tf.keras.utils.get_file(template_file_name,
+      template_url, cache_subdir = output_directory)
+
+    template_image = ants.image_read(template_file_name_path)
     registration = ants.registration(fixed=template_image, moving=t1_preprocessed,
         type_of_transform="antsRegistrationSyNQuick[t]", verbose=verbose)
-    image = registration['warpedmovout']    
+    image = registration['warpedmovout']
     transforms = dict(fwdtransforms=registration['fwdtransforms'],
                         invtransforms=registration['invtransforms'])
 
     # Threshold at 10th percentile of non-zero voxels in "robust range (fslmaths)"
     if verbose == True:
-        print("    HippMapp3r: threshold.") 
+        print("    HippMapp3r: threshold.")
 
     image_array = image.numpy()
     image_robust_range = np.quantile(image_array[np.where(image_array != 0)], (0.02, 0.98))
@@ -118,8 +112,8 @@ def hippmapp3r_segmentation(t1,
     if verbose == True:
         print("    HippMapp3r: standardize.")
 
-    mean_image = np.mean(thresholded_image[thresholded_mask==1]) 
-    sd_image = np.std(thresholded_image[thresholded_mask==1]) 
+    mean_image = np.mean(thresholded_image[thresholded_mask==1])
+    sd_image = np.std(thresholded_image[thresholded_mask==1])
     image_normalized = (image - mean_image) / sd_image
     image_normalized = image_normalized * thresholded_mask
 
@@ -130,29 +124,21 @@ def hippmapp3r_segmentation(t1,
     image_cropped = ants.crop_image(image_normalized, thresholded_mask, 1)
     shape_initial_stage = (160, 160, 128)
     image_resampled = ants.resample_image(image_cropped, shape_initial_stage, use_voxels=True, interp_type=1)
-    
+
     if verbose == True:
         print("    HippMapp3r: generate first network and download weights.")
 
     model_initial_stage = create_hippmapp3r_unet_model_3d((*shape_initial_stage, 1), do_first_network=True)
-    
-    if output_directory is not None:
-        initial_stage_weights_file_name = output_directory + "/hippMapp3rInitial.h5"
-        if not os.path.exists(initial_stage_weights_file_name):
-            if verbose == True:
-                print("    HippMapp3r: downloading model weights.")
-            initial_stage_weights_file_name = get_pretrained_network("hippMapp3rInitial", initial_stage_weights_file_name)
-    else:    
-        initial_stage_weights_file_name = get_pretrained_network("hippMapp3rInitial")
 
+    initial_stage_weights_file_name = get_pretrained_network("hippMapp3rInitial", output_directory=output_directory)
     model_initial_stage.load_weights(initial_stage_weights_file_name)
 
     if verbose == True:
         print("    HippMapp3r: prediction.")
-    
+
     data_initial_stage = np.expand_dims(image_resampled.numpy(), axis=0)
     data_initial_stage = np.expand_dims(data_initial_stage, axis=-1)
-    mask_array = model_initial_stage.predict(data_initial_stage, verbose=verbose) 
+    mask_array = model_initial_stage.predict(data_initial_stage, verbose=verbose)
     mask_image_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(np.squeeze(mask_array)))
     mask_image = ants.resample_image(mask_image_resampled, image.shape, use_voxels=True, interp_type=0)
     mask_image[mask_image >= 0.5] = 1
@@ -169,13 +155,13 @@ def hippmapp3r_segmentation(t1,
         print("*************  Refine stage segmentation  ***************")
         print("")
 
-    mask_array = np.squeeze(mask_array) 
+    mask_array = np.squeeze(mask_array)
     centroid_indices = np.where(mask_array == 1)
     centroid = np.zeros((3,))
     centroid[0] = centroid_indices[0].mean()
     centroid[1] = centroid_indices[1].mean()
     centroid[2] = centroid_indices[2].mean()
-    
+
     shape_refine_stage = (112, 112, 64)
     lower = (np.floor(centroid - 0.5 * np.array(shape_refine_stage)) - 1).astype(int)
     upper = (lower + np.array(shape_refine_stage)).astype(int)
@@ -186,16 +172,8 @@ def hippmapp3r_segmentation(t1,
         print("    HippMapp3r: generate second network and download weights.")
 
     model_refine_stage = create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), do_first_network=False)
-    
-    if output_directory is not None:
-        refine_stage_weights_file_name = output_directory + "/hippMapp3rRefine.h5"
-        if not os.path.exists(refine_stage_weights_file_name):
-            if verbose == True:
-                print("    HippMapp3r: downloading model weights.")
-            refine_stage_weights_file_name = get_pretrained_network("hippMapp3rRefine", initial_stage_weights_file_name)
-    else:    
-        refine_stage_weights_file_name = get_pretrained_network("hippMapp3rRefine")
 
+    refine_stage_weights_file_name = get_pretrained_network("hippMapp3rRefine", output_directory=output_directory)
     model_refine_stage.load_weights(refine_stage_weights_file_name)
 
     data_refine_stage = np.expand_dims(image_trimmed.numpy(), axis=0)
@@ -217,7 +195,7 @@ def hippmapp3r_segmentation(t1,
     prediction_refine_stage_array[lower[0]:upper[0],
                                   lower[1]:upper[1],
                                   lower[2]:upper[2]] = prediction_refine_stage
-    probability_mask_refine_stage_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(prediction_refine_stage_array))                                  
+    probability_mask_refine_stage_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(prediction_refine_stage_array))
 
     segmentation_image_resampled = ants.label_clusters(
         ants.threshold_image(probability_mask_refine_stage_resampled, 0.0, 0.5, 0, 1), min_cluster_size=10)
@@ -236,7 +214,7 @@ def hippmapp3r_segmentation(t1,
       whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
 
     return(segmentation_image)
-    
+
 
 
 

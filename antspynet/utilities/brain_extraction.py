@@ -1,12 +1,5 @@
-import os
-import shutil
-
 import numpy as np
-import keras
-
-import requests
-import tempfile
-import sys
+import tensorflow as tf
 
 import ants
 
@@ -44,7 +37,7 @@ def brain_extraction(image,
     output_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
-        tempfile.
+        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -68,6 +61,9 @@ def brain_extraction(image,
     channel_size = 1
     if isinstance(image, list):
         channel_size = len(image)
+
+    if output_directory == None:
+        output_directory = "ANTsXNet"
 
     input_images = list()
     if channel_size == 1:
@@ -107,73 +103,36 @@ def brain_extraction(image,
         #
         #####################
 
-        weights_file_name = None
         weights_file_name_prefix = None
 
         if modality == "t1":
-            weights_file_name = "/brainExtractionWeights.h5"
             weights_file_name_prefix = "brainExtraction"
         elif modality == "bold":
-            weights_file_name = "/brainExtractionBoldWeights.h5"
             weights_file_name_prefix = "brainExtractionBOLD"
         elif modality == "t2":
-            weights_file_name = "/brainExtractionT2Weights.h5"
             weights_file_name_prefix = "brainExtractionT2"
         elif modality == "flair":
-            weights_file_name = "/brainExtractionFlairWeights.h5"
             weights_file_name_prefix = "brainExtractionFLAIR"
         elif modality == "fa":
-            weights_file_name = "/brainExtractionFaWeights.h5"
             weights_file_name_prefix = "brainExtractionFA"
         elif modality == "t1t2infant":
-            weights_file_name = "/brainExtractionInfantT1T2Weights.h5"
             weights_file_name_prefix = "brainExtractionInfantT1T2"
         elif modality == "t1infant":
-            weights_file_name = "/brainExtractionInfantT1Weights.h5"
             weights_file_name_prefix = "brainExtractionInfantT1"
         elif modality == "t2infant":
-            weights_file_name = "/brainExtractionInfantT2Weights.h5"
             weights_file_name_prefix = "brainExtractionInfantT2"
         else:
             raise ValueError("Unknown modality type.")
 
-        if output_directory is not None:
-            weights_file_name = output_directory + weights_file_name
+        weights_file_name = get_pretrained_network(weights_file_name_prefix, output_directory=output_directory)
 
-        if output_directory is not None:
-            if not os.path.exists(weights_file_name):
-                if verbose == True:
-                    print("Brain extraction:  downloading weights.")
-                weights_file_name = get_pretrained_network(weights_file_name_prefix, weights_file_name)
-        else:
-            weights_file_name = get_pretrained_network(weights_file_name_prefix)
-
-        reorient_template_file_name = None
-        reorient_template_file_exists = False
-        if output_directory is not None:
-            reorient_template_file_name = output_directory + "/S_template3_resampled.nii.gz"
-            if os.path.exists(reorient_template_file_name):
-                reorient_template_file_exists = True
-
-        reorient_template = None
-        if output_directory is None or reorient_template_file_exists == False:
-            reorient_template_file = tempfile.NamedTemporaryFile(suffix=".nii.gz")
-            reorient_template_file.close()
-            template_file_name = reorient_template_file.name
-            template_url = "https://ndownloader.figshare.com/files/22597175"
-
-            if not os.path.exists(template_file_name):
-                if verbose == True:
-                    print("Brain extraction:  downloading template.")
-                r = requests.get(template_url)
-                with open(template_file_name, 'wb') as f:
-                    f.write(r.content)
-            reorient_template = ants.image_read(template_file_name)
-            if output_directory is not None:
-                shutil.copy(template_file_name, reorient_template_file_name)
-        else:
-            reorient_template = ants.image_read(reorient_template_file_name)
-
+        if verbose == True:
+            print("Brain extraction:  retrieving template.")
+        reorient_template_url = "https://ndownloader.figshare.com/files/22597175"
+        reorient_template_file_name = "S_template3_resampled.nii.gz"
+        reorient_template_file_name_path = tf.keras.utils.get_file(
+            reorient_template_file_name, reorient_template_url, cache_subdir = output_directory)
+        reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
@@ -236,15 +195,7 @@ def brain_extraction(image,
 
         model = create_nobrainer_unet_model_3d((None, None, None, 1))
 
-        weights_file_name = None
-        if output_directory is not None:
-            weights_file_name = output_directory + "/noBrainerWeights.h5"
-            if not os.path.exists(weights_file_name):
-                if verbose == True:
-                    print("Brain extraction:  downloading weights.")
-                weights_file_name = get_pretrained_network("brainExtractionNoBrainer", weights_file_name)
-        else:
-            weights_file_name = get_pretrained_network("brainExtractionNoBrainer")
+        weights_file_name = get_pretrained_network("brainExtractionNoBrainer", output_directory=output_directory)
         model.load_weights(weights_file_name)
 
         if verbose == True:

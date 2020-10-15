@@ -31,15 +31,8 @@
           <div class="body" role="main">
             
   <h1>Source code for antspynet.utilities.brain_extraction</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">keras</span>
-
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">import</span> <span class="nn">ants</span>
 
@@ -77,7 +70,7 @@
 <span class="sd">    output_directory : string</span>
 <span class="sd">        Destination directory for storing the downloaded template and model weights.</span>
 <span class="sd">        Since these can be resused, if is None, these data will be downloaded to a</span>
-<span class="sd">        tempfile.</span>
+<span class="sd">        ~/.keras/ANTsXNet/.</span>
 
 <span class="sd">    verbose : boolean</span>
 <span class="sd">        Print progress to the screen.</span>
@@ -101,6 +94,9 @@
     <span class="n">channel_size</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">channel_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_directory</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_directory</span> <span class="o">=</span> <span class="s2">&quot;ANTsXNet&quot;</span>
 
     <span class="n">input_images</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">channel_size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -140,73 +136,36 @@
         <span class="c1">#</span>
         <span class="c1">#####################</span>
 
-        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionWeights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtraction&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;bold&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionBoldWeights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionBOLD&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionT2Weights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionT2&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;flair&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionFlairWeights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionFLAIR&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;fa&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionFaWeights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionFA&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1t2infant&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionInfantT1T2Weights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT1T2&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1infant&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionInfantT1Weights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT1&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t2infant&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="s2">&quot;/brainExtractionInfantT2Weights.h5&quot;</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT2&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown modality type.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="n">weights_file_name</span>
+        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading weights.&quot;</span><span class="p">)</span>
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">,</span> <span class="n">weights_file_name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">)</span>
-
-        <span class="n">reorient_template_file_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">reorient_template_file_exists</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">reorient_template_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="s2">&quot;/S_template3_resampled.nii.gz&quot;</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">reorient_template_file_name</span><span class="p">):</span>
-                <span class="n">reorient_template_file_exists</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="n">reorient_template</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">reorient_template_file_exists</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">reorient_template_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.nii.gz&quot;</span><span class="p">)</span>
-            <span class="n">reorient_template_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="n">template_file_name</span> <span class="o">=</span> <span class="n">reorient_template_file</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22597175&quot;</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading template.&quot;</span><span class="p">)</span>
-                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">template_url</span><span class="p">)</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-            <span class="n">reorient_template</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span> <span class="n">reorient_template_file_name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">reorient_template</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">reorient_template_file_name</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  retrieving template.&quot;</span><span class="p">)</span>
+        <span class="n">reorient_template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22597175&quot;</span>
+        <span class="n">reorient_template_file_name</span> <span class="o">=</span> <span class="s2">&quot;S_template3_resampled.nii.gz&quot;</span>
+        <span class="n">reorient_template_file_name_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span>
+            <span class="n">reorient_template_file_name</span><span class="p">,</span> <span class="n">reorient_template_url</span><span class="p">,</span> <span class="n">cache_subdir</span> <span class="o">=</span> <span class="n">output_directory</span><span class="p">)</span>
+        <span class="n">reorient_template</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">reorient_template_file_name_path</span><span class="p">)</span>
         <span class="n">resampled_image_size</span> <span class="o">=</span> <span class="n">reorient_template</span><span class="o">.</span><span class="n">shape</span>
 
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">create_unet_model_3d</span><span class="p">((</span><span class="o">*</span><span class="n">resampled_image_size</span><span class="p">,</span> <span class="n">channel_size</span><span class="p">),</span>
@@ -269,15 +228,7 @@
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">create_nobrainer_unet_model_3d</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">output_directory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">output_directory</span> <span class="o">+</span> <span class="s2">&quot;/noBrainerWeights.h5&quot;</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  downloading weights.&quot;</span><span class="p">)</span>
-                <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionNoBrainer&quot;</span><span class="p">,</span> <span class="n">weights_file_name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionNoBrainer&quot;</span><span class="p">)</span>
+        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionNoBrainer&quot;</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
