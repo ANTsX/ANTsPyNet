@@ -1,4 +1,5 @@
 from .get_pretrained_network import get_pretrained_network
+from .get_antsxnet_data import get_antsxnet_data
 
 from .denseunet_utilities import Scale
 

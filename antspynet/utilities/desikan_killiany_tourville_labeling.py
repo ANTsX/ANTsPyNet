@@ -157,6 +157,7 @@ def desikan_killiany_tourville_labeling(t1,
 
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
     from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
     from ..utilities import crop_image_center
@@ -192,10 +193,8 @@ def desikan_killiany_tourville_labeling(t1,
     #
     ################################
 
-    spatial_priors_file_name = "priorDktLabels.nii.gz"
-    spatial_priors_url = "https://ndownloader.figshare.com/files/24139802"
-    spatial_priors_file_name_path = tf.keras.utils.get_file(spatial_priors_file_name,
-      spatial_priors_url, cache_subdir = antsxnet_cache_directory)
+    spatial_priors_file_name_path = get_antsxnet_data("priorDktLabels",
+      antsxnet_cache_directory=antsxnet_cache_directory)
     spatial_priors = ants.image_read(spatial_priors_file_name_path)
     priors_image_list = ants.ndimage_to_list(spatial_priors)
 

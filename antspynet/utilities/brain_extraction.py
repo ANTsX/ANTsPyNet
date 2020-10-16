@@ -53,6 +53,7 @@ def brain_extraction(image,
 
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
     from ..architectures import create_nobrainer_unet_model_3d
 
     classes = ("background", "brain")
@@ -124,14 +125,13 @@ def brain_extraction(image,
         else:
             raise ValueError("Unknown modality type.")
 
-        weights_file_name = get_pretrained_network(weights_file_name_prefix, antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(weights_file_name_prefix,
+          antsxnet_cache_directory=antsxnet_cache_directory)
 
         if verbose == True:
             print("Brain extraction:  retrieving template.")
-        reorient_template_url = "https://ndownloader.figshare.com/files/22597175"
-        reorient_template_file_name = "S_template3_resampled.nii.gz"
-        reorient_template_file_name_path = tf.keras.utils.get_file(
-            reorient_template_file_name, reorient_template_url, cache_subdir = antsxnet_cache_directory)
+        reorient_template_file_name_path = get_antsxnet_data("S_template3",
+          antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 
@@ -195,7 +195,8 @@ def brain_extraction(image,
 
         model = create_nobrainer_unet_model_3d((None, None, None, 1))
 
-        weights_file_name = get_pretrained_network("brainExtractionNoBrainer", antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("brainExtractionNoBrainer",
+          antsxnet_cache_directory=antsxnet_cache_directory)
         model.load_weights(weights_file_name)
 
         if verbose == True:
