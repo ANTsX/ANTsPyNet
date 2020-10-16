@@ -35,7 +35,7 @@ def get_antsxnet_data(file_id=None,
         switcher = {
             "biobank": "https://ndownloader.figshare.com/files/22429242",
             "croppedMni152": "https://ndownloader.figshare.com/files/22933754",
-            "mprage_hippmapp3r": "https://ndownloader.figshare.com/files/24139802",
+            "mprage_hippmapp3r": "https://ndownloader.figshare.com/files/24984689",
             "protonLungTemplate": "https://ndownloader.figshare.com/files/22707338",
             "ctLungTemplate": "https://ndownloader.figshare.com/files/22707335",
             "priorDktLabels": "https://ndownloader.figshare.com/files/24139802",
