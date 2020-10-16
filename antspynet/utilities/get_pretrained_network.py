@@ -28,7 +28,7 @@ def get_pretrained_network(file_id=None,
 
     Example
     -------
-    >>> model_file = get_pretrained_network( 'dbpn4x' )
+    >>> model_file = get_pretrained_network('dbpn4x')
     """
 
     def switch_networks(argument):

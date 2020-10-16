@@ -53,8 +53,9 @@ def hippmapp3r_segmentation(t1,
     """
 
     from ..architectures import create_hippmapp3r_unet_model_3d
-    from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
+    from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -86,12 +87,9 @@ def hippmapp3r_segmentation(t1,
     if verbose == True:
         print("    HippMapp3r: template normalization.")
 
-    template_file_name = "mprage_hippmapp3r.nii.gz"
-    template_url = "https://ndownloader.figshare.com/files/24139802"
-    template_file_name_path = tf.keras.utils.get_file(template_file_name,
-      template_url, cache_subdir = antsxnet_cache_directory)
-
+    template_file_name_path = get_antsxnet_data("mprage_hippmapp3r", antsxnet_cache_directory=antsxnet_cache_directory)
     template_image = ants.image_read(template_file_name_path)
+
     registration = ants.registration(fixed=template_image, moving=t1_preprocessed,
         type_of_transform="antsRegistrationSyNQuick[t]", verbose=verbose)
     image = registration['warpedmovout']

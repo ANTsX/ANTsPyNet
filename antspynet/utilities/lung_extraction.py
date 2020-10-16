@@ -37,6 +37,7 @@ def lung_extraction(image,
 
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -51,15 +52,14 @@ def lung_extraction(image,
     unet_model = None
 
     if modality == "proton":
-        weights_file_name = get_pretrained_network("protonLungMri", antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("protonLungMri",
+            antsxnet_cache_directory=antsxnet_cache_directory)
 
         classes = ("background", "left_lung", "right_lung")
         number_of_classification_labels = len(classes)
 
-        reorient_template_file_name = "protonLungTemplate.nii.gz"
-        reorient_template_url = "https://ndownloader.figshare.com/files/22707338"
-        reorient_template_file_name_path = tf.keras.utils.get_file(reorient_template_file_name,
-            reorient_template_url, cache_subdir = antsxnet_cache_directory)
+        reorient_template_file_name_path = get_antsxnet_data("protonLungTemplate",
+            antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
 
         resampled_image_size = reorient_template.shape
@@ -118,9 +118,8 @@ def lung_extraction(image,
         classes = ("background", "left_lung", "right_lung", "trachea")
         number_of_classification_labels = len(classes)
 
-        reorient_template_url = "https://ndownloader.figshare.com/files/22707335"
-        reorient_template_file_name_path = tf.keras.utils.get_file(reorient_template_file_name,
-            reorient_template_url, cache_subdir = antsxnet_cache_directory)
+        reorient_template_file_name_path = get_antsxnet_data("ctLungTemplate",
+            antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 

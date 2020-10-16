@@ -86,6 +86,7 @@ def preprocess_brain_image(image,
 
     from ..utilities import brain_extraction
     from ..utilities import regression_match_image
+    from ..utilities import get_antsxnet_data
 
     preprocessed_image = ants.image_clone(image)
 
@@ -115,15 +116,7 @@ def preprocess_brain_image(image,
     if template_transform_type is not None:
         template_image = None
         if isinstance(template, str):
-            template_file_name = ''
-            if template == "biobank":
-                template_file_name = "biobank_resampled.nii.gz"
-                template_url = "https://ndownloader.figshare.com/files/22429242"
-            elif template == "croppedMni152":
-                template_file_name = "croppedMNI152.nii.gz"
-                template_url = "https://ndownloader.figshare.com/files/22933754"
-            template_file_name_path = tf.keras.utils.get_file(template_file_name,
-                template_url, cache_subdir = antsxnet_cache_directory)
+            template_file_name_path = get_antsxnet_data(template, antsxnet_cache_directory=antsxnet_cache_directory)
             template_image = ants.image_read(template_file_name_path)
         else:
             template_image = template
