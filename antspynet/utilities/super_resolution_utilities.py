@@ -1,4 +1,3 @@
-
 import ants
 import numpy as np
 import keras
@@ -12,8 +11,8 @@ from keras.models import load_model
 import time
 from os import path
 
-def mse(x,
-        y=None):
+
+def mse(x, y=None):
     """
     Mean square error of a single image or between two images.
 
@@ -37,15 +36,14 @@ def mse(x,
     """
 
     if y == None:
-       x2 = x**2
-       return x2.mean()
+        x2 = x ** 2
+        return x2.mean()
     else:
         diff2 = (x - y) ** 2
         return diff2.mean()
 
 
-def mae(x,
-        y=None):
+def mae(x, y=None):
     """
     Mean absolute error of a single image or between two images.
 
@@ -69,14 +67,14 @@ def mae(x,
     """
 
     if y == None:
-       xabs = x.abs()
-       return xabs.mean()
+        xabs = x.abs()
+        return xabs.mean()
     else:
         diffabs = abs(x - y)
         return diffabs.mean()
 
-def psnr(x,
-         y):
+
+def psnr(x, y):
     """
     Peak signal-to-noise ratio between two images.
 
@@ -99,12 +97,11 @@ def psnr(x,
     >>> value = psnr(r16, r64)
     """
 
-    value = (20 * np.log10(x.max()) - 10 * np.log10(mse(x, y)))
-    return(value)
+    value = 20 * np.log10(x.max()) - 10 * np.log10(mse(x, y))
+    return value
 
-def ssim(x,
-         y,
-         K=(0.01, 0.03)):
+
+def ssim(x, y, K=(0.01, 0.03)):
     """
     Structural similarity index (SSI) between two images.
 
@@ -141,8 +138,8 @@ def ssim(x,
     global_min = np.abs(min(x.min(), y.min()))
     L = global_max - global_min
 
-    C1 = (K[0] * L)**2
-    C2 = (K[1] * L)**2
+    C1 = (K[0] * L) ** 2
+    C2 = (K[1] * L) ** 2
     C3 = C2 / 2
 
     mu_x = x.mean()
@@ -156,15 +153,15 @@ def ssim(x,
     sigma_y_sq = (y * y).mean() - mu_y_sq
     sigma_xy = (x * y).mean() - mu_xy
 
-    numerator = ( 2 * mu_xy + C1 ) * ( 2 * sigma_xy + C2 )
-    denominator = ( mu_x_sq + mu_y_sq + C1 ) * ( sigma_x_sq + sigma_y_sq + C2 )
+    numerator = (2 * mu_xy + C1) * (2 * sigma_xy + C2)
+    denominator = (mu_x_sq + mu_y_sq + C1) * (sigma_x_sq + sigma_y_sq + C2)
 
     SSI = numerator / denominator
 
-    return(SSI)
+    return SSI
 
-def gmsd(x,
-         y):
+
+def gmsd(x, y):
     """
     Gradient magnitude similarity deviation
 
@@ -196,22 +193,25 @@ def gmsd(x,
 
     constant = 0.0026
     gmsd_numerator = gx * gy * 2.0 + constant
-    gmsd_denominator = gx**2 + gy**2 + constant
+    gmsd_denominator = gx ** 2 + gy ** 2 + constant
     gmsd = gmsd_numerator / gmsd_denominator
 
     product_dimension = 1
     for i in range(len(x.shape)):
-       product_dimension *= x.shape[i]
+        product_dimension *= x.shape[i]
     prefactor = 1.0 / product_dimension
 
-    return(np.sqrt(prefactor * ((gmsd - gmsd.mean())**2).sum()))
+    return np.sqrt(prefactor * ((gmsd - gmsd.mean()) ** 2).sum())
 
-def apply_super_resolution_model_to_image(image,
-                                          model,
-                                          target_range=(-127.5, 127.5),
-                                          batch_size=32,
-                                          regression_order=None,
-                                          verbose=False):
+
+def apply_super_resolution_model_to_image(
+    image,
+    model,
+    target_range=(-127.5, 127.5),
+    batch_size=32,
+    regression_order=None,
+    verbose=False,
+):
 
     """
     Apply a pretrained deep back projection model for super resolution.
@@ -259,9 +259,9 @@ def apply_super_resolution_model_to_image(image,
 
     channel_axis = 0
     if K.image_data_format() == "channels_last":
-      channel_axis = -1
+        channel_axis = -1
 
-    shape_length = len( model.input_shape )
+    shape_length = len(model.input_shape)
 
     if shape_length < 4 | shape_length > 5:
         raise ValueError("Unexpected input shape.")
@@ -276,9 +276,13 @@ def apply_super_resolution_model_to_image(image,
     channel_size = model.input_shape[channel_axis]
 
     if channel_size != image.components:
-       raise ValueError('Channel size of model', str(channel_size),
-                        'does not match ncomponents=', str(image.components),
-                        'of the input image.')
+        raise ValueError(
+            "Channel size of model",
+            str(channel_size),
+            "does not match ncomponents=",
+            str(image.components),
+            "of the input image.",
+        )
 
     if target_range[0] > target_range[1]:
         target_range = target_range[::-1]
@@ -290,19 +294,25 @@ def apply_super_resolution_model_to_image(image,
                 print("Load model.")
             model = load_model(model)
             if verbose:
-               elapsed_time = time.time() - start_time
-               print("  (elapsed time: ", elapsed_time, ")")
+                elapsed_time = time.time() - start_time
+                print("  (elapsed time: ", elapsed_time, ")")
         else:
             raise ValueError("Model not found.")
 
-    image_patches = extract_image_patches(image, patch_size=image.shape,
-       max_number_of_patches=1, stride_length=image.shape,
-       return_as_array=True)
+    image_patches = extract_image_patches(
+        image,
+        patch_size=image.shape,
+        max_number_of_patches=1,
+        stride_length=image.shape,
+        return_as_array=True,
+    )
     image_patches = np.expand_dims(image_patches, axis=-1)
 
     image_patches = image_patches - image_patches.min()
-    image_patches = (image_patches / image_patches.max() *
-      (target_range[1] - target_range[0]) + target_range[0])
+    image_patches = (
+        image_patches / image_patches.max() * (target_range[1] - target_range[0])
+        + target_range[0]
+    )
 
     if verbose:
         print("Prediction")
@@ -319,46 +329,61 @@ def apply_super_resolution_model_to_image(image,
 
     intensity_range = image.range()
     prediction = prediction - prediction.min()
-    prediction = (prediction / prediction.max() *
-      (intensity_range[1] - intensity_range[0]) + intensity_range[0])
+    prediction = (
+        prediction / prediction.max() * (intensity_range[1] - intensity_range[0])
+        + intensity_range[0]
+    )
 
     def slice_array_channel(input_array, slice, channel_axis=-1):
         if channel_axis == 0:
             if shape_length == 4:
-                return(input_array[slice,:,:,:])
+                return input_array[slice, :, :, :]
             else:
-                return(input_array[slice,:,:,:,:])
+                return input_array[slice, :, :, :, :]
         else:
             if shape_length == 4:
-                return(input_array[:,:,:,slice])
+                return input_array[:, :, :, slice]
             else:
-                return(input_array[:,:,:,:,slice])
+                return input_array[:, :, :, :, slice]
 
-    expansion_factor = (np.asarray(prediction.shape) / np.asarray(image_patches.shape))[2:image.dimension]
+    expansion_factor = np.asarray(prediction.shape) / np.asarray(image_patches.shape)
     if channel_axis == 0:
-        expansion_factor = (np.asarray(prediction.shape) / np.asarray(image_patches.shape))[1:image.dimension]
+        FIXME
+
+    expansion_factor = expansion_factor[1 : (len(expansion_factor) - 1)]
 
     if verbose:
         print("ExpansionFactor:", str(expansion_factor))
 
     if image.components == 1:
         image_array = slice_array_channel(prediction, 0, channel_axis)
-        prediction_image = ants.make_image((np.asarray(image.shape) *
-          np.asarray(expansion_factor)).astype(int), image_array)
+        prediction_image = ants.make_image(
+            (np.asarray(image.shape) * np.asarray(expansion_factor)).astype(int),
+            image_array,
+        )
         if regression_order is not None:
             reference_image = ants.resample_image_to_target(image, prediction_image)
-            prediction_image = regression_match_image(prediction_image, reference_image,
-              poly_order=regression_order)
+            prediction_image = regression_match_image(
+                prediction_image, reference_image, poly_order=regression_order
+            )
     else:
         image_component_list = list()
         for k in range(image.components):
             image_array = slice_array_channel(prediction, k, channel_axis)
-            image_component_list.append(ants.make_image((np.asarray(image.shape) *
-              np.asarray(expansion_factor)).astype(int), image_array))
+            image_component_list.append(
+                ants.make_image(
+                    (np.asarray(image.shape) * np.asarray(expansion_factor)).astype(
+                        int
+                    ),
+                    image_array,
+                )
+            )
         prediction_image = ants.merge_channels(image_component_list)
 
     prediction_image = ants.copy_image_info(image, prediction_image)
-    ants.set_spacing(prediction_image, tuple(np.asarray(image.spacing) / np.asarray(expansion_factor)))
+    ants.set_spacing(
+        prediction_image,
+        tuple(np.asarray(image.spacing) / np.asarray(expansion_factor)),
+    )
 
-    return(prediction_image)
-
+    return prediction_image
