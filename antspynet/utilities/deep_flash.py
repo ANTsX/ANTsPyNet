@@ -156,8 +156,11 @@ def deep_flash(t1,
         else:
             probability_images.append(decropped_image)
 
-    image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
-    segmentation_matrix = np.argmax(image_matrix, axis=0)
+    image_matrix = ants.image_list_to_matrix(probability_images[1:(len(probability_images))], t1 * 0 + 1)
+    background_foreground_matrix = np.stack([ants.image_list_to_matrix([probability_images[0]], t1 * 0 + 1),
+                                            np.expand_dims(np.sum(image_matrix, axis=0), axis=0)])
+    foreground_matrix = np.argmax(background_foreground_matrix, axis=0)
+    segmentation_matrix = (np.argmax(image_matrix, axis=0) + 1) * foreground_matrix
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
