@@ -232,7 +232,7 @@ def sysu_media_wmh_segmentation(flair,
         current_end_slice = current_start_slice + flair_preprocessed_warped.shape[dimensions_to_predict[d]] - 1
         which_batch_slices = range(current_start_slice, current_end_slice)
         prediction_per_dimension = prediction[which_batch_slices,:,:,:]
-        prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[d])
+        prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
         prediction_image = ants.copy_image_info(flair_preprocessed_warped,
           pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
             flair_preprocessed_warped.shape))
