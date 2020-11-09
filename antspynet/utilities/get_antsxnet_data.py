@@ -39,7 +39,9 @@ def get_antsxnet_data(file_id=None,
             "protonLungTemplate": "https://ndownloader.figshare.com/files/22707338",
             "ctLungTemplate": "https://ndownloader.figshare.com/files/22707335",
             "priorDktLabels": "https://ndownloader.figshare.com/files/24139802",
-            "S_template3": "https://ndownloader.figshare.com/files/22597175"
+            "S_template3": "https://ndownloader.figshare.com/files/22597175",
+            "priorDeepFlashLeftLabels": "https://ndownloader.figshare.com/files/25422098",
+            "priorDeepFlashRightLabels": "https://ndownloader.figshare.com/files/25422101"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -51,8 +53,10 @@ def get_antsxnet_data(file_id=None,
                   "mprage_hippmapp3r",
                   "protonLungTemplate",
                   "ctLungTemplate",
-                  "priorDktLabels",
                   "S_template3",
+                  "priorDktLabels",
+                  "priorDeepFlashLeftLabels",
+                  "priorDeepFlashRightLabels",
                   "show")
 
     if not file_id in valid_list:
