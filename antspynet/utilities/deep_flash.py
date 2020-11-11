@@ -5,7 +5,7 @@ def deep_flash(t1,
                do_preprocessing=True,
                antsxnet_cache_directory=None,
                verbose=False,
-               temp_network=None):
+               temp_network=16):
 
     """
     Hippocampal/Enthorhinal segmentation using "Deep Flash"
