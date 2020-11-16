@@ -86,6 +86,7 @@
 
     <span class="kn">from</span> <span class="nn">..architectures</span> <span class="kn">import</span> <span class="n">create_unet_model_3d</span>
     <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">get_pretrained_network</span>
+    <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">get_antsxnet_data</span>
     <span class="kn">from</span> <span class="nn">..architectures</span> <span class="kn">import</span> <span class="n">create_nobrainer_unet_model_3d</span>
 
     <span class="n">classes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;background&quot;</span><span class="p">,</span> <span class="s2">&quot;brain&quot;</span><span class="p">)</span>
@@ -157,14 +158,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown modality type.&quot;</span><span class="p">)</span>
 
-        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">)</span>
+        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="n">weights_file_name_prefix</span><span class="p">,</span>
+          <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Brain extraction:  retrieving template.&quot;</span><span class="p">)</span>
-        <span class="n">reorient_template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22597175&quot;</span>
-        <span class="n">reorient_template_file_name</span> <span class="o">=</span> <span class="s2">&quot;S_template3_resampled.nii.gz&quot;</span>
-        <span class="n">reorient_template_file_name_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span>
-            <span class="n">reorient_template_file_name</span><span class="p">,</span> <span class="n">reorient_template_url</span><span class="p">,</span> <span class="n">cache_subdir</span> <span class="o">=</span> <span class="n">antsxnet_cache_directory</span><span class="p">)</span>
+        <span class="n">reorient_template_file_name_path</span> <span class="o">=</span> <span class="n">get_antsxnet_data</span><span class="p">(</span><span class="s2">&quot;S_template3&quot;</span><span class="p">,</span>
+          <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">)</span>
         <span class="n">reorient_template</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">reorient_template_file_name_path</span><span class="p">)</span>
         <span class="n">resampled_image_size</span> <span class="o">=</span> <span class="n">reorient_template</span><span class="o">.</span><span class="n">shape</span>
 
@@ -228,7 +228,8 @@
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">create_nobrainer_unet_model_3d</span><span class="p">((</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionNoBrainer&quot;</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">)</span>
+        <span class="n">weights_file_name</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s2">&quot;brainExtractionNoBrainer&quot;</span><span class="p">,</span>
+          <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">weights_file_name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>

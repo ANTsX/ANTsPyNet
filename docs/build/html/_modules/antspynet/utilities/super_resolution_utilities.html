@@ -31,8 +31,7 @@
           <div class="body" role="main">
             
   <h1>Source code for antspynet.utilities.super_resolution_utilities</h1><div class="highlight"><pre>
-<span></span>
-<span class="kn">import</span> <span class="nn">ants</span>
+<span></span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">keras</span>
 <span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
@@ -45,8 +44,8 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
 
-<div class="viewcode-block" id="mse"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.mse">[docs]</a><span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="mse"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.mse">[docs]</a><span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mean square error of a single image or between two images.</span>
 
@@ -70,15 +69,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-       <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
-       <span class="k">return</span> <span class="n">x2</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">x2</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">diff2</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="k">return</span> <span class="n">diff2</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="mae"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.mae">[docs]</a><span class="k">def</span> <span class="nf">mae</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
-        <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="mae"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.mae">[docs]</a><span class="k">def</span> <span class="nf">mae</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mean absolute error of a single image or between two images.</span>
 
@@ -102,14 +100,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-       <span class="n">xabs</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
-       <span class="k">return</span> <span class="n">xabs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">xabs</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">xabs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">diffabs</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">diffabs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="psnr"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.psnr">[docs]</a><span class="k">def</span> <span class="nf">psnr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
-         <span class="n">y</span><span class="p">):</span>
+
+<div class="viewcode-block" id="psnr"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.psnr">[docs]</a><span class="k">def</span> <span class="nf">psnr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Peak signal-to-noise ratio between two images.</span>
 
@@ -132,12 +130,11 @@
 <span class="sd">    &gt;&gt;&gt; value = psnr(r16, r64)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)))</span>
-    <span class="k">return</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+    <span class="n">value</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">value</span></div>
 
-<div class="viewcode-block" id="ssim"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.ssim">[docs]</a><span class="k">def</span> <span class="nf">ssim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
-         <span class="n">y</span><span class="p">,</span>
-         <span class="n">K</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">)):</span>
+
+<div class="viewcode-block" id="ssim"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.ssim">[docs]</a><span class="k">def</span> <span class="nf">ssim</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Structural similarity index (SSI) between two images.</span>
 
@@ -174,8 +171,8 @@
     <span class="n">global_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
     <span class="n">L</span> <span class="o">=</span> <span class="n">global_max</span> <span class="o">-</span> <span class="n">global_min</span>
 
-    <span class="n">C1</span> <span class="o">=</span> <span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-    <span class="n">C2</span> <span class="o">=</span> <span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">C1</span> <span class="o">=</span> <span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">C2</span> <span class="o">=</span> <span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
     <span class="n">C3</span> <span class="o">=</span> <span class="n">C2</span> <span class="o">/</span> <span class="mi">2</span>
 
     <span class="n">mu_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -189,15 +186,15 @@
     <span class="n">sigma_y_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">mu_y_sq</span>
     <span class="n">sigma_xy</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">mu_xy</span>
 
-    <span class="n">numerator</span> <span class="o">=</span> <span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mu_xy</span> <span class="o">+</span> <span class="n">C1</span> <span class="p">)</span> <span class="o">*</span> <span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sigma_xy</span> <span class="o">+</span> <span class="n">C2</span> <span class="p">)</span>
-    <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span> <span class="n">mu_x_sq</span> <span class="o">+</span> <span class="n">mu_y_sq</span> <span class="o">+</span> <span class="n">C1</span> <span class="p">)</span> <span class="o">*</span> <span class="p">(</span> <span class="n">sigma_x_sq</span> <span class="o">+</span> <span class="n">sigma_y_sq</span> <span class="o">+</span> <span class="n">C2</span> <span class="p">)</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mu_xy</span> <span class="o">+</span> <span class="n">C1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma_xy</span> <span class="o">+</span> <span class="n">C2</span><span class="p">)</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span><span class="n">mu_x_sq</span> <span class="o">+</span> <span class="n">mu_y_sq</span> <span class="o">+</span> <span class="n">C1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma_x_sq</span> <span class="o">+</span> <span class="n">sigma_y_sq</span> <span class="o">+</span> <span class="n">C2</span><span class="p">)</span>
 
     <span class="n">SSI</span> <span class="o">=</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span>
 
-    <span class="k">return</span><span class="p">(</span><span class="n">SSI</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">SSI</span></div>
 
-<div class="viewcode-block" id="gmsd"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.gmsd">[docs]</a><span class="k">def</span> <span class="nf">gmsd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>
-         <span class="n">y</span><span class="p">):</span>
+
+<div class="viewcode-block" id="gmsd"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.gmsd">[docs]</a><span class="k">def</span> <span class="nf">gmsd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient magnitude similarity deviation</span>
 
@@ -229,22 +226,25 @@
 
     <span class="n">constant</span> <span class="o">=</span> <span class="mf">0.0026</span>
     <span class="n">gmsd_numerator</span> <span class="o">=</span> <span class="n">gx</span> <span class="o">*</span> <span class="n">gy</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">constant</span>
-    <span class="n">gmsd_denominator</span> <span class="o">=</span> <span class="n">gx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">gy</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">constant</span>
+    <span class="n">gmsd_denominator</span> <span class="o">=</span> <span class="n">gx</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">gy</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">constant</span>
     <span class="n">gmsd</span> <span class="o">=</span> <span class="n">gmsd_numerator</span> <span class="o">/</span> <span class="n">gmsd_denominator</span>
 
     <span class="n">product_dimension</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)):</span>
-       <span class="n">product_dimension</span> <span class="o">*=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">product_dimension</span> <span class="o">*=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
     <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">product_dimension</span>
 
-    <span class="k">return</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">prefactor</span> <span class="o">*</span> <span class="p">((</span><span class="n">gmsd</span> <span class="o">-</span> <span class="n">gmsd</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">prefactor</span> <span class="o">*</span> <span class="p">((</span><span class="n">gmsd</span> <span class="o">-</span> <span class="n">gmsd</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="apply_super_resolution_model_to_image"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.apply_super_resolution_model_to_image">[docs]</a><span class="k">def</span> <span class="nf">apply_super_resolution_model_to_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
-                                          <span class="n">model</span><span class="p">,</span>
-                                          <span class="n">target_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">127.5</span><span class="p">,</span> <span class="mf">127.5</span><span class="p">),</span>
-                                          <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-                                          <span class="n">regression_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                          <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="apply_super_resolution_model_to_image"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.apply_super_resolution_model_to_image">[docs]</a><span class="k">def</span> <span class="nf">apply_super_resolution_model_to_image</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">,</span>
+    <span class="n">target_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">127.5</span><span class="p">,</span> <span class="mf">127.5</span><span class="p">),</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">regression_order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply a pretrained deep back projection model for super resolution.</span>
@@ -292,9 +292,9 @@
 
     <span class="n">channel_axis</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">:</span>
-      <span class="n">channel_axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">channel_axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
-    <span class="n">shape_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="n">model</span><span class="o">.</span><span class="n">input_shape</span> <span class="p">)</span>
+    <span class="n">shape_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">input_shape</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">shape_length</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="o">|</span> <span class="n">shape_length</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unexpected input shape.&quot;</span><span class="p">)</span>
@@ -309,9 +309,13 @@
     <span class="n">channel_size</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">input_shape</span><span class="p">[</span><span class="n">channel_axis</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">channel_size</span> <span class="o">!=</span> <span class="n">image</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
-       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Channel size of model&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">channel_size</span><span class="p">),</span>
-                        <span class="s1">&#39;does not match ncomponents=&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">components</span><span class="p">),</span>
-                        <span class="s1">&#39;of the input image.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Channel size of model&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">channel_size</span><span class="p">),</span>
+            <span class="s2">&quot;does not match ncomponents=&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">components</span><span class="p">),</span>
+            <span class="s2">&quot;of the input image.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">target_range</span> <span class="o">=</span> <span class="n">target_range</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -323,19 +327,25 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Load model.&quot;</span><span class="p">)</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-               <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
-               <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  (elapsed time: &quot;</span><span class="p">,</span> <span class="n">elapsed_time</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
+                <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  (elapsed time: &quot;</span><span class="p">,</span> <span class="n">elapsed_time</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model not found.&quot;</span><span class="p">)</span>
 
-    <span class="n">image_patches</span> <span class="o">=</span> <span class="n">extract_image_patches</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-       <span class="n">max_number_of_patches</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride_length</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-       <span class="n">return_as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">image_patches</span> <span class="o">=</span> <span class="n">extract_image_patches</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span>
+        <span class="n">patch_size</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="n">max_number_of_patches</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">stride_length</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="n">return_as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">image_patches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">image_patches</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">image_patches</span> <span class="o">=</span> <span class="n">image_patches</span> <span class="o">-</span> <span class="n">image_patches</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-    <span class="n">image_patches</span> <span class="o">=</span> <span class="p">(</span><span class="n">image_patches</span> <span class="o">/</span> <span class="n">image_patches</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span>
-      <span class="p">(</span><span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">image_patches</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">image_patches</span> <span class="o">/</span> <span class="n">image_patches</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">target_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">target_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prediction&quot;</span><span class="p">)</span>
@@ -352,49 +362,64 @@
 
     <span class="n">intensity_range</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">range</span><span class="p">()</span>
     <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span> <span class="o">-</span> <span class="n">prediction</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-    <span class="n">prediction</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span> <span class="o">/</span> <span class="n">prediction</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span>
-      <span class="p">(</span><span class="n">intensity_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intensity_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">intensity_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">prediction</span> <span class="o">/</span> <span class="n">prediction</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">intensity_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intensity_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">intensity_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">slice_array_channel</span><span class="p">(</span><span class="n">input_array</span><span class="p">,</span> <span class="nb">slice</span><span class="p">,</span> <span class="n">channel_axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">channel_axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">shape_length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="k">return</span><span class="p">(</span><span class="n">input_array</span><span class="p">[</span><span class="nb">slice</span><span class="p">,:,:,:])</span>
+                <span class="k">return</span> <span class="n">input_array</span><span class="p">[</span><span class="nb">slice</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span><span class="p">(</span><span class="n">input_array</span><span class="p">[</span><span class="nb">slice</span><span class="p">,:,:,:,:])</span>
+                <span class="k">return</span> <span class="n">input_array</span><span class="p">[</span><span class="nb">slice</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">shape_length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="k">return</span><span class="p">(</span><span class="n">input_array</span><span class="p">[:,:,:,</span><span class="nb">slice</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">input_array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="nb">slice</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span><span class="p">(</span><span class="n">input_array</span><span class="p">[:,:,:,:,</span><span class="nb">slice</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">input_array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="nb">slice</span><span class="p">]</span>
 
-    <span class="n">expansion_factor</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image_patches</span><span class="o">.</span><span class="n">shape</span><span class="p">))[</span><span class="mi">2</span><span class="p">:</span><span class="n">image</span><span class="o">.</span><span class="n">dimension</span><span class="p">]</span>
+    <span class="n">expansion_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image_patches</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">channel_axis</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">expansion_factor</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image_patches</span><span class="o">.</span><span class="n">shape</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="n">image</span><span class="o">.</span><span class="n">dimension</span><span class="p">]</span>
+        <span class="n">FIXME</span>
+
+    <span class="n">expansion_factor</span> <span class="o">=</span> <span class="n">expansion_factor</span><span class="p">[</span><span class="mi">1</span> <span class="p">:</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ExpansionFactor:&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">image_array</span> <span class="o">=</span> <span class="n">slice_array_channel</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">)</span>
-        <span class="n">prediction_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">make_image</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span>
-          <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">image_array</span><span class="p">)</span>
+        <span class="n">prediction_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">make_image</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+            <span class="n">image_array</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">regression_order</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">reference_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">resample_image_to_target</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">prediction_image</span><span class="p">)</span>
-            <span class="n">prediction_image</span> <span class="o">=</span> <span class="n">regression_match_image</span><span class="p">(</span><span class="n">prediction_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">,</span>
-              <span class="n">poly_order</span><span class="o">=</span><span class="n">regression_order</span><span class="p">)</span>
+            <span class="n">prediction_image</span> <span class="o">=</span> <span class="n">regression_match_image</span><span class="p">(</span>
+                <span class="n">prediction_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">,</span> <span class="n">poly_order</span><span class="o">=</span><span class="n">regression_order</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">image_component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">components</span><span class="p">):</span>
             <span class="n">image_array</span> <span class="o">=</span> <span class="n">slice_array_channel</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">channel_axis</span><span class="p">)</span>
-            <span class="n">image_component_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">make_image</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span>
-              <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">image_array</span><span class="p">))</span>
+            <span class="n">image_component_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">ants</span><span class="o">.</span><span class="n">make_image</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                        <span class="nb">int</span>
+                    <span class="p">),</span>
+                    <span class="n">image_array</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="n">prediction_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">merge_channels</span><span class="p">(</span><span class="n">image_component_list</span><span class="p">)</span>
 
     <span class="n">prediction_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">copy_image_info</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">prediction_image</span><span class="p">)</span>
-    <span class="n">ants</span><span class="o">.</span><span class="n">set_spacing</span><span class="p">(</span><span class="n">prediction_image</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">)))</span>
+    <span class="n">ants</span><span class="o">.</span><span class="n">set_spacing</span><span class="p">(</span>
+        <span class="n">prediction_image</span><span class="p">,</span>
+        <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">expansion_factor</span><span class="p">)),</span>
+    <span class="p">)</span>
 
-    <span class="k">return</span><span class="p">(</span><span class="n">prediction_image</span><span class="p">)</span></div>
-
+    <span class="k">return</span> <span class="n">prediction_image</span></div>
 </pre></div>
 
           </div>

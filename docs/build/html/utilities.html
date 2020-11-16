@@ -842,7 +842,7 @@ Since these can be resused, if is None, these data will be downloaded to a
 
 <dl class="function">
 <dt id="antspynet.utilities.deep_flash">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_flash</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_flash</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">do_per_hemisphere=True</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hippocampal/Enthorhinal segmentation using “Deep Flash”</p>
 <p>Perform hippocampal/entorhinal segmentation in T1 images using
 labels from Mike Yassa’s lab</p>
@@ -880,6 +880,8 @@ do_preprocessing = True</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
 <li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
+<li><p><strong>do_per_hemisphere</strong> (<em>boolean</em>) – If True, do prediction based on separate networks per hemisphere.  Otherwise,
+use the single network trained for both hemispheres.</p></li>
 <li><p><strong>antsxnet_cache_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
 Since these can be resused, if is None, these data will be downloaded to a
 ~/.keras/ANTsXNet/.</p></li>
@@ -1265,7 +1267,35 @@ to the subdirectory ~/.keras/ANTsXNet/.</p></li>
 </dd>
 </dl>
 <p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model_file</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span> <span class="s1">&#39;dbpn4x&#39;</span> <span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model_file</span> <span class="o">=</span> <span class="n">get_pretrained_network</span><span class="p">(</span><span class="s1">&#39;dbpn4x&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.get_antsxnet_data">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">get_antsxnet_data</code><span class="sig-paren">(</span><em class="sig-param">file_id=None</em>, <em class="sig-param">target_file_name=None</em>, <em class="sig-param">antsxnet_cache_directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_antsxnet_data.html#get_antsxnet_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_antsxnet_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download data such as prefabricated templates and spatial priors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> (<em>antsxnet_cache_directory</em>) – One of the permitted file ids or pass “show” to list all
+valid possibilities. Note that most require internet access
+to download.</p></li>
+<li><p><strong>string</strong> – Optional target filename.</p></li>
+<li><p><strong>string</strong> – Optional target output.  If not specified these data will be downloaded
+to the subdirectory ~/.keras/ANTsXNet/.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A filename string</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">template_file</span> <span class="o">=</span> <span class="n">get_antsxnet_data</span><span class="p">(</span><span class="s1">&#39;biobank&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

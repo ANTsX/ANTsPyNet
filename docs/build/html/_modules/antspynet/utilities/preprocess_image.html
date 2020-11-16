@@ -119,6 +119,7 @@
 
     <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">brain_extraction</span>
     <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">regression_match_image</span>
+    <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">get_antsxnet_data</span>
 
     <span class="n">preprocessed_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_clone</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 
@@ -148,15 +149,7 @@
     <span class="k">if</span> <span class="n">template_transform_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">template_image</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">template_file_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-            <span class="k">if</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;biobank&quot;</span><span class="p">:</span>
-                <span class="n">template_file_name</span> <span class="o">=</span> <span class="s2">&quot;biobank_resampled.nii.gz&quot;</span>
-                <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22429242&quot;</span>
-            <span class="k">elif</span> <span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;croppedMni152&quot;</span><span class="p">:</span>
-                <span class="n">template_file_name</span> <span class="o">=</span> <span class="s2">&quot;croppedMNI152.nii.gz&quot;</span>
-                <span class="n">template_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22933754&quot;</span>
-            <span class="n">template_file_name_path</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="n">template_file_name</span><span class="p">,</span>
-                <span class="n">template_url</span><span class="p">,</span> <span class="n">cache_subdir</span> <span class="o">=</span> <span class="n">antsxnet_cache_directory</span><span class="p">)</span>
+            <span class="n">template_file_name_path</span> <span class="o">=</span> <span class="n">get_antsxnet_data</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">)</span>
             <span class="n">template_image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">template_file_name_path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">template_image</span> <span class="o">=</span> <span class="n">template</span>

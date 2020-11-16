@@ -3,9 +3,10 @@ import ants
 
 def deep_flash(t1,
                do_preprocessing=True,
+               do_per_hemisphere=True,
                antsxnet_cache_directory=None,
-               verbose=False,
-               temp_network=16):
+               verbose=False
+               ):
 
     """
     Hippocampal/Enthorhinal segmentation using "Deep Flash"
@@ -49,6 +50,10 @@ def deep_flash(t1,
     do_preprocessing : boolean
         See description above.
 
+    do_per_hemisphere : boolean
+        If True, do prediction based on separate networks per hemisphere.  Otherwise,
+        use the single network trained for both hemispheres.
+
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
@@ -77,7 +82,7 @@ def deep_flash(t1,
     from ..utilities import pad_or_crop_image_to_size
 
     if t1.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )
+        raise ValueError("Image dimension must be 3.")
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
@@ -110,7 +115,7 @@ def deep_flash(t1,
     #
     ################################
 
-    if temp_network is None:
+    if do_per_hemisphere == False:
 
         ################################
         #
@@ -121,10 +126,13 @@ def deep_flash(t1,
         template_size = (160, 192, 160)
 
         unet_model = create_unet_model_3d((*template_size, 1),
-            number_of_outputs = len(labels),
-            number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
-            convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-            weight_decay = 1e-5, add_attention_gating=True)
+            number_of_outputs=len(labels),
+            number_of_layers=4, number_of_filters_at_base_layer=8, dropout_rate=0.0,
+            convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+            weight_decay=1e-5, add_attention_gating =True)
+
+        if verbose == True:
+            print("DeepFlash: retrieving model weights.")
 
         weights_file_name = get_pretrained_network("deepFlash", antsxnet_cache_directory=antsxnet_cache_directory)
         unet_model.load_weights(weights_file_name)
@@ -196,16 +204,8 @@ def deep_flash(t1,
         labels_left = (0, 5, 7, 9, 11, 13, 15, 17)
         channel_size = 1 + len(labels_left)
 
-        number_of_filters = None
-        network_name = ''
-        if temp_network == 8:
-            number_of_filters = 8
-            network_name = "deepFlashLeft8"
-        elif temp_network == 16:
-            number_of_filters = 16
-            network_name = "deepFlashLeft16"
-        else:
-            raise ValueError("Incorrect choice for temp_network.")
+        number_of_filters = 16
+        network_name = "deepFlashLeft16"
 
         unet_model = create_unet_model_3d((*template_size, channel_size),
             number_of_outputs = len(labels_left),
@@ -213,6 +213,8 @@ def deep_flash(t1,
             convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
             weight_decay = 1e-5, add_attention_gating=True)
 
+        if verbose == True:
+            print("DeepFlash: retrieving model weights (left).")
         weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
         unet_model.load_weights(weights_file_name)
 
