@@ -6,7 +6,7 @@ import ants
 def brain_extraction(image,
                      modality="t1",
                      antsxnet_cache_directory=None,
-                     verbose=None):
+                     verbose=False):
 
     """
     Perform brain extraction using U-net and ANTs-based training data.  "NoBrainer"

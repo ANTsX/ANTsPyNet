@@ -47,6 +47,7 @@ from .randomly_transform_image_data import randomly_transform_image_data
 
 from .preprocess_image import preprocess_brain_image
 from .brain_extraction import brain_extraction
+from .cortical_thickness import cortical_thickness
 from .lung_extraction import lung_extraction
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .hippmapp3r_segmentation import hippmapp3r_segmentation
