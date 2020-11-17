@@ -9,7 +9,8 @@ def extract_image_patches(image,
                           stride_length=1,
                           mask_image=None,
                           random_seed=None,
-                          return_as_array=False):
+                          return_as_array=False,
+                          randomize=True):
     """
     Extract 2-D or 3-D image patches.
 
@@ -43,6 +44,9 @@ def extract_image_patches(image,
         False (default) the return type is a list where each element is
         a single patch.  Otherwise the return type is an array of size
         dim( number_of_patches, patch_size ).
+
+    randomize: boolean
+        Boolean controlling whether we randomize indices when masking.
 
     Returns
     -------
@@ -185,8 +189,12 @@ def extract_image_patches(image,
 
             number_of_extracted_patches = min(max_number_of_patches, mask_indices.shape[0])
 
-            random_indices = mask_indices[
-              random.sample(range(mask_indices.shape[0] + 1), number_of_extracted_patches), :]
+            if randomize:
+                random_indices = mask_indices[
+                  random.sample(range(mask_indices.shape[0] + 1), number_of_extracted_patches), :]
+            else:
+                random_indices = mask_indices
+
         else:
 
             for d in range(dimensionality):
