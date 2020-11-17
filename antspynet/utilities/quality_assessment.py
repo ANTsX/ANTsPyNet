@@ -226,7 +226,7 @@ def tid_neural_image_assessment(image,
         evaluation_image = padded_image
 
         if not is_prime(patch_size):
-            raise ValueError("patch_size should be a prime number:  13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97...")
+            print("patch_size should be a prime number:  13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97...")
 
         stride_length_vector = stride_length
         if isinstance(stride_length, int):
