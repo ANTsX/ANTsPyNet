@@ -69,7 +69,6 @@
             <span class="s2">&quot;brainAgeGender&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22179948&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainAgeDeepBrainNet&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/23573402&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainExtraction&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22944632&quot;</span><span class="p">,</span>
-            <span class="c1"># &quot;brainExtraction&quot;: &quot;https://ndownloader.figshare.com/files/13729661&quot;,  # old weights</span>
             <span class="s2">&quot;brainExtractionT2&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/23066153&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainExtractionFLAIR&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/23562194&quot;</span><span class="p">,</span>
             <span class="s2">&quot;brainExtractionBOLD&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22761977&quot;</span><span class="p">,</span>
@@ -94,6 +93,10 @@
             <span class="s2">&quot;functionalLungMri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13824167&quot;</span><span class="p">,</span>
             <span class="s2">&quot;hippMapp3rInitial&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/18068408&quot;</span><span class="p">,</span>
             <span class="s2">&quot;hippMapp3rRefine&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/18068411&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;koniqMBCS&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/24967376&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;koniqMS&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/25461887&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;koniqMS2&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/25474850&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;koniqMS3&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/25474847&quot;</span><span class="p">,</span>
             <span class="s2">&quot;mriSuperResolution&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/24128618&quot;</span><span class="p">,</span>
             <span class="s2">&quot;protonLungMri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/13606799&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sixTissueOctantBrainSegmentation&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/23776025&quot;</span><span class="p">,</span>
@@ -103,6 +106,7 @@
             <span class="s2">&quot;sysuMediaWmhFlairT1Model0&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22898450&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sysuMediaWmhFlairT1Model1&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22898453&quot;</span><span class="p">,</span>
             <span class="s2">&quot;sysuMediaWmhFlairT1Model2&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/22898459&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;tidsQualityAssessment&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/24292895&quot;</span><span class="p">,</span>
             <span class="s2">&quot;wholeTumorSegmentationT2Flair&quot;</span><span class="p">:</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/14087045&quot;</span>
         <span class="p">}</span>
         <span class="k">return</span><span class="p">(</span><span class="n">switcher</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="s2">&quot;Invalid argument.&quot;</span><span class="p">))</span>
@@ -137,6 +141,10 @@
                   <span class="s2">&quot;functionalLungMri&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;hippMapp3rInitial&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;hippMapp3rRefine&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;koniqMBCS&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;koniqMS&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;koniqMS2&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;koniqMS3&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;mriSuperResolution&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;protonLungMri&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;sixTissueOctantBrainSegmentation&quot;</span><span class="p">,</span>
@@ -146,6 +154,7 @@
                   <span class="s2">&quot;sysuMediaWmhFlairT1Model0&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;sysuMediaWmhFlairT1Model1&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;sysuMediaWmhFlairT1Model2&quot;</span><span class="p">,</span>
+                  <span class="s2">&quot;tidsQualityAssessment&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;wholeTumorSegmentationT2Flair&quot;</span><span class="p">,</span>
                   <span class="s2">&quot;show&quot;</span><span class="p">)</span>
 

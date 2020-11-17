@@ -387,6 +387,6 @@ def deep_flash(t1,
     for i in range(len(labels)):
         relabeled_image[segmentation_image==i] = labels[i]
 
-    return_dict = {'segmentation_image'  : relabeled_image,
-                'probability_images' : probability_images}
+    return_dict = {'segmentation_image' : relabeled_image,
+                   'probability_images' : probability_images}
     return(return_dict)

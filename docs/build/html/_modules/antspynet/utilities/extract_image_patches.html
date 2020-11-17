@@ -42,7 +42,8 @@
                           <span class="n">stride_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                           <span class="n">mask_image</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                           <span class="n">random_seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                          <span class="n">return_as_array</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                          <span class="n">return_as_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">randomize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract 2-D or 3-D image patches.</span>
 
@@ -76,6 +77,9 @@
 <span class="sd">        False (default) the return type is a list where each element is</span>
 <span class="sd">        a single patch.  Otherwise the return type is an array of size</span>
 <span class="sd">        dim( number_of_patches, patch_size ).</span>
+
+<span class="sd">    randomize: boolean</span>
+<span class="sd">        Boolean controlling whether we randomize indices when masking.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -218,8 +222,12 @@
 
             <span class="n">number_of_extracted_patches</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_number_of_patches</span><span class="p">,</span> <span class="n">mask_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-            <span class="n">random_indices</span> <span class="o">=</span> <span class="n">mask_indices</span><span class="p">[</span>
-              <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">mask_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">number_of_extracted_patches</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="n">randomize</span><span class="p">:</span>
+                <span class="n">random_indices</span> <span class="o">=</span> <span class="n">mask_indices</span><span class="p">[</span>
+                  <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">mask_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">number_of_extracted_patches</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">random_indices</span> <span class="o">=</span> <span class="n">mask_indices</span>
+
         <span class="k">else</span><span class="p">:</span>
 
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimensionality</span><span class="p">):</span>

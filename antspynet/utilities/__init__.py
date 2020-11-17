@@ -55,5 +55,6 @@ from .deep_atropos import deep_atropos
 from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
 from .brain_age import brain_age
 from .mri_super_resolution import mri_super_resolution
+from .quality_assessment import tid_neural_image_assessment
 
 from .neural_style_transfer import neural_style_transfer

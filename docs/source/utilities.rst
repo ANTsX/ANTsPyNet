@@ -81,6 +81,7 @@ Applications
 .. autofunction:: antspynet.utilities.desikan_killiany_tourville_labeling
 .. autofunction:: antspynet.utilities.brain_age
 .. autofunction:: antspynet.utilities.mri_super_resolution
+.. autofunction:: antspynet.utilities.tid_neural_image_assessment
 .. autofunction:: antspynet.utilities.neural_style_transfer
 
 Miscellaneous
