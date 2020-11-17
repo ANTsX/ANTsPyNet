@@ -77,7 +77,10 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * [Neural style transfer](https://arxiv.org/abs/1508.06576)
 * Deep Flash
 * Desikan-Killiany-Tourville cortical labeling
-
+* Image quality assessment
+    * [TID2013](https://www.sciencedirect.com/science/article/pii/S0923596514001490)
+    * [KonIQ-10k](https://ieeexplore.ieee.org/document/8968750)
+    
 ## Miscellaneous
 
 * [Mixture density networks (MDN)](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
