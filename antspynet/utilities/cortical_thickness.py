@@ -201,8 +201,8 @@ def longitudinal_cortical_thickness(t1s,
         if verbose:
             print("Atropos for image", i, "( out of", len(t1s), ")")
         atropos_output = ants.atropos(t1s_preprocessed[i]['preprocessed_image'],
-            x=t1s_preprocessed[i]['brain_mask'], i=sst_atropos['probability_images'][1:6],
-            m="[0.1,1x1x1", c="[5,0]", priorweight=0.5, p="Socrates[1]", verbose=verbose)
+            x=t1s_preprocessed[i]['brain_mask'], i=sst_atropos['probability_images'][1:7],
+            m="[0.1,1x1x1]", c="[5,0]", priorweight=0.5, p="Socrates[1]", verbose=verbose)
 
         kk_segmentation = atropos_output['segmentation']
         kk_segmentation[kk_segmentation == 4] = 3
