@@ -204,7 +204,7 @@ def longitudinal_cortical_thickness(t1s,
             x=t1s_preprocessed[i]['brain_mask'], i=sst_atropos['probability_images'][1:7],
             m="[0.1,1x1x1]", c="[5,0]", priorweight=0.5, p="Socrates[1]", verbose=int(verbose))
 
-        kk_segmentation = atropos_output['segmentation']
+        kk_segmentation = ants.image_clone(atropos_output['segmentation'])
         kk_segmentation[kk_segmentation == 4] = 3
         gray_matter = atropos_output['probabilityimages'][1]
         white_matter = atropos_output['probabilityimages'][2] + atropos_output['probabilityimages'][3]
