@@ -45,20 +45,21 @@ def cortical_thickness(t1,
 
     # Kelly Kapowski cortical thickness
 
-    kk_segmentation = atropos['segmentation_image']
+    kk_segmentation = ants.image_clone(atropos['segmentation'])
     kk_segmentation[kk_segmentation == 4] = 3
-    gray_matter = atropos['probability_images'][2]
-    white_matter = (atropos['probability_images'][3] + atropos['probability_images'][4])
+    gray_matter = atropos['probabilityimages'][2]
+    white_matter = (atropos['probabilityimages'][3] + atropos['probabilityimages'][4])
     kk = ants.kelly_kapowski(s=kk_segmentation, g=gray_matter, w=white_matter,
                             its=45, r=0.025, m=1.5, x=0, verbose=int(verbose))
 
     return_dict = {'thickness_image' : kk,
-                   'csf_probability_image' : atropos['probability_images'][1],
-                   'gray_matter_probability_image' : atropos['probability_images'][2],
-                   'white_matter_probability_image' : atropos['probability_images'][3],
-                   'deep_gray_matter_probability_image' : atropos['probability_images'][4],
-                   'brain_stem_matter_probability_image' : atropos['probability_images'][5],
-                   'cerebellum_probability_image' : atropos['probability_images'][6]
+                   'segmentation_image' : atropos['segmentation'],
+                   'csf_probability_image' : atropos['probabilityimages'][1],
+                   'gray_matter_probability_image' : atropos['probabilityimages'][2],
+                   'white_matter_probability_image' : atropos['probabilityimages'][3],
+                   'deep_gray_matter_probability_image' : atropos['probabilityimages'][4],
+                   'brain_stem_matter_probability_image' : atropos['probabilityimages'][5],
+                   'cerebellum_probability_image' : atropos['probabilityimages'][6]
                   }
     return(return_dict)
 
