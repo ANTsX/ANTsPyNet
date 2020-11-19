@@ -216,7 +216,8 @@ def desikan_killiany_tourville_labeling(t1,
         weight_decay = 1e-5, add_attention_gating=True)
 
     weights_file_name = None
-    weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors", antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors",
+                                               antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################
