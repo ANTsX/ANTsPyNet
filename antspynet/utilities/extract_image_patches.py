@@ -77,11 +77,6 @@ def extract_image_patches(image,
         raise ValueError("Patch size is greater than the image size.")
 
     image_array = image.numpy()
-    if number_of_image_components > 1:
-        if dimensionality == 2:
-            image_array = np.transpose(image_array, [1, 2, 0])
-        else:
-            image_array = np.transpose(image_array, [1, 2, 3, 0])
 
     patch_list = []
     patch_array = np.empty([1, 1])
