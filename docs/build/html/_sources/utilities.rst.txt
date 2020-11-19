@@ -73,6 +73,7 @@ Applications
 
 .. autofunction:: antspynet.utilities.brain_extraction
 .. autofunction:: antspynet.utilities.cortical_thickness
+.. autofunction:: antspynet.utilities.longitudinal_cortical_thickness
 .. autofunction:: antspynet.utilities.lung_extraction
 .. autofunction:: antspynet.utilities.preprocess_brain_image
 .. autofunction:: antspynet.utilities.sysu_media_wmh_segmentation
