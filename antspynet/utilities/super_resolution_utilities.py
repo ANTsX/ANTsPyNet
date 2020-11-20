@@ -35,7 +35,7 @@ def mse(x, y=None):
     >>> value = mse(r16, r64)
     """
 
-    if y == None:
+    if y is None:
         x2 = x ** 2
         return x2.mean()
     else:
