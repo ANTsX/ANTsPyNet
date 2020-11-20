@@ -66,7 +66,7 @@ def mae(x, y=None):
     >>> value = mae(r16, r64)
     """
 
-    if y == None:
+    if y is None:
         xabs = x.abs()
         return xabs.mean()
     else:
