@@ -36,7 +36,7 @@ class ResampleTensorLayer2D(Layer):
             raise ValueError("interpolation_type not one of the allowed types.")
         self.interpolation_type = interpolation_type
 
-        self.name = name
+        self._name = name
 
         super(ResampleTensorLayer2D, self).__init__(**kwargs)
 
@@ -102,7 +102,7 @@ class ResampleTensorLayer3D(Layer):
             raise ValueError("interpolation_type not one of the allowed types.")
         self.interpolation_type = interpolation_type
 
-        self.name = name
+        self._name = name
 
         super(ResampleTensorLayer3D, self).__init__(**kwargs)
 
