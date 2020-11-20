@@ -47,8 +47,8 @@ def cortical_thickness(t1,
 
     kk_segmentation = ants.image_clone(atropos['segmentation_image'])
     kk_segmentation[kk_segmentation == 4] = 3
-    gray_matter = atropos['probabilityimages'][2]
-    white_matter = (atropos['probabilityimages'][3] + atropos['probabilityimages'][4])
+    gray_matter = atropos['probability_images'][2]
+    white_matter = (atropos['probability_images'][3] + atropos['probability_images'][4])
     kk = ants.kelly_kapowski(s=kk_segmentation, g=gray_matter, w=white_matter,
                             its=45, r=0.025, m=1.5, x=0, verbose=int(verbose))
 
