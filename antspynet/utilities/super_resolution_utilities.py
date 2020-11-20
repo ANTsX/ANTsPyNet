@@ -306,7 +306,8 @@ def apply_super_resolution_model_to_image(
         stride_length=image.shape,
         return_as_array=True,
     )
-    image_patches = np.expand_dims(image_patches, axis=-1)
+    if image.components == 1:
+        image_patches = np.expand_dims(image_patches, axis=-1)
 
     image_patches = image_patches - image_patches.min()
     image_patches = (
