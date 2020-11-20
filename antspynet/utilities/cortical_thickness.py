@@ -53,7 +53,7 @@ def cortical_thickness(t1,
                             its=45, r=0.025, m=1.5, x=0, verbose=int(verbose))
 
     return_dict = {'thickness_image' : kk,
-                   'segmentation_image' : atropos['segmentation'],
+                   'segmentation_image' : atropos['segmentationImage'],
                    'csf_probability_image' : atropos['probabilityimages'][1],
                    'gray_matter_probability_image' : atropos['probabilityimages'][2],
                    'white_matter_probability_image' : atropos['probabilityimages'][3],
