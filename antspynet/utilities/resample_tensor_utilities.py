@@ -57,11 +57,11 @@ class ResampleTensorLayer2D(Layer):
 
         resampled_tensor = None
         if self.interpolation_type == 'nearest_neighbor':
-            resampled_tensor = tf.image.resize_nearest_neighbor(x, size=new_size, align_corners=True)
+            resampled_tensor = tf.image.resize(x, size=new_size, method='nearest')
         elif self.interpolation_type == 'linear':
-            resampled_tensor = tf.image.resize_bilinear(x, size=new_size, align_corners=True)
+            resampled_tensor = tf.image.resize(x, size=new_size, method='bilinear')
         elif self.interpolation_type == 'cubic':
-            resampled_tensor = tf.image.resize_bicubic(x, size=new_size, align_corners=True)
+            resampled_tensor = tf.image.resize(x, size=new_size, method='bicubic')
 
         return(resampled_tensor)
 
@@ -133,14 +133,11 @@ class ResampleTensorLayer3D(Layer):
 
         resampled_tensor_yz = None
         if self.interpolation_type == 'nearest_neighbor':
-            resampled_tensor_yz = tf.image.resize_nearest_neighbor(squeeze_tensor_yz,
-              size=new_shape_yz, align_corners=True)
+            resampled_tensor_yz = tf.image.resize(squeeze_tensor_yz, size=new_shape_yz, method='nearest')
         elif self.interpolation_type == 'linear':
-            resampled_tensor_yz = tf.image.resize_bilinear(squeeze_tensor_yz,
-              size=new_shape_yz, align_corners=True)
+            resampled_tensor_yz = tf.image.resize(squeeze_tensor_yz, size=new_shape_yz, method='bilinear')
         elif self.interpolation_type == 'cubic':
-            resampled_tensor_yz = tf.image.resize_bicubic(squeeze_tensor_yz,
-              size=new_shape_yz, align_corners=True)
+            resampled_tensor_yz = tf.image.resize(squeeze_tensor_yz, size=new_shape_yz, method='bicubic')
 
         new_shape_yz = (-1, old_size[0], new_size[1], new_size[2], channel_size)
         resume_tensor_yz = tf.reshape(resampled_tensor_yz, new_shape_yz)
@@ -156,14 +153,11 @@ class ResampleTensorLayer3D(Layer):
 
         resampled_tensor_x = None
         if self.interpolation_type == 'nearest_neighbor':
-            resampled_tensor_x = tf.image.resize_nearest_neighbor(squeeze_tensor_x,
-                size=new_shape_x, align_corners=True)
+            resampled_tensor_x = tf.image.resize(squeeze_tensor_x, size=new_shape_x, method='nearest')
         elif self.interpolation_type == 'linear':
-            resampled_tensor_x = tf.image.resize_bilinear(squeeze_tensor_x,
-                size=new_shape_x, align_corners=True)
+            resampled_tensor_x = tf.image.resize(squeeze_tensor_x, size=new_shape_x, method='bilinear')
         elif self.interpolation_type == 'cubic':
-            resampled_tensor_x = tf.image.resize_bicubic(squeeze_tensor_x,
-                size=new_shape_x, align_corners=True)
+            resampled_tensor_x = tf.image.resize(squeeze_tensor_x, size=new_shape_x, method='bicubic')
 
         new_shape_x = (-1, new_size[2], new_size[1], new_size[0], channel_size)
         resumeTensor_x = tf.reshape(resampled_tensor_x, new_shape_x)
