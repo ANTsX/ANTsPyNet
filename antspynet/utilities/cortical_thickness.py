@@ -58,7 +58,7 @@ def cortical_thickness(t1,
                    'gray_matter_probability_image' : atropos['probability_images'][2],
                    'white_matter_probability_image' : atropos['probability_images'][3],
                    'deep_gray_matter_probability_image' : atropos['probability_images'][4],
-                   'brain_stem_matter_probability_image' : atropos['probability_images'][5],
+                   'brain_stem_probability_image' : atropos['probability_images'][5],
                    'cerebellum_probability_image' : atropos['probability_images'][6]
                   }
     return(return_dict)
@@ -219,7 +219,7 @@ def longitudinal_cortical_thickness(t1s,
                    'gray_matter_probability_image' : atropos_output['probabilityimages'][1],
                    'white_matter_probability_image' : atropos_output['probabilityimages'][2],
                    'deep_gray_matter_probability_image' : atropos_output['probabilityimages'][3],
-                   'brain_step_probability_image' : atropos_output['probabilityimages'][4],
+                   'brain_stem_probability_image' : atropos_output['probabilityimages'][4],
                    'cerebellum_probability_image' : atropos_output['probabilityimages'][5],
                    'template_transforms' : t1s_preprocessed[i]['template_transforms']
                   }
