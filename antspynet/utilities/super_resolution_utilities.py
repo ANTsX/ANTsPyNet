@@ -134,8 +134,8 @@ def ssim(x, y, K=(0.01, 0.03)):
     >>> value = psnr(r16, r64)
     """
 
-    global_max = np.max(x.max(), y.max())
-    global_min = np.abs(min(x.min(), y.min()))
+    global_max = np.max( ( x.max(), y.max()) )
+    global_min = np.abs(min( ( x.min(), y.min())) )
     L = global_max - global_min
 
     C1 = (K[0] * L) ** 2
