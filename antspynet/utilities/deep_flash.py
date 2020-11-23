@@ -283,16 +283,8 @@ def deep_flash(t1,
         labels_right = (0, 6, 8, 10, 12, 14, 16, 18)
         channel_size = 1 + len(labels_right)
 
-        number_of_filters = None
-        network_name = ''
-        if temp_network == 8:
-            number_of_filters = 8
-            network_name = "deepFlashRight8"
-        elif temp_network == 16:
-            number_of_filters = 16
-            network_name = "deepFlashRight16"
-        else:
-            raise ValueError("Incorrect choice for temp_network.")
+        number_of_filters = 16
+        network_name = "deepFlashRight16"
 
         unet_model = create_unet_model_3d((*template_size, channel_size),
             number_of_outputs = len(labels_right),
