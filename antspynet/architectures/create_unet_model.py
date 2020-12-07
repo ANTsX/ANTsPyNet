@@ -18,6 +18,7 @@ def create_unet_model_2d(input_image_size,
                          dropout_rate=0.0,
                          weight_decay=0.0,
                          add_attention_gating=False,
+                         activation_type = 'relu',
                          mode='classification'
                         ):
     """
@@ -76,6 +77,9 @@ def create_unet_model_2d(input_image_size,
         Weighting parameter for L2 regularization of the kernel weights of the
         convolution layers.  Default = 0.0.
 
+    activation_type :  string
+        Activation type at each convolutional layer; default relu.
+
     add_attention_gating :  boolean
         Whether or not to include attention gating.
 
@@ -121,13 +125,13 @@ def create_unet_model_2d(input_image_size,
         if i == 0:
             conv = Conv2D(filters=number_of_filters,
                           kernel_size=convolution_kernel_size,
-                          activation='relu',
+                          activation=activation_type,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(inputs)
         else:
             conv = Conv2D(filters=number_of_filters,
                           kernel_size=convolution_kernel_size,
-                          activation='relu',
+                          activation=activation_type,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(pool)
 
@@ -136,7 +140,7 @@ def create_unet_model_2d(input_image_size,
 
         encoding_convolution_layers.append(Conv2D(filters=number_of_filters,
                                                   kernel_size=convolution_kernel_size,
-                                                  activation='relu',
+                                                  activation=activation_type,
                                                   padding='same')(conv))
 
         if i < number_of_layers - 1:
@@ -163,7 +167,7 @@ def create_unet_model_2d(input_image_size,
 
         outputs = Conv2D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
-                         activation='relu',
+                         activation=activation_type,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
@@ -172,7 +176,7 @@ def create_unet_model_2d(input_image_size,
 
         outputs = Conv2D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
-                         activation='relu',
+                         activation=activation_type,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
@@ -205,6 +209,7 @@ def create_unet_model_3d(input_image_size,
                          strides=(2, 2, 2),
                          dropout_rate=0.0,
                          weight_decay=0.0,
+                         activation_type='relu',
                          add_attention_gating=False,
                          mode='classification'
                         ):
@@ -264,6 +269,9 @@ def create_unet_model_3d(input_image_size,
         Weighting parameter for L2 regularization of the kernel weights of the
         convolution layers.  Default = 0.0.
 
+    activation_type :  string
+        Activation type at each convolutional layer; default relu.
+
     add_attention_gating :  boolean
         Whether or not to include attention gating.
 
@@ -309,13 +317,13 @@ def create_unet_model_3d(input_image_size,
         if i == 0:
             conv = Conv3D(filters=number_of_filters,
                           kernel_size=convolution_kernel_size,
-                          activation='relu',
+                          activation=activation_type,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(inputs)
         else:
             conv = Conv3D(filters=number_of_filters,
                           kernel_size=convolution_kernel_size,
-                          activation='relu',
+                          activation=activation_type,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(pool)
 
@@ -324,7 +332,7 @@ def create_unet_model_3d(input_image_size,
 
         encoding_convolution_layers.append(Conv3D(filters=number_of_filters,
                                                   kernel_size=convolution_kernel_size,
-                                                  activation='relu',
+                                                  activation=activation_type,
                                                   padding='same')(conv))
 
         if i < number_of_layers - 1:
@@ -351,7 +359,7 @@ def create_unet_model_3d(input_image_size,
 
         outputs = Conv3D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
-                         activation='relu',
+                         activation=activation_type,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
@@ -360,7 +368,7 @@ def create_unet_model_3d(input_image_size,
 
         outputs = Conv3D(filters=number_of_filters,
                          kernel_size=convolution_kernel_size,
-                         activation='relu',
+                         activation=activation_type,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
@@ -381,5 +389,3 @@ def create_unet_model_3d(input_image_size,
     unet_model = Model(inputs=inputs, outputs=outputs)
 
     return unet_model
-
-
