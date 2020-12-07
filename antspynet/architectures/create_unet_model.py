@@ -1,11 +1,11 @@
-from keras.models import Model
-from keras.layers import (Input, Concatenate, Dropout, Add, Activation,
-                          multiply, ReLU,
-                          Conv2D, Conv2DTranspose, MaxPooling2D,
-                          UpSampling2D,
-                          Conv3D, Conv3DTranspose, MaxPooling3D,
-                          UpSampling3D)
-from keras import regularizers
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Concatenate, Dropout, Add, Activation,
+                                     multiply, ReLU,
+                                     Conv2D, Conv2DTranspose, MaxPooling2D,
+                                     UpSampling2D,
+                                     Conv3D, Conv3DTranspose, MaxPooling3D,
+                                     UpSampling3D)
+from tensorflow.keras import regularizers
 
 def create_unet_model_2d(input_image_size,
                          number_of_outputs=2,
