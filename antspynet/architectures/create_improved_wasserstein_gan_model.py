@@ -4,11 +4,10 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Layer
 from tensorflow.keras.layers import (Input, Concatenate, Dense, Activation,
                                      BatchNormalization, Reshape, Dropout,
                                      Flatten, LeakyReLU, Conv2D, Conv3D,
-                                     Lambda)
+                                     Layer)
 from tensorflow.keras.optimizers import RMSprop
 
 from . import (create_convolutional_autoencoder_model_2d,
