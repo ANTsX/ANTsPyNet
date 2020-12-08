@@ -1,6 +1,6 @@
 
-from keras.models import Model
-from keras.layers import Input, Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense
 
 def create_autoencoder_model(number_of_units_per_layer,
                              activation='relu',

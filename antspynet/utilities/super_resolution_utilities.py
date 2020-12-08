@@ -1,12 +1,11 @@
 import ants
 import numpy as np
-import keras
-import keras.backend as K
+import tensorflow.keras.backend as K
 
 from . import extract_image_patches
 from . import regression_match_image
 
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 
 import time
 from os import path

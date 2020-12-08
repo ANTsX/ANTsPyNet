@@ -1,8 +1,8 @@
 
-import keras.backend as K
-from keras.engine import Layer, InputSpec
-from keras.layers import Concatenate
-from keras import initializers
+import tensorflow.keras.backend as K
+from tensorflow.keras.engine import Layer, InputSpec
+from tensorflow.keras.layers import Concatenate
+from tensorflow.keras import initializers
 
 import numpy as np
 import tensorflow as tf
