@@ -1,6 +1,6 @@
 
-from keras.models import Model
-from keras.layers import (Input, Dense, Activation, Flatten,
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Dense, Activation, Flatten,
                           Conv2D, MaxPooling2D,
                           Conv3D, MaxPooling3D)
 

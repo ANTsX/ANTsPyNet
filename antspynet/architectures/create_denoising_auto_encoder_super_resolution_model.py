@@ -1,6 +1,6 @@
 
-from keras.models import Model
-from keras.layers import (Input, Average, Add,
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Average, Add,
                           Conv2D, Conv2DTranspose,
                           Conv3D, Conv3DTranspose)
 

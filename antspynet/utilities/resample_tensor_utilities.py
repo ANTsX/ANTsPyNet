@@ -1,8 +1,8 @@
 
-import keras.backend as K
+import tensorflow.keras.backend as K
 import tensorflow as tf
 
-from keras.engine import Layer, InputSpec
+from tensorflow.keras.engine import Layer, InputSpec
 
 class ResampleTensorLayer2D(Layer):
 

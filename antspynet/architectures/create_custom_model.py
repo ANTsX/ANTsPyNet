@@ -1,5 +1,5 @@
-from keras.models import Model
-from keras.layers import (Add, Activation, AveragePooling3D, BatchNormalization,
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Add, Activation, AveragePooling3D, BatchNormalization,
                           Conv3D, Dropout, Input, MaxPooling3D, ReLU, ZeroPadding3D)
 from antspynet.utilities import LogSoftmax                          
 

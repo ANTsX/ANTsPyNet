@@ -1,6 +1,6 @@
 
-from keras.models import Model
-from keras.layers import (Input, Average, Conv2D, Conv3D)
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Input, Average, Conv2D, Conv3D)
 
 def create_expanded_super_resolution_model_2d(input_image_size,
                                               convolution_kernel_sizes=[(9, 9), (1, 1), (3, 3), (5, 5), (5, 5)],

@@ -1,7 +1,7 @@
 
-import keras.backend as K
-from keras.engine import Layer, InputSpec
-from keras import initializers
+import tensorflow.keras.backend as K
+from tensorflow.keras.engine import Layer, InputSpec
+from tensorflow.keras import initializers
 
 import tensorflow as tf
 
