@@ -2,7 +2,7 @@
 import tensorflow.keras.backend as K
 import tensorflow as tf
 
-from tensorflow.keras.engine import Layer, InputSpec
+from tensorflow.keras.layers import Layer, InputSpec
 
 class ResampleTensorLayer2D(Layer):
 
