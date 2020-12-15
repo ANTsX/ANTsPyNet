@@ -69,9 +69,8 @@ def mae(x, y=None):
         xabs = x.abs()
         return xabs.mean()
     else:
-        diffabs = abs(x - y)
+        diffabs = (x-y).abs().mean()
         return diffabs.mean()
-
 
 def psnr(x, y):
     """
