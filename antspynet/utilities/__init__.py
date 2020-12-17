@@ -25,6 +25,7 @@ from .mixture_density_utilities import mixture_density_software_max
 from .mixture_density_utilities import sample_from_output
 
 from .resample_tensor_utilities import ResampleTensorLayer2D, ResampleTensorLayer3D
+from .resample_tensor_utilities import ResampleTensorToTargetTensorLayer2D, ResampleTensorToTargetTensorLayer3D
 
 from .attention_utilities import AttentionLayer2D, AttentionLayer3D
 
