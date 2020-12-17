@@ -127,11 +127,12 @@ class ResampleTensorLayer3D(Layer):
         resampled_tensor = None
 
         # Do yz
-        squeeze_tensor_yz = tf.reshape(x, (-1, tf.shape(x)[2], tf.shape(x)[3], channel_size))
 
-        new_shape_yz = (new_size[1], new_size[2])
+        new_shape_squeeze_yz = (-1, tf.shape(x)[2], tf.shape(x)[3], channel_size)
+        squeeze_tensor_yz = tf.reshape(x, new_shape_squeeze_yz)
 
         resampled_tensor_yz = None
+        new_shape_yz = (new_size[1], new_size[2])
         if self.interpolation_type == 'nearest_neighbor':
             resampled_tensor_yz = tf.image.resize(squeeze_tensor_yz, size=new_shape_yz, method='nearest')
         elif self.interpolation_type == 'linear':
@@ -146,11 +147,11 @@ class ResampleTensorLayer3D(Layer):
 
         reoriented_tensor = tf.transpose(resume_tensor_yz, (0, 3, 2, 1, 4))
 
-        squeeze_tensor_x = tf.reshape(reoriented_tensor, (-1, new_size[1], tf.shape(x)[1], channel_size))
-
-        new_shape_x = (new_size[1], new_size[0])
+        new_shape_squeeze_x = (-1, new_size[1], tf.shape(x)[1], channel_size)
+        squeeze_tensor_x = tf.reshape(reoriented_tensor, new_shape_squeeze_x)
 
         resampled_tensor_x = None
+        new_shape_x = (new_size[1], new_size[0])
         if self.interpolation_type == 'nearest_neighbor':
             resampled_tensor_x = tf.image.resize(squeeze_tensor_x, size=new_shape_x, method='nearest')
         elif self.interpolation_type == 'linear':
