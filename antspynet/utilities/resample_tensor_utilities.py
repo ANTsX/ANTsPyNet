@@ -249,12 +249,12 @@ class ResampleTensorToTargetTensorLayer3D(Layer):
         source_tensor = x[0]
         target_tensor = x[1]
 
-        channel_size = x[0].get_shape()[-1]
+        channel_size = source_tensor.get_shape()[-1]
 
         # Do yz
 
         new_shape_squeeze_yz = (-1, tf.shape(source_tensor)[2], tf.shape(source_tensor)[3], channel_size)
-        squeeze_tensor_yz = tf.reshape(x[0], new_shape_squeeze_yz)
+        squeeze_tensor_yz = tf.reshape(source_tensor, new_shape_squeeze_yz)
 
         resampled_tensor_yz = None
         new_shape_yz = (tf.shape(target_tensor)[2], tf.shape(target_tensor)[3])
