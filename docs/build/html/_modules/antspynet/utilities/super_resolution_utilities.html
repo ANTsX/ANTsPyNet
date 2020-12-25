@@ -33,13 +33,12 @@
   <h1>Source code for antspynet.utilities.super_resolution_utilities</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">keras</span>
-<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+<span class="kn">import</span> <span class="nn">tensorflow.keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">extract_image_patches</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">regression_match_image</span>
 
-<span class="kn">from</span> <span class="nn">keras.models</span> <span class="kn">import</span> <span class="n">load_model</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">load_model</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
@@ -68,7 +67,7 @@
 <span class="sd">    &gt;&gt;&gt; value = mse(r16, r64)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">x2</span> <span class="o">=</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="k">return</span> <span class="n">x2</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -99,13 +98,12 @@
 <span class="sd">    &gt;&gt;&gt; value = mae(r16, r64)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">xabs</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">xabs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">diffabs</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">diffabs</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">diffabs</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
-
 
 <div class="viewcode-block" id="psnr"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.psnr">[docs]</a><span class="k">def</span> <span class="nf">psnr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -167,8 +165,8 @@
 <span class="sd">    &gt;&gt;&gt; value = psnr(r16, r64)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">global_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-    <span class="n">global_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
+    <span class="n">global_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span> <span class="p">(</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="p">)</span>
+    <span class="n">global_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span> <span class="p">(</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span> <span class="p">)</span>
     <span class="n">L</span> <span class="o">=</span> <span class="n">global_max</span> <span class="o">-</span> <span class="n">global_min</span>
 
     <span class="n">C1</span> <span class="o">=</span> <span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">L</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
@@ -339,7 +337,8 @@
         <span class="n">stride_length</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
         <span class="n">return_as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">image_patches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">image_patches</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">image</span><span class="o">.</span><span class="n">components</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">image_patches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">image_patches</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">image_patches</span> <span class="o">=</span> <span class="n">image_patches</span> <span class="o">-</span> <span class="n">image_patches</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
     <span class="n">image_patches</span> <span class="o">=</span> <span class="p">(</span>

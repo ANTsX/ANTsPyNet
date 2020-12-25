@@ -94,6 +94,7 @@ Miscellaneous
 .. autoclass:: antspynet.utilities.Scale
 .. autofunction:: antspynet.utilities.regression_match_image
 .. autofunction:: antspynet.utilities.randomly_transform_image_data
+.. autofunction:: antspynet.utilities.randomly_histogram_warp_image_intensity
 .. autofunction:: antspynet.utilities.crop_image_center
 .. autofunction:: antspynet.utilities.pad_or_crop_image_to_size
 .. autofunction:: antspynet.utilities.pad_image_by_factor
