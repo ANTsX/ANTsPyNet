@@ -44,6 +44,7 @@ from .cropping_and_padding_utilities import crop_image_center
 from .cropping_and_padding_utilities import pad_or_crop_image_to_size
 from .cropping_and_padding_utilities import pad_image_by_factor
 
+from .randomly_transform_image_data import randomly_histogram_warp_image_intensity
 from .randomly_transform_image_data import randomly_transform_image_data
 
 from .preprocess_image import preprocess_brain_image

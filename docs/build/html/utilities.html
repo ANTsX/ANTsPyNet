@@ -1471,7 +1471,7 @@ image.</p></li>
 
 <dl class="function">
 <dt id="antspynet.utilities.randomly_transform_image_data">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">randomly_transform_image_data</code><span class="sig-paren">(</span><em class="sig-param">reference_image</em>, <em class="sig-param">input_image_list</em>, <em class="sig-param">segmentation_image_list=None</em>, <em class="sig-param">number_of_simulations=10</em>, <em class="sig-param">transform_type='affine'</em>, <em class="sig-param">sd_affine=0.02</em>, <em class="sig-param">deformation_transform_type='bspline'</em>, <em class="sig-param">number_of_random_points=1000</em>, <em class="sig-param">sd_noise=10.0</em>, <em class="sig-param">number_of_fitting_levels=4</em>, <em class="sig-param">mesh_size=1</em>, <em class="sig-param">sd_smoothing=4.0</em>, <em class="sig-param">input_image_interpolator='linear'</em>, <em class="sig-param">segmentation_image_interpolator='nearestNeighbor'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_transform_image_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.randomly_transform_image_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">randomly_transform_image_data</code><span class="sig-paren">(</span><em class="sig-param">reference_image</em>, <em class="sig-param">input_image_list</em>, <em class="sig-param">segmentation_image_list=None</em>, <em class="sig-param">number_of_simulations=10</em>, <em class="sig-param">number_of_histogram_points=0</em>, <em class="sig-param">sd_intensity_transform=0.04</em>, <em class="sig-param">transform_type='affine'</em>, <em class="sig-param">sd_affine=0.02</em>, <em class="sig-param">deformation_transform_type='bspline'</em>, <em class="sig-param">number_of_random_points=1000</em>, <em class="sig-param">sd_noise=10.0</em>, <em class="sig-param">number_of_fitting_levels=4</em>, <em class="sig-param">mesh_size=1</em>, <em class="sig-param">sd_smoothing=4.0</em>, <em class="sig-param">input_image_interpolator='linear'</em>, <em class="sig-param">segmentation_image_interpolator='nearestNeighbor'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_transform_image_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.randomly_transform_image_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Randomly transform image data (optional: with corresponding segmentations).</p>
 <p>Apply rigid, affine and/or deformable maps to an input set of training
 images.  The reference image domain defines the space in which this
@@ -1491,6 +1491,9 @@ outer list contains multiple subject lists which are randomly sampled to
 produce output image list.</p></li>
 <li><p><strong>segmentation_image_list</strong> (<em>list of ANTsImages</em>) – List of segmentation images corresponding to the input image list (optional).</p></li>
 <li><p><strong>number_of_simulations</strong> (<em>integer</em>) – Number of output images.</p></li>
+<li><p><strong>number_of_histogram_points</strong> (<em>integer</em>) – Number of histogram points for intensity warping. If = 0, no intensity warping
+is performed.</p></li>
+<li><p><strong>sd_intensity_transform</strong> (<em>float</em>) – Characterize the randomness of the intensity displacement.</p></li>
 <li><p><strong>transform_type</strong> (<em>string</em>) – One of the following options: “translation”, “rigid”, “scaleShear”, “affine”,
 “deformation”, “affineAndDeformation”.</p></li>
 <li><p><strong>sd_affine</strong> (<em>float</em>) – Parameter dictating deviation amount from identity for random linear
@@ -1527,6 +1530,36 @@ transformations.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">randomly_transform_image_data</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">input_images</span><span class="p">,</span> <span class="n">input_segmentations</span><span class="p">,</span> <span class="n">sd_affine</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">transform_type</span> <span class="o">=</span> <span class="s2">&quot;affineAndDeformation&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="antspynet.utilities.randomly_histogram_warp_image_intensity">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">randomly_histogram_warp_image_intensity</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">number_of_histogram_points=4</em>, <em class="sig-param">sd_intensity_transform=0.05</em>, <em class="sig-param">transform_domain_size=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_histogram_warp_image_intensity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.randomly_histogram_warp_image_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly transform image intensities.</p>
+<p>Apply B-spline 1-D maps to an input image for intensity warping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image</strong> (<em>ANTsImage</em>) – Input image.</p></li>
+<li><p><strong>number_of_histogram_points</strong> (<em>integer</em>) – Number of histogram points for intensity warping. If = 0, no intensity warping
+is performed.</p></li>
+<li><p><strong>sd_intensity_transform</strong> (<em>float</em>) – Characterize the randomness of the intensity displacement.</p></li>
+<li><p><strong>transform_domain_size</strong> (<em>integer</em>) – Defines the sampling resolution of the B-spline warping.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ANTs image</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">transformed_image</span> <span class="o">=</span> <span class="n">randomly_histogram_warp_image_intensity</span><span class="p">(</span> <span class="n">image</span> <span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
