@@ -2,68 +2,6 @@ import ants
 
 import numpy as np
 
-def randomly_histogram_warp_image_intensity(image,
-                                            number_of_histogram_points=4,
-                                            sd_intensity_transform=0.05,
-                                            transform_domain_size=20):
-    """
-    Randomly transform image intensities.
-
-    Apply B-spline 1-D maps to an input image for intensity warping.
-
-    Arguments
-    ---------
-    image : ANTsImage
-        Input image.
-
-    number_of_histogram_points : integer
-        Number of histogram points for intensity warping. If = 0, no intensity warping
-        is performed.
-
-    sd_intensity_transform : float
-        Characterize the randomness of the intensity displacement.
-
-    transform_domain_size : integer
-        Defines the sampling resolution of the B-spline warping.
-
-    Returns
-    -------
-    ANTs image
-
-    Example
-    -------
-    >>> import ants
-    >>> image = ants.image_read(ants.get_ants_data("r64"))
-    >>> transformed_image = randomly_histogram_warp_image_intensity( image )
-    """
-
-    transformed_image = ants.iMath(ants.image_clone(image), "Normalize")
-
-    scattered_data = np.reshape(np.concatenate((np.zeros(1),
-                                np.random.normal(loc=0.0, scale=sd_intensity_transform, size=number_of_histogram_points-2),
-                                np.zeros(1))), (number_of_histogram_points,1))
-    parametric_data = np.reshape(np.linspace(0, 1, number_of_histogram_points), (number_of_histogram_points,1))
-
-    weights = (1000, *np.ones(number_of_histogram_points - 2), 1000)
-
-    transform_domain_origin = 0
-    transform_domain_spacing = (1.0 - transform_domain_origin) / (transform_domain_size - 1)
-
-    bspline_histogram_transform = ants.fit_bspline_object_to_scattered_data( scattered_data,
-        parametric_data, [transform_domain_origin], [transform_domain_spacing], [transform_domain_size],
-        data_weights=weights)
-
-    transform_domain = np.linspace(0, 1, transform_domain_size)
-
-    for i in range(len(transform_domain) - 1):
-        transformed_image[transformed_image >= transform_domain[i] and transformed_image < transform_domain[i+1]] = (
-             transformed_image[transformed_image >= transform_domain[i] and transformed_image < transform_domain[i+1]] +
-             0.5 * (bspline_histogram_transform[i] + bspline_histogram_transform[i+1]))
-
-    transformed_image = transformed_image * (image.max() - image.min()) + image.min()
-
-    return(transformed_image)
-
 def randomly_transform_image_data(reference_image,
                                   input_image_list,
                                   segmentation_image_list=None,
@@ -170,6 +108,8 @@ def randomly_transform_image_data(reference_image,
     >>>     input_images, input_segmentations, sd_affine=0.02,
     >>>     transform_type = "affineAndDeformation" )
     """
+
+    from ..utilities import histogram_warp_image_intensities
 
     def polar_decomposition(X):
        U, d, V = np.linalg.svd(X, full_matrices=False)
@@ -284,7 +224,7 @@ def randomly_transform_image_data(reference_image,
             if number_of_histogram_points == 0:
                 single_subject_image = single_subject_image_list[j]
             else:
-                single_subject_image = randomly_histogram_warp_image_intensity(
+                single_subject_image = histogram_warp_image_intensities(
                     single_subject_image_list[j], number_of_histogram_points, sd_intensity_transform)
             single_subject_simulated_image_list.append(ants.apply_ants_transform_to_image(
                 simulated_transforms[i], single_subject_image,

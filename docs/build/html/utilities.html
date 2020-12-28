@@ -1535,17 +1535,22 @@ transformations.</p></li>
 </dd></dl>
 
 <dl class="function">
-<dt id="antspynet.utilities.randomly_histogram_warp_image_intensity">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">randomly_histogram_warp_image_intensity</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">number_of_histogram_points=4</em>, <em class="sig-param">sd_intensity_transform=0.05</em>, <em class="sig-param">transform_domain_size=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_histogram_warp_image_intensity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.randomly_histogram_warp_image_intensity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Randomly transform image intensities.</p>
+<dt id="antspynet.utilities.histogram_warp_image_intensities">
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">histogram_warp_image_intensities</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">break_points=(0.25</em>, <em class="sig-param">0.5</em>, <em class="sig-param">0.75)</em>, <em class="sig-param">displacements=None</em>, <em class="sig-param">clamp_end_points=(False</em>, <em class="sig-param">False)</em>, <em class="sig-param">sd_displacements=0.05</em>, <em class="sig-param">transform_domain_size=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/histogram_warp_image_intensities.html#histogram_warp_image_intensities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.histogram_warp_image_intensities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform image intensities based on histogram mapping.</p>
 <p>Apply B-spline 1-D maps to an input image for intensity warping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>image</strong> (<em>ANTsImage</em>) – Input image.</p></li>
-<li><p><strong>number_of_histogram_points</strong> (<em>integer</em>) – Number of histogram points for intensity warping. If = 0, no intensity warping
-is performed.</p></li>
-<li><p><strong>sd_intensity_transform</strong> (<em>float</em>) – Characterize the randomness of the intensity displacement.</p></li>
+<li><p><strong>break_points</strong> (<em>integer</em><em> or </em><em>tuple</em>) – Parametric points at which the intensity transform displacements
+are specified between [0, 1].  Alternatively, a single number can
+be given and the sequence is linearly spaced in [0, 1].</p></li>
+<li><p><strong>displacements</strong> (<em>tuple</em>) – displacements to define intensity warping.  Length must be equal to the
+breakPoints.  Alternatively, if None random displacements are chosen
+(random normal:  mean = 0, sd = sd_displacements).</p></li>
+<li><p><strong>sd_displacements</strong> (<em>float</em>) – Characterize the randomness of the intensity displacement.</p></li>
+<li><p><strong>clamp_end_points</strong> (<em>2-element tuple of booleans</em>) – Specify non-zero intensity change at the ends of the histogram.</p></li>
 <li><p><strong>transform_domain_size</strong> (<em>integer</em>) – Defines the sampling resolution of the B-spline warping.</p></li>
 </ul>
 </dd>
@@ -1559,7 +1564,7 @@ is performed.</p></li>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">transformed_image</span> <span class="o">=</span> <span class="n">randomly_histogram_warp_image_intensity</span><span class="p">(</span> <span class="n">image</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">transformed_image</span> <span class="o">=</span> <span class="n">histogram_warp_image_intensities</span><span class="p">(</span> <span class="n">image</span> <span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
