@@ -243,3 +243,155 @@ def sysu_media_wmh_segmentation(flair,
         prediction_image_average, flair)
 
     return(probability_image)
+
+def ew_david(flair,
+             t1=None,
+             do_preprocessing=True,
+             antsxnet_cache_directory=None,
+             verbose=False):
+
+    """
+    Perform White matter hypterintensity probabilistic segmentation 
+    using deep learning
+
+    Preprocessing on the training data consisted of:
+       * n4 bias correction,
+       * brain extraction, and
+       * affine registration to MNI.
+    The input T1 should undergo the same steps.  If the input T1 is the raw
+    T1, these steps can be performed by the internal preprocessing, i.e. set
+    \code{doPreprocessing = TRUE}
+
+    Arguments
+    ---------
+    flair : ANTsImage
+        input 3-D FLAIR brain image (not skull-stripped).
+
+    t1 : ANTsImage
+        input 3-D T1 brain image (not skull-stripped).
+
+    do_preprocessing : boolean
+        perform n4 bias correction?
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    WMH segmentation probability image
+
+    Example
+    -------
+    >>> image = ants.image_read("flair.nii.gz")
+    >>> probability_mask = sysu_media_wmh_segmentation(image)
+    """
+
+    from ..architectures import create_unet_model_3d
+    from ..utilities import get_pretrained_network
+    from ..utilities import categorical_focal_loss
+    from ..utilities import preprocess_brain_image
+    from ..utilities import extract_image_patches
+    from ..utilities import reconstruct_image_from_patches
+
+    if flair.dimension != 3:
+        raise ValueError( "Image dimension must be 3." )
+
+    if t1.dimension != 3:
+        raise ValueError( "Image dimension must be 3." )
+
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
+
+    ################################
+    #
+    # Preprocess images
+    #
+    ################################
+
+    t1_preprocessed = t1
+    flair_preprocessed = flair
+    if do_preprocessing == True:
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=(0.01, 0.99),
+            do_brain_extraction=False,
+            template="croppedMni152",
+            template_transform_type="AffineFast",
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        t1_preprocessed = t1_preprocessing["preprocessed_image"] # * t1_preprocessing['brain_mask']
+
+        flair_preprocessed = ants.apply_transforms(fixed=t1_preprocessed, moving=flair, 
+            transformlist=t1_preprocessing['template_transforms']['fwdtransforms'])
+        # flair_preprocessed[t1_preprocessing['brain_mask'] == 0] = 0    
+
+    ################################
+    #
+    # Build model and load weights
+    #
+    ################################
+
+    patch_size = (112, 112, 112)
+    stride_length = (t1_preprocessed.shape[0] - patch_size[0],
+                     t1_preprocessed.shape[1] - patch_size[1],
+                     t1_preprocessed.shape[2] - patch_size[2])
+
+    classes = ("background", "wmh" )
+    number_of_classification_labels = len(classes)
+    labels = (0, 1)
+
+    image_modalities = ("T1", "FLAIR")
+    channel_size = len(image_modalities)
+
+    unet_model = create_unet_model_3d((*patch_size, channel_size),
+        number_of_outputs = number_of_classification_labels,
+        number_of_layers = 4, number_of_filters_at_base_layer = 32, dropout_rate = 0.0,
+        convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
+        weight_decay = 1e-5, nn_unet_activation_style=False, add_attention_gating=True)
+
+    weights_file_name = get_pretrained_network("ewDavidWmhSegmentationWeights", 
+        antsxnet_cache_directory=antsxnet_cache_directory)
+    unet_model.load_weights(weights_file_name)
+
+    ################################
+    #
+    # Do prediction and normalize to native space
+    #
+    ################################
+
+    if verbose == True:
+        print("ew_david:  prediction.")
+
+    batchX = np.zeros((8, *patch_size, channel_size))
+
+    t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
+    t1_patches = extract_image_patches(t1_preprocessed, patch_size=patch_size,
+                                          max_number_of_patches="all", stride_length=stride_length,
+                                          return_as_array=True)
+    batchX[:,:,:,:,0] = t1_patches
+
+    flair_preprocessed = (flair_preprocessed - flair_preprocessed.mean()) / flair_preprocessed.std()
+    flair_patches = extract_image_patches(flair_preprocessed, patch_size=patch_size,
+                                        max_number_of_patches="all", stride_length=stride_length,
+                                        return_as_array=True)
+    batchX[:,:,:,:,1] = flair_patches
+
+    predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+    probability_images = list()
+    for i in range(len(labels)):
+        print("Reconstructing image", classes[i])
+        reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
+            domain_image=t1_preprocessed, stride_length=stride_length)
+
+        if do_preprocessing == True:
+            probability_images.append(ants.apply_transforms(fixed=t1,
+                moving=reconstructed_image,
+                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+        else:
+            probability_images.append(reconstructed_image)
+
+    return(probability_images[1])
+
