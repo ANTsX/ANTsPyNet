@@ -6,8 +6,6 @@ def randomly_transform_image_data(reference_image,
                                   input_image_list,
                                   segmentation_image_list=None,
                                   number_of_simulations=10,
-                                  number_of_histogram_points=0,
-                                  sd_intensity_transform=0.04,
                                   transform_type='affine',
                                   sd_affine=0.02,
                                   deformation_transform_type="bspline",
@@ -47,13 +45,6 @@ def randomly_transform_image_data(reference_image,
 
     number_of_simulations : integer
         Number of output images.
-
-    number_of_histogram_points : integer
-        Number of histogram points for intensity warping. If = 0, no intensity warping
-        is performed.
-
-    sd_intensity_transform : float
-        Characterize the randomness of the intensity displacement.
 
     transform_type : string
         One of the following options: "translation", "rigid", "scaleShear", "affine",
@@ -220,12 +211,7 @@ def randomly_transform_image_data(reference_image,
 
         single_subject_simulated_image_list = list()
         for j in range(len(single_subject_image_list)):
-            single_subject_image = None
-            if number_of_histogram_points == 0:
-                single_subject_image = single_subject_image_list[j]
-            else:
-                single_subject_image = histogram_warp_image_intensities(
-                    single_subject_image_list[j], number_of_histogram_points, sd_intensity_transform)
+            single_subject_image = single_subject_image_list[j]
             single_subject_simulated_image_list.append(ants.apply_ants_transform_to_image(
                 simulated_transforms[i], single_subject_image,
                 reference=reference_image))
