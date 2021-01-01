@@ -43,7 +43,7 @@ def multilabel_dice_coefficient(y_true, y_pred, smoothing_factor=0.0):
 
         unionOverlap = numerator / denominator
 
-        return((2.0 * unionOverlap + smoothing_factor) /
+        return(-1.0 * (2.0 * unionOverlap + smoothing_factor) /
         (1.0 + unionOverlap + smoothing_factor))
 
     return(multilabel_dice_coefficient_fixed)
