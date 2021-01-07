@@ -66,7 +66,7 @@ def get_antsxnet_data(file_id=None,
                   "priorDeepFlashRightLabels",
                   "adni",
                   "ixi",
-                  "kirby"
+                  "kirby",
                   "mni152",
                   "nki",
                   "nki10",
