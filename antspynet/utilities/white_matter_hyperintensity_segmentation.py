@@ -309,10 +309,10 @@ def ew_david(flair,
     ################################
 
     t1_preprocessed = t1
-    flair_preprocessed = flair
+    t1_preprocessing = None
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
-            truncate_intensity=(0.001, 0.995),
+            truncate_intensity=(0.01, 0.99),
             do_brain_extraction=True,
             template="croppedMni152",
             template_transform_type="AffineFast",
@@ -320,11 +320,21 @@ def ew_david(flair,
             do_denoising=False,
             antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
-        t1_preprocessed = t1_preprocessing["preprocessed_image"] # * t1_preprocessing['brain_mask']
+        t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
-        flair_preprocessed = ants.apply_transforms(fixed=t1_preprocessed, moving=flair, 
+    flair_preprocessed = flair
+    if do_preprocessing == True:
+        flair_preprocessing = preprocess_brain_image(flair,
+            truncate_intensity=(0.01, 0.99),
+            do_brain_extraction=False,
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        flair_preprocessed = ants.apply_transforms(fixed=t1_preprocessed, 
+            moving=flair_preprocessing["preprocessed_image"], 
             transformlist=t1_preprocessing['template_transforms']['fwdtransforms'])
-        flair_preprocessed[t1_preprocessing['brain_mask'] == 0] = 0    
+        flair_preprocessed = flair_preprocessed * t1_preprocessing['brain_mask']
 
     ################################
     #
