@@ -245,7 +245,7 @@ def sysu_media_wmh_segmentation(flair,
     return(probability_image)
 
 def ew_david(flair,
-             t1=None,
+             t1,
              do_preprocessing=True,
              antsxnet_cache_directory=None,
              verbose=False):
@@ -312,8 +312,8 @@ def ew_david(flair,
     flair_preprocessed = flair
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
-            truncate_intensity=(0.01, 0.99),
-            do_brain_extraction=False,
+            truncate_intensity=(0.001, 0.995),
+            do_brain_extraction=True,
             template="croppedMni152",
             template_transform_type="AffineFast",
             do_bias_correction=True,
@@ -324,7 +324,7 @@ def ew_david(flair,
 
         flair_preprocessed = ants.apply_transforms(fixed=t1_preprocessed, moving=flair, 
             transformlist=t1_preprocessing['template_transforms']['fwdtransforms'])
-        # flair_preprocessed[t1_preprocessing['brain_mask'] == 0] = 0    
+        flair_preprocessed[t1_preprocessing['brain_mask'] == 0] = 0    
 
     ################################
     #
@@ -346,7 +346,7 @@ def ew_david(flair,
 
     unet_model = create_unet_model_3d((*patch_size, channel_size),
         number_of_outputs = number_of_classification_labels,
-        number_of_layers = 4, number_of_filters_at_base_layer = 32, dropout_rate = 0.0,
+        number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
         weight_decay = 1e-5, nn_unet_activation_style=False, add_attention_gating=True)
 

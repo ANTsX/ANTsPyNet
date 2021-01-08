@@ -4,6 +4,7 @@ import ants
 def deep_flash(t1,
                do_preprocessing=True,
                do_per_hemisphere=True,
+               which_hemisphere_models="new",
                antsxnet_cache_directory=None,
                verbose=False
                ):
@@ -205,7 +206,13 @@ def deep_flash(t1,
         channel_size = 1 + len(labels_left)
 
         number_of_filters = 16
-        network_name = "deepFlashLeft16"
+        network_name = ''
+        if which_hemisphere_models == "old":
+           network_name = "deepFlashLeft16"
+        elif which_hemisphere_models == "new":
+           network_name = "deepFlashLeft16new"
+        else:
+            raise ValueError("network_name must be \"old\" or \"new\".")
 
         unet_model = create_unet_model_3d((*template_size, channel_size),
             number_of_outputs = len(labels_left),
@@ -284,7 +291,13 @@ def deep_flash(t1,
         channel_size = 1 + len(labels_right)
 
         number_of_filters = 16
-        network_name = "deepFlashRight16"
+        network_name = ''
+        if which_hemisphere_models == "old":
+           network_name = "deepFlashRight16"
+        elif which_hemisphere_models == "new":
+           network_name = "deepFlashRight16new"
+        else:
+            raise ValueError("network_name must be \"old\" or \"new\".")
 
         unet_model = create_unet_model_3d((*template_size, channel_size),
             number_of_outputs = len(labels_right),
