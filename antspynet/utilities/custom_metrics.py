@@ -1,21 +1,23 @@
 
 import tensorflow.keras.backend as K
 
-def multilabel_dice_coefficient(y_true, y_pred, smoothing_factor=0.0):
+def multilabel_dice_coefficient(y_true, y_pred, dimensionality = 3, smoothing_factor=0.0):
 
     def multilabel_dice_coefficient_fixed(y_true, y_pred):
         y_dims = K.int_shape(y_pred)
 
         number_of_labels = y_dims[len(y_dims)]
 
-        if len(y_dims) == 3:
+        if dimensionality == 3:
             # 2-D image
             y_true_permuted = K.permute_dimensions(y_true, pattern = (3, 0, 1, 2))
             y_pred_permuted = K.permute_dimensions(y_pred, pattern = (3, 0, 1, 2))
-        else:
+        elif dimensionality == 2:
             # 3-D image
             y_true_permuted <- K.permute_dimensions(y_true, pattern = (4, 0, 1, 2, 3))
             y_pred_permuted <- K.permute_dimensions(y_pred, pattern = (4, 0, 1, 2, 3))
+        else:
+            raise ValueError("Specified dimensionality not implemented.")    
 
         y_true_label = K.gather(y_true_permuted, indices = (1))
         y_pred_label = K.gather(y_pred_permuted, indices = (1))
