@@ -193,7 +193,7 @@ def sysu_media_wmh_segmentation(flair,
         number_of_slices = flair_preprocessed_warped.shape[dimensions_to_predict[d]]
 
         if verbose == True:
-            print("Extracting slices for dimension ", d, ".")
+            print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
             flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), (200, 200))
