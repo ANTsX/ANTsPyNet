@@ -37,7 +37,7 @@
 <h2>Custom metrics<a class="headerlink" href="#custom-metrics" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="antspynet.utilities.multilabel_dice_coefficient">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">multilabel_dice_coefficient</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em>, <em class="sig-param">smoothing_factor=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_dice_coefficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.multilabel_dice_coefficient" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">multilabel_dice_coefficient</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em>, <em class="sig-param">dimensionality=3</em>, <em class="sig-param">smoothing_factor=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_dice_coefficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.multilabel_dice_coefficient" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -1025,7 +1025,7 @@ Since these can be resused, if is None, these data will be downloaded to a
 
 <dl class="function">
 <dt id="antspynet.utilities.desikan_killiany_tourville_labeling">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">desikan_killiany_tourville_labeling</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/desikan_killiany_tourville_labeling.html#desikan_killiany_tourville_labeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.desikan_killiany_tourville_labeling" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">desikan_killiany_tourville_labeling</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">return_probability_images=False</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/desikan_killiany_tourville_labeling.html#desikan_killiany_tourville_labeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.desikan_killiany_tourville_labeling" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cortical and deep gray matter labeling using Desikan-Killiany-Tourville</p>
 <p>Perform DKT labeling using deep learning</p>
 <p>The labeling is as follows:</p>
@@ -1149,6 +1149,8 @@ do_preprocessing = True</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
 <li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
+<li><p><strong>return_probability_images</strong> (<em>boolean</em>) – Whether to return the two sets of probability images for the inner and outer
+labels.</p></li>
 <li><p><strong>antsxnet_cache_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
 Since these can be resused, if is None, these data will be downloaded to a
 ~/.keras/ANTsXNet/.</p></li>

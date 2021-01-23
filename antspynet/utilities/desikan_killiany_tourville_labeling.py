@@ -4,6 +4,7 @@ import ants
 
 def desikan_killiany_tourville_labeling(t1,
                                         do_preprocessing=True,
+                                        return_probability_images=False,
                                         antsxnet_cache_directory=None,
                                         verbose=False):
 
@@ -136,6 +137,10 @@ def desikan_killiany_tourville_labeling(t1,
     do_preprocessing : boolean
         See description above.
 
+    return_probability_images : boolean
+        Whether to return the two sets of probability images for the inner and outer
+        labels.
+
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
@@ -246,21 +251,21 @@ def desikan_killiany_tourville_labeling(t1,
     spacing = downsampled_image.spacing
     direction = downsampled_image.direction
 
-    probability_images = list()
+    inner_probability_images = list()
     for i in range(len(labels)):
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
             origin=origin, spacing=spacing, direction=direction)
         resampled_image = ants.resample_image( probability_image, t1_preprocessed.shape, use_voxels=True, interp_type=0)
         if do_preprocessing == True:
-            probability_images.append(ants.apply_transforms(fixed=t1,
+            inner_probability_images.append(ants.apply_transforms(fixed=t1,
                 moving=resampled_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
         else:
-            probability_images.append(resampled_image)
+            inner_probability_images.append(resampled_image)
 
-    image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
+    image_matrix = ants.image_list_to_matrix(inner_probability_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
@@ -309,7 +314,7 @@ def desikan_killiany_tourville_labeling(t1,
     spacing = cropped_image.spacing
     direction = cropped_image.direction
 
-    probability_images = list()
+    outer_probability_images = list()
     for i in range(len(labels)):
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
@@ -320,14 +325,14 @@ def desikan_killiany_tourville_labeling(t1,
             decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
         if do_preprocessing == True:
-            probability_images.append(ants.apply_transforms(fixed=t1,
+            outer_probability_images.append(ants.apply_transforms(fixed=t1,
                 moving=decropped_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
         else:
-            probability_images.append(decropped_image)
+            outer_probability_images.append(decropped_image)
 
-    image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
+    image_matrix = ants.image_list_to_matrix(outer_probability_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
@@ -343,4 +348,10 @@ def desikan_killiany_tourville_labeling(t1,
         if labels[i] > 0:
             dkt_label_image[segmentation_image==i] = labels[i]
 
-    return(dkt_label_image)
+    if return_probability_images == True:
+        return_dict = {'segmentation_image' : dkt_label_image,
+                       'inner_probability_images' : inner_probability_images,
+                       'outer_probability_images' : outer_probability_images}
+        return(return_dict)
+    else:
+        return(dkt_label_image)
