@@ -73,16 +73,16 @@ def histogram_warp_image_intensities(image,
         parametric_points = np.linspace(0, 1, total_number_of_break_points)
         number_of_nonzero_displacements = break_points
 
-    weights = None
     if displacements is None:
         displacements = np.random.normal(loc=0.0, scale=sd_displacements, size=number_of_nonzero_displacements)
-        weights = np.ones(len(displacements))
-        if clamp_end_points[0] is True:
-            displacements = (0, *displacements)
-            weights = np.concatenate((1000 * np.ones(1), weights))
-        if clamp_end_points[1] is True:
-            displacements = (*displacements, 0)
-            weights = np.concatenate((weights, 1000 * np.ones(1)))
+
+    weights = np.ones(len(displacements))
+    if clamp_end_points[0] is True:
+        displacements = (0, *displacements)
+        weights = np.concatenate((1000 * np.ones(1), weights))
+    if clamp_end_points[1] is True:
+        displacements = (*displacements, 0)
+        weights = np.concatenate((weights, 1000 * np.ones(1)))
 
     if not len(displacements) == len(parametric_points):
         raise ValueError("Length of displacements does not match the length of the break points.")
