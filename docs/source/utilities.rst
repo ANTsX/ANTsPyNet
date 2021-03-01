@@ -11,6 +11,7 @@ Custom metrics
 .. autofunction:: antspynet.utilities.categorical_focal_gain
 .. autofunction:: antspynet.utilities.categorical_focal_loss
 .. autofunction:: antspynet.utilities.weighted_categorical_crossentropy
+.. autofunction:: antspynet.utilities.multilabel_surface_loss
 
 Custom normalization layers
 ---------------------------

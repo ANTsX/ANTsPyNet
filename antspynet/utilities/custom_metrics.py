@@ -1,10 +1,17 @@
 
 import tensorflow.keras.backend as K
+import tensorflow as tf
+import numpy as np
+import scipy as sp
 
-def multilabel_dice_coefficient(y_true, y_pred, dimensionality = 3, smoothing_factor=0.0):
+def multilabel_dice_coefficient(y_true, y_pred, smoothing_factor=0.0):
 
     def multilabel_dice_coefficient_fixed(y_true, y_pred):
         y_dims = K.int_shape(y_pred)
+
+        dimensionality = 3
+        if len(y_dims) == 4:
+            dimensionality = 2
 
         number_of_labels = y_dims[len(y_dims)]
 
@@ -17,7 +24,7 @@ def multilabel_dice_coefficient(y_true, y_pred, dimensionality = 3, smoothing_fa
             y_true_permuted <- K.permute_dimensions(y_true, pattern = (4, 0, 1, 2, 3))
             y_pred_permuted <- K.permute_dimensions(y_pred, pattern = (4, 0, 1, 2, 3))
         else:
-            raise ValueError("Specified dimensionality not implemented.")    
+            raise ValueError("Specified dimensionality not implemented.")
 
         y_true_label = K.gather(y_true_permuted, indices = (1))
         y_pred_label = K.gather(y_pred_permuted, indices = (1))
@@ -104,3 +111,30 @@ def weighted_categorical_crossentropy(y_true, y_pred, weights):
         return(loss)
 
     return(weighted_categorical_crossentropy_fixed)
+
+def multilabel_surface_loss(y_true, y_pred):
+
+    def calculate_residual_distance_map(segmentation):
+        residual_distance = np.zeros_like(segmentation)
+
+        positive_mask = segmentation.astype(np.bool)
+        if positive_mask.any():
+            negative_mask = ~positive_mask
+            residual_distance = \
+                (sp.ndimage.distance_transform_edt(negative_mask) * negative_mask -
+                (sp.ndimage.distance_transform_edt(positive_mask) - 1) * positive_mask)
+
+        return(residual_distance)
+
+    def calculate_batchwise_residual_distance_maps(y_true):
+        y_true_numpy = y_true.numpy()
+        return(np.array([calculate_residual_distance_map(y)
+            for y in y_true_numpy]).astype(np.float32))
+
+    y_true_distance_map = tf.py_function(
+        func=calculate_batchwise_residual_distance_maps,
+        inp=[y_true],
+        Tout=tf.float32)
+
+    product = y_pred * y_true_distance_map
+    return(K.mean(product))
