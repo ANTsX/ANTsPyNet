@@ -99,4 +99,5 @@ Miscellaneous
 .. autofunction:: antspynet.utilities.crop_image_center
 .. autofunction:: antspynet.utilities.pad_or_crop_image_to_size
 .. autofunction:: antspynet.utilities.pad_image_by_factor
-
+.. autofunction:: antspynet.utilities.encode_unet
+.. autofunction:: antspynet.utilities.decode_unet

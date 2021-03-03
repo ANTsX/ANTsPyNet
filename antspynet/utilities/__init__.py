@@ -1,6 +1,8 @@
 from .get_pretrained_network import get_pretrained_network
 from .get_antsxnet_data import get_antsxnet_data
 
+from .unet_utilities import encode_unet
+from .unet_utilities import decode_unet
 from .denseunet_utilities import Scale
 
 from .spatial_transformer_network_utilities import SpatialTransformer2D, SpatialTransformer3D

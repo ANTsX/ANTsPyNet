@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Utilities &#8212; ANTsPyNet 0.0.1 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Architectures" href="architectures.html" />
@@ -35,42 +35,42 @@
 <h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="custom-metrics">
 <h2>Custom metrics<a class="headerlink" href="#custom-metrics" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.multilabel_dice_coefficient">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">multilabel_dice_coefficient</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em>, <em class="sig-param">dimensionality=3</em>, <em class="sig-param">smoothing_factor=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_dice_coefficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.multilabel_dice_coefficient" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">multilabel_dice_coefficient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_dice_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.multilabel_dice_coefficient" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.peak_signal_to_noise_ratio">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">peak_signal_to_noise_ratio</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#peak_signal_to_noise_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.peak_signal_to_noise_ratio" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">peak_signal_to_noise_ratio</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#peak_signal_to_noise_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.peak_signal_to_noise_ratio" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.pearson_correlation_coefficient">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">pearson_correlation_coefficient</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#pearson_correlation_coefficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.pearson_correlation_coefficient" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">pearson_correlation_coefficient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#pearson_correlation_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.pearson_correlation_coefficient" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="antspynet.utilities.categorical_focal_gain">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">categorical_focal_gain</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em>, <em class="sig-param">gamma=2.0</em>, <em class="sig-param">alpha=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#categorical_focal_gain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.categorical_focal_gain" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.categorical_focal_loss">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">categorical_focal_loss</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em>, <em class="sig-param">gamma=2.0</em>, <em class="sig-param">alpha=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#categorical_focal_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.categorical_focal_loss" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">categorical_focal_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.25</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#categorical_focal_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.categorical_focal_loss" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.weighted_categorical_crossentropy">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">weighted_categorical_crossentropy</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em>, <em class="sig-param">weights</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#weighted_categorical_crossentropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.weighted_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">weighted_categorical_crossentropy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#weighted_categorical_crossentropy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.weighted_categorical_crossentropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="antspynet.utilities.multilabel_surface_loss">
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">multilabel_surface_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_surface_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.multilabel_surface_loss" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="custom-normalization-layers">
 <h2>Custom normalization layers<a class="headerlink" href="#custom-normalization-layers" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.InstanceNormalization">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">InstanceNormalization</code><span class="sig-paren">(</span><em class="sig-param">axis=None</em>, <em class="sig-param">epsilon=0.001</em>, <em class="sig-param">center=True</em>, <em class="sig-param">scale=True</em>, <em class="sig-param">beta_initializer='zeros'</em>, <em class="sig-param">gamma_initializer='ones'</em>, <em class="sig-param">beta_regularizer=None</em>, <em class="sig-param">gamma_regularizer=None</em>, <em class="sig-param">beta_constraint=None</em>, <em class="sig-param">gamma_constraint=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_normalization_layers.html#InstanceNormalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.InstanceNormalization" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">InstanceNormalization</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_normalization_layers.html#InstanceNormalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.InstanceNormalization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instance normalization layer.</p>
 <p>Normalize the activations of the previous layer at each step,
 i.e. applies a transformation that maintains the mean activation
@@ -111,9 +111,9 @@ next layer.</p></li>
 </div>
 <div class="section" id="custom-activation-layers">
 <h2>Custom activation layers<a class="headerlink" href="#custom-activation-layers" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.LogSoftmax">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">LogSoftmax</code><span class="sig-paren">(</span><em class="sig-param">axis=-1</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_activation_layers.html#LogSoftmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.LogSoftmax" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">LogSoftmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_activation_layers.html#LogSoftmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.LogSoftmax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log Softmax activation function.</p>
 <dl class="simple">
 <dt>Input shape:</dt><dd><p>Arbitrary. Use the keyword argument <cite>input_shape</cite>
@@ -133,9 +133,9 @@ when using this layer as the first layer in a model.</p>
 </div>
 <div class="section" id="resample-tensor-layer">
 <h2>Resample tensor layer<a class="headerlink" href="#resample-tensor-layer" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.ResampleTensorLayer2D">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">ResampleTensorLayer2D</code><span class="sig-paren">(</span><em class="sig-param">shape</em>, <em class="sig-param">interpolation_type='nearest_neighbor'</em>, <em class="sig-param">name=''</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/resample_tensor_utilities.html#ResampleTensorLayer2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.ResampleTensorLayer2D" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">ResampleTensorLayer2D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/resample_tensor_utilities.html#ResampleTensorLayer2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.ResampleTensorLayer2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tensor resampling layer (2D).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -153,9 +153,9 @@ when using this layer as the first layer in a model.</p>
 </dl>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.ResampleTensorLayer3D">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">ResampleTensorLayer3D</code><span class="sig-paren">(</span><em class="sig-param">shape</em>, <em class="sig-param">interpolation_type='nearest_neighbor'</em>, <em class="sig-param">name=''</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/resample_tensor_utilities.html#ResampleTensorLayer3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.ResampleTensorLayer3D" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">ResampleTensorLayer3D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/resample_tensor_utilities.html#ResampleTensorLayer3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.ResampleTensorLayer3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tensor resampling layer (3D).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -176,9 +176,9 @@ when using this layer as the first layer in a model.</p>
 </div>
 <div class="section" id="mixture-density-networks">
 <h2>Mixture density networks<a class="headerlink" href="#mixture-density-networks" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.MixtureDensityLayer">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">MixtureDensityLayer</code><span class="sig-paren">(</span><em class="sig-param">output_dimension</em>, <em class="sig-param">number_of_mixtures</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#MixtureDensityLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.MixtureDensityLayer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">MixtureDensityLayer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#MixtureDensityLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.MixtureDensityLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Layer for modeling arbitrary functions using neural networks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -196,9 +196,9 @@ when using this layer as the first layer in a model.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.get_mixture_density_loss_function">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">get_mixture_density_loss_function</code><span class="sig-paren">(</span><em class="sig-param">output_dimension</em>, <em class="sig-param">number_of_mixtures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#get_mixture_density_loss_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_mixture_density_loss_function" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">get_mixture_density_loss_function</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_mixtures</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mixture_density_utilities.html#get_mixture_density_loss_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.get_mixture_density_loss_function" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a loss function for the mixture density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -219,9 +219,9 @@ when using this layer as the first layer in a model.</p>
 </div>
 <div class="section" id="attention">
 <h2>Attention<a class="headerlink" href="#attention" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.AttentionLayer2D">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">AttentionLayer2D</code><span class="sig-paren">(</span><em class="sig-param">number_of_channels</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/attention_utilities.html#AttentionLayer2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.AttentionLayer2D" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">AttentionLayer2D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/attention_utilities.html#AttentionLayer2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.AttentionLayer2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attention layer (2-D) from the self attention GAN</p>
 <p>taken from the following python implementation</p>
 <p><a class="reference external" href="https://stackoverflow.com/questions/50819931/self-attention-gan-in-keras">https://stackoverflow.com/questions/50819931/self-attention-gan-in-keras</a></p>
@@ -240,9 +240,9 @@ when using this layer as the first layer in a model.</p>
 </dl>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.AttentionLayer3D">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">AttentionLayer3D</code><span class="sig-paren">(</span><em class="sig-param">number_of_channels</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/attention_utilities.html#AttentionLayer3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.AttentionLayer3D" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">AttentionLayer3D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/attention_utilities.html#AttentionLayer3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.AttentionLayer3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attention layer (3-D) from the self attention GAN</p>
 <p>taken from the following python implementation</p>
 <p><a class="reference external" href="https://stackoverflow.com/questions/50819931/self-attention-gan-in-keras">https://stackoverflow.com/questions/50819931/self-attention-gan-in-keras</a></p>
@@ -273,9 +273,9 @@ when using this layer as the first layer in a model.</p>
 </div>
 <div class="section" id="clustering">
 <h2>Clustering<a class="headerlink" href="#clustering" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.DeepEmbeddedClustering">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">DeepEmbeddedClustering</code><span class="sig-paren">(</span><em class="sig-param">number_of_clusters=10</em>, <em class="sig-param">initial_cluster_weights=None</em>, <em class="sig-param">alpha=1.0</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_embedded_clustering_utilities.html#DeepEmbeddedClustering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.DeepEmbeddedClustering" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">DeepEmbeddedClustering</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_embedded_clustering_utilities.html#DeepEmbeddedClustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.DeepEmbeddedClustering" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deep embedded lustering layer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -294,9 +294,9 @@ when using this layer as the first layer in a model.</p>
 </dl>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.DeepEmbeddedClusteringModel">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">DeepEmbeddedClusteringModel</code><span class="sig-paren">(</span><em class="sig-param">number_of_units_per_layer=None</em>, <em class="sig-param">number_of_clusters=10</em>, <em class="sig-param">alpha=1.0</em>, <em class="sig-param">initializer='glorot_uniform'</em>, <em class="sig-param">convolutional=False</em>, <em class="sig-param">input_image_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_embedded_clustering_utilities.html#DeepEmbeddedClusteringModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.DeepEmbeddedClusteringModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">DeepEmbeddedClusteringModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_units_per_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'glorot_uniform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convolutional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_image_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_embedded_clustering_utilities.html#DeepEmbeddedClusteringModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.DeepEmbeddedClusteringModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deep embedded clustering with and without convolutions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -319,9 +319,9 @@ when using this layer as the first layer in a model.</p>
 </div>
 <div class="section" id="image-patch">
 <h2>Image patch<a class="headerlink" href="#image-patch" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.extract_image_patches">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">extract_image_patches</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">patch_size</em>, <em class="sig-param">max_number_of_patches='all'</em>, <em class="sig-param">stride_length=1</em>, <em class="sig-param">mask_image=None</em>, <em class="sig-param">random_seed=None</em>, <em class="sig-param">return_as_array=False</em>, <em class="sig-param">randomize=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/extract_image_patches.html#extract_image_patches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.extract_image_patches" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">extract_image_patches</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_number_of_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_as_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/extract_image_patches.html#extract_image_patches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.extract_image_patches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract 2-D or 3-D image patches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -359,9 +359,9 @@ dim( number_of_patches, patch_size ).</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.reconstruct_image_from_patches">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">reconstruct_image_from_patches</code><span class="sig-paren">(</span><em class="sig-param">patches</em>, <em class="sig-param">domain_image</em>, <em class="sig-param">stride_length=1</em>, <em class="sig-param">domain_image_is_mask=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/reconstruct_image_from_patches.html#reconstruct_image_from_patches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.reconstruct_image_from_patches" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">reconstruct_image_from_patches</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_image_is_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/reconstruct_image_from_patches.html#reconstruct_image_from_patches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.reconstruct_image_from_patches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reconstruct image from a list of patches.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -396,9 +396,9 @@ mask used to limit the region of reconstruction from the patches.</p></li>
 </div>
 <div class="section" id="super-resolution">
 <h2>Super-resolution<a class="headerlink" href="#super-resolution" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.mse">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">mse</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#mse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.mse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">mse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#mse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.mse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean square error of a single image or between two images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -422,9 +422,9 @@ mask used to limit the region of reconstruction from the patches.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.mae">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">mae</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#mae"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.mae" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">mae</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#mae"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.mae" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean absolute error of a single image or between two images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -448,9 +448,9 @@ mask used to limit the region of reconstruction from the patches.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.psnr">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">psnr</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#psnr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.psnr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">psnr</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#psnr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.psnr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Peak signal-to-noise ratio between two images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -474,9 +474,9 @@ mask used to limit the region of reconstruction from the patches.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.ssim">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">ssim</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">K=(0.01</em>, <em class="sig-param">0.03)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#ssim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.ssim" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">ssim</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.01,</span> <span class="pre">0.03)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#ssim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.ssim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structural similarity index (SSI) between two images.</p>
 <p>Implementation of the SSI quantity for two images proposed in</p>
 <p>Z. Wang, A.C. Bovik, H.R. Sheikh, E.P. Simoncelli. “Image quality
@@ -506,9 +506,9 @@ in case of weak denominators.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.gmsd">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">gmsd</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#gmsd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.gmsd" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">gmsd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#gmsd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.gmsd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gradient magnitude similarity deviation</p>
 <p>A fast and simple metric that correlates to perceptual quality.</p>
 <dl class="field-list simple">
@@ -533,9 +533,9 @@ in case of weak denominators.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.apply_super_resolution_model_to_image">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">apply_super_resolution_model_to_image</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">model</em>, <em class="sig-param">target_range=(-127.5</em>, <em class="sig-param">127.5)</em>, <em class="sig-param">batch_size=32</em>, <em class="sig-param">regression_order=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#apply_super_resolution_model_to_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.apply_super_resolution_model_to_image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">apply_super_resolution_model_to_image</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-</span> <span class="pre">127.5,</span> <span class="pre">127.5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regression_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/super_resolution_utilities.html#apply_super_resolution_model_to_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.apply_super_resolution_model_to_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a pretrained deep back projection model for super resolution.
 Helper function for applying a pretrained deep back projection model.
 Apply a patch-wise trained network to perform super-resolution. Can be applied
@@ -576,9 +576,9 @@ poly_order=regression_order.</p></li>
 </div>
 <div class="section" id="spatial-transformer-network">
 <h2>Spatial transformer network<a class="headerlink" href="#spatial-transformer-network" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.SpatialTransformer2D">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">SpatialTransformer2D</code><span class="sig-paren">(</span><em class="sig-param">resampled_size</em>, <em class="sig-param">transform_type='affine'</em>, <em class="sig-param">interpolator_type='linear'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/spatial_transformer_network_utilities.html#SpatialTransformer2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.SpatialTransformer2D" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">SpatialTransformer2D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/spatial_transformer_network_utilities.html#SpatialTransformer2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.SpatialTransformer2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom layer for the spatial transfomer network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -599,9 +599,9 @@ weights.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.SpatialTransformer3D">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">SpatialTransformer3D</code><span class="sig-paren">(</span><em class="sig-param">resampled_size</em>, <em class="sig-param">transform_type='affine'</em>, <em class="sig-param">interpolator_type='linear'</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/spatial_transformer_network_utilities.html#SpatialTransformer3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.SpatialTransformer3D" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">SpatialTransformer3D</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/spatial_transformer_network_utilities.html#SpatialTransformer3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.SpatialTransformer3D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom layer for the spatial transfomer network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -625,9 +625,9 @@ weights.</p></li>
 </div>
 <div class="section" id="applications">
 <h2>Applications<a class="headerlink" href="#applications" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.brain_extraction">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">brain_extraction</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">modality='t1'</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/brain_extraction.html#brain_extraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.brain_extraction" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">brain_extraction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/brain_extraction.html#brain_extraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.brain_extraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform brain extraction using U-net and ANTs-based training data.  “NoBrainer”
 is also possible where brain extraction uses U-net and FreeSurfer training data
 ported from the</p>
@@ -675,9 +675,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.cortical_thickness">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">cortical_thickness</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cortical_thickness.html#cortical_thickness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.cortical_thickness" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">cortical_thickness</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cortical_thickness.html#cortical_thickness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.cortical_thickness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform KellyKapowski cortical thickness using deep_atropos for
 segmentation.  Description concerning implementaiton and evaluation:</p>
 <p><a class="reference external" href="https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1">https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1</a></p>
@@ -705,9 +705,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.longitudinal_cortical_thickness">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">longitudinal_cortical_thickness</code><span class="sig-paren">(</span><em class="sig-param">t1s</em>, <em class="sig-param">initial_template='oasis'</em>, <em class="sig-param">number_of_iterations=1</em>, <em class="sig-param">refinement_transform='antsRegistrationSyNQuick[a]'</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cortical_thickness.html#longitudinal_cortical_thickness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.longitudinal_cortical_thickness" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">longitudinal_cortical_thickness</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'oasis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refinement_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'antsRegistrationSyNQuick[a]'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cortical_thickness.html#longitudinal_cortical_thickness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.longitudinal_cortical_thickness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform KellyKapowski cortical thickness longitudinally using code{deepAtropos}
 for segmentation of the derived single-subject template.  It takes inspiration from
 the work described here:</p>
@@ -743,9 +743,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.lung_extraction">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">lung_extraction</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">modality='proton'</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/lung_extraction.html#lung_extraction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.lung_extraction" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">lung_extraction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'proton'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/lung_extraction.html#lung_extraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.lung_extraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform proton or ct lung extraction using U-net.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -771,9 +771,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.preprocess_brain_image">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">preprocess_brain_image</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">truncate_intensity=(0.01</em>, <em class="sig-param">0.99)</em>, <em class="sig-param">do_brain_extraction=True</em>, <em class="sig-param">template_transform_type=None</em>, <em class="sig-param">template='biobank'</em>, <em class="sig-param">do_bias_correction=True</em>, <em class="sig-param">return_bias_field=False</em>, <em class="sig-param">do_denoising=True</em>, <em class="sig-param">intensity_matching_type=None</em>, <em class="sig-param">reference_image=None</em>, <em class="sig-param">intensity_normalization_type=None</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/preprocess_image.html#preprocess_brain_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.preprocess_brain_image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">preprocess_brain_image</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate_intensity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.01,</span> <span class="pre">0.99)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_brain_extraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_transform_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'biobank'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_bias_correction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_bias_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_denoising</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity_matching_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity_normalization_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/preprocess_image.html#preprocess_brain_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.preprocess_brain_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Basic preprocessing pipeline for T1-weighted brain MRI</p>
 <p>Standard preprocessing steps that have been previously described
 in various papers including the cortical thickness pipeline:</p>
@@ -821,9 +821,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.sysu_media_wmh_segmentation">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">sysu_media_wmh_segmentation</code><span class="sig-paren">(</span><em class="sig-param">flair</em>, <em class="sig-param">t1=None</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">use_ensemble=True</em>, <em class="sig-param">use_axial_slices_only=True</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/white_matter_hyperintensity_segmentation.html#sysu_media_wmh_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.sysu_media_wmh_segmentation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">sysu_media_wmh_segmentation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flair</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_ensemble</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_axial_slices_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/white_matter_hyperintensity_segmentation.html#sysu_media_wmh_segmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.sysu_media_wmh_segmentation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform WMH segmentation using the winning submission in the MICCAI
 2017 challenge by the sysu_media team using FLAIR or T1/FLAIR.  The
 MICCAI challenge is discussed in</p>
@@ -864,9 +864,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.hippmapp3r_segmentation">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">hippmapp3r_segmentation</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/hippmapp3r_segmentation.html#hippmapp3r_segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.hippmapp3r_segmentation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">hippmapp3r_segmentation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/hippmapp3r_segmentation.html#hippmapp3r_segmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.hippmapp3r_segmentation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform HippMapp3r (hippocampal) segmentation described in</p>
 <blockquote>
 <div><p><a class="reference external" href="https://www.ncbi.nlm.nih.gov/pubmed/31609046">https://www.ncbi.nlm.nih.gov/pubmed/31609046</a></p>
@@ -909,9 +909,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.deep_flash">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_flash</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">do_per_hemisphere=True</em>, <em class="sig-param">which_hemisphere_models='new'</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">deep_flash</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_per_hemisphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which_hemisphere_models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'new'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hippocampal/Enthorhinal segmentation using “Deep Flash”</p>
 <p>Perform hippocampal/entorhinal segmentation in T1 images using
 labels from Mike Yassa’s lab</p>
@@ -972,9 +972,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.deep_atropos">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_atropos</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_atropos.html#deep_atropos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_atropos" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">deep_atropos</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_atropos.html#deep_atropos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.deep_atropos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Six-tissue segmentation.</p>
 <p>Perform Atropos-style six tissue segmentation using deep learning.</p>
 <p>The labeling is as follows:
@@ -1023,9 +1023,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.desikan_killiany_tourville_labeling">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">desikan_killiany_tourville_labeling</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">return_probability_images=False</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/desikan_killiany_tourville_labeling.html#desikan_killiany_tourville_labeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.desikan_killiany_tourville_labeling" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">desikan_killiany_tourville_labeling</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_probability_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/desikan_killiany_tourville_labeling.html#desikan_killiany_tourville_labeling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.desikan_killiany_tourville_labeling" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cortical and deep gray matter labeling using Desikan-Killiany-Tourville</p>
 <p>Perform DKT labeling using deep learning</p>
 <p>The labeling is as follows:</p>
@@ -1172,9 +1172,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.brain_age">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">brain_age</code><span class="sig-paren">(</span><em class="sig-param">t1</em>, <em class="sig-param">do_preprocessing=True</em>, <em class="sig-param">number_of_simulations=0</em>, <em class="sig-param">sd_affine=0.01</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/brain_age.html#brain_age"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.brain_age" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">brain_age</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_affine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/brain_age.html#brain_age"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.brain_age" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate BrainAge from a T1-weighted MR image using the DeepBrainNet
 architecture and weights described here:</p>
 <p><a class="reference external" href="https://github.com/vishnubashyam/DeepBrainNet">https://github.com/vishnubashyam/DeepBrainNet</a></p>
@@ -1220,9 +1220,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.mri_super_resolution">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">mri_super_resolution</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mri_super_resolution.html#mri_super_resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.mri_super_resolution" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">mri_super_resolution</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/mri_super_resolution.html#mri_super_resolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.mri_super_resolution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform super-resolution (2x) of MRI data using deep back projection network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1248,9 +1248,9 @@ Since these can be resused, if is None, these data will be downloaded to a
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.tid_neural_image_assessment">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">tid_neural_image_assessment</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">patch_size=101</em>, <em class="sig-param">stride_length=None</em>, <em class="sig-param">padding_size=0</em>, <em class="sig-param">dimensions_to_predict=0</em>, <em class="sig-param">antsxnet_cache_directory=None</em>, <em class="sig-param">which_model='tidsQualityAssessment'</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/quality_assessment.html#tid_neural_image_assessment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.tid_neural_image_assessment" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">tid_neural_image_assessment</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">101</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions_to_predict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tidsQualityAssessment'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/quality_assessment.html#tid_neural_image_assessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.tid_neural_image_assessment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform MOS-based assessment of an image.</p>
 <p>Use a ResNet architecture to estimate image quality in 2D or 3D using subjective
 QC image databases described in</p>
@@ -1301,9 +1301,9 @@ the latter koniq models predict mean opinion score (MOS) and sharpness.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.neural_style_transfer">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">neural_style_transfer</code><span class="sig-paren">(</span><em class="sig-param">content_image, style_images, initial_combination_image=None, number_of_iterations=10, learning_rate=1.0, total_variation_weight=8.5e-05, content_weight=0.025, style_image_weights=1.0, content_layer_names=['block5_conv2'], style_layer_names='all', content_mask=None, style_masks=None, use_shifted_activations=True, use_chained_inference=True, verbose=False, output_prefix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">neural_style_transfer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_images</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_combination_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_variation_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8.5e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_image_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_layer_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['block5_conv2']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_layer_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">style_masks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_shifted_activations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_chained_inference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/neural_style_transfer.html#neural_style_transfer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.neural_style_transfer" title="Permalink to this definition">¶</a></dt>
 <dd><p>The popular neural style transfer described here:</p>
 <p><a class="reference external" href="https://arxiv.org/abs/1508.06576">https://arxiv.org/abs/1508.06576</a> and <a class="reference external" href="https://arxiv.org/abs/1605.04603">https://arxiv.org/abs/1605.04603</a></p>
 <p>and taken from François Chollet’s implementation</p>
@@ -1368,9 +1368,9 @@ mentioned in <a class="reference external" href="https://arxiv.org/abs/1605.0460
 </div>
 <div class="section" id="miscellaneous">
 <h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.get_pretrained_network">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">get_pretrained_network</code><span class="sig-paren">(</span><em class="sig-param">file_id=None</em>, <em class="sig-param">target_file_name=None</em>, <em class="sig-param">antsxnet_cache_directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_pretrained_network.html#get_pretrained_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_pretrained_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">get_pretrained_network</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_pretrained_network.html#get_pretrained_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.get_pretrained_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download pretrained network/weights.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1396,9 +1396,9 @@ to the subdirectory ~/.keras/ANTsXNet/.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.get_antsxnet_data">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">get_antsxnet_data</code><span class="sig-paren">(</span><em class="sig-param">file_id=None</em>, <em class="sig-param">target_file_name=None</em>, <em class="sig-param">antsxnet_cache_directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_antsxnet_data.html#get_antsxnet_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.get_antsxnet_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">get_antsxnet_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_file_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/get_antsxnet_data.html#get_antsxnet_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.get_antsxnet_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download data such as prefabricated templates and spatial priors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1424,9 +1424,9 @@ to the subdirectory ~/.keras/ANTsXNet/.</p></li>
 </div>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="antspynet.utilities.Scale">
-<em class="property">class </em><code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">Scale</code><span class="sig-paren">(</span><em class="sig-param">axis=-1</em>, <em class="sig-param">momentum=0.9</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/denseunet_utilities.html#Scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.Scale" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">Scale</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/denseunet_utilities.html#Scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.Scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Custom layer used in the Dense U-net class for normalization which
 learns a set of weights and biases for scaling the input data.</p>
 <dl class="field-list simple">
@@ -1440,9 +1440,9 @@ mean and standard deviation.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.regression_match_image">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">regression_match_image</code><span class="sig-paren">(</span><em class="sig-param">source_image</em>, <em class="sig-param">reference_image</em>, <em class="sig-param">mask=None</em>, <em class="sig-param">poly_order=1</em>, <em class="sig-param">truncate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/regression_match_image.html#regression_match_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.regression_match_image" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">regression_match_image</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/regression_match_image.html#regression_match_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.regression_match_image" title="Permalink to this definition">¶</a></dt>
 <dd><p>Image intensity normalization using linear regression.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1471,9 +1471,9 @@ image.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.randomly_transform_image_data">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">randomly_transform_image_data</code><span class="sig-paren">(</span><em class="sig-param">reference_image</em>, <em class="sig-param">input_image_list</em>, <em class="sig-param">segmentation_image_list=None</em>, <em class="sig-param">number_of_simulations=10</em>, <em class="sig-param">transform_type='affine'</em>, <em class="sig-param">sd_affine=0.02</em>, <em class="sig-param">deformation_transform_type='bspline'</em>, <em class="sig-param">number_of_random_points=1000</em>, <em class="sig-param">sd_noise=10.0</em>, <em class="sig-param">number_of_fitting_levels=4</em>, <em class="sig-param">mesh_size=1</em>, <em class="sig-param">sd_smoothing=4.0</em>, <em class="sig-param">input_image_interpolator='linear'</em>, <em class="sig-param">segmentation_image_interpolator='nearestNeighbor'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_transform_image_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.randomly_transform_image_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">randomly_transform_image_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reference_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_image_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_image_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'affine'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_affine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deformation_transform_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bspline'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_random_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_fitting_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_image_interpolator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_image_interpolator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearestNeighbor'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/randomly_transform_image_data.html#randomly_transform_image_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.randomly_transform_image_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Randomly transform image data (optional: with corresponding segmentations).</p>
 <p>Apply rigid, affine and/or deformable maps to an input set of training
 images.  The reference image domain defines the space in which this
@@ -1533,9 +1533,9 @@ transformations.</p></li>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.histogram_warp_image_intensities">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">histogram_warp_image_intensities</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">break_points=(0.25</em>, <em class="sig-param">0.5</em>, <em class="sig-param">0.75)</em>, <em class="sig-param">displacements=None</em>, <em class="sig-param">clamp_end_points=(False</em>, <em class="sig-param">False)</em>, <em class="sig-param">sd_displacements=0.05</em>, <em class="sig-param">transform_domain_size=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/histogram_warp_image_intensities.html#histogram_warp_image_intensities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.histogram_warp_image_intensities" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">histogram_warp_image_intensities</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">break_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.25,</span> <span class="pre">0.5,</span> <span class="pre">0.75)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displacements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clamp_end_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(False,</span> <span class="pre">False)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_displacements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_domain_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/histogram_warp_image_intensities.html#histogram_warp_image_intensities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.histogram_warp_image_intensities" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform image intensities based on histogram mapping.</p>
 <p>Apply B-spline 1-D maps to an input image for intensity warping.</p>
 <dl class="field-list simple">
@@ -1568,9 +1568,9 @@ breakPoints.  Alternatively, if None random displacements are chosen
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.crop_image_center">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">crop_image_center</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">crop_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#crop_image_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.crop_image_center" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">crop_image_center</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#crop_image_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.crop_image_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crop the center of an image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1594,9 +1594,9 @@ breakPoints.  Alternatively, if None random displacements are chosen
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.pad_or_crop_image_to_size">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">pad_or_crop_image_to_size</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#pad_or_crop_image_to_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.pad_or_crop_image_to_size" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">pad_or_crop_image_to_size</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#pad_or_crop_image_to_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.pad_or_crop_image_to_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad or crop an image to a specified size</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1620,9 +1620,9 @@ breakPoints.  Alternatively, if None random displacements are chosen
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="antspynet.utilities.pad_image_by_factor">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">pad_image_by_factor</code><span class="sig-paren">(</span><em class="sig-param">image</em>, <em class="sig-param">factor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#pad_image_by_factor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.pad_image_by_factor" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">pad_image_by_factor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#pad_image_by_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.pad_image_by_factor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad an image based on a factor.</p>
 <p>Pad image of size (x, y, z) to (x’, y’, z’) where (x’, y’, z’)
 is a divisible by a user-specified factor.</p>
@@ -1644,6 +1644,58 @@ is a divisible by a user-specified factor.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">padded_image</span> <span class="o">=</span> <span class="n">pad_image_by_factor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="antspynet.utilities.encode_unet">
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">encode_unet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmentations_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/unet_utilities.html#encode_unet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.encode_unet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic one-hot transformation of segmentations array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>segmentations_array</strong> (<em>numpy array</em>) – multi-label numpy array</p></li>
+<li><p><strong>segmentation_labels</strong> (<em>tuple</em><em> or </em><em>list</em>) – Note that a background label (typically 0) needs to be included.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>An n-d array of shape batch_size x width x height x &lt;depth&gt; x number_of_segmentation_labels</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">kmeans_segmentation</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="s1">&#39;segmentation&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">one_hot</span> <span class="o">=</span> <span class="n">seg</span><span class="o">.</span><span class="n">encode_unet</span><span class="p">(</span><span class="n">seg</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="antspynet.utilities.decode_unet">
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">decode_unet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmentations_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/unet_utilities.html#decode_unet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.decode_unet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decoding function for the u-net prediction outcome</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_predicted</strong> (<em>an array</em>) – Shape batch_size x width x height x &lt;depth&gt; x number_of_segmentation_labels</p></li>
+<li><p><strong>domain_image</strong> (<em>ANTs image</em>) – Defines the geometry of the returned probability images</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List of probability images.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s1">&#39;r16&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1722,7 +1774,7 @@ is a divisible by a user-specified factor.</p>
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
