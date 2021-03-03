@@ -1,17 +1,12 @@
 
 import tensorflow.keras.backend as K
-import tensorflow as tf
 import numpy as np
 import scipy as sp
 
-def multilabel_dice_coefficient(y_true, y_pred, smoothing_factor=0.0):
+def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
 
     def multilabel_dice_coefficient_fixed(y_true, y_pred):
         y_dims = K.int_shape(y_pred)
-
-        dimensionality = 3
-        if len(y_dims) == 4:
-            dimensionality = 2
 
         number_of_labels = y_dims[len(y_dims)]
 
@@ -77,18 +72,7 @@ def pearson_correlation_coefficient(y_true, y_pred):
 
     return(coefficient)
 
-def categorical_focal_gain(y_true, y_pred, gamma=2.0, alpha=0.25):
-
-    def categorical_focal_gain_fixed(y_true, y_pred):
-        y_pred = y_pred / K.sum(y_pred, axis=-1, keepdims=True)
-        y_pred = K.clip(y_pred, K.epsilon(), 1.0 - K.epsilon())
-        cross_entropy = y_true * K.log(y_pred)
-        gain = alpha * K.pow(1.0 - y_pred, gamma) * cross_entropy
-        return(K.sum(gain, axis=-1))
-
-    return(categorical_focal_gain_fixed)
-
-def categorical_focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
+def categorical_focal_loss(gamma=2.0, alpha=0.25):
 
     def categorical_focal_loss_fixed(y_true, y_pred):
         y_pred = y_pred / K.sum(y_pred, axis=-1, keepdims=True)
@@ -99,7 +83,7 @@ def categorical_focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
 
     return(categorical_focal_loss_fixed)
 
-def weighted_categorical_crossentropy(y_true, y_pred, weights):
+def weighted_categorical_crossentropy(weights):
 
     weights_tensor = K.variable(weights)
 
@@ -112,29 +96,32 @@ def weighted_categorical_crossentropy(y_true, y_pred, weights):
 
     return(weighted_categorical_crossentropy_fixed)
 
-def multilabel_surface_loss(y_true, y_pred):
+def multilabel_surface_loss(dimensionality = 3):
 
-    def calculate_residual_distance_map(segmentation):
-        residual_distance = np.zeros_like(segmentation)
+    def multilabel_surface_loss_fixed(y_true, y_pred):
+        def calculate_residual_distance_map(segmentation):
+            residual_distance = np.zeros_like(segmentation)
 
-        positive_mask = segmentation.astype(np.bool)
-        if positive_mask.any():
-            negative_mask = ~positive_mask
-            residual_distance = \
-                (sp.ndimage.distance_transform_edt(negative_mask) * negative_mask -
-                (sp.ndimage.distance_transform_edt(positive_mask) - 1) * positive_mask)
+            positive_mask = segmentation.astype(np.bool)
+            if positive_mask.any():
+                negative_mask = ~positive_mask
+                residual_distance = \
+                    (sp.ndimage.distance_transform_edt(negative_mask) * negative_mask -
+                    (sp.ndimage.distance_transform_edt(positive_mask) - 1) * positive_mask)
 
-        return(residual_distance)
+            return(residual_distance)
 
-    def calculate_batchwise_residual_distance_maps(y_true):
-        y_true_numpy = y_true.numpy()
-        return(np.array([calculate_residual_distance_map(y)
-            for y in y_true_numpy]).astype(np.float32))
+        def calculate_batchwise_residual_distance_maps(y_true):
+            y_true_numpy = y_true.numpy()
+            return(np.array([calculate_residual_distance_map(y)
+                for y in y_true_numpy]).astype(np.float32))
 
-    y_true_distance_map = tf.py_function(
-        func=calculate_batchwise_residual_distance_maps,
-        inp=[y_true],
-        Tout=tf.float32)
+        y_true_distance_map = tf.py_function(
+            func=calculate_batchwise_residual_distance_maps,
+            inp=[y_true],
+            Tout=tf.float32)
 
-    product = y_pred * y_true_distance_map
-    return(K.mean(product))
+        product = y_pred * y_true_distance_map
+        return(K.mean(product))
+
+    return(multilabel_surface_loss_fixed)
