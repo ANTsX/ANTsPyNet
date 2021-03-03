@@ -8,7 +8,7 @@ def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
     def multilabel_dice_coefficient_fixed(y_true, y_pred):
         y_dims = K.int_shape(y_pred)
 
-        number_of_labels = y_dims[len(y_dims)]
+        number_of_labels = y_dims[len(y_dims)-1]
 
         if dimensionality == 3:
             # 2-D image
