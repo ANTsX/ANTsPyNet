@@ -3,7 +3,7 @@ import tensorflow.keras.backend as K
 import numpy as np
 import scipy as sp
 
-def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
+def multilabel_dice_coefficient(dimensionality=3, smoothing_factor=0.0):
 
     def multilabel_dice_coefficient_fixed(y_true, y_pred):
         y_dims = K.int_shape(y_pred)
@@ -96,7 +96,7 @@ def weighted_categorical_crossentropy(weights):
 
     return(weighted_categorical_crossentropy_fixed)
 
-def multilabel_surface_loss(dimensionality = 3):
+def multilabel_surface_loss(dimensionality=3):
 
     def multilabel_surface_loss_fixed(y_true, y_pred):
         def calculate_residual_distance_map(segmentation):
