@@ -46,7 +46,7 @@ def encode_unet(segmentations_array,
     for i in range(number_of_labels):
         per_label = np.zeros_like(segmentations_array)
         per_label[segmentations_array == segmentation_labels[i]] = 1
-        per_label[segmentations_array != segmentation_labels[i]] = 1
+        per_label[segmentations_array != segmentation_labels[i]] = 0
         if image_dimension == 2:
             one_hot_array[:,:,:,i] = per_label
         else:
