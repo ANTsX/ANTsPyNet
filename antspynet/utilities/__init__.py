@@ -32,7 +32,6 @@ from .attention_utilities import AttentionLayer2D, AttentionLayer3D
 from .custom_metrics import multilabel_dice_coefficient
 from .custom_metrics import peak_signal_to_noise_ratio
 from .custom_metrics import pearson_correlation_coefficient
-from .custom_metrics import categorical_focal_gain
 from .custom_metrics import categorical_focal_loss
 from .custom_metrics import weighted_categorical_crossentropy
 from .custom_metrics import multilabel_surface_loss
