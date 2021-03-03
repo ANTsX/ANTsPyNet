@@ -16,8 +16,8 @@ def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
             y_pred_permuted = K.permute_dimensions(y_pred, pattern = (3, 0, 1, 2))
         elif dimensionality == 3:
             # 3-D image
-            y_true_permuted <- K.permute_dimensions(y_true, pattern = (4, 0, 1, 2, 3))
-            y_pred_permuted <- K.permute_dimensions(y_pred, pattern = (4, 0, 1, 2, 3))
+            y_true_permuted = K.permute_dimensions(y_true, pattern = (4, 0, 1, 2, 3))
+            y_pred_permuted = K.permute_dimensions(y_pred, pattern = (4, 0, 1, 2, 3))
         else:
             raise ValueError("Specified dimensionality not implemented.")
 
