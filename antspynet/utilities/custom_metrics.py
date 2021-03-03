@@ -21,8 +21,8 @@ def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
         else:
             raise ValueError("Specified dimensionality not implemented.")
 
-        y_true_label = K.gather(y_true_permuted, indices = (0))
-        y_pred_label = K.gather(y_pred_permuted, indices = (0))
+        y_true_label = K.gather(y_true_permuted, indices = (1))
+        y_pred_label = K.gather(y_pred_permuted, indices = (1))
 
         y_true_label_f = K.flatten(y_true_label)
         y_pred_label_f = K.flatten(y_pred_label)
@@ -34,8 +34,8 @@ def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
 
         if number_of_labels > 2:
             for j in range(2, number_of_labels):
-                y_true_label = K.gather(y_true_permuted, indices = (j-1))
-                y_pred_label = K.gather(y_pred_permuted, indices = (j-1))
+                y_true_label = K.gather(y_true_permuted, indices = (j))
+                y_pred_label = K.gather(y_pred_permuted, indices = (j))
                 y_true_label_f = K.flatten(y_true_label)
                 y_pred_label_f = K.flatten(y_pred_label)
 
