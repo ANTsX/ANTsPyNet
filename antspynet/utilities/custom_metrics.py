@@ -10,11 +10,11 @@ def multilabel_dice_coefficient(dimensionality = 3, smoothing_factor=0.0):
 
         number_of_labels = y_dims[len(y_dims)-1]
 
-        if dimensionality == 3:
+        if dimensionality == 2:
             # 2-D image
             y_true_permuted = K.permute_dimensions(y_true, pattern = (3, 0, 1, 2))
             y_pred_permuted = K.permute_dimensions(y_pred, pattern = (3, 0, 1, 2))
-        elif dimensionality == 2:
+        elif dimensionality == 3:
             # 3-D image
             y_true_permuted <- K.permute_dimensions(y_true, pattern = (4, 0, 1, 2, 3))
             y_pred_permuted <- K.permute_dimensions(y_pred, pattern = (4, 0, 1, 2, 3))
