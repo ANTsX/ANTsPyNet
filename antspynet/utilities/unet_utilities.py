@@ -55,8 +55,8 @@ def encode_unet(segmentations_array,
     return one_hot_array
 
 
-def decode_unet(segmentations_array,
-                segmentation_labels=None):
+def decode_unet(y_predicted,
+                domain_image):
 
     """
     Decoding function for the u-net prediction outcome
