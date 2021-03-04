@@ -52,7 +52,7 @@ def histogram_warp_image_intensities(image,
         raise ValueError("clamp_end_points must be a boolean tuple of length 2.")
 
     if not isinstance(break_points, int):
-        if any( break_points < 0 ) and any( break_points > 1 ):
+        if any(b < 0 for b in break_points) and any(b > 1 for b in break_points):
             raise ValueError("If specifying break_points as a vector, values must be in the range [0, 1]")
 
     parametric_points = None
