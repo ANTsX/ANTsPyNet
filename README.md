@@ -67,17 +67,18 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
     * FA
     * BOLD
     * [T1/T2 infant](https://www.med.unc.edu/psych/research/psychiatry-department-research-programs/early-brain-development-research/)
-* Lung extraction
-    * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
-    * CT
 * Six-tissue Atropos brain segmentation
 * [Cortical thickness](https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1.full)
 * [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
 * [Hippmapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
 * [White matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
-* [Neural style transfer](https://arxiv.org/abs/1508.06576)
 * Deep Flash
 * Desikan-Killiany-Tourville cortical labeling
+* Lung extraction
+    * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
+    * CT
+* [Functional lung segmentation](https://www.medrxiv.org/content/10.1101/2021.03.04.21252588v2)
+* [Neural style transfer](https://arxiv.org/abs/1508.06576)
 * Image quality assessment
     * [TID2013](https://www.sciencedirect.com/science/article/pii/S0923596514001490)
     * [KonIQ-10k](https://ieeexplore.ieee.org/document/8968750)
