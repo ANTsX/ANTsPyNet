@@ -6,6 +6,7 @@ from . import extract_image_patches
 from . import regression_match_image
 
 from tensorflow.keras.models import load_model
+import tensorflow as tf
 
 import time
 from os import path
@@ -254,13 +255,38 @@ def apply_super_resolution_model_to_image(
     >>> image = ants.image_read(ants.get_ants_data('r16'))
     >>> image_sr = apply_super_resolution_model_to_image(image, get_pretrained_network("dbpn4x"))
     """
-
+    tflite_flag = False
     channel_axis = 0
     if K.image_data_format() == "channels_last":
         channel_axis = -1
 
-    shape_length = len(model.input_shape)
+    if target_range[0] > target_range[1]:
+        target_range = target_range[::-1]
 
+    start_time = time.time()
+    if isinstance(model, str):
+        if path.isfile(model):
+            if verbose:
+                print("Load model.")
+            if path.splitext(model)[1] == '.tflite':
+                interpreter = tf.lite.Interpreter(model)
+                interpreter.allocate_tensors()
+                input_details = interpreter.get_input_details()
+                output_details = interpreter.get_output_details()
+                shape_length = len(interpreter.get_input_details()[0]['shape'])
+            else:    
+                model = load_model(model)
+                shape_length = len(model.input_shape)
+
+            if verbose:
+                elapsed_time = time.time() - start_time
+                print("  (elapsed time: ", elapsed_time, ")")
+        else:
+            raise ValueError("Model not found.")
+    else:
+        shape_length = len(model.input_shape)
+
+    
     if shape_length < 4 | shape_length > 5:
         raise ValueError("Unexpected input shape.")
     else:
@@ -271,7 +297,10 @@ def apply_super_resolution_model_to_image(
 
     if channel_axis == -1:
         channel_axis < shape_length
-    channel_size = model.input_shape[channel_axis]
+    if  tflite_flag:
+        channel_size = interpreter.get_input_details()[0]['shape'][channel_axis]
+    else:
+        channel_size = model.input_shape[channel_axis]
 
     if channel_size != image.components:
         raise ValueError(
@@ -281,21 +310,6 @@ def apply_super_resolution_model_to_image(
             str(image.components),
             "of the input image.",
         )
-
-    if target_range[0] > target_range[1]:
-        target_range = target_range[::-1]
-
-    start_time = time.time()
-    if isinstance(model, str):
-        if path.isfile(model):
-            if verbose:
-                print("Load model.")
-            model = load_model(model)
-            if verbose:
-                elapsed_time = time.time() - start_time
-                print("  (elapsed time: ", elapsed_time, ")")
-        else:
-            raise ValueError("Model not found.")
 
     image_patches = extract_image_patches(
         image,
@@ -317,7 +331,15 @@ def apply_super_resolution_model_to_image(
         print("Prediction")
 
     start_time = time.time()
-    prediction = model.predict(image_patches, batch_size=batch_size)
+
+    if  tflite_flag:
+        image_patches = image_patches.astype('float32')
+        interpreter.set_tensor(input_details[0]['index'], image_patches)
+        interpreter.invoke()
+        out = interpreter.tensor(output_details[0]['index'])
+        prediction = out()
+    else:
+        prediction = model.predict(image_patches, batch_size=batch_size)
 
     if verbose:
         elapsed_time = time.time() - start_time
