@@ -101,6 +101,8 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 ## Publications
 
+* Nicholas J. Tustison, ..., Jaime F. Mata.  Image- vs. histogram-based considerations in semantic segmentation of pulmonary hyperpolarized gas images.  [(medrxiv)](https://www.medrxiv.org/content/10.1101/2021.03.04.21252588v2)
+
 * Nicholas J. Tustison, Philip A. Cook, Andrew J. Holbrook, Hans J. Johnson, John Muschelli, Gabriel A. Devenyi, Jeffrey T. Duda, Sandhitsu R. Das, Nicholas C. Cullen, Daniel L. Gillen, Michael A. Yassa, James R. Stone, James C. Gee, and Brian B. Avants for the Alzheimer’s Disease Neuroimaging Initiative.  ANTsX: A dynamic ecosystem for quantitative biological and medical imaging.  [(medrxiv)](https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1)
 
 * Andrew T. Grainger, Arun Krishnaraj, Michael H. Quinones, Nicholas J. Tustison, Samantha Epstein, Daniela Fuller, Aakash Jha, Kevin L. Allman, Weibin Shi. Deep Learning-based Quantification of Abdominal Subcutaneous and Visceral Fat Volume on CT Images, _Academic Radiology_.  [(pubmed)](https://pubmed.ncbi.nlm.nih.gov/32771313)
