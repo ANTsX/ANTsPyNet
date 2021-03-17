@@ -38,7 +38,44 @@
 <dl class="py function">
 <dt id="antspynet.utilities.multilabel_dice_coefficient">
 <code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">multilabel_dice_coefficient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_dice_coefficient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.multilabel_dice_coefficient" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Multi-label dice segmentation loss</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimensionality</strong> (<em>dimensionality</em>) – Image dimension</p></li>
+<li><p><strong>smoothing_factor</strong> (<em>float</em>) – Used to smooth value during optimization</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Loss value (negative Dice coefficient)</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">antspynet</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r16</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r16_seg</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">kmeans_segmentation</span><span class="p">(</span><span class="n">r16</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="s1">&#39;segmentation&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r16_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">r16_seg</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r16_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">antspynet</span><span class="o">.</span><span class="n">encode_unet</span><span class="p">(</span><span class="n">r16_array</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64_seg</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">kmeans_segmentation</span><span class="p">(</span><span class="n">r64</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="s1">&#39;segmentation&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">r64_seg</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r64_tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">antspynet</span><span class="o">.</span><span class="n">encode_unet</span><span class="p">(</span><span class="n">r64_array</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dice_loss</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">multilabel_dice_coefficient</span><span class="p">(</span><span class="n">dimensionality</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loss_value</span> <span class="o">=</span> <span class="n">dice_loss</span><span class="p">(</span><span class="n">r16_tensor</span><span class="p">,</span> <span class="n">r64_tensor</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Compare with...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ants</span><span class="o">.</span><span class="n">label_overlap_measures</span><span class="p">(</span><span class="n">r16_seg</span><span class="p">,</span> <span class="n">r64_seg</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt id="antspynet.utilities.peak_signal_to_noise_ratio">
@@ -63,6 +100,11 @@
 <dl class="py function">
 <dt id="antspynet.utilities.multilabel_surface_loss">
 <code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">multilabel_surface_loss</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimensionality</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#multilabel_surface_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.multilabel_surface_loss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="antspynet.maximum_mean_discrepancy">
+<code class="sig-prename descclassname"><span class="pre">antspynet.</span></code><code class="sig-name descname"><span class="pre">maximum_mean_discrepancy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/custom_metrics.html#maximum_mean_discrepancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.maximum_mean_discrepancy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -839,7 +881,7 @@ MICCAI challenge is discussed in</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>flair</strong> (<em>ANTsImage</em>) – input 3-D FLAIR brain image (not skull-stripped).</p></li>
 <li><p><strong>t1</strong> (<em>ANTsImage</em>) – input 3-D T1 brain image (not skull-stripped).</p></li>
-<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – perform n4 bias correction?</p></li>
+<li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – perform n4 bias correction.</p></li>
 <li><p><strong>use_ensemble</strong> (<em>boolean</em>) – check whether to use all 3 sets of weights.</p></li>
 <li><p><strong>use_axial_slices_only</strong> (<em>boolean</em>) – If True, use original implementation which was trained on axial slices.
 If False, use ANTsXNet variant implementation which applies the slice-by-slice
@@ -1677,7 +1719,7 @@ is a divisible by a user-specified factor.</p>
 
 <dl class="py function">
 <dt id="antspynet.utilities.decode_unet">
-<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">decode_unet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segmentations_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/unet_utilities.html#decode_unet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.decode_unet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">decode_unet</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_predicted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain_image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/unet_utilities.html#decode_unet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.decode_unet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decoding function for the u-net prediction outcome</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

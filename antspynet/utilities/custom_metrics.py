@@ -163,3 +163,32 @@ def multilabel_surface_loss(dimensionality=3):
         return(K.mean(product))
 
     return(multilabel_surface_loss_fixed)
+
+
+def maximum_mean_discrepancy(sigma=1.0):
+
+    def maximum_mean_discrepancy_fixed(y_true, y_pred):
+
+        x = y_true
+        y = y_pred
+
+        def compute_kernel(x, y, sigma=1.0):
+
+            x_size = K.shape(x)[0]
+            y_size = K.shape(x)[1]
+            dim = K.shape(x)[1]
+            x_tiled = K.tile(K.reshape(x, K.stack([x_size, 1, dim])), K.stack([1, y_size, 1]))
+            y_tiled = K.tile(K.reshape(y, K.stack([1, y_size, dim])), K.stack([x_size, 1, 1]))
+
+            denominator = 2.0 * K.square(sigma)
+            kernel_value = K.exp(-K.mean(K.square(x_tiled - y_tiled) / denominator, axis=3) / K.cast( dim, 'float32'))
+            return kernel_value
+
+        x_kernel = compute_kernel(x, x, sigma)
+        y_kernel = compute_kernel(y, y, sigma)
+        xy_kernel = compute_kernel(x, y, sigma)
+
+        mmd_value = K.mean(x_kernel) + K.mean(y_kernel) - 2 * K.mean(xy_kernel)
+        return mmd_value
+
+    return(maximum_mean_discrepancy_fixed)

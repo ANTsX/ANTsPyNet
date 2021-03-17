@@ -31,26 +31,64 @@
           <div class="body" role="main">
             
   <h1>Source code for antspynet.utilities.custom_metrics</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">tensorflow.keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
 
-<div class="viewcode-block" id="multilabel_dice_coefficient"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.multilabel_dice_coefficient">[docs]</a><span class="k">def</span> <span class="nf">multilabel_dice_coefficient</span><span class="p">(</span><span class="n">dimensionality</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<div class="viewcode-block" id="multilabel_dice_coefficient"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.multilabel_dice_coefficient">[docs]</a><span class="k">def</span> <span class="nf">multilabel_dice_coefficient</span><span class="p">(</span><span class="n">dimensionality</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">smoothing_factor</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multi-label dice segmentation loss</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    dimensionality : dimensionality</span>
+<span class="sd">        Image dimension</span>
+
+<span class="sd">    smoothing_factor : float</span>
+<span class="sd">        Used to smooth value during optimization</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Loss value (negative Dice coefficient).</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import ants</span>
+<span class="sd">    &gt;&gt;&gt; import antspynet</span>
+<span class="sd">    &gt;&gt;&gt; import tensorflow as tf</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; r16 = ants.image_read(ants.get_ants_data(&quot;r16&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; r16_seg = ants.kmeans_segmentation(r16, 3)[&#39;segmentation&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; r16_array = np.expand_dims(r16_seg.numpy(), axis=0)</span>
+<span class="sd">    &gt;&gt;&gt; r16_tensor = tf.convert_to_tensor(antspynet.encode_unet(r16_array, (0, 1, 2, 3)))</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; r64 = ants.image_read(ants.get_ants_data(&quot;r64&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; r64_seg = ants.kmeans_segmentation(r64, 3)[&#39;segmentation&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; r64_array = np.expand_dims(r64_seg.numpy(), axis=0)</span>
+<span class="sd">    &gt;&gt;&gt; r64_tensor = tf.convert_to_tensor(antspynet.encode_unet(r64_array, (0, 1, 2, 3)))</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; dice_loss = antspynet.multilabel_dice_coefficient(dimensionality=2)</span>
+<span class="sd">    &gt;&gt;&gt; loss_value = dice_loss(r16_tensor, r64_tensor).numpy()</span>
+<span class="sd">    &gt;&gt;&gt; # Compare with...</span>
+<span class="sd">    &gt;&gt;&gt; ants.label_overlap_measures(r16_seg, r64_seg)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">multilabel_dice_coefficient_fixed</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
         <span class="n">y_dims</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
 
-        <span class="n">number_of_labels</span> <span class="o">=</span> <span class="n">y_dims</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y_dims</span><span class="p">)]</span>
+        <span class="n">number_of_labels</span> <span class="o">=</span> <span class="n">y_dims</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">y_dims</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="c1"># 2-D image</span>
             <span class="n">y_true_permuted</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
             <span class="n">y_pred_permuted</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">dimensionality</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="c1"># 3-D image</span>
-            <span class="n">y_true_permuted</span> <span class="o">&lt;-</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-            <span class="n">y_pred_permuted</span> <span class="o">&lt;-</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">y_true_permuted</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">y_pred_permuted</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Specified dimensionality not implemented.&quot;</span><span class="p">)</span>
 
@@ -129,7 +167,7 @@
 
     <span class="k">return</span><span class="p">(</span><span class="n">weighted_categorical_crossentropy_fixed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="multilabel_surface_loss"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.multilabel_surface_loss">[docs]</a><span class="k">def</span> <span class="nf">multilabel_surface_loss</span><span class="p">(</span><span class="n">dimensionality</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+<div class="viewcode-block" id="multilabel_surface_loss"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.multilabel_surface_loss">[docs]</a><span class="k">def</span> <span class="nf">multilabel_surface_loss</span><span class="p">(</span><span class="n">dimensionality</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">multilabel_surface_loss_fixed</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">calculate_residual_distance_map</span><span class="p">(</span><span class="n">segmentation</span><span class="p">):</span>
@@ -158,6 +196,35 @@
         <span class="k">return</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">product</span><span class="p">))</span>
 
     <span class="k">return</span><span class="p">(</span><span class="n">multilabel_surface_loss_fixed</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="maximum_mean_discrepancy"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.maximum_mean_discrepancy">[docs]</a><span class="k">def</span> <span class="nf">maximum_mean_discrepancy</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">maximum_mean_discrepancy_fixed</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">y_true</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y_pred</span>
+
+        <span class="k">def</span> <span class="nf">compute_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+
+            <span class="n">x_size</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y_size</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">x_tiled</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="p">])),</span> <span class="n">K</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">y_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+            <span class="n">y_tiled</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">y_size</span><span class="p">,</span> <span class="n">dim</span><span class="p">])),</span> <span class="n">K</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+
+            <span class="n">denominator</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="n">kernel_value</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">x_tiled</span> <span class="o">-</span> <span class="n">y_tiled</span><span class="p">)</span> <span class="o">/</span> <span class="n">denominator</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="n">K</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span> <span class="n">dim</span><span class="p">,</span> <span class="s1">&#39;float32&#39;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">kernel_value</span>
+
+        <span class="n">x_kernel</span> <span class="o">=</span> <span class="n">compute_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+        <span class="n">y_kernel</span> <span class="o">=</span> <span class="n">compute_kernel</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+        <span class="n">xy_kernel</span> <span class="o">=</span> <span class="n">compute_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+
+        <span class="n">mmd_value</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x_kernel</span><span class="p">)</span> <span class="o">+</span> <span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_kernel</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">xy_kernel</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mmd_value</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">maximum_mean_discrepancy_fixed</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

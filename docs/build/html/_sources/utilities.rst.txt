@@ -8,10 +8,10 @@ Custom metrics
 .. autofunction:: antspynet.utilities.multilabel_dice_coefficient
 .. autofunction:: antspynet.utilities.peak_signal_to_noise_ratio
 .. autofunction:: antspynet.utilities.pearson_correlation_coefficient
-.. autofunction:: antspynet.utilities.categorical_focal_gain
 .. autofunction:: antspynet.utilities.categorical_focal_loss
 .. autofunction:: antspynet.utilities.weighted_categorical_crossentropy
 .. autofunction:: antspynet.utilities.multilabel_surface_loss
+.. autofunction:: antspynet.maximum_mean_discrepancy
 
 Custom normalization layers
 ---------------------------
