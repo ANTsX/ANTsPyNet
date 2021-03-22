@@ -298,11 +298,13 @@ def ew_david(flair,
     from ..utilities import reconstruct_image_from_patches
     from ..utilities import pad_or_crop_image_to_size
 
-    if flair.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )
+    do_t1_only = False
 
-    if t1.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )
+    if flair is None:
+        do_t1_only = True
+
+    if do_t1_only and do_slicewise == False:
+        raise ValueError("T1-only only works with do_slicewise=True")
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
@@ -432,18 +434,20 @@ def ew_david(flair,
                 verbose=verbose)
             t1_preprocessed = t1_preprocessing["preprocessed_image"]
 
-        flair_preprocessed = flair
-        if do_preprocessing == True:
-            flair_preprocessing = preprocess_brain_image(flair,
-                truncate_intensity=(0.01, 0.99),
-                do_brain_extraction=False,
-                do_bias_correction=True,
-                do_denoising=False,
-                antsxnet_cache_directory=antsxnet_cache_directory,
-                verbose=verbose)
-            flair_preprocessed = flair_preprocessing["preprocessed_image"]
+        flair_preprocessed = None
+        if not do_t1_only:
+            flair_preprocessed = flair
+            if do_preprocessing == True:
+                flair_preprocessing = preprocess_brain_image(flair,
+                    truncate_intensity=(0.01, 0.99),
+                    do_brain_extraction=False,
+                    do_bias_correction=True,
+                    do_denoising=False,
+                    antsxnet_cache_directory=antsxnet_cache_directory,
+                    verbose=verbose)
+                flair_preprocessed = flair_preprocessing["preprocessed_image"]
 
-        resampling_params = list(ants.get_spacing(flair_preprocessed))
+        resampling_params = list(ants.get_spacing(t1_preprocessed))
 
         do_resampling = False
         for d in range(len(resampling_params)):
@@ -454,10 +458,12 @@ def ew_david(flair,
         resampling_params = tuple(resampling_params)
 
         if do_resampling:
-            flair_preprocessed = ants.resample_image(flair_preprocessed, resampling_params, use_voxels=False, interp_type=0)
+            if not do_t1_only:
+                flair_preprocessed = ants.resample_image(flair_preprocessed, resampling_params, use_voxels=False, interp_type=0)
             t1_preprocessed = ants.resample_image(t1_preprocessed, resampling_params, use_voxels=False, interp_type=0)
 
-        flair_preprocessed = (flair_preprocessed - flair_preprocessed.mean()) / flair_preprocessed.std()
+        if not do_t1_only:
+            flair_preprocessed = (flair_preprocessed - flair_preprocessed.mean()) / flair_preprocessed.std()
         t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
 
         ################################
@@ -473,6 +479,9 @@ def ew_david(flair,
         labels = (0, 1)
 
         image_modalities = ("T1", "FLAIR")
+        if do_t1_only:
+            image_modalities=("T1",)
+
         channel_size = len(image_modalities)
 
         unet_model = create_unet_model_2d((*template_size, channel_size),
@@ -484,8 +493,13 @@ def ew_david(flair,
         if verbose == True:
             print("ewDavid:  retrieving model weights.")
 
-        weights_file_name = get_pretrained_network("ewDavidWmhSegmentationSlicewiseWeights",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        if do_t1_only:
+            weights_file_name = get_pretrained_network("ewDavidWmhSegmentationSlicewiseT1OnlyWeights",
+                antsxnet_cache_directory=antsxnet_cache_directory)
+        else:
+            weights_file_name = get_pretrained_network("ewDavidWmhSegmentationSlicewiseWeights",
+                antsxnet_cache_directory=antsxnet_cache_directory)
+
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -496,30 +510,34 @@ def ew_david(flair,
 
         use_coarse_slices_only = True
 
-        spacing = ants.get_spacing(flair_preprocessed)
+        spacing = ants.get_spacing(t1_preprocessed)
         dimensions_to_predict = (spacing.index(max(spacing)),)
         if use_coarse_slices_only == False:
             dimensions_to_predict = list(range(3))
 
         total_number_of_slices = 0
         for d in range(len(dimensions_to_predict)):
-            total_number_of_slices += flair_preprocessed.shape[dimensions_to_predict[d]]
+            total_number_of_slices += t1_preprocessed.shape[dimensions_to_predict[d]]
 
         batchX = np.zeros((total_number_of_slices, *template_size, channel_size))
 
         slice_count = 0
         for d in range(len(dimensions_to_predict)):
-            number_of_slices = flair_preprocessed.shape[dimensions_to_predict[d]]
+            number_of_slices = t1_preprocessed.shape[dimensions_to_predict[d]]
 
             if verbose == True:
                 print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
             for i in range(number_of_slices):
-                flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed, dimensions_to_predict[d], i), template_size)
-                batchX[slice_count,:,:,0] = flair_slice.numpy()
 
                 t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed, dimensions_to_predict[d], i), template_size)
-                batchX[slice_count,:,:,1] = t1_slice.numpy()
+
+                if not do_t1_only:
+                    flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed, dimensions_to_predict[d], i), template_size)
+                    batchX[slice_count,:,:,0] = flair_slice.numpy()
+                    batchX[slice_count,:,:,1] = t1_slice.numpy()
+                else:
+                    batchX[slice_count,:,:,0] = t1_slice.numpy()
 
                 slice_count += 1
 
@@ -540,23 +558,23 @@ def ew_david(flair,
         permutations.append((1, 0, 2))
         permutations.append((1, 2, 0))
 
-        prediction_image_average = ants.image_clone(flair_preprocessed) * 0
+        prediction_image_average = ants.image_clone(t1_preprocessed) * 0
 
         current_start_slice = 0
         for d in range(len(dimensions_to_predict)):
-            current_end_slice = current_start_slice + flair_preprocessed.shape[dimensions_to_predict[d]] - 1
+            current_end_slice = current_start_slice + t1_preprocessed.shape[dimensions_to_predict[d]] - 1
             which_batch_slices = range(current_start_slice, current_end_slice)
             prediction_per_dimension = prediction[which_batch_slices,:,:,1]
             prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
-            prediction_image = ants.copy_image_info(flair_preprocessed,
+            prediction_image = ants.copy_image_info(t1_preprocessed,
                 pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
-                flair_preprocessed.shape))
+                t1_preprocessed.shape))
             prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
 
             current_start_slice = current_end_slice + 1
 
         if do_resampling:
-            prediction_image_average = ants.resample_image_to_target(prediction_image_average, flair)
+            prediction_image_average = ants.resample_image_to_target(prediction_image_average, t1)
 
         return(prediction_image_average)
 
