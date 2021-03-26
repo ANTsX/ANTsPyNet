@@ -157,15 +157,13 @@ def desikan_killiany_tourville_labeling(t1,
     Example
     -------
     >>> image = ants.image_read("t1.nii.gz")
-    >>> flash = desikan_killiany_tourville_labeling(image)
+    >>> dkt = desikan_killiany_tourville_labeling(image)
     """
 
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
-    from ..utilities import crop_image_center
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -351,7 +349,284 @@ def desikan_killiany_tourville_labeling(t1,
     if return_probability_images == True:
         return_dict = {'segmentation_image' : dkt_label_image,
                        'inner_probability_images' : inner_probability_images,
-                       'outer_probability_images' : outer_probability_images}
+                       'outer_probability_images' : outer_probability_images }
         return(return_dict)
     else:
         return(dkt_label_image)
+
+
+def dkt_based_lobar_parcellation(t1,
+                                 dkt=None,
+                                 do_preprocessing=True,
+                                 antsxnet_cache_directory=None,
+                                 verbose=False):
+
+    """
+    Use Desikan-Killiany-Tourville labeling to generate a lobar parcellation
+    based on an ANTs-flavored brain mask.  The user might want to run to
+    multiply the result by the "no-brainer" mask and/or the output from
+    DeepAtropos.
+
+    See https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation
+
+    Frontal lobe:
+    Label 1002:  left caudal anterior cingulate
+    Label 1003:  left caudal middle frontal
+    Label 1012:  left lateral orbitofrontal
+    Label 1014:  left medial orbitofrontal
+    Label 1018:  left pars opercularis
+    Label 1019:  left pars orbitalis
+    Label 1020:  left pars triangularis
+    Label 1026:  left rostral anterior cingulate
+    Label 1027:  left rostral middle frontal
+    Label 1028:  left superior frontal
+    Label 2002:  right caudal anterior cingulate
+    Label 2003:  right caudal middle frontal
+    Label 2012:  right lateral orbitofrontal
+    Label 2014:  right medial orbitofrontal
+    Label 2018:  right pars opercularis
+    Label 2019:  right pars orbitalis
+    Label 2020:  right pars triangularis
+    Label 2026:  right rostral anterior cingulate
+    Label 2027:  right rostral middle frontal
+    Label 2028:  right superior frontal
+
+    Parietal:
+    Label 1008:  left inferior parietal
+    Label 1010:  left isthmus cingulate
+    Label 1017:  left paracentral
+    Label 1022:  left postcentral
+    Label 1023:  left posterior cingulate
+    Label 1024:  left precentral
+    Label 1025:  left precuneus
+    Label 1029:  left superior parietal
+    Label 1031:  left supramarginal
+    Label 2008:  right inferior parietal
+    Label 2010:  right isthmus cingulate
+    Label 2017:  right paracentral
+    Label 2022:  right postcentral
+    Label 2023:  right posterior cingulate
+    Label 2024:  right precentral
+    Label 2025:  right precuneus
+    Label 2029:  right superior parietal
+    Label 2031:  right supramarginal
+
+    Temporal:
+    Label 1006:  left entorhinal
+    Label 1007:  left fusiform
+    Label 1009:  left inferior temporal
+    Label 1015:  left middle temporal
+    Label 1016:  left parahippocampal
+    Label 1030:  left superior temporal
+    Label 1034:  left transverse temporal
+    Label 2006:  right entorhinal
+    Label 2007:  right fusiform
+    Label 2009:  right inferior temporal
+    Label 2015:  right middle temporal
+    Label 2016:  right parahippocampal
+    Label 2030:  right superior temporal
+    Label 2034:  right transverse temporal
+
+    Occipital:
+    Label 1005:  left cuneus
+    Label 1011:  left lateral occipital
+    Label 1013:  left lingual
+    Label 1021:  left pericalcarine
+    Label 2005:  right cuneus
+    Label 2011:  right lateral occipital
+    Label 2013:  right lingual
+    Label 2021:  right pericalcarine
+
+    Other outer labels:
+    Label 1035:  left insula
+    Label 2035:  right insula
+
+    See desikan_killiany_tourville_labeling for preprocessing information.
+
+    Arguments
+    ---------
+    t1 : ANTsImage
+        raw or preprocessed 3-D T1-weighted brain image.
+
+    dkt:  ANTsImage
+        DKT label image.  If None (default), desikan_killiany_tourville_labeling is called.
+
+    do_preprocessing : boolean
+        See description above.
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    List consisting of the segmentation image and probability images for
+    each label.
+
+    Example
+    -------
+    >>> image = ants.image_read("t1.nii.gz")
+    >>> results = dkt_based_lobar_parcellation(image)
+    """
+
+    from ..architectures import create_unet_model_3d
+    from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
+    from ..utilities import preprocess_brain_image
+    from ..utilities import deep_atropos
+
+    if t1.dimension != 3:
+        raise ValueError( "Image dimension must be 3." )
+
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
+
+    if dkt is None:
+
+        ################################
+        #
+        # Preprocess images
+        #
+        ################################
+
+        t1_preprocessed = t1
+        if do_preprocessing == True:
+            t1_preprocessing = preprocess_brain_image(t1,
+                truncate_intensity=(0.01, 0.99),
+                do_brain_extraction=True,
+                template="croppedMni152",
+                template_transform_type="AffineFast",
+                do_bias_correction=True,
+                do_denoising=True,
+                antsxnet_cache_directory=antsxnet_cache_directory,
+                verbose=verbose)
+            t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
+
+        ################################
+        #
+        # Download spatial priors for outer model
+        #
+        ################################
+
+        spatial_priors_file_name_path = get_antsxnet_data("priorDktLabels",
+        antsxnet_cache_directory=antsxnet_cache_directory)
+        spatial_priors = ants.image_read(spatial_priors_file_name_path)
+        priors_image_list = ants.ndimage_to_list(spatial_priors)
+
+        ################################
+        #
+        # Build outer model and load weights
+        #
+        ################################
+
+        template_size = (96, 112, 96)
+        labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
+                    2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
+        channel_size = 1 + len(priors_image_list)
+
+        unet_model = create_unet_model_3d((*template_size, channel_size),
+            number_of_outputs = len(labels),
+            number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
+            convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
+            weight_decay = 1e-5, add_attention_gating=True)
+
+        weights_file_name = None
+        weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors",
+                                                antsxnet_cache_directory=antsxnet_cache_directory)
+        unet_model.load_weights(weights_file_name)
+
+        ################################
+        #
+        # Do prediction and normalize to native space
+        #
+        ################################
+
+        if verbose == True:
+            print("Outer model Prediction.")
+
+        downsampled_image = ants.resample_image(t1_preprocessed, template_size, use_voxels=True, interp_type=0)
+        image_array = downsampled_image.numpy()
+        image_array = (image_array - image_array.mean()) / image_array.std()
+
+        batchX = np.zeros((1, *template_size, channel_size))
+        batchX[0,:,:,:,0] = image_array
+
+        for i in range(len(priors_image_list)):
+            resampled_prior_image = ants.resample_image(priors_image_list[i], template_size, use_voxels=True, interp_type=0)
+            batchX[0,:,:,:,i+1] = resampled_prior_image.numpy()
+
+        predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+        origin = downsampled_image.origin
+        spacing = downsampled_image.spacing
+        direction = downsampled_image.direction
+
+        inner_probability_images = list()
+        for i in range(len(labels)):
+            probability_image = \
+                ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
+                origin=origin, spacing=spacing, direction=direction)
+            resampled_image = ants.resample_image( probability_image, t1_preprocessed.shape, use_voxels=True, interp_type=0)
+            if do_preprocessing == True:
+                inner_probability_images.append(ants.apply_transforms(fixed=t1,
+                    moving=resampled_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose))
+            else:
+                inner_probability_images.append(resampled_image)
+
+        image_matrix = ants.image_list_to_matrix(inner_probability_images, t1 * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
+
+        dkt_label_image = ants.image_clone(segmentation_image)
+        for i in range(len(labels)):
+            dkt_label_image[segmentation_image==i] = labels[i]
+
+        dkt = dkt_label_image
+
+    ################################
+    #
+    # Consolidate lobar cortical labels
+    #
+    ################################
+
+    frontal_labels = (1002, 1003, 1012, 1014, 1018, 1019, 1020, 1026, 1027, 1028,
+                      2002, 2003, 2012, 2014, 2018, 2019, 2020, 2026, 2027, 2028)
+    parietal_labels = (1008, 1010, 1017, 1022, 1023, 1024, 1025, 1029, 1031,
+                       2008, 2010, 2018, 2022, 2023, 2024, 2025, 2029, 2031)
+    temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
+                       2006, 2007, 2009, 2015, 2016, 2030, 2034)
+    occipital_labels = (1005, 1011, 1013, 1021,
+                        2005, 2011, 2013, 2021)
+
+    lobar_labels = list()
+    lobar_labels.append(frontal_labels)
+    lobar_labels.append(parietal_labels)
+    lobar_labels.append(temporal_labels)
+    lobar_labels.append(occipital_labels)
+
+    dkt[dkt < 1000] = 0
+
+    for i in range(len(lobar_labels)):
+        for j in range(len(lobar_labels[i])):
+            dkt[dkt == lobar_labels[i][j]] = i + 1
+
+    dkt[dkt > len(lobar_labels)] = 0
+
+    atropos = deep_atropos(t1, do_preprocessing=do_preprocessing,
+        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+    brain_mask = ants.image_clone(atropos['segmentation_image'])
+    brain_mask[brain_mask == 1 or brain_mask == 5 or brain_mask == 6] = 0
+    brain_mask = ants.threshold_image(brain_mask, 0, 0, 0, 1)
+
+    lobar_parcellation = ants.iMath(brain_mask, "PropagateLabelsThroughMask", brain_mask * dkt)
+    lobar_parcellation[atropos['segmentation_image'] == 5] = 5
+    lobar_parcellation[atropos['segmentation_image'] == 6] = 6
+
+    return lobar_parcellation
