@@ -374,6 +374,7 @@ def dkt_based_lobar_parcellation(t1,
     Label 1003:  left caudal middle frontal
     Label 1012:  left lateral orbitofrontal
     Label 1014:  left medial orbitofrontal
+    Label 1017:  left paracentral
     Label 1018:  left pars opercularis
     Label 1019:  left pars orbitalis
     Label 1020:  left pars triangularis
@@ -384,6 +385,7 @@ def dkt_based_lobar_parcellation(t1,
     Label 2003:  right caudal middle frontal
     Label 2012:  right lateral orbitofrontal
     Label 2014:  right medial orbitofrontal
+    Label 2017:  right paracentral
     Label 2018:  right pars opercularis
     Label 2019:  right pars orbitalis
     Label 2020:  right pars triangularis
@@ -394,7 +396,6 @@ def dkt_based_lobar_parcellation(t1,
     Parietal:
     Label 1008:  left inferior parietal
     Label 1010:  left isthmus cingulate
-    Label 1017:  left paracentral
     Label 1022:  left postcentral
     Label 1023:  left posterior cingulate
     Label 1024:  left precentral
@@ -403,7 +404,6 @@ def dkt_based_lobar_parcellation(t1,
     Label 1031:  left supramarginal
     Label 2008:  right inferior parietal
     Label 2010:  right isthmus cingulate
-    Label 2017:  right paracentral
     Label 2022:  right postcentral
     Label 2023:  right posterior cingulate
     Label 2024:  right precentral
@@ -596,10 +596,10 @@ def dkt_based_lobar_parcellation(t1,
     #
     ################################
 
-    frontal_labels = (1002, 1003, 1012, 1014, 1018, 1019, 1020, 1026, 1027, 1028,
-                      2002, 2003, 2012, 2014, 2018, 2019, 2020, 2026, 2027, 2028)
-    parietal_labels = (1008, 1010, 1017, 1022, 1023, 1024, 1025, 1029, 1031,
-                       2008, 2010, 2017, 2022, 2023, 2024, 2025, 2029, 2031)
+    frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1026, 1027, 1028,
+                      2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2026, 2027, 2028)
+    parietal_labels = (1008, 1010, 1022, 1023, 1024, 1025, 1029, 1031,
+                       2008, 2010, 2022, 2023, 2024, 2025, 2029, 2031)
     temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
                        2006, 2007, 2009, 2015, 2016, 2030, 2034)
     occipital_labels = (1005, 1011, 1013, 1021,
