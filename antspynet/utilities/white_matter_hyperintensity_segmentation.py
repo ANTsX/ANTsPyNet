@@ -248,6 +248,7 @@ def ew_david(flair,
              t1,
              do_preprocessing=True,
              do_slicewise=True,
+             which_axes="max",
              antsxnet_cache_directory=None,
              verbose=False):
 
@@ -276,6 +277,11 @@ def ew_david(flair,
 
     do_slicewise : boolean
         apply 2-D modal along direction of maximal slice thickness.
+
+    which_axes : string or scalar or tuple/vector
+        apply 2-D model to 1 or more axes.  In addition to a scalar
+        or vector, e.g., which_axes = (0, 2), one can use "max" for the
+        axis with maximum anisotropy (default) or "all" for all axes.
 
     verbose : boolean
         Print progress to the screen.
@@ -508,12 +514,16 @@ def ew_david(flair,
         #
         ################################
 
-        use_coarse_slices_only = True
-
-        spacing = ants.get_spacing(t1_preprocessed)
-        dimensions_to_predict = (spacing.index(max(spacing)),)
-        if use_coarse_slices_only == False:
+        dimensions_to_predict = list((0,))
+        if which_axes == "max":
+            dimensions_to_predict = (spacing.index(max(spacing)),)
+        elif which_axes == "all":
             dimensions_to_predict = list(range(3))
+        else:
+            if isinstance(which_axes, int):
+                dimensions_to_predict = list((which_axes,))
+            else:
+                dimensions_to_predict = list(which_axes)
 
         total_number_of_slices = 0
         for d in range(len(dimensions_to_predict)):

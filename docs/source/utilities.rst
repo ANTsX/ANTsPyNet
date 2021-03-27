@@ -82,7 +82,7 @@ Applications
 .. autofunction:: antspynet.utilities.deep_flash
 .. autofunction:: antspynet.utilities.deep_atropos
 .. autofunction:: antspynet.utilities.desikan_killiany_tourville_labeling
-.. autofunction:: antpynet.utilities.dkt_based_lobar_parcellation
+.. autofunction:: antspynet.utilities.dkt_based_lobar_parcellation
 .. autofunction:: antspynet.utilities.brain_age
 .. autofunction:: antspynet.utilities.mri_super_resolution
 .. autofunction:: antspynet.utilities.tid_neural_image_assessment
