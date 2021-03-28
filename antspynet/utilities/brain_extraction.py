@@ -22,7 +22,8 @@ def brain_extraction(image,
 
     modality : string
         Modality image type.  Options include:
-            * "t1": T1-weighted MRI---ANTs-trained.
+            * "t1": T1-weighted MRI---ANTs-trained.  Update from "t1v0".
+            * "t1v0":  T1-weighted MRI---ANTs-trained.
             * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
             * "t1combined": Brian's combination of "t1" and "t1nobrainer".  One can also specify
                             "t1combined[X]" where X is the morphological radius.  X = 12 by default.
@@ -106,14 +107,16 @@ def brain_extraction(image,
 
         weights_file_name_prefix = None
 
-        if modality == "t1":
+        if modality == "t1v0":
             weights_file_name_prefix = "brainExtraction"
-        elif modality == "bold":
-            weights_file_name_prefix = "brainExtractionBOLD"
+        elif modality == "t1":
+            weights_file_name_prefix = "brainExtractionT1"
         elif modality == "t2":
             weights_file_name_prefix = "brainExtractionT2"
         elif modality == "flair":
             weights_file_name_prefix = "brainExtractionFLAIR"
+        elif modality == "bold":
+            weights_file_name_prefix = "brainExtractionBOLD"
         elif modality == "fa":
             weights_file_name_prefix = "brainExtractionFA"
         elif modality == "t1t2infant":
@@ -134,6 +137,10 @@ def brain_extraction(image,
           antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
+
+        if modality == "t1":
+            classes = ("background", "head", "brain")
+            number_of_classification_labels = len(classes)            
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
             number_of_outputs = number_of_classification_labels,
@@ -174,11 +181,15 @@ def brain_extraction(image,
         probability_images_array.append(
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 1]),
             origin=origin, spacing=spacing, direction=direction))
+        if modality == "t1":
+            probability_images_array.append(
+                ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 2]),
+                origin=origin, spacing=spacing, direction=direction))
 
         if verbose == True:
             print("Brain extraction:  renormalize probability mask to native space.")
         probability_image = ants.apply_ants_transform_to_image(
-            ants.invert_ants_transform(xfrm), probability_images_array[1], input_images[0])
+            ants.invert_ants_transform(xfrm), probability_images_array[number_of_classification_labels-1], input_images[0])
 
         return(probability_image)
 
