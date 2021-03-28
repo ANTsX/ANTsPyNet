@@ -378,6 +378,7 @@ def dkt_based_lobar_parcellation(t1,
     Label 1018:  left pars opercularis
     Label 1019:  left pars orbitalis
     Label 1020:  left pars triangularis
+    Label 1024:  left precentral
     Label 1026:  left rostral anterior cingulate
     Label 1027:  left rostral middle frontal
     Label 1028:  left superior frontal
@@ -389,6 +390,7 @@ def dkt_based_lobar_parcellation(t1,
     Label 2018:  right pars opercularis
     Label 2019:  right pars orbitalis
     Label 2020:  right pars triangularis
+    Label 2024:  right precentral
     Label 2026:  right rostral anterior cingulate
     Label 2027:  right rostral middle frontal
     Label 2028:  right superior frontal
@@ -398,7 +400,6 @@ def dkt_based_lobar_parcellation(t1,
     Label 1010:  left isthmus cingulate
     Label 1022:  left postcentral
     Label 1023:  left posterior cingulate
-    Label 1024:  left precentral
     Label 1025:  left precuneus
     Label 1029:  left superior parietal
     Label 1031:  left supramarginal
@@ -406,7 +407,6 @@ def dkt_based_lobar_parcellation(t1,
     Label 2010:  right isthmus cingulate
     Label 2022:  right postcentral
     Label 2023:  right posterior cingulate
-    Label 2024:  right precentral
     Label 2025:  right precuneus
     Label 2029:  right superior parietal
     Label 2031:  right supramarginal
