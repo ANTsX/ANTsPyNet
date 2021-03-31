@@ -274,6 +274,7 @@ def apply_super_resolution_model_to_image(
                 input_details = interpreter.get_input_details()
                 output_details = interpreter.get_output_details()
                 shape_length = len(interpreter.get_input_details()[0]['shape'])
+                tflite_flag = True
             else:    
                 model = load_model(model)
                 shape_length = len(model.input_shape)
