@@ -13,6 +13,7 @@ def create_unet_model_2d(input_image_size,
                          number_of_outputs=2,
                          number_of_layers=4,
                          number_of_filters_at_base_layer=32,
+                         number_of_filters=None,
                          convolution_kernel_size=(3, 3),
                          deconvolution_kernel_size=(2, 2),
                          pool_size=(2, 2),
@@ -59,6 +60,11 @@ def create_unet_model_2d(input_image_size,
     number_of_filters_at_base_layer : integer
         number of filters at the beginning and end of the `U`.  Doubles at each
         descending/ascending layer.
+
+    number_of_filters : tuple
+        tuple explicitly setting the number of filters at each layer.  One can
+        either set this or number_of_layers and  number_of_filters_at_base_layer.
+        Default = None.
 
     convolution_kernel_size : tuple of length 2
         Defines the kernel size during the encoding.
@@ -123,20 +129,26 @@ def create_unet_model_2d(input_image_size,
 
     inputs = Input(shape = input_image_size)
 
+    if number_of_filters is not None:
+        number_of_layers = len(number_of_filters)
+    else:
+        number_of_filters = list()
+        for i in range(number_of_layers):
+            number_of_filters.append(number_of_filters_at_base_layer * 2**i)
+
     # Encoding path
 
     encoding_convolution_layers = []
     pool = None
     for i in range(number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**i
 
         if i == 0:
-            conv = Conv2D(filters=number_of_filters,
+            conv = Conv2D(filters=number_of_filters[i],
                           kernel_size=convolution_kernel_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(inputs)
         else:
-            conv = Conv2D(filters=number_of_filters,
+            conv = Conv2D(filters=number_of_filters[i],
                           kernel_size=convolution_kernel_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(pool)
@@ -149,7 +161,7 @@ def create_unet_model_2d(input_image_size,
         if dropout_rate > 0.0:
             conv = Dropout(rate=dropout_rate)(conv)
 
-        conv = Conv2D(filters=number_of_filters,
+        conv = Conv2D(filters=number_of_filters[i],
                       kernel_size=convolution_kernel_size,
                       padding='same')(conv)
 
@@ -167,8 +179,7 @@ def create_unet_model_2d(input_image_size,
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
     for i in range(1, number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**(number_of_layers - i - 1)
-        deconv = Conv2DTranspose(filters=number_of_filters,
+        deconv = Conv2DTranspose(filters=number_of_filters[number_of_layers-i-1],
                                  kernel_size=deconvolution_kernel_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
@@ -179,12 +190,12 @@ def create_unet_model_2d(input_image_size,
         if add_attention_gating == True:
             outputs = attention_gate_2d(deconv,
               encoding_convolution_layers[number_of_layers-i-1],
-              number_of_filters // 4)
+              number_of_filters[number_of_layers-i-1] // 4)
             outputs = Concatenate(axis=3)([deconv, outputs])
         else:
             outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
-        outputs = Conv2D(filters=number_of_filters,
+        outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
                          kernel_size=convolution_kernel_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
@@ -196,7 +207,7 @@ def create_unet_model_2d(input_image_size,
         if dropout_rate > 0.0:
             outputs = Dropout(rate=dropout_rate)(outputs)
 
-        outputs = Conv2D(filters=number_of_filters,
+        outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
                          kernel_size=convolution_kernel_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
@@ -229,6 +240,7 @@ def create_unet_model_3d(input_image_size,
                          number_of_outputs=2,
                          number_of_layers=4,
                          number_of_filters_at_base_layer=32,
+                         number_of_filters=None,
                          convolution_kernel_size=(3, 3, 3),
                          deconvolution_kernel_size=(2, 2, 2),
                          pool_size=(2, 2, 2),
@@ -275,6 +287,11 @@ def create_unet_model_3d(input_image_size,
     number_of_filters_at_base_layer : integer
         number of filters at the beginning and end of the `U`.  Doubles at each
         descending/ascending layer.
+
+    number_of_filters : tuple
+        tuple explicitly setting the number of filters at each layer.  One can
+        either set this or number_of_layers and  number_of_filters_at_base_layer.
+        Default = None.
 
     convolution_kernel_size : tuple of length 3
         Defines the kernel size during the encoding.
@@ -339,20 +356,26 @@ def create_unet_model_3d(input_image_size,
 
     inputs = Input(shape = input_image_size)
 
+    if number_of_filters is not None:
+        number_of_layers = len(number_of_filters)
+    else:
+        number_of_filters = list()
+        for i in range(number_of_layers):
+            number_of_filters.append(number_of_filters_at_base_layer * 2**i)
+
     # Encoding path
 
     encoding_convolution_layers = []
     pool = None
     for i in range(number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**i
 
         if i == 0:
-            conv = Conv3D(filters=number_of_filters,
+            conv = Conv3D(filters=number_of_filters[i],
                           kernel_size=convolution_kernel_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(inputs)
         else:
-            conv = Conv3D(filters=number_of_filters,
+            conv = Conv3D(filters=number_of_filters[i],
                           kernel_size=convolution_kernel_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(pool)
@@ -365,7 +388,7 @@ def create_unet_model_3d(input_image_size,
         if dropout_rate > 0.0:
             conv = Dropout(rate=dropout_rate)(conv)
 
-        conv = Conv3D(filters=number_of_filters,
+        conv = Conv3D(filters=number_of_filters[i],
                       kernel_size=convolution_kernel_size,
                       padding='same')(conv)
 
@@ -383,8 +406,7 @@ def create_unet_model_3d(input_image_size,
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
     for i in range(1, number_of_layers):
-        number_of_filters = number_of_filters_at_base_layer * 2**(number_of_layers - i - 1)
-        deconv = Conv3DTranspose(filters=number_of_filters,
+        deconv = Conv3DTranspose(filters=number_of_filters[number_of_layers-i-1],
                                  kernel_size=deconvolution_kernel_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
@@ -395,12 +417,12 @@ def create_unet_model_3d(input_image_size,
         if add_attention_gating == True:
             outputs = attention_gate_3d(deconv,
               encoding_convolution_layers[number_of_layers-i-1],
-              number_of_filters // 4)
+              number_of_filters[number_of_layers-i-1] // 4)
             outputs = Concatenate(axis=4)([deconv, outputs])
         else:
             outputs = Concatenate(axis=4)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
-        outputs = Conv3D(filters=number_of_filters,
+        outputs = Conv3D(filters=number_of_filters[number_of_layers-i-1],
                          kernel_size=convolution_kernel_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
@@ -412,7 +434,7 @@ def create_unet_model_3d(input_image_size,
         if dropout_rate > 0.0:
             outputs = Dropout(rate=dropout_rate)(outputs)
 
-        outputs = Conv3D(filters=number_of_filters,
+        outputs = Conv3D(filters=number_of_filters[number_of_layers-i-1],
                          kernel_size=convolution_kernel_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)

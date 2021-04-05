@@ -25,7 +25,7 @@ def encode_unet(segmentations_array,
     >>> import ants
     >>> image = ants.image_read(ants.get_ants_data('r16'))
     >>> seg = ants.kmeans_segmentation(image, 3)['segmentation']
-    >>> one_hot = seg.encode_unet(seg.numpy().astype('int'))
+    >>> one_hot = encode_unet(seg.numpy().astype('int'))
     """
 
     if segmentation_labels is None:
