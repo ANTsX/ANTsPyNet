@@ -5,6 +5,7 @@ import ants
 def desikan_killiany_tourville_labeling(t1,
                                         do_preprocessing=True,
                                         return_probability_images=False,
+                                        do_lobar_parcellation=False,
                                         antsxnet_cache_directory=None,
                                         verbose=False):
 
@@ -120,6 +121,83 @@ def desikan_killiany_tourville_labeling(t1,
     Label 2034: right transverse temporal
     Label 2035: right insula
 
+    Performing the lobar parcellation is based on the FreeSurfer division
+    described here:
+
+    See https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation
+
+    Frontal lobe:
+    Label 1002:  left caudal anterior cingulate
+    Label 1003:  left caudal middle frontal
+    Label 1012:  left lateral orbitofrontal
+    Label 1014:  left medial orbitofrontal
+    Label 1017:  left paracentral
+    Label 1018:  left pars opercularis
+    Label 1019:  left pars orbitalis
+    Label 1020:  left pars triangularis
+    Label 1024:  left precentral
+    Label 1026:  left rostral anterior cingulate
+    Label 1027:  left rostral middle frontal
+    Label 1028:  left superior frontal
+    Label 2002:  right caudal anterior cingulate
+    Label 2003:  right caudal middle frontal
+    Label 2012:  right lateral orbitofrontal
+    Label 2014:  right medial orbitofrontal
+    Label 2017:  right paracentral
+    Label 2018:  right pars opercularis
+    Label 2019:  right pars orbitalis
+    Label 2020:  right pars triangularis
+    Label 2024:  right precentral
+    Label 2026:  right rostral anterior cingulate
+    Label 2027:  right rostral middle frontal
+    Label 2028:  right superior frontal
+
+    Parietal:
+    Label 1008:  left inferior parietal
+    Label 1010:  left isthmus cingulate
+    Label 1022:  left postcentral
+    Label 1023:  left posterior cingulate
+    Label 1025:  left precuneus
+    Label 1029:  left superior parietal
+    Label 1031:  left supramarginal
+    Label 2008:  right inferior parietal
+    Label 2010:  right isthmus cingulate
+    Label 2022:  right postcentral
+    Label 2023:  right posterior cingulate
+    Label 2025:  right precuneus
+    Label 2029:  right superior parietal
+    Label 2031:  right supramarginal
+
+    Temporal:
+    Label 1006:  left entorhinal
+    Label 1007:  left fusiform
+    Label 1009:  left inferior temporal
+    Label 1015:  left middle temporal
+    Label 1016:  left parahippocampal
+    Label 1030:  left superior temporal
+    Label 1034:  left transverse temporal
+    Label 2006:  right entorhinal
+    Label 2007:  right fusiform
+    Label 2009:  right inferior temporal
+    Label 2015:  right middle temporal
+    Label 2016:  right parahippocampal
+    Label 2030:  right superior temporal
+    Label 2034:  right transverse temporal
+
+    Occipital:
+    Label 1005:  left cuneus
+    Label 1011:  left lateral occipital
+    Label 1013:  left lingual
+    Label 1021:  left pericalcarine
+    Label 2005:  right cuneus
+    Label 2011:  right lateral occipital
+    Label 2013:  right lingual
+    Label 2021:  right pericalcarine
+
+    Other outer labels:
+    Label 1035:  left insula
+    Label 2035:  right insula
+
     Preprocessing on the training data consisted of:
        * n4 bias correction,
        * denoising,
@@ -140,6 +218,9 @@ def desikan_killiany_tourville_labeling(t1,
     return_probability_images : boolean
         Whether to return the two sets of probability images for the inner and outer
         labels.
+
+    do_lobar_parcellation : boolean
+        Perform lobar parcellation (also divided by hemisphere).
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -164,6 +245,7 @@ def desikan_killiany_tourville_labeling(t1,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
+    from ..utilities import deep_atropos
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -346,13 +428,145 @@ def desikan_killiany_tourville_labeling(t1,
         if labels[i] > 0:
             dkt_label_image[segmentation_image==i] = labels[i]
 
-    if return_probability_images == True:
+    if do_lobar_parcellation:
+
+        if verbose == True:
+            print("Doing lobar parcellation.")
+
+        ################################
+        #
+        # Lobar/hemisphere parcellation
+        #
+        ################################
+
+        # Consolidate lobar cortical labels
+
+        if verbose == True:
+            print("   Consolidating cortical labels.")
+
+        frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1026, 1027, 1028,
+                            2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2026, 2027, 2028)
+        parietal_labels = (1008, 1010, 1022, 1023, 1024, 1025, 1029, 1031,
+                            2008, 2010, 2022, 2023, 2024, 2025, 2029, 2031)
+        temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
+                            2006, 2007, 2009, 2015, 2016, 2030, 2034)
+        occipital_labels = (1005, 1011, 1013, 1021,
+                            2005, 2011, 2013, 2021)
+
+        lobar_labels = list()
+        lobar_labels.append(frontal_labels)
+        lobar_labels.append(parietal_labels)
+        lobar_labels.append(temporal_labels)
+        lobar_labels.append(occipital_labels)
+
+        dkt_lobes = ants.image_clone(dkt_label_image)
+        dkt_lobes[dkt_lobes < 1000] = 0
+
+        for i in range(len(lobar_labels)):
+            for j in range(len(lobar_labels[i])):
+                dkt_lobes[dkt_lobes == lobar_labels[i][j]] = i + 1
+
+        dkt_lobes[dkt_lobes > len(lobar_labels)] = 0
+
+        six_tissue = deep_atropos(t1_preprocessed, do_preprocessing=False,
+            antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        atropos_seg = six_tissue['segmentation_image']
+        if do_preprocessing == True:
+            atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,
+                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
+
+        brain_mask = ants.image_clone(atropos_seg)
+        brain_mask[brain_mask == 1 or brain_mask == 5 or brain_mask == 6] = 0
+        brain_mask = ants.threshold_image(brain_mask, 0, 0, 0, 1)
+
+        lobar_parcellation = ants.iMath(brain_mask, "PropagateLabelsThroughMask", brain_mask * dkt_lobes)
+
+        lobar_parcellation[atropos_seg == 5] = 5
+        lobar_parcellation[atropos_seg == 6] = 6
+
+        # Do left/right
+
+        if verbose == True:
+            print("   Doing left/right hemispheres.")
+
+
+        left_labels = (*tuple(range(4, 8)), *tuple(range(10, 14)), 17, 18, 25, 26, 28, 30, 91,
+                       1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
+        right_labels = (*tuple(range(43, 47)), *tuple(range(49, 55)), 57, 58, 60, 62, 92, 2002, 2003,
+                        *tuple(range(2005, 2032)), 2034, 2035)
+
+        hemisphere_labels = list()
+        hemisphere_labels.append(left_labels)
+        hemisphere_labels.append(right_labels)
+
+        dkt_hemispheres = ants.image_clone(dkt_label_image)
+
+        for i in range(len(hemisphere_labels)):
+            for j in range(len(hemisphere_labels[i])):
+                dkt_hemispheres[dkt_hemispheres == hemisphere_labels[i][j]] = i + 1
+
+        dkt_hemispheres[dkt_hemispheres > 2] = 0
+
+        atropos_brain_mask = ants.threshold_image(atropos_seg, 0, 0, 0, 1)
+        hemisphere_parcellation = ants.iMath(atropos_brain_mask, "PropagateLabelsThroughMask",
+          atropos_brain_mask * dkt_hemispheres)
+
+        # The following contains a bug somewhere as only the latter condition is seen.
+        # Need to fix it.
+        #
+        # for i in range(6):
+        #     lobar_parcellation[lobar_parcellation == (i + 1) and hemisphere_parcellation == 2] = 6 + i + 1
+
+        hemisphere_parcellation *= ants.threshold_image(lobar_parcellation, 0, 0, 0, 1)
+        hemisphere_parcellation[hemisphere_parcellation == 1] = 0
+        hemisphere_parcellation[hemisphere_parcellation == 2] = 1
+        hemisphere_parcellation *= 6
+        lobar_parcellation += hemisphere_parcellation
+
+    if return_probability_images == True and do_lobar_parcellation == True:
+        return_dict = {'segmentation_image' : dkt_label_image,
+                       'lobar_parcellation' : lobar_parcellation,
+                       'inner_probability_images' : inner_probability_images,
+                       'outer_probability_images' : outer_probability_images }
+        return(return_dict)
+    elif return_probability_images == True and do_lobar_parcellation == False:
         return_dict = {'segmentation_image' : dkt_label_image,
                        'inner_probability_images' : inner_probability_images,
                        'outer_probability_images' : outer_probability_images }
         return(return_dict)
+    elif return_probability_images == False and do_lobar_parcellation == True:
+        return_dict = {'segmentation_image' : dkt_label_image,
+                       'lobar_parcellation' : lobar_parcellation }
+        return(return_dict)
     else:
         return(dkt_label_image)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def dkt_based_lobar_parcellation(t1,
