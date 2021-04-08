@@ -373,7 +373,7 @@ def ew_david(flair,
             number_of_outputs = number_of_classification_labels,
             number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
             convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-            weight_decay = 1e-5, nn_unet_activation_style=False, add_attention_gating=True)
+            weight_decay = 1e-5, additional_options=("attentionGating"))
 
         weights_file_name = get_pretrained_network("ewDavidWmhSegmentationWeights",
             antsxnet_cache_directory=antsxnet_cache_directory)
@@ -494,7 +494,7 @@ def ew_david(flair,
             number_of_outputs = number_of_classification_labels,
             number_of_layers = 5, number_of_filters_at_base_layer = 64, dropout_rate = 0.0,
             convolution_kernel_size = (5, 5), deconvolution_kernel_size = (3, 3),
-            weight_decay = 1e-5, nn_unet_activation_style=True, add_attention_gating=True)
+            weight_decay = 1e-5, additional_options=("nnUnetActivationStyle", "attentionGating"))
 
         if verbose == True:
             print("ewDavid:  retrieving model weights.")

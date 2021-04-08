@@ -86,7 +86,7 @@ def el_bicho(ventilation_image,
         number_of_outputs=number_of_classification_labels,
         number_of_layers=4, number_of_filters_at_base_layer=32, dropout_rate=0.0,
         convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
-        weight_decay=1e-5, add_attention_gating =True)
+        weight_decay=1e-5, additional_options=("attentionGating"))
 
     if verbose == True:
         print("El Bicho: retrieving model weights.")

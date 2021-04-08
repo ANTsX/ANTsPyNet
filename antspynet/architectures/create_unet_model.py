@@ -20,9 +20,8 @@ def create_unet_model_2d(input_image_size,
                          strides=(2, 2),
                          dropout_rate=0.0,
                          weight_decay=0.0,
-                         nn_unet_activation_style=False,
-                         add_attention_gating=False,
-                         mode='classification'
+                         mode='classification',
+                         additional_options=None
                         ):
     """
     2-D implementation of the U-net deep learning architecture.
@@ -85,15 +84,14 @@ def create_unet_model_2d(input_image_size,
         Weighting parameter for L2 regularization of the kernel weights of the
         convolution layers.  Default = 0.0.
 
-    nn_unet_activation_style : boolean
-        Instance normalization followed by leaky relu Activation on the convolution
-        layers.
-
-    add_attention_gating :  boolean
-        Whether or not to include attention gating.
-
     mode :  string
         `classification` or `regression`.  Default = `classification`.
+
+    additional_options : string or tuple of strings
+        specific configuration add-ons/tweaks:
+            * "attentionGating" -- attention-unet variant in https://pubmed.ncbi.nlm.nih.gov/33288961/
+            * "nnUnetActivationStyle" -- U-net activation explained in https://pubmed.ncbi.nlm.nih.gov/33288961/
+            * "initialConvolutionalKernelSize[X]" -- Set the first two convolutional layer kernel sizes to X.
 
     Returns
     -------
@@ -127,7 +125,27 @@ def create_unet_model_2d(input_image_size,
         attention = multiply([x, alpha])
         return attention
 
-    inputs = Input(shape = input_image_size)
+    # Handle additional specific configurations
+
+    initial_convolution_kernel_size = convolution_kernel_size
+    add_attention_gating = False
+    nn_unet_activation_style = False
+
+    if additional_options is not None:
+
+        if "attentionGating" in additional_options:
+            add_attention_gating = True
+
+        if "nnUnetActivationStyle" in additional_options:
+            nn_unet_activation_style = True
+
+        option = [o for o in additional_options if o.startswith('initialConvolutionKernelSize')]
+        if not not option:
+            initial_convolution_kernel_size = option[0].replace("initialConvolutionKernelSize", "")
+            initial_convolution_kernel_size = initial_convolution_kernel_size.replace("[", "")
+            initial_convolution_kernel_size = int(initial_convolution_kernel_size.replace("]", ""))
+
+    # Specify the number of filters
 
     if number_of_filters is not None:
         number_of_layers = len(number_of_filters)
@@ -135,6 +153,8 @@ def create_unet_model_2d(input_image_size,
         number_of_filters = list()
         for i in range(number_of_layers):
             number_of_filters.append(number_of_filters_at_base_layer * 2**i)
+
+    inputs = Input(shape = input_image_size)
 
     # Encoding path
 
@@ -144,7 +164,7 @@ def create_unet_model_2d(input_image_size,
 
         if i == 0:
             conv = Conv2D(filters=number_of_filters[i],
-                          kernel_size=convolution_kernel_size,
+                          kernel_size=initial_convolution_kernel_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(inputs)
         else:
@@ -161,9 +181,14 @@ def create_unet_model_2d(input_image_size,
         if dropout_rate > 0.0:
             conv = Dropout(rate=dropout_rate)(conv)
 
-        conv = Conv2D(filters=number_of_filters[i],
-                      kernel_size=convolution_kernel_size,
-                      padding='same')(conv)
+        if i == 0:
+            conv = Conv2D(filters=number_of_filters[i],
+                          kernel_size=initial_convolution_kernel_size,
+                          padding='same')(conv)
+        else:
+            conv = Conv2D(filters=number_of_filters[i],
+                          kernel_size=convolution_kernel_size,
+                          padding='same')(conv)
 
         if nn_unet_activation_style == True:
             conv = nn_unet_activation(conv)
@@ -247,9 +272,8 @@ def create_unet_model_3d(input_image_size,
                          strides=(2, 2, 2),
                          dropout_rate=0.0,
                          weight_decay=0.0,
-                         nn_unet_activation_style=False,
-                         add_attention_gating=False,
-                         mode='classification'
+                         mode='classification',
+                         additional_options=None
                         ):
     """
     3-D implementation of the U-net deep learning architecture.
@@ -312,15 +336,14 @@ def create_unet_model_3d(input_image_size,
         Weighting parameter for L2 regularization of the kernel weights of the
         convolution layers.  Default = 0.0.
 
-    nn_unet_activation_style : boolean
-        Instance normalization followed by leaky relu Activation on the convolution
-        layers.
-
-    add_attention_gating :  boolean
-        Whether or not to include attention gating.
-
     mode :  string
         `classification` or `regression`.  Default = `classification`.
+
+    additional_options : string or tuple of strings
+        specific configuration add-ons/tweaks:
+            * "attentionGating" -- attention-unet variant in https://pubmed.ncbi.nlm.nih.gov/33288961/
+            * "nnUnetActivationStyle" -- U-net activation explained in https://pubmed.ncbi.nlm.nih.gov/33288961/
+            * "initialConvolutionalKernelSize[X]" -- Set the first two convolutional layer kernel sizes to X.
 
     Returns
     -------
@@ -354,7 +377,27 @@ def create_unet_model_3d(input_image_size,
         attention = multiply([x, alpha])
         return attention
 
-    inputs = Input(shape = input_image_size)
+    # Handle additional specific configurations
+
+    initial_convolution_kernel_size = convolution_kernel_size
+    add_attention_gating = False
+    nn_unet_activation_style = False
+
+    if additional_options is not None:
+
+        if "attentionGating" in additional_options:
+            add_attention_gating = True
+
+        if "nnUnetActivationStyle" in additional_options:
+            nn_unet_activation_style = True
+
+        option = [o for o in additional_options if o.startswith('initialConvolutionKernelSize')]
+        if not not option:
+            initial_convolution_kernel_size = option[0].replace("initialConvolutionKernelSize", "")
+            initial_convolution_kernel_size = initial_convolution_kernel_size.replace("[", "")
+            initial_convolution_kernel_size = int(initial_convolution_kernel_size.replace("]", ""))
+
+    # Specify the number of filters
 
     if number_of_filters is not None:
         number_of_layers = len(number_of_filters)
@@ -362,6 +405,8 @@ def create_unet_model_3d(input_image_size,
         number_of_filters = list()
         for i in range(number_of_layers):
             number_of_filters.append(number_of_filters_at_base_layer * 2**i)
+
+    inputs = Input(shape = input_image_size)
 
     # Encoding path
 
@@ -371,7 +416,7 @@ def create_unet_model_3d(input_image_size,
 
         if i == 0:
             conv = Conv3D(filters=number_of_filters[i],
-                          kernel_size=convolution_kernel_size,
+                          kernel_size=initial_convolution_kernel_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(inputs)
         else:
@@ -388,9 +433,14 @@ def create_unet_model_3d(input_image_size,
         if dropout_rate > 0.0:
             conv = Dropout(rate=dropout_rate)(conv)
 
-        conv = Conv3D(filters=number_of_filters[i],
-                      kernel_size=convolution_kernel_size,
-                      padding='same')(conv)
+        if i == 0:
+            conv = Conv3D(filters=number_of_filters[i],
+                          kernel_size=initial_convolution_kernel_size,
+                          padding='same')(conv)
+        else:
+            conv = Conv3D(filters=number_of_filters[i],
+                          kernel_size=convolution_kernel_size,
+                          padding='same')(conv)
 
         if nn_unet_activation_style == True:
             conv = nn_unet_activation(conv)

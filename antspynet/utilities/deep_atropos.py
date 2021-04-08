@@ -104,10 +104,10 @@ def deep_atropos(t1,
     labels = (0, 1, 2, 3, 4, 5, 6)
 
     unet_model = create_unet_model_3d((*patch_size, 1),
-        number_of_outputs = len(labels),
-        number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
-        convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-        weight_decay = 1e-5, add_attention_gating=True)
+        number_of_outputs=len(labels),
+        number_of_layers=4, number_of_filters_at_base_layer=16, dropout_rate=0.0,
+        convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+        weight_decay=1e-5, additional_options=("attentionGating"))
 
     weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)

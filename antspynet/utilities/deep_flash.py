@@ -130,7 +130,7 @@ def deep_flash(t1,
             number_of_outputs=len(labels),
             number_of_layers=4, number_of_filters_at_base_layer=8, dropout_rate=0.0,
             convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
-            weight_decay=1e-5, add_attention_gating =True)
+            weight_decay=1e-5, additional_options=("attentionGating"))
 
         if verbose == True:
             print("DeepFlash: retrieving model weights.")
@@ -218,7 +218,7 @@ def deep_flash(t1,
             number_of_outputs = len(labels_left),
             number_of_layers = 4, number_of_filters_at_base_layer = number_of_filters, dropout_rate = 0.0,
             convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-            weight_decay = 1e-5, add_attention_gating=True)
+            weight_decay = 1e-5, additional_options=("attentionGating"))
 
         if verbose == True:
             print("DeepFlash: retrieving model weights (left).")
@@ -303,7 +303,7 @@ def deep_flash(t1,
             number_of_outputs = len(labels_right),
             number_of_layers = 4, number_of_filters_at_base_layer = number_of_filters, dropout_rate = 0.0,
             convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-            weight_decay = 1e-5, add_attention_gating=True)
+            weight_decay = 1e-5, additional_options=("attentionGating"))
 
         weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
         unet_model.load_weights(weights_file_name)
