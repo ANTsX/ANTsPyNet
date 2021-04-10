@@ -275,7 +275,7 @@ def create_unet_model_2d(input_image_size,
 
     unet_model = None
     if output_scalar_size > 0:
-        unet_model - Model(inputs=inputs, outputs=[outputs, scalar_output])
+        unet_model = Model(inputs=inputs, outputs=[outputs, scalar_output])
     else:
         unet_model = Model(inputs=inputs, outputs=outputs)
 
@@ -546,7 +546,7 @@ def create_unet_model_3d(input_image_size,
 
     unet_model = None
     if output_scalar_size > 0:
-        unet_model - Model(inputs=inputs, outputs=[outputs, scalar_output])
+        unet_model = Model(inputs=inputs, outputs=[outputs, scalar_output])
     else:
         unet_model = Model(inputs=inputs, outputs=outputs)
 
