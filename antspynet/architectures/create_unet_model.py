@@ -1,8 +1,10 @@
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (Input, Concatenate, Dropout, Add, Activation,
+from tensorflow.keras.layers import (Input, Concatenate, Dense, Dropout, Add, Activation,
                                      multiply, ReLU, LeakyReLU,
+                                     GlobalAveragePooling2D,
                                      Conv2D, Conv2DTranspose, MaxPooling2D,
                                      UpSampling2D,
+                                     GlobalAveragePooling3D,
                                      Conv3D, Conv3DTranspose, MaxPooling3D,
                                      UpSampling3D)
 from tensorflow.keras import regularizers
@@ -11,6 +13,8 @@ from ..utilities import InstanceNormalization
 
 def create_unet_model_2d(input_image_size,
                          number_of_outputs=2,
+                         output_scalar_size = 0,
+                         output_scalar_activation = "relu",
                          number_of_layers=4,
                          number_of_filters_at_base_layer=32,
                          number_of_filters=None,
@@ -52,6 +56,13 @@ def create_unet_model_2d(input_image_size,
     number_of_outputs : integer
         Meaning depends on the mode.  For `classification` this is the number of
         segmentation labels.  For `regression` this is the number of outputs.
+
+    output_scalar_size : integer
+        If greater than 0, a global average pooling and dense layer is added to
+        the bottom of the encoding branch.
+
+    output_scalar_activation : string
+        activation for nonzero output scalar.
 
     number_of_layers : integer
         number of encoding/decoding layers.
@@ -200,6 +211,12 @@ def create_unet_model_2d(input_image_size,
         if i < number_of_layers - 1:
             pool = MaxPooling2D(pool_size=pool_size)(encoding_convolution_layers[i])
 
+    scalar_output = None
+    if output_scalar_size > 0:
+        scalar_output = GlobalAveragePooling2D()(encoding_convolution_layers[number_of_layers - 1])
+        scalar_output = Dense(units=output_scalar_size,
+                              activation=output_scalar_activation)(scalar_output)
+
     # Decoding path
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
@@ -256,13 +273,19 @@ def create_unet_model_2d(input_image_size,
                      activation = convActivation,
                      kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
-    unet_model = Model(inputs=inputs, outputs=outputs)
+    unet_model = None
+    if output_scalar_size > 0:
+        unet_model - Model(inputs=inputs, outputs=[outputs, scalar_output])
+    else:
+        unet_model = Model(inputs=inputs, outputs=outputs)
 
     return unet_model
 
 
 def create_unet_model_3d(input_image_size,
                          number_of_outputs=2,
+                         output_scalar_size = 0,
+                         output_scalar_activation = "relu",
                          number_of_layers=4,
                          number_of_filters_at_base_layer=32,
                          number_of_filters=None,
@@ -304,6 +327,13 @@ def create_unet_model_3d(input_image_size,
     number_of_outputs : integer
         Meaning depends on the mode.  For `classification` this is the number of
         segmentation labels.  For `regression` this is the number of outputs.
+
+    output_scalar_size : integer
+        If greater than 0, a global average pooling and dense layer is added to
+        the bottom of the encoding branch.
+
+    output_scalar_activation : string
+        activation for nonzero output scalar.
 
     number_of_layers : integer
         number of encoding/decoding layers.
@@ -452,6 +482,12 @@ def create_unet_model_3d(input_image_size,
         if i < number_of_layers - 1:
             pool = MaxPooling3D(pool_size=pool_size)(encoding_convolution_layers[i])
 
+    scalar_output = None
+    if output_scalar_size > 0:
+        scalar_output = GlobalAveragePooling3D()(encoding_convolution_layers[number_of_layers - 1])
+        scalar_output = Dense(units=output_scalar_size,
+                              activation=output_scalar_activation)(scalar_output)
+
     # Decoding path
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
@@ -508,6 +544,10 @@ def create_unet_model_3d(input_image_size,
                      activation = convActivation,
                      kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
-    unet_model = Model(inputs=inputs, outputs=outputs)
+    unet_model = None
+    if output_scalar_size > 0:
+        unet_model - Model(inputs=inputs, outputs=[outputs, scalar_output])
+    else:
+        unet_model = Model(inputs=inputs, outputs=outputs)
 
     return unet_model
