@@ -213,7 +213,10 @@ def create_unet_model_2d(input_image_size,
 
     scalar_output = None
     if output_scalar_size > 0:
-        scalar_output = GlobalAveragePooling2D()(encoding_convolution_layers[number_of_layers - 1])
+        scalar_layers = list()
+        for i in range(number_of_layers):
+            scalar_layers.append(GlobalAveragePooling2D()(encoding_convolution_layers[i]))
+        scalar_output = Concatenate()(scalar_layers)
         scalar_output = Dense(units=output_scalar_size,
                               activation=output_scalar_activation)(scalar_output)
 
@@ -484,7 +487,10 @@ def create_unet_model_3d(input_image_size,
 
     scalar_output = None
     if output_scalar_size > 0:
-        scalar_output = GlobalAveragePooling3D()(encoding_convolution_layers[number_of_layers - 1])
+        scalar_layers = list()
+        for i in range(number_of_layers):
+            scalar_layers.append(GlobalAveragePooling3D()(encoding_convolution_layers[i]))
+        scalar_output = Concatenate()(scalar_layers)
         scalar_output = Dense(units=output_scalar_size,
                               activation=output_scalar_activation)(scalar_output)
 

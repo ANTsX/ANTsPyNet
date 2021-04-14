@@ -246,7 +246,10 @@
 
     <span class="n">scalar_output</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">number_of_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">scalar_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+            <span class="n">scalar_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">scalar_layers</span><span class="p">)</span>
         <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">output_scalar_size</span><span class="p">,</span>
                               <span class="n">activation</span><span class="o">=</span><span class="n">output_scalar_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
 
@@ -308,7 +311,7 @@
 
     <span class="n">unet_model</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">unet_model</span> <span class="o">-</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">outputs</span><span class="p">,</span> <span class="n">scalar_output</span><span class="p">])</span>
+        <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">outputs</span><span class="p">,</span> <span class="n">scalar_output</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
 
@@ -517,7 +520,10 @@
 
     <span class="n">scalar_output</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">number_of_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">scalar_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+            <span class="n">scalar_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">scalar_layers</span><span class="p">)</span>
         <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">output_scalar_size</span><span class="p">,</span>
                               <span class="n">activation</span><span class="o">=</span><span class="n">output_scalar_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
 
@@ -579,7 +585,7 @@
 
     <span class="n">unet_model</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">unet_model</span> <span class="o">-</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">outputs</span><span class="p">,</span> <span class="n">scalar_output</span><span class="p">])</span>
+        <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">outputs</span><span class="p">,</span> <span class="n">scalar_output</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
 
