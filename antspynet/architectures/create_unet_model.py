@@ -58,11 +58,11 @@ def create_unet_model_2d(input_image_size,
         segmentation labels.  For `regression` this is the number of outputs.
 
     output_scalar_size : integer
-        If greater than 0, a global average pooling and dense layer is added to
-        the bottom of the encoding branch.
+        If greater than 0, a global average pooling from each
+        encoding layer is concatenated to a dense layer as a secondary output.
 
     output_scalar_activation : string
-        activation for nonzero output scalar.
+        Activation for nonzero output scalar.
 
     number_of_layers : integer
         number of encoding/decoding layers.
@@ -332,11 +332,11 @@ def create_unet_model_3d(input_image_size,
         segmentation labels.  For `regression` this is the number of outputs.
 
     output_scalar_size : integer
-        If greater than 0, a global average pooling and dense layer is added to
-        the bottom of the encoding branch.
+        If greater than 0, a global average pooling from each
+        encoding layer is concatenated to a dense layer as a secondary output.
 
     output_scalar_activation : string
-        activation for nonzero output scalar.
+        Activation for nonzero output scalar.
 
     number_of_layers : integer
         number of encoding/decoding layers.

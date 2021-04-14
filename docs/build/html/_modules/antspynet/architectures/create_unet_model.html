@@ -91,11 +91,11 @@
 <span class="sd">        segmentation labels.  For `regression` this is the number of outputs.</span>
 
 <span class="sd">    output_scalar_size : integer</span>
-<span class="sd">        If greater than 0, a global average pooling and dense layer is added to</span>
-<span class="sd">        the bottom of the encoding branch.</span>
+<span class="sd">        If greater than 0, a global average pooling from each</span>
+<span class="sd">        encoding layer is concatenated to a dense layer as a secondary output.</span>
 
 <span class="sd">    output_scalar_activation : string</span>
-<span class="sd">        activation for nonzero output scalar.</span>
+<span class="sd">        Activation for nonzero output scalar.</span>
 
 <span class="sd">    number_of_layers : integer</span>
 <span class="sd">        number of encoding/decoding layers.</span>
@@ -249,7 +249,7 @@
         <span class="n">scalar_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="n">scalar_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">scalar_layers</span><span class="p">)</span>
+        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">scalar_layers</span><span class="p">)</span>
         <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">output_scalar_size</span><span class="p">,</span>
                               <span class="n">activation</span><span class="o">=</span><span class="n">output_scalar_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
 
@@ -365,11 +365,11 @@
 <span class="sd">        segmentation labels.  For `regression` this is the number of outputs.</span>
 
 <span class="sd">    output_scalar_size : integer</span>
-<span class="sd">        If greater than 0, a global average pooling and dense layer is added to</span>
-<span class="sd">        the bottom of the encoding branch.</span>
+<span class="sd">        If greater than 0, a global average pooling from each</span>
+<span class="sd">        encoding layer is concatenated to a dense layer as a secondary output.</span>
 
 <span class="sd">    output_scalar_activation : string</span>
-<span class="sd">        activation for nonzero output scalar.</span>
+<span class="sd">        Activation for nonzero output scalar.</span>
 
 <span class="sd">    number_of_layers : integer</span>
 <span class="sd">        number of encoding/decoding layers.</span>
@@ -523,7 +523,7 @@
         <span class="n">scalar_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="n">scalar_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">scalar_layers</span><span class="p">)</span>
+        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">scalar_layers</span><span class="p">)</span>
         <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">output_scalar_size</span><span class="p">,</span>
                               <span class="n">activation</span><span class="o">=</span><span class="n">output_scalar_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
 

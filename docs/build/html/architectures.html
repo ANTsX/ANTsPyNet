@@ -1208,9 +1208,9 @@ that tensor is the image dimensions followed by the number of channels
 (e.g., red, green, and blue).</p></li>
 <li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For <cite>classification</cite> this is the number of
 segmentation labels.  For <cite>regression</cite> this is the number of outputs.</p></li>
-<li><p><strong>output_scalar_size</strong> (<em>integer</em>) – If greater than 0, a global average pooling and dense layer is added to
-the bottom of the encoding branch.</p></li>
-<li><p><strong>output_scalar_activation</strong> (<em>string</em>) – activation for nonzero output scalar.</p></li>
+<li><p><strong>output_scalar_size</strong> (<em>integer</em>) – If greater than 0, a global average pooling from each
+encoding layer is concatenated to a dense layer as a secondary output.</p></li>
+<li><p><strong>output_scalar_activation</strong> (<em>string</em>) – Activation for nonzero output scalar.</p></li>
 <li><p><strong>number_of_layers</strong> (<em>integer</em>) – number of encoding/decoding layers.</p></li>
 <li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – number of filters at the beginning and end of the <cite>U</cite>.  Doubles at each
 descending/ascending layer.</p></li>
@@ -1277,9 +1277,9 @@ that tensor is the image dimensions followed by the number of channels
 (e.g., red, green, and blue).</p></li>
 <li><p><strong>number_of_outputs</strong> (<em>integer</em>) – Meaning depends on the mode.  For <cite>classification</cite> this is the number of
 segmentation labels.  For <cite>regression</cite> this is the number of outputs.</p></li>
-<li><p><strong>output_scalar_size</strong> (<em>integer</em>) – If greater than 0, a global average pooling and dense layer is added to
-the bottom of the encoding branch.</p></li>
-<li><p><strong>output_scalar_activation</strong> (<em>string</em>) – activation for nonzero output scalar.</p></li>
+<li><p><strong>output_scalar_size</strong> (<em>integer</em>) – If greater than 0, a global average pooling from each
+encoding layer is concatenated to a dense layer as a secondary output.</p></li>
+<li><p><strong>output_scalar_activation</strong> (<em>string</em>) – Activation for nonzero output scalar.</p></li>
 <li><p><strong>number_of_layers</strong> (<em>integer</em>) – number of encoding/decoding layers.</p></li>
 <li><p><strong>number_of_filters_at_base_layer</strong> (<em>integer</em>) – number of filters at the beginning and end of the <cite>U</cite>.  Doubles at each
 descending/ascending layer.</p></li>
