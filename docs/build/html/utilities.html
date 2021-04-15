@@ -1683,6 +1683,38 @@ breakPoints.  Alternatively, if None random displacements are chosen
 </dd></dl>
 
 <dl class="py function">
+<dt id="antspynet.utilities.simulate_bias_field">
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">simulate_bias_field</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_bias_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_fitting_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/simulate_bias_field.html#simulate_bias_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.simulate_bias_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulate random bias field</p>
+<p>Low frequency, spatial varying simulated random bias field using
+random points and B-spline fitting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain_image</strong> (<em>ANTsImage</em>) – Image to define the spatial domain of the bias field.</p></li>
+<li><p><strong>number_of_points</strong> (<em>integer</em>) – Number of randomly defined points to define the bias field
+(default = 10).</p></li>
+<li><p><strong>sd_bias_field</strong> (<em>float</em>) – Characterize the standard deviation of the amplitude (default = 1).</p></li>
+<li><p><strong>number_of_fitting_levels</strong> (<em>integer</em>) – B-spline fitting parameter.</p></li>
+<li><p><strong>clamp_end_points</strong> (<em>integer</em><em> or </em><em>tuple</em>) – B-spline fitting parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ANTs image</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias_field_image</span> <span class="o">=</span> <span class="n">simulate_bias_field</span><span class="p">(</span> <span class="n">image</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt id="antspynet.utilities.crop_image_center">
 <code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">crop_image_center</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/cropping_and_padding_utilities.html#crop_image_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.crop_image_center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Crop the center of an image.</p>

@@ -48,6 +48,7 @@ from .cropping_and_padding_utilities import pad_or_crop_image_to_size
 from .cropping_and_padding_utilities import pad_image_by_factor
 
 from .histogram_warp_image_intensities import histogram_warp_image_intensities
+from .simulate_bias_field import simulate_bias_field
 
 from .randomly_transform_image_data import randomly_transform_image_data
 
