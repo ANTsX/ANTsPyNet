@@ -516,6 +516,7 @@ def ew_david(flair,
 
         dimensions_to_predict = list((0,))
         if which_axes == "max":
+            spacing = ants.get_spacing(t1_preprocessed)
             dimensions_to_predict = (spacing.index(max(spacing)),)
         elif which_axes == "all":
             dimensions_to_predict = list(range(3))
