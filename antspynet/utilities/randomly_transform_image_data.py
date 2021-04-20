@@ -224,7 +224,7 @@ def randomly_transform_image_data(reference_image,
         if single_subject_segmentation_image is not None:
             simulated_segmentation_image_list.append(ants.apply_ants_transform_to_image(
                 simulated_transforms[i], single_subject_segmentation_image,
-                reference=reference_image))
+                reference=reference_image, interpolation="nearestneighbor"))
 
     if segmentation_image_list is None:
         return({'simulated_images' : simulated_image_list,
