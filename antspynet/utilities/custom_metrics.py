@@ -3,10 +3,45 @@ import tensorflow.keras.backend as K
 import numpy as np
 import scipy as sp
 
+def binary_dice_coefficient(smoothing_factor=0.0):
+
+    """
+    Binary dice segmentation loss.
+
+    Note:  Assumption is that y_true is *not* a one-hot representation
+    of the segmentation batch.  For use with e.g., sigmoid activation.
+
+    Arguments
+    ---------
+
+    smoothing_factor : float
+        Used to smooth value during optimization
+
+    Returns
+    -------
+    Loss value (negative Dice coefficient).
+
+    """
+
+    def binary_dice_coefficient_fixed(y_true, y_pred):
+
+        y_true_f = K.flatten(y_true)
+        y_pred_f = K.flatten(y_pred)
+        intersection = K.sum(y_true_f * y_pred_f)
+        return(-1.0 * (2.0 * intersection + smoothing_factor)/
+           (K.sum(y_true_f) + K.sum(y_pred_f) + smoothing_factor))
+
+    return(binary_dice_coefficient_fixed)
+
 def multilabel_dice_coefficient(dimensionality=3, smoothing_factor=0.0):
 
     """
     Multi-label dice segmentation loss
+
+    Note:  Assumption is that y_true is a one-hot representation
+    of the segmentation batch.  The background (label 0) should
+    be included but is not used in the calculation.  For use with
+    e.g., softmax activation.
 
     Arguments
     ---------

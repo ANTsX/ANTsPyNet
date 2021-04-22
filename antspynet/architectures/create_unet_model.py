@@ -85,7 +85,7 @@ def create_unet_model_2d(input_image_size,
         convolution layers.  Default = 0.0.
 
     mode :  string
-        `classification` or `regression`.  Default = `classification`.
+        `classification`, `regression`, or `sigmoid`.  Default = `classification`.
 
     additional_options : string or tuple of strings
         specific configuration add-ons/tweaks:
@@ -242,18 +242,20 @@ def create_unet_model_2d(input_image_size,
         else:
             outputs = ReLU()(outputs)
 
-    convActivation = ''
+    conv_activation = ''
 
-    if mode == 'classification':
-        convActivation = 'softmax'
+    if mode == 'sigmoid':
+        conv_activation = 'sigmoid'
+    elif mode == 'classification':
+        conv_activation = 'softmax'
     elif mode == 'regression':
-        convActivation = 'linear'
+        conv_activation = 'linear'
     else:
-        raise ValueError('mode must be either `classification` or `regression`.')
+        raise ValueError('mode must be either `classification`, `regression` or `sigmoid`.')
 
     outputs = Conv2D(filters=number_of_outputs,
                      kernel_size=(1, 1),
-                     activation = convActivation,
+                     activation = conv_activation,
                      kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
     unet_model = Model(inputs=inputs, outputs=outputs)
