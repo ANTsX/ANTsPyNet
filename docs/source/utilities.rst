@@ -5,6 +5,7 @@ Utilities
 Custom metrics
 --------------
 
+.. autofunction:: antspynet.utilities.binary_dice_coefficient
 .. autofunction:: antspynet.utilities.multilabel_dice_coefficient
 .. autofunction:: antspynet.utilities.peak_signal_to_noise_ratio
 .. autofunction:: antspynet.utilities.pearson_correlation_coefficient
