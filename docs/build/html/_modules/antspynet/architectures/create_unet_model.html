@@ -53,9 +53,8 @@
                          <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
                          <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                          <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                         <span class="n">nn_unet_activation_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">add_attention_gating</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
+                         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+                         <span class="n">additional_options</span><span class="o">=</span><span class="kc">None</span>
                         <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    2-D implementation of the U-net deep learning architecture.</span>
@@ -118,15 +117,14 @@
 <span class="sd">        Weighting parameter for L2 regularization of the kernel weights of the</span>
 <span class="sd">        convolution layers.  Default = 0.0.</span>
 
-<span class="sd">    nn_unet_activation_style : boolean</span>
-<span class="sd">        Instance normalization followed by leaky relu Activation on the convolution</span>
-<span class="sd">        layers.</span>
-
-<span class="sd">    add_attention_gating :  boolean</span>
-<span class="sd">        Whether or not to include attention gating.</span>
-
 <span class="sd">    mode :  string</span>
-<span class="sd">        `classification` or `regression`.  Default = `classification`.</span>
+<span class="sd">        `classification`, `regression`, or `sigmoid`.  Default = `classification`.</span>
+
+<span class="sd">    additional_options : string or tuple of strings</span>
+<span class="sd">        specific configuration add-ons/tweaks:</span>
+<span class="sd">            * &quot;attentionGating&quot; -- attention-unet variant in https://pubmed.ncbi.nlm.nih.gov/33288961/</span>
+<span class="sd">            * &quot;nnUnetActivationStyle&quot; -- U-net activation explained in https://pubmed.ncbi.nlm.nih.gov/33288961/</span>
+<span class="sd">            * &quot;initialConvolutionalKernelSize[X]&quot; -- Set the first two convolutional layer kernel sizes to X.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -160,7 +158,27 @@
         <span class="n">attention</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">attention</span>
 
-    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+    <span class="c1"># Handle additional specific configurations</span>
+
+    <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="n">convolution_kernel_size</span>
+    <span class="n">add_attention_gating</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">nn_unet_activation_style</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">additional_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="s2">&quot;attentionGating&quot;</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
+            <span class="n">add_attention_gating</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;nnUnetActivationStyle&quot;</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
+            <span class="n">nn_unet_activation_style</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">option</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">additional_options</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;initialConvolutionKernelSize&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="ow">not</span> <span class="n">option</span><span class="p">:</span>
+            <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;initialConvolutionKernelSize&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="n">initial_convolution_kernel_size</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">initial_convolution_kernel_size</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Specify the number of filters</span>
 
     <span class="k">if</span> <span class="n">number_of_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">number_of_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">number_of_filters</span><span class="p">)</span>
@@ -168,6 +186,8 @@
         <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="n">number_of_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">number_of_filters_at_base_layer</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
 
     <span class="c1"># Encoding path</span>
 
@@ -177,7 +197,7 @@
 
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">initial_convolution_kernel_size</span><span class="p">,</span>
                           <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
                           <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -194,9 +214,14 @@
         <span class="k">if</span> <span class="n">dropout_rate</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">conv</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
 
-        <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                      <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
-                      <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">initial_convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nn_unet_activation_style</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">conv</span> <span class="o">=</span> <span class="n">nn_unet_activation</span><span class="p">(</span><span class="n">conv</span><span class="p">)</span>
@@ -250,18 +275,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">ReLU</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
 
-    <span class="n">convActivation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">conv_activation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;classification&#39;</span><span class="p">:</span>
-        <span class="n">convActivation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sigmoid&#39;</span><span class="p">:</span>
+        <span class="n">conv_activation</span> <span class="o">=</span> <span class="s1">&#39;sigmoid&#39;</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;classification&#39;</span><span class="p">:</span>
+        <span class="n">conv_activation</span> <span class="o">=</span> <span class="s1">&#39;softmax&#39;</span>
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;regression&#39;</span><span class="p">:</span>
-        <span class="n">convActivation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+        <span class="n">conv_activation</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification` or `regression`.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;mode must be either `classification`, `regression` or `sigmoid`.&#39;</span><span class="p">)</span>
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_outputs</span><span class="p">,</span>
                      <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-                     <span class="n">activation</span> <span class="o">=</span> <span class="n">convActivation</span><span class="p">,</span>
+                     <span class="n">activation</span> <span class="o">=</span> <span class="n">conv_activation</span><span class="p">,</span>
                      <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
@@ -280,9 +307,8 @@
                          <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
                          <span class="n">dropout_rate</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                          <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                         <span class="n">nn_unet_activation_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">add_attention_gating</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span>
+                         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+                         <span class="n">additional_options</span><span class="o">=</span><span class="kc">None</span>
                         <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    3-D implementation of the U-net deep learning architecture.</span>
@@ -345,15 +371,14 @@
 <span class="sd">        Weighting parameter for L2 regularization of the kernel weights of the</span>
 <span class="sd">        convolution layers.  Default = 0.0.</span>
 
-<span class="sd">    nn_unet_activation_style : boolean</span>
-<span class="sd">        Instance normalization followed by leaky relu Activation on the convolution</span>
-<span class="sd">        layers.</span>
-
-<span class="sd">    add_attention_gating :  boolean</span>
-<span class="sd">        Whether or not to include attention gating.</span>
-
 <span class="sd">    mode :  string</span>
 <span class="sd">        `classification` or `regression`.  Default = `classification`.</span>
+
+<span class="sd">    additional_options : string or tuple of strings</span>
+<span class="sd">        specific configuration add-ons/tweaks:</span>
+<span class="sd">            * &quot;attentionGating&quot; -- attention-unet variant in https://pubmed.ncbi.nlm.nih.gov/33288961/</span>
+<span class="sd">            * &quot;nnUnetActivationStyle&quot; -- U-net activation explained in https://pubmed.ncbi.nlm.nih.gov/33288961/</span>
+<span class="sd">            * &quot;initialConvolutionalKernelSize[X]&quot; -- Set the first two convolutional layer kernel sizes to X.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -387,7 +412,27 @@
         <span class="n">attention</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">attention</span>
 
-    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
+    <span class="c1"># Handle additional specific configurations</span>
+
+    <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="n">convolution_kernel_size</span>
+    <span class="n">add_attention_gating</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">nn_unet_activation_style</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">additional_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="s2">&quot;attentionGating&quot;</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
+            <span class="n">add_attention_gating</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="s2">&quot;nnUnetActivationStyle&quot;</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
+            <span class="n">nn_unet_activation_style</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">option</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">additional_options</span> <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;initialConvolutionKernelSize&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="ow">not</span> <span class="n">option</span><span class="p">:</span>
+            <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;initialConvolutionKernelSize&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="n">initial_convolution_kernel_size</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">initial_convolution_kernel_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">initial_convolution_kernel_size</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Specify the number of filters</span>
 
     <span class="k">if</span> <span class="n">number_of_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">number_of_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">number_of_filters</span><span class="p">)</span>
@@ -395,6 +440,8 @@
         <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="n">number_of_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">number_of_filters_at_base_layer</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="n">input_image_size</span><span class="p">)</span>
 
     <span class="c1"># Encoding path</span>
 
@@ -404,7 +451,7 @@
 
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">initial_convolution_kernel_size</span><span class="p">,</span>
                           <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
                           <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -421,9 +468,14 @@
         <span class="k">if</span> <span class="n">dropout_rate</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">conv</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">rate</span><span class="o">=</span><span class="n">dropout_rate</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
 
-        <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                      <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
-                      <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">initial_convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nn_unet_activation_style</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">conv</span> <span class="o">=</span> <span class="n">nn_unet_activation</span><span class="p">(</span><span class="n">conv</span><span class="p">)</span>
