@@ -27,7 +27,7 @@ def binary_dice_coefficient(smoothing_factor=0.0):
 
         y_true_f = K.flatten(y_true)
         y_pred_f = K.flatten(y_pred)
-        intersection = y_true_f * y_pred_f
+        intersection = K.sum(y_true_f * y_pred_f)
         return(-1.0 * (2.0 * intersection + smoothing_factor)/
            (K.sum(y_true_f) + K.sum(y_pred_f) + smoothing_factor))
 
