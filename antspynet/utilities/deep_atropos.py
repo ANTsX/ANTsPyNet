@@ -112,6 +112,8 @@ def deep_atropos(t1,
     channel_size = 1
     if use_spatial_priors != 0:
         mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors")))
+        for i in range(len(mni_priors)):
+            mni_priors[i] = ants.copy_image_info(t1_preprocessed, mni_priors[i])
         channel_size = len(mni_priors) + 1
 
     unet_model = create_unet_model_3d((*patch_size, channel_size),

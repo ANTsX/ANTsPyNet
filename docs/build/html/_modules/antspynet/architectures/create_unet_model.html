@@ -46,8 +46,8 @@
 
 <div class="viewcode-block" id="create_unet_model_2d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_unet_model_2d">[docs]</a><span class="k">def</span> <span class="nf">create_unet_model_2d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
                          <span class="n">number_of_outputs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                         <span class="n">output_scalar_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                         <span class="n">output_scalar_activation</span> <span class="o">=</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+                         <span class="n">scalar_output_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                         <span class="n">scalar_output_activation</span> <span class="o">=</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span>
                          <span class="n">number_of_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                          <span class="n">number_of_filters_at_base_layer</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
                          <span class="n">number_of_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -90,11 +90,11 @@
 <span class="sd">        Meaning depends on the mode.  For `classification` this is the number of</span>
 <span class="sd">        segmentation labels.  For `regression` this is the number of outputs.</span>
 
-<span class="sd">    output_scalar_size : integer</span>
+<span class="sd">    scalar_output_size : integer</span>
 <span class="sd">        If greater than 0, a global average pooling from each</span>
 <span class="sd">        encoding layer is concatenated to a dense layer as a secondary output.</span>
 
-<span class="sd">    output_scalar_activation : string</span>
+<span class="sd">    scalar_output_activation : string</span>
 <span class="sd">        Activation for nonzero output scalar.</span>
 
 <span class="sd">    number_of_layers : integer</span>
@@ -245,13 +245,13 @@
             <span class="n">pool</span> <span class="o">=</span> <span class="n">MaxPooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
     <span class="n">scalar_output</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">scalar_output_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">scalar_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="n">scalar_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
         <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">scalar_layers</span><span class="p">)</span>
-        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">output_scalar_size</span><span class="p">,</span>
-                              <span class="n">activation</span><span class="o">=</span><span class="n">output_scalar_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
+        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">scalar_output_size</span><span class="p">,</span>
+                              <span class="n">activation</span><span class="o">=</span><span class="n">scalar_output_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
 
     <span class="c1"># Decoding path</span>
 
@@ -312,7 +312,7 @@
                      <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="n">unet_model</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">scalar_output_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">outputs</span><span class="p">,</span> <span class="n">scalar_output</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
@@ -322,8 +322,8 @@
 
 <div class="viewcode-block" id="create_unet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_unet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_unet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">,</span>
                          <span class="n">number_of_outputs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                         <span class="n">output_scalar_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                         <span class="n">output_scalar_activation</span> <span class="o">=</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+                         <span class="n">scalar_output_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                         <span class="n">scalar_output_activation</span> <span class="o">=</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span>
                          <span class="n">number_of_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                          <span class="n">number_of_filters_at_base_layer</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
                          <span class="n">number_of_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -366,11 +366,11 @@
 <span class="sd">        Meaning depends on the mode.  For `classification` this is the number of</span>
 <span class="sd">        segmentation labels.  For `regression` this is the number of outputs.</span>
 
-<span class="sd">    output_scalar_size : integer</span>
+<span class="sd">    scalar_output_size : integer</span>
 <span class="sd">        If greater than 0, a global average pooling from each</span>
 <span class="sd">        encoding layer is concatenated to a dense layer as a secondary output.</span>
 
-<span class="sd">    output_scalar_activation : string</span>
+<span class="sd">    scalar_output_activation : string</span>
 <span class="sd">        Activation for nonzero output scalar.</span>
 
 <span class="sd">    number_of_layers : integer</span>
@@ -521,13 +521,13 @@
             <span class="n">pool</span> <span class="o">=</span> <span class="n">MaxPooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
     <span class="n">scalar_output</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">scalar_output_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">scalar_layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
             <span class="n">scalar_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
         <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">scalar_layers</span><span class="p">)</span>
-        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">output_scalar_size</span><span class="p">,</span>
-                              <span class="n">activation</span><span class="o">=</span><span class="n">output_scalar_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
+        <span class="n">scalar_output</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">scalar_output_size</span><span class="p">,</span>
+                              <span class="n">activation</span><span class="o">=</span><span class="n">scalar_output_activation</span><span class="p">)(</span><span class="n">scalar_output</span><span class="p">)</span>
 
     <span class="c1"># Decoding path</span>
 
@@ -586,7 +586,7 @@
                      <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l2</span><span class="p">(</span><span class="n">weight_decay</span><span class="p">))(</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="n">unet_model</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">output_scalar_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">scalar_output_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">outputs</span><span class="p">,</span> <span class="n">scalar_output</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
