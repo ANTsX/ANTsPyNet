@@ -679,7 +679,11 @@ def ew_david(flair,
             ################################
 
             if verbose == True:
-                print("Prediction.")
+                if n == 0:
+                    print("Prediction")
+                else:
+                    print("Prediction (simulation " + str(n) + ")")
+
 
             prediction = unet_model.predict(batchX, verbose=verbose)
 
