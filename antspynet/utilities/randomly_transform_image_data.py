@@ -105,12 +105,12 @@ def randomly_transform_image_data(reference_image,
     def polar_decomposition(X):
          U, d, V = np.linalg.svd(X, full_matrices=False)
          P = np.matmul(U, np.matmul(np.diag(d), np.transpose(U)))
-         Z = np.matmul(U, np.transpose(V))
+         Z = np.matmul(U, V)
          if np.linalg.det(Z) < 0:
              n = X.shape[0]
-             reflection_matrix = np.identity( n )
+             reflection_matrix = np.identity(n)
              reflection_matrix[0,0] = -1.0
-             Z = np.matmul(Z, reflection_matrix )
+             Z = np.matmul(Z, reflection_matrix)
          return({"P" : P, "Z" : Z, "Xtilde" : np.matmul(P, Z)})
 
     def create_random_linear_transform(image,
