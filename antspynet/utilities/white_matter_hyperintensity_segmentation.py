@@ -249,6 +249,8 @@ def ew_david(flair,
              do_preprocessing=True,
              which_model="sysu",
              which_axes="max",
+             number_of_simulations=0,
+             sd_affine=0.01,
              antsxnet_cache_directory=None,
              verbose=False):
 
@@ -284,6 +286,17 @@ def ew_david(flair,
         or vector, e.g., which_axes = (0, 2), one can use "max" for the
         axis with maximum anisotropy (default) or "all" for all axes.
 
+    number_of_simulations : integer
+        Number of random affine perturbations to transform the input.
+
+    sd_affine : float
+        Define the standard deviation of the affine transformation parameter.
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
     verbose : boolean
         Print progress to the screen.
 
@@ -303,6 +316,7 @@ def ew_david(flair,
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
     from ..utilities import extract_image_patches
+    from ..utilities import randomly_transform_image_data
     from ..utilities import reconstruct_image_from_patches
     from ..utilities import pad_or_crop_image_to_size
 
@@ -312,11 +326,13 @@ def ew_david(flair,
         do_t1_only = True
 
     if do_t1_only and "T1Only" in which_model:
-        raise ValueError("T1-only only works if flair is not supplied")
+        raise ValueError("T1-only only works if flair is not supplied.")
 
     use_t1_segmentation = False
     if "Seg" in which_model:
         use_t1_segmentation = True
+    if use_t1_segmentation and do_preprocessing == True:
+        raise ValueError("Using the t1 segmentation requires do_preprocessing=False.")
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
@@ -454,7 +470,7 @@ def ew_david(flair,
 
         t1_segmentation = None
         if use_t1_segmentation:
-            atropos_seg = deep_atropos( t1, do_preprocessing = do_preprocessing, verbose = verbose )
+            atropos_seg = deep_atropos(t1, do_preprocessing=True, verbose=verbose)
             t1_segmentation = atropos_seg['segmentation_image']
 
         flair_preprocessed = None
@@ -486,10 +502,6 @@ def ew_david(flair,
             t1_preprocessed = ants.resample_image(t1_preprocessed, resampling_params, use_voxels=False, interp_type=0)
             if t1_segmentation is not None:
                 t1_segmentation = ants.resample_image(t1_segmentation, resampling_params, use_voxels=False, interp_type=1)
-
-        if not do_t1_only:
-            flair_preprocessed = (flair_preprocessed - flair_preprocessed.mean()) / flair_preprocessed.std()
-        t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
 
         ################################
         #
@@ -570,72 +582,139 @@ def ew_david(flair,
 
         batchX = np.zeros((total_number_of_slices, *template_size, channel_size))
 
-        slice_count = 0
-        for d in range(len(dimensions_to_predict)):
-            number_of_slices = t1_preprocessed.shape[dimensions_to_predict[d]]
+        data_augmentation = None
+        if number_of_simulations > 0:
+            if do_t1_only:
+                if use_t1_segmentation:
+                    data_augmentation = randomly_transform_image_data(
+                        reference_image=t1_preprocessed,
+                        input_image_list=[[t1_preprocessed]],
+                        segmentation_image_list=[t1_segmentation],
+                        number_of_simulations=number_of_simulations,
+                        transform_type='affine',
+                        sd_affine=sd_affine,
+                        input_image_interpolator='linear',
+                        segmentation_image_interpolator='nearestNeighbor')
+                else:
+                    data_augmentation = randomly_transform_image_data(
+                        reference_image=t1_preprocessed,
+                        input_image_list=[[t1_preprocessed]],
+                        number_of_simulations=number_of_simulations,
+                        transform_type='affine',
+                        sd_affine=sd_affine,
+                        input_image_interpolator='linear')
+            else:
+                if use_t1_segmentation:
+                    data_augmentation = randomly_transform_image_data(
+                        reference_image=t1_preprocessed,
+                        input_image_list=[[flair_preprocessed, t1_preprocessed]],
+                        segmentation_image_list=[t1_segmentation],
+                        number_of_simulations=number_of_simulations,
+                        transform_type='affine',
+                        sd_affine=sd_affine,
+                        input_image_interpolator='linear',
+                        segmentation_image_interpolator='nearestNeighbor')
+                else:
+                    data_augmentation = randomly_transform_image_data(
+                        reference_image=t1_preprocessed,
+                        input_image_list=[[flair_preprocessed, t1_preprocessed]],
+                        number_of_simulations=number_of_simulations,
+                        transform_type='affine',
+                        sd_affine=sd_affine,
+                        input_image_interpolator='linear')
+
+        wmh_probability_image = ants.image_clone(t1) * 0
+        wmh_site = np.array([0, 0, 0])
+
+        for n in range(number_of_simulations + 1):
+
+            batch_flair = flair_preprocessed
+            batch_t1 = t1_preprocessed
+            batch_t1_segmentation = t1_segmentation
+
+            if n > 0:
+                if do_t1_only:
+                    batch_t1 = data_augmentation['simulated_images'][n-1][0]
+                else:
+                    batch_flair = data_augmentation['simulated_images'][n-1][0]
+                    batch_t1 = data_augmentation['simulated_images'][n-1][1]
+                if use_t1_segmentation:
+                    batch_t1_segmentation = data_augmentation['simulated_segmentation_images'][n-1]
+
+            if not do_t1_only:
+                batch_flair = (batch_flair - batch_flair.mean()) / batch_flair.std()
+            batch_t1 = (batch_t1 - batch_t1.mean()) / batch_t1.std()
+
+            slice_count = 0
+            for d in range(len(dimensions_to_predict)):
+                number_of_slices = batch_t1.shape[dimensions_to_predict[d]]
+
+                if verbose == True:
+                    print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
+
+                for i in range(number_of_slices):
+
+                    t1_slice = pad_or_crop_image_to_size(ants.slice_image(batch_t1, dimensions_to_predict[d], i), template_size)
+
+                    if not do_t1_only:
+                        flair_slice = pad_or_crop_image_to_size(ants.slice_image(batch_flair, dimensions_to_predict[d], i), template_size)
+                        batchX[slice_count,:,:,0] = flair_slice.numpy()
+                        batchX[slice_count,:,:,1] = t1_slice.numpy()
+                        if t1_segmentation is not None:
+                            t1_segmentation_slice = pad_or_crop_image_to_size(ants.slice_image(batch_t1_segmentation, dimensions_to_predict[d], i), template_size)
+                            batchX[slice_count,:,:,2] = t1_segmentation_slice.numpy() / 6
+                    else:
+                        batchX[slice_count,:,:,0] = t1_slice.numpy()
+                        if t1_segmentation is not None:
+                            t1_segmentation_slice = pad_or_crop_image_to_size(ants.slice_image(batch_t1_segmentation, dimensions_to_predict[d], i), template_size)
+                            batchX[slice_count,:,:,1] = t1_segmentation_slice.numpy() / 6
+
+                    slice_count += 1
+
+
+            ################################
+            #
+            # Do prediction and then restack into the image
+            #
+            ################################
 
             if verbose == True:
-                print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
+                print("Prediction.")
 
-            for i in range(number_of_slices):
+            prediction = unet_model.predict(batchX, verbose=verbose)
 
-                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed, dimensions_to_predict[d], i), template_size)
+            permutations = list()
+            permutations.append((0, 1, 2))
+            permutations.append((1, 0, 2))
+            permutations.append((1, 2, 0))
 
-                if not do_t1_only:
-                    flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed, dimensions_to_predict[d], i), template_size)
-                    batchX[slice_count,:,:,0] = flair_slice.numpy()
-                    batchX[slice_count,:,:,1] = t1_slice.numpy()
-                    if t1_segmentation is not None:
-                        t1_segmentation_slice = pad_or_crop_image_to_size(ants.slice_image(t1_segmentation, dimensions_to_predict[d], i), template_size)
-                        batchX[slice_count,:,:,2] = t1_segmentation_slice.numpy() / 6
+            prediction_image_average = ants.image_clone(t1_preprocessed) * 0
+
+            current_start_slice = 0
+            for d in range(len(dimensions_to_predict)):
+                current_end_slice = current_start_slice + t1_preprocessed.shape[dimensions_to_predict[d]] - 1
+                which_batch_slices = range(current_start_slice, current_end_slice)
+                if isinstance(prediction, list):
+                    prediction_per_dimension = prediction[0][which_batch_slices,:,:,0]
                 else:
-                    batchX[slice_count,:,:,0] = t1_slice.numpy()
-                    if t1_segmentation is not None:
-                        t1_segmentation_slice = pad_or_crop_image_to_size(ants.slice_image(t1_segmentation, dimensions_to_predict[d], i), template_size)
-                        batchX[slice_count,:,:,1] = t1_segmentation_slice.numpy() / 6
+                    prediction_per_dimension = prediction[which_batch_slices,:,:,0]
+                prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
+                prediction_image = ants.copy_image_info(t1_preprocessed,
+                    pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+                    t1_preprocessed.shape))
+                prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
 
-                slice_count += 1
+                current_start_slice = current_end_slice + 1
 
+            if do_resampling:
+                prediction_image_average = ants.resample_image_to_target(prediction_image_average, t1)
 
-        ################################
-        #
-        # Do prediction and then restack into the image
-        #
-        ################################
-
-        if verbose == True:
-            print("Prediction.")
-
-        prediction = unet_model.predict(batchX, verbose=verbose)
-
-        permutations = list()
-        permutations.append((0, 1, 2))
-        permutations.append((1, 0, 2))
-        permutations.append((1, 2, 0))
-
-        prediction_image_average = ants.image_clone(t1_preprocessed) * 0
-
-        current_start_slice = 0
-        for d in range(len(dimensions_to_predict)):
-            current_end_slice = current_start_slice + t1_preprocessed.shape[dimensions_to_predict[d]] - 1
-            which_batch_slices = range(current_start_slice, current_end_slice)
+            wmh_probability_image = wmh_probability_image + (prediction_image_average - wmh_probability_image) / (n + 1)
             if isinstance(prediction, list):
-                prediction_per_dimension = prediction[0][which_batch_slices,:,:,0]
-            else:
-                prediction_per_dimension = prediction[which_batch_slices,:,:,0]
-            prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
-            prediction_image = ants.copy_image_info(t1_preprocessed,
-                pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
-                t1_preprocessed.shape))
-            prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
-
-            current_start_slice = current_end_slice + 1
-
-        if do_resampling:
-            prediction_image_average = ants.resample_image_to_target(prediction_image_average, t1)
+                wmh_site = wmh_site + (np.mean(prediction[1], axis=1) - wmh_site) / (n + 1)
 
         if isinstance(prediction, list):
-            return([prediction_image_average, prediction[1]])
+            return([wmh_probability_image, wmh_site])
         else:
-            return(prediction_image_average)
+            return(wmh_probability_image)
 
