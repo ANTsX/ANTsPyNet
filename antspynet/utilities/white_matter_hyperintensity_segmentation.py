@@ -64,7 +64,6 @@ def sysu_media_wmh_segmentation(flair,
 
     from ..architectures import create_sysu_media_unet_model_2d
     from ..utilities import brain_extraction
-    from ..utilities import crop_image_center
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
     from ..utilities import pad_or_crop_image_to_size
@@ -74,6 +73,8 @@ def sysu_media_wmh_segmentation(flair,
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
+
+    image_size = (200, 200)
 
     ################################
     #
@@ -120,12 +121,11 @@ def sysu_media_wmh_segmentation(flair,
     else:
         brain_mask = brain_extraction(flair, modality="flair")
 
-    reference_image = ants.make_image((200, 200, 200),
-                                      voxval=1,
-                                      spacing=(1, 1, 1),
-                                      origin=(0, 0, 0),
-                                      direction=np.identity(3))
-
+    reference_image = ants.make_image((170, 256, 256),
+                                       voxval=1,
+                                       spacing=(1, 1, 1),
+                                       origin=(0, 0, 0),
+                                       direction=np.identity(3))
     center_of_mass_reference = ants.get_center_of_mass(reference_image)
     center_of_mass_image = ants.get_center_of_mass(brain_mask)
     translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
@@ -138,6 +138,10 @@ def sysu_media_wmh_segmentation(flair,
     if t1 is not None:
         t1_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reference_image)
 
+    flair_preprocessed_warped = flair_preprocessed_warped * brain_mask_warped
+    if t1 is not None:
+        t1_preprocessed_warped = t1_preprocessed_warped * brain_mask_warped
+
     ################################
     #
     # Gaussian normalize intensity based on brain mask
@@ -147,7 +151,6 @@ def sysu_media_wmh_segmentation(flair,
     mean_flair = flair_preprocessed_warped[brain_mask_warped > 0].mean()
     std_flair = flair_preprocessed_warped[brain_mask_warped > 0].std()
     flair_preprocessed_warped = (flair_preprocessed_warped - mean_flair) / std_flair
-
     if number_of_channels == 2:
         mean_t1 = t1_preprocessed_warped[brain_mask_warped > 0].mean()
         std_t1 = t1_preprocessed_warped[brain_mask_warped > 0].std()
@@ -162,6 +165,9 @@ def sysu_media_wmh_segmentation(flair,
     number_of_models = 1
     if use_ensemble == True:
         number_of_models = 3
+
+    if verbose == True:
+        print("White matter hyperintensity:  retrieving model weights.")
 
     unet_models = list()
     for i in range(number_of_models):
@@ -196,10 +202,10 @@ def sysu_media_wmh_segmentation(flair,
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
-            flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), (200, 200))
+            flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
             batchX[slice_count,:,:,0] = flair_slice.numpy()
             if number_of_channels == 2:
-                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), (200, 200))
+                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
                 batchX[slice_count,:,:,1] = t1_slice.numpy()
 
             slice_count += 1
@@ -240,7 +246,7 @@ def sysu_media_wmh_segmentation(flair,
         current_start_slice = current_end_slice + 1
 
     probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm),
-        prediction_image_average, flair)
+        prediction_image_average, flair) * brain_mask
 
     return(probability_image)
 
