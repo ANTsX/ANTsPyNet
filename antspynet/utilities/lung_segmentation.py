@@ -91,7 +91,7 @@ def el_bicho(ventilation_image,
     if verbose == True:
         print("El Bicho: retrieving model weights.")
 
-    weights_file_name = get_pretrained_network("elbicho", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("elBicho", antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################
