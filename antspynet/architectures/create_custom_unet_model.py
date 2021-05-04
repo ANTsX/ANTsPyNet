@@ -6,7 +6,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (Add, Activation, Concatenate, ReLU, LeakyReLU,
                                      Conv3D, Conv3DTranspose, Input, MaxPooling3D,
-                                     SpatialDropout3D, UpSampling3D, 
+                                     SpatialDropout3D, UpSampling3D,
                                      Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 
 from ..utilities import InstanceNormalization
@@ -324,25 +324,29 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
 
     return(unet_model)
 
-def create_sysu_media_unet_model_2d(input_image_size):
+def create_sysu_media_unet_model_2d(input_image_size,
+                                    anatomy="wmh"):
     """
     Implementation of the sysu_media U-net architecture
 
     Creates a keras model implementation of the u-net architecture
-    in the 2017 MICCAI WMH challenge by the sysu_medial team described 
+    in the 2017 MICCAI WMH challenge by the sysu_medial team described
     here:
-   
+
         https://pubmed.ncbi.nlm.nih.gov/30125711/
-   
+
     with the original implementation available here:
-   
+
         https://github.com/hongweilibran/wmh_ibbmTum
 
     Arguments
     ---------
     input_image_size : tuple of length 4
-        This will be (200, 200, 2) for t1/flair input and (200, 200, 1)} for 
+        This will be (200, 200, 2) for t1/flair input and (200, 200, 1)} for
         flair-only input.
+
+    anatomy : string
+        "wmh" or "claustrum"
 
     Returns
     -------
@@ -356,7 +360,7 @@ def create_sysu_media_unet_model_2d(input_image_size):
     """
 
     def get_crop_shape( target_layer, reference_layer ):
-        
+
         delta = K.int_shape(target_layer)[1] - K.int_shape(reference_layer)[1]
         if delta % 2 != 0:
             cropShape0 = (int(delta/2), int(delta/2) + 1)
@@ -369,34 +373,37 @@ def create_sysu_media_unet_model_2d(input_image_size):
         else:
             cropShape1 = (int(delta/2), int(delta/2))
 
-        return((cropShape0, cropShape1))    
+        return((cropShape0, cropShape1))
 
     inputs = Input(shape=input_image_size)
 
-    number_of_filters = (64, 96, 128, 256, 512)
- 
+    if anatomy == "wmh":
+        number_of_filters = (64, 96, 128, 256, 512)
+    elif anatomy == "claustrum":
+        number_of_filters = (32, 64, 96, 128, 256)
+
     # encoding layers
 
     encoding_layers = list()
 
-    outputs = inputs 
+    outputs = inputs
     for i in range(len(number_of_filters)):
 
         kernel1 = 3
         kernel2 = 3
-        if i == 0:
+        if i == 0 and anatomy == "wmh":
             kernel1 = 5
             kernel2 = 5
         elif i == 3:
             kernel1 = 3
             kernel2 = 4
 
-        outputs = Conv2D(filters=number_of_filters[i], 
-                         kernel_size=kernel1, 
+        outputs = Conv2D(filters=number_of_filters[i],
+                         kernel_size=kernel1,
                          padding = 'same' )(outputs)
         outputs = Activation('relu')(outputs)
-        outputs = Conv2D(filters=number_of_filters[i], 
-                         kernel_size=kernel2, 
+        outputs = Conv2D(filters=number_of_filters[i],
+                         kernel_size=kernel2,
                          padding = 'same' )(outputs)
         outputs = Activation('relu')(outputs)
         encoding_layers.append(outputs)
@@ -418,9 +425,9 @@ def create_sysu_media_unet_model_2d(input_image_size):
                          kernel_size=3,
                          padding='same')(outputs)
         outputs = Activation('relu')(outputs)
-                         
+
     # final
-    
+
     crop_shape = get_crop_shape(inputs, outputs)
     outputs = ZeroPadding2D(padding=crop_shape)(outputs)
     outputs = Conv2D(filters=1,

@@ -3,6 +3,7 @@ import ants
 
 def deep_atropos(t1,
                  do_preprocessing=True,
+                 use_spatial_priors=0,
                  antsxnet_cache_directory=None,
                  verbose=False):
 
@@ -37,6 +38,9 @@ def deep_atropos(t1,
     do_preprocessing : boolean
         See description above.
 
+    use_spatial_priors : integer
+        Use MNI spatial tissue priors (0, 1, or 2).  0 is no priors.
+
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be resused, if is None, these data will be downloaded to a
@@ -58,6 +62,7 @@ def deep_atropos(t1,
 
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
     from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
     from ..utilities import extract_image_patches
@@ -103,13 +108,27 @@ def deep_atropos(t1,
                "deep gray matter", "brain stem", "cerebellum")
     labels = (0, 1, 2, 3, 4, 5, 6)
 
-    unet_model = create_unet_model_3d((*patch_size, 1),
+    mni_priors = None
+    channel_size = 1
+    if use_spatial_priors != 0:
+        mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors")))
+        for i in range(len(mni_priors)):
+            mni_priors[i] = ants.copy_image_info(t1_preprocessed, mni_priors[i])
+        channel_size = len(mni_priors) + 1
+
+    unet_model = create_unet_model_3d((*patch_size, channel_size),
         number_of_outputs=len(labels),
         number_of_layers=4, number_of_filters_at_base_layer=16, dropout_rate=0.0,
         convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
         weight_decay=1e-5, additional_options=("attentionGating"))
 
-    weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = ''
+    if use_spatial_priors == 0:
+        weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", antsxnet_cache_directory=antsxnet_cache_directory)
+    elif use_spatial_priors == 1:
+        weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentationWithPriors1", antsxnet_cache_directory=antsxnet_cache_directory)
+    elif use_spatial_priors == 2:
+        weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentationWithPriors2", antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)
 
     ################################
@@ -125,7 +144,15 @@ def deep_atropos(t1,
     image_patches = extract_image_patches(t1_preprocessed, patch_size=patch_size,
                                           max_number_of_patches="all", stride_length=stride_length,
                                           return_as_array=True)
-    batchX = np.expand_dims(image_patches, axis=-1)
+    batchX = np.zeros((*image_patches.shape, channel_size))
+    batchX[:,:,:,:,0] = image_patches
+    if channel_size > 1:
+        for i in range(channel_size-1):
+            prior_patches = extract_image_patches(mni_priors[i], patch_size=patch_size,
+                                max_number_of_patches="all", stride_length=stride_length,
+                                return_as_array=True)
+            batchX[:,:,:,:,i+1]
+
     predicted_data = unet_model.predict(batchX, verbose=verbose)
 
     probability_images = list()

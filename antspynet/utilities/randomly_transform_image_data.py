@@ -105,18 +105,18 @@ def randomly_transform_image_data(reference_image,
     def polar_decomposition(X):
          U, d, V = np.linalg.svd(X, full_matrices=False)
          P = np.matmul(U, np.matmul(np.diag(d), np.transpose(U)))
-         Z = np.matmul(U, np.transpose(V))
+         Z = np.matmul(U, V)
          if np.linalg.det(Z) < 0:
              n = X.shape[0]
-             reflection_matrix = np.identity( n )
-             reflection_matrix[n-1,n-1]=-1.0
-             Z = np.matmul(Z, reflection_matrix )
+             reflection_matrix = np.identity(n)
+             reflection_matrix[0,0] = -1.0
+             Z = np.matmul(Z, reflection_matrix)
          return({"P" : P, "Z" : Z, "Xtilde" : np.matmul(P, Z)})
 
     def create_random_linear_transform(image,
                                        fixed_parameters,
                                        transform_type='affine',
-                                       sd_affine=1.0):
+                                       sd_affine=0.02):
         transform = ants.create_ants_transform(transform_type=
            "AffineTransform", precision='float', dimension=image.dimension)
         ants.set_ants_transform_fixed_parameters(transform, fixed_parameters)
