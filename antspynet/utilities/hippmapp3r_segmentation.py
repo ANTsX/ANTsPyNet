@@ -183,6 +183,7 @@ def hippmapp3r_segmentation(t1,
     number_of_mci_iterations = 30
     prediction_refine_stage = np.zeros(shape_refine_stage)
     for i in range(number_of_mci_iterations):
+        tf.random.set_seed(i)
         if verbose == True:
             print("        Monte Carlo iteration", i + 1, "out of", number_of_mci_iterations)
         prediction_refine_stage = \
@@ -212,16 +213,3 @@ def hippmapp3r_segmentation(t1,
       whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
 
     return(segmentation_image)
-
-
-
-
-
-
-
-
-
-
-
-
-
