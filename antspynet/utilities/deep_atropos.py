@@ -157,7 +157,8 @@ def deep_atropos(t1,
 
     probability_images = list()
     for i in range(len(labels)):
-        print("Reconstructing image", classes[i])
+        if verbose == True:
+            print("Reconstructing image", classes[i])
         reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
             domain_image=t1_preprocessed, stride_length=stride_length)
 
