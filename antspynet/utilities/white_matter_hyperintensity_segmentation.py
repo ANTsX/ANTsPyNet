@@ -678,7 +678,7 @@ def ew_david(flair,
             if n > 0:
                 if do_flair_only:
                     batch_flair = data_augmentation['simulated_images'][n-1][0]
-                if do_t1_only:
+                elif do_t1_only:
                     batch_t1 = data_augmentation['simulated_images'][n-1][0]
                 else:
                     batch_flair = data_augmentation['simulated_images'][n-1][0]
