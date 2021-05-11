@@ -591,27 +591,9 @@ def ew_david(flair,
 
         ################################
         #
-        # Extract slices
+        # Data augmentation and extract slices
         #
         ################################
-
-        dimensions_to_predict = list((0,))
-        if which_axes == "max":
-            spacing = ants.get_spacing(t1_preprocessed)
-            dimensions_to_predict = (spacing.index(max(spacing)),)
-        elif which_axes == "all":
-            dimensions_to_predict = list(range(3))
-        else:
-            if isinstance(which_axes, int):
-                dimensions_to_predict = list((which_axes,))
-            else:
-                dimensions_to_predict = list(which_axes)
-
-        total_number_of_slices = 0
-        for d in range(len(dimensions_to_predict)):
-            total_number_of_slices += t1_preprocessed.shape[dimensions_to_predict[d]]
-
-        batchX = np.zeros((total_number_of_slices, *template_size, channel_size))
 
         wmh_probability_image = None
 
@@ -669,6 +651,24 @@ def ew_david(flair,
 
         wmh_site = np.array([0, 0, 0])
 
+        dimensions_to_predict = list((0,))
+        if which_axes == "max":
+            spacing = ants.get_spacing(wmh_probability_image)
+            dimensions_to_predict = (spacing.index(max(spacing)),)
+        elif which_axes == "all":
+            dimensions_to_predict = list(range(3))
+        else:
+            if isinstance(which_axes, int):
+                dimensions_to_predict = list((which_axes,))
+            else:
+                dimensions_to_predict = list(which_axes)
+
+        total_number_of_slices = 0
+        for d in range(len(dimensions_to_predict)):
+            total_number_of_slices += t1_preprocessed.shape[dimensions_to_predict[d]]
+
+        batchX = np.zeros((total_number_of_slices, *template_size, channel_size))
+
         for n in range(number_of_simulations + 1):
 
             batch_flair = flair_preprocessed
@@ -720,7 +720,6 @@ def ew_david(flair,
 
                     slice_count += 1
 
-
             ################################
             #
             # Do prediction and then restack into the image
@@ -732,7 +731,6 @@ def ew_david(flair,
                     print("Prediction")
                 else:
                     print("Prediction (simulation " + str(n) + ")")
-
 
             prediction = unet_model.predict(batchX, verbose=verbose)
 
