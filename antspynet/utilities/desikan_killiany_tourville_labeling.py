@@ -253,6 +253,8 @@ def desikan_killiany_tourville_labeling(t1,
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
 
+
+    template_transform_type = "antsRegistrationSyNQuickRepro[a]"
     ################################
     #
     # Preprocess images
@@ -265,7 +267,7 @@ def desikan_killiany_tourville_labeling(t1,
             truncate_intensity=(0.01, 0.99),
             do_brain_extraction=True,
             template="croppedMni152",
-            template_transform_type="AffineFast",
+            template_transform_type=template_transform_type,
             do_bias_correction=True,
             do_denoising=True,
             antsxnet_cache_directory=antsxnet_cache_directory,

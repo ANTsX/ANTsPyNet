@@ -362,7 +362,7 @@ def ew_david(flair,
         #         truncate_intensity=(0.01, 0.99),
         #         do_brain_extraction=True,
         #         template="croppedMni152",
-        #         template_transform_type="AffineFast",
+        #         template_transform_type="antsRegistrationSyNQuickRepro[a]",
         #         do_bias_correction=True,
         #         do_denoising=False,
         #         antsxnet_cache_directory=antsxnet_cache_directory,
@@ -727,4 +727,3 @@ def ew_david(flair,
             return([wmh_probability_image, wmh_site])
         else:
             return(wmh_probability_image)
-
