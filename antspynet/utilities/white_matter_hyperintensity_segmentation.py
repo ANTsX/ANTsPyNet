@@ -336,11 +336,13 @@ def ew_david(flair,
 
     use_t1_segmentation = False
     if "Seg" in which_model:
-        use_t1_segmentation = True
-    if do_flair_only:
-        raise ValueError("Segmentation requires T1.")
-    if use_t1_segmentation and do_preprocessing == True:
-        raise ValueError("Using the t1 segmentation requires do_preprocessing=False.")
+        if do_flair_only:
+            raise ValueError("Segmentation requires T1.")
+        else:
+            use_t1_segmentation = True
+
+    if use_t1_segmentation and do_preprocessing == False:
+        raise ValueError("Using the t1 segmentation requires do_preprocessing=True.")
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
