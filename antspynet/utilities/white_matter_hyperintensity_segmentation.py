@@ -529,10 +529,10 @@ def ew_david(flair,
         template_size = (208, 208)
 
         image_modalities = ("T1", "FLAIR")
-        if do_t1_only:
-            image_modalities=("T1",)
         if do_flair_only:
             image_modalities=("FLAIR",)
+        elif do_t1_only:
+            image_modalities=("T1",)
         if use_t1_segmentation:
             image_modalities = (*image_modalities, "T1Seg")
         channel_size = len(image_modalities)
@@ -552,7 +552,7 @@ def ew_david(flair,
                 weight_decay=0, additional_options=("initialConvolutionKernelSize[5]",))
         else:
             unet_model = create_unet_model_2d((*template_size, channel_size),
-                scalar_output_size=3, scalar_output_activation="softmax",
+                number_of_outputs=1, mode="sigmoid",
                 number_of_filters=(64, 96, 128, 256, 512), dropout_rate=0.0,
                 convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
                 weight_decay=1e-5,
@@ -762,7 +762,7 @@ def ew_david(flair,
 
             wmh_probability_image = wmh_probability_image + (prediction_image_average - wmh_probability_image) / (n + 1)
             if isinstance(prediction, list):
-                wmh_site = wmh_site + (np.mean(prediction[1], axis=1) - wmh_site) / (n + 1)
+                wmh_site = wmh_site + (np.mean(prediction[1], axis=0) - wmh_site) / (n + 1)
 
         if isinstance(prediction, list):
             return([wmh_probability_image, wmh_site])
