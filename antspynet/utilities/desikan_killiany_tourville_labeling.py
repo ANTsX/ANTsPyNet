@@ -7,7 +7,6 @@ def desikan_killiany_tourville_labeling(t1,
                                         return_probability_images=False,
                                         do_lobar_parcellation=False,
                                         antsxnet_cache_directory=None,
-                                        template_transform_type='AffineFast',
                                         verbose=False):
 
     """
@@ -228,10 +227,6 @@ def desikan_killiany_tourville_labeling(t1,
         Since these can be resused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
-    template_transform_type : string
-        see preprocess_brain_image; use antsRegistrationSyNQuickRepro[a] for
-        a reproducible result.
-
     verbose : boolean
         Print progress to the screen.
 
@@ -258,6 +253,8 @@ def desikan_killiany_tourville_labeling(t1,
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
 
+
+    template_transform_type = "antsRegistrationSyNQuickRepro[a]"
     ################################
     #
     # Preprocess images
