@@ -665,7 +665,7 @@ def ew_david(flair,
 
         total_number_of_slices = 0
         for d in range(len(dimensions_to_predict)):
-            total_number_of_slices += t1_preprocessed.shape[dimensions_to_predict[d]]
+            total_number_of_slices += wmh_probability_image.shape[dimensions_to_predict[d]]
 
         batchX = np.zeros((total_number_of_slices, *template_size, channel_size))
 
