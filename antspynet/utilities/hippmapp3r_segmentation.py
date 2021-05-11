@@ -91,7 +91,7 @@ def hippmapp3r_segmentation(t1,
     template_image = ants.image_read(template_file_name_path)
 
     registration = ants.registration(fixed=template_image, moving=t1_preprocessed,
-        type_of_transform="antsRegistrationSyNQuick[t]", verbose=verbose)
+        type_of_transform="antsRegistrationSyNQuickRepro[t]", verbose=verbose)
     image = registration['warpedmovout']
     transforms = dict(fwdtransforms=registration['fwdtransforms'],
                         invtransforms=registration['invtransforms'])
