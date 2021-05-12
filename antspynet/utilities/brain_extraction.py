@@ -78,10 +78,10 @@ def brain_extraction(image,
 
     if "t1combined" in modality:
 
-        brain_extraction_t1 = brain_extraction(image, modality="t1v0",
+        brain_extraction_t1 = brain_extraction(image, modality="t1",
           antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         brain_mask = ants.iMath_get_largest_component(
-          ants.threshold_image(brain_extraction_t1, 0.5, 10000)).ants.iMath_fill_holes()
+          ants.threshold_image(brain_extraction_t1, 0.5, 10000)).iMath_fill_holes()
 
         # Need to change with voxel resolution
         morphological_radius = 12
