@@ -83,7 +83,7 @@ def brain_age(t1,
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
-            do_brain_extraction=True,
+            brain_extraction_modality="t1",
             template="croppedMni152",
             template_transform_type="antsRegistrationSyNQuickRepro[a]",
             do_bias_correction=True,
