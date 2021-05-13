@@ -476,7 +476,7 @@ def ew_david(flair,
                     do_denoising=False,
                     antsxnet_cache_directory=antsxnet_cache_directory,
                     verbose=verbose)
-                brain_mask = t1_preprocessing["brain_mask"]
+                brain_mask = ants.threshold_image(t1_preprocessing["brain_mask"], 0.5, 1, 1, 0)
                 t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
 
         t1_segmentation = None
@@ -501,7 +501,7 @@ def ew_david(flair,
 
         if t1_preprocessed is not None:
             resampling_params = list(ants.get_spacing(t1_preprocessed))
-        elif flair_preprocessed is not None:
+        else:
             resampling_params = list(ants.get_spacing(flair_preprocessed))
 
         do_resampling = False
@@ -596,6 +596,12 @@ def ew_david(flair,
         ################################
 
         wmh_probability_image = None
+        if t1 is not None:
+            wmh_probability_image = ants.image_clone(t1) * 0
+        else:
+            wmh_probability_image = ants.image_clone(flair) * 0    
+
+        wmh_site = np.array([0, 0, 0])
 
         data_augmentation = None
         if number_of_simulations > 0:
@@ -607,7 +613,6 @@ def ew_david(flair,
                     transform_type='affine',
                     sd_affine=sd_affine,
                     input_image_interpolator='linear')
-                wmh_probability_image = ants.image_clone(flair) * 0
             elif do_t1_only:
                 if use_t1_segmentation:
                     data_augmentation = randomly_transform_image_data(
@@ -627,7 +632,6 @@ def ew_david(flair,
                         transform_type='affine',
                         sd_affine=sd_affine,
                         input_image_interpolator='linear')
-                wmh_probability_image = ants.image_clone(t1) * 0
             else:
                 if use_t1_segmentation:
                     data_augmentation = randomly_transform_image_data(
@@ -647,9 +651,6 @@ def ew_david(flair,
                         transform_type='affine',
                         sd_affine=sd_affine,
                         input_image_interpolator='linear')
-                wmh_probability_image = ants.image_clone(t1) * 0
-
-        wmh_site = np.array([0, 0, 0])
 
         dimensions_to_predict = list((0,))
         if which_axes == "max":
@@ -687,9 +688,9 @@ def ew_david(flair,
                     batch_t1_segmentation = data_augmentation['simulated_segmentation_images'][n-1]
 
             if batch_flair is not None:
-                batch_flair = (batch_flair - batch_flair.mean()) / batch_flair.std()
+                batch_flair = (batch_flair - batch_flair[brain_mask != 0].mean()) / batch_flair[brain_mask != 0].std()
             if batch_t1 is not None:
-                batch_t1 = (batch_t1 - batch_t1.mean()) / batch_t1.std()
+                batch_t1 = (batch_t1 - batch_t1[brain_mask != 0].mean()) / batch_t1[brain_mask != 0].std()
 
             slice_count = 0
             for d in range(len(dimensions_to_predict)):
@@ -701,7 +702,7 @@ def ew_david(flair,
                     number_of_slices = batch_flair.shape[dimensions_to_predict[d]]
 
                 if verbose == True:
-                    print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
+                    print("Extracting slices for dimension ", dimensions_to_predict[d])
 
                 for i in range(number_of_slices):
 
@@ -709,11 +710,11 @@ def ew_david(flair,
                     if batch_flair is not None:
                         flair_slice = pad_or_crop_image_to_size(ants.slice_image(batch_flair, dimensions_to_predict[d], i), template_size)
                         batchX[slice_count,:,:,channel_count] = flair_slice.numpy()
-                        channel_count = channel_count + 1
+                        channel_count += 1
                     if batch_t1 is not None:
                         t1_slice = pad_or_crop_image_to_size(ants.slice_image(batch_t1, dimensions_to_predict[d], i), template_size)
                         batchX[slice_count,:,:,channel_count] = t1_slice.numpy()
-                        channel_count = channel_count + 1
+                        channel_count += 1
                     if t1_segmentation is not None:
                         t1_segmentation_slice = pad_or_crop_image_to_size(ants.slice_image(batch_t1_segmentation, dimensions_to_predict[d], i), template_size)
                         batchX[slice_count,:,:,channel_count] = t1_segmentation_slice.numpy() / 6
@@ -758,7 +759,7 @@ def ew_david(flair,
                 current_start_slice = current_end_slice + 1
 
             if do_resampling:
-                prediction_image_average = ants.resample_image_to_target(prediction_image_average, t1)
+                prediction_image_average = ants.resample_image_to_target(prediction_image_average, wmh_probability_image)
 
             wmh_probability_image = wmh_probability_image + (prediction_image_average - wmh_probability_image) / (n + 1)
             if isinstance(prediction, list):
