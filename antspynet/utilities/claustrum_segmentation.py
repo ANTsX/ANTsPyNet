@@ -9,7 +9,7 @@ def claustrum_segmentation(t1,
                            verbose=False):
 
     """
-    Claustrum segmentaiton
+    Claustrum segmentation
 
     Described here:
 
@@ -75,7 +75,7 @@ def claustrum_segmentation(t1,
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
-            do_brain_extraction=True,
+            brain_extraction_modality="t1",
             do_bias_correction=True,
             do_denoising=True,
             antsxnet_cache_directory=antsxnet_cache_directory,

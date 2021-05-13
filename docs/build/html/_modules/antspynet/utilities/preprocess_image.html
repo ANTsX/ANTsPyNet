@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>antspynet.utilities.preprocess_image &#8212; ANTsPyNet 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -37,7 +37,7 @@
 
 <div class="viewcode-block" id="preprocess_brain_image"><a class="viewcode-back" href="../../../utilities.html#antspynet.utilities.preprocess_brain_image">[docs]</a><span class="k">def</span> <span class="nf">preprocess_brain_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
                            <span class="n">truncate_intensity</span><span class="o">=</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">),</span>
-                           <span class="n">do_brain_extraction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                           <span class="n">brain_extraction_modality</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">template_transform_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                            <span class="n">template</span><span class="o">=</span><span class="s2">&quot;biobank&quot;</span><span class="p">,</span>
                            <span class="n">do_bias_correction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -65,8 +65,10 @@
 <span class="sd">    truncate_intensity : 2-length tuple</span>
 <span class="sd">        Defines the quantile threshold for truncating the image intensity</span>
 
-<span class="sd">    do_brain_extraction : boolean</span>
-<span class="sd">        Perform brain extraction using antspynet tools (3D images only).</span>
+<span class="sd">    brain_extraction_modality : string or None</span>
+<span class="sd">        Perform brain extraction using antspynet tools.  One of &quot;t1&quot;, &quot;t1v0&quot;,</span>
+<span class="sd">        &quot;t1nobrainer&quot;, &quot;t1combined&quot;, &quot;flair&quot;, &quot;t2&quot;, &quot;bold&quot;, &quot;fa&quot;, &quot;t1infant&quot;,</span>
+<span class="sd">        &quot;t2infant&quot;, or None.</span>
 
 <span class="sd">    template_transform_type : string</span>
 <span class="sd">        See details in help for ants.registration.  Typically &quot;Rigid&quot; or</span>
@@ -137,11 +139,12 @@
 
     <span class="c1"># Brain extraction</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">do_brain_extraction</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">brain_extraction_modality</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocessing:  brain extraction.&quot;</span><span class="p">)</span>
 
-        <span class="n">probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">modality</span><span class="o">=</span><span class="n">brain_extraction_modality</span><span class="p">,</span>
+            <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">probability_mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Template normalization</span>
@@ -294,7 +297,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

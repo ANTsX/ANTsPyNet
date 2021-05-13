@@ -71,7 +71,7 @@ def hippmapp3r_segmentation(t1,
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=None,
-            do_brain_extraction=True,
+            brain_extraction_modality="t1",
             template=None,
             do_bias_correction=True,
             do_denoising=False,

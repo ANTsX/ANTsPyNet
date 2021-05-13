@@ -4,7 +4,7 @@ import ants
 
 def preprocess_brain_image(image,
                            truncate_intensity=(0.01, 0.99),
-                           do_brain_extraction=True,
+                           brain_extraction_modality=None,
                            template_transform_type=None,
                            template="biobank",
                            do_bias_correction=True,
@@ -32,8 +32,10 @@ def preprocess_brain_image(image,
     truncate_intensity : 2-length tuple
         Defines the quantile threshold for truncating the image intensity
 
-    do_brain_extraction : boolean
-        Perform brain extraction using antspynet tools (3D images only).
+    brain_extraction_modality : string or None
+        Perform brain extraction using antspynet tools.  One of "t1", "t1v0",
+        "t1nobrainer", "t1combined", "flair", "t2", "bold", "fa", "t1infant",
+        "t2infant", or None.
 
     template_transform_type : string
         See details in help for ants.registration.  Typically "Rigid" or
@@ -104,11 +106,12 @@ def preprocess_brain_image(image,
 
     # Brain extraction
     mask = None
-    if do_brain_extraction == True:
+    if brain_extraction_modality is not None:
         if verbose == True:
             print("Preprocessing:  brain extraction.")
 
-        probability_mask = brain_extraction(preprocessed_image, antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        probability_mask = brain_extraction(preprocessed_image, modality=brain_extraction_modality,
+            antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
 
     # Template normalization

@@ -4,7 +4,7 @@ import tensorflow as tf
 import ants
 
 def brain_extraction(image,
-                     modality="t1",
+                     modality="t1v0",
                      antsxnet_cache_directory=None,
                      verbose=False):
 
@@ -81,7 +81,7 @@ def brain_extraction(image,
         brain_extraction_t1 = brain_extraction(image, modality="t1",
           antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         brain_mask = ants.iMath_get_largest_component(
-          ants.threshold_image(brain_extraction_t1, 0.5, 10000))
+          ants.threshold_image(brain_extraction_t1, 0.5, 10000)).iMath_fill_holes()
 
         # Need to change with voxel resolution
         morphological_radius = 12
@@ -140,7 +140,7 @@ def brain_extraction(image,
 
         if modality == "t1":
             classes = ("background", "head", "brain")
-            number_of_classification_labels = len(classes)            
+            number_of_classification_labels = len(classes)
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
             number_of_outputs = number_of_classification_labels,
@@ -237,4 +237,3 @@ def brain_extraction(image,
         brain_mask_labeled = ants.label_clusters(brain_mask_image, minimum_brain_volume)
 
         return(brain_mask_labeled)
-

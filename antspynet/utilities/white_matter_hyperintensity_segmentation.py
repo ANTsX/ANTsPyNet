@@ -86,7 +86,7 @@ def sysu_media_wmh_segmentation(flair,
     if do_preprocessing == True:
         flair_preprocessing = preprocess_brain_image(flair,
             truncate_intensity=(0.01, 0.99),
-            do_brain_extraction=False,
+            brain_extraction_modality=NULL,
             do_bias_correction=True,
             do_denoising=False,
             antsxnet_cache_directory=antsxnet_cache_directory,
@@ -99,7 +99,7 @@ def sysu_media_wmh_segmentation(flair,
         if do_preprocessing == True:
             t1_preprocessing = preprocess_brain_image(t1,
                 truncate_intensity=(0.01, 0.99),
-                do_brain_extraction=False,
+                brain_extraction_modality=NULL,
                 do_bias_correction=True,
                 do_denoising=False,
                 antsxnet_cache_directory=antsxnet_cache_directory,
@@ -364,7 +364,7 @@ def ew_david(flair,
         # if do_preprocessing == True:
         #     t1_preprocessing = preprocess_brain_image(t1,
         #         truncate_intensity=(0.01, 0.99),
-        #         do_brain_extraction=True,
+        #         brain_extraction_modality="t1",
         #         template="croppedMni152",
         #         template_transform_type="antsRegistrationSyNQuickRepro[a]",
         #         do_bias_correction=True,
@@ -377,7 +377,7 @@ def ew_david(flair,
         # if do_preprocessing == True:
         #     flair_preprocessing = preprocess_brain_image(flair,
         #         truncate_intensity=(0.01, 0.99),
-        #         do_brain_extraction=False,
+        #         brain_extraction_modality="t1",
         #         do_bias_correction=True,
         #         do_denoising=False,
         #         antsxnet_cache_directory=antsxnet_cache_directory,
@@ -471,7 +471,7 @@ def ew_david(flair,
             if do_preprocessing == True:
                 t1_preprocessing = preprocess_brain_image(t1,
                     truncate_intensity=(0.01, 0.99),
-                    do_brain_extraction=True,
+                    brain_extraction_modality="t1",
                     do_bias_correction=True,
                     do_denoising=False,
                     antsxnet_cache_directory=antsxnet_cache_directory,
@@ -490,13 +490,12 @@ def ew_david(flair,
             if do_preprocessing == True:
                 flair_preprocessing = preprocess_brain_image(flair,
                     truncate_intensity=(0.01, 0.99),
-                    do_brain_extraction=False,
+                    brain_extraction_modality="flair",
                     do_bias_correction=True,
                     do_denoising=False,
                     antsxnet_cache_directory=antsxnet_cache_directory,
                     verbose=verbose)
-                if brain_mask == None:
-                    brain_mask = ants.threshold_image(brain_extraction(flair, modality="flair", verbose=verbose), 0.5, 1, 1, 0)
+                brain_mask = flair_preprocessing["brain_mask"]
                 flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
 
         if t1_preprocessed is not None:

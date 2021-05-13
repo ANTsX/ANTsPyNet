@@ -84,7 +84,7 @@ def deep_atropos(t1,
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
-            do_brain_extraction=True,
+            brain_extraction_modality="t1",
             template="croppedMni152",
             template_transform_type="antsRegistrationSyNQuickRepro[a]",
             do_bias_correction=True,
@@ -157,7 +157,8 @@ def deep_atropos(t1,
 
     probability_images = list()
     for i in range(len(labels)):
-        print("Reconstructing image", classes[i])
+        if verbose == True:
+            print("Reconstructing image", classes[i])
         reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
             domain_image=t1_preprocessed, stride_length=stride_length)
 
