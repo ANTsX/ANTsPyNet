@@ -169,8 +169,7 @@ def brain_extraction(image,
         if modality == "experimental":
             warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[0], reorient_template)
             warped_array = warped_image.numpy()
-            # batchX[0,:,:,:,0] = (warped_array - warped_array.mean()) / warped_array.std()
-            batchX[0,:,:,:,0] = (warped_array - warped_array.min()) / (warped_array.max() - warped_array.min())
+            batchX[0,:,:,:,0] = (warped_array - warped_array.mean()) / warped_array.std()
 
             index = ants.transform_physical_point_to_index(warped_image, ants.get_center_of_mass(warped_image))
             warped_distance_image = warped_image * 0
