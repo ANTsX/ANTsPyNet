@@ -86,7 +86,7 @@ def sysu_media_wmh_segmentation(flair,
     if do_preprocessing == True:
         flair_preprocessing = preprocess_brain_image(flair,
             truncate_intensity=(0.01, 0.99),
-            brain_extraction_modality=NULL,
+            brain_extraction_modality=None,
             do_bias_correction=True,
             do_denoising=False,
             antsxnet_cache_directory=antsxnet_cache_directory,
@@ -99,7 +99,7 @@ def sysu_media_wmh_segmentation(flair,
         if do_preprocessing == True:
             t1_preprocessing = preprocess_brain_image(t1,
                 truncate_intensity=(0.01, 0.99),
-                brain_extraction_modality=NULL,
+                brain_extraction_modality=None,
                 do_bias_correction=True,
                 do_denoising=False,
                 antsxnet_cache_directory=antsxnet_cache_directory,
@@ -598,7 +598,7 @@ def ew_david(flair,
         if t1 is not None:
             wmh_probability_image = ants.image_clone(t1) * 0
         else:
-            wmh_probability_image = ants.image_clone(flair) * 0    
+            wmh_probability_image = ants.image_clone(flair) * 0
 
         wmh_site = np.array([0, 0, 0])
 
