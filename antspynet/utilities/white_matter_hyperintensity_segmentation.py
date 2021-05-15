@@ -467,7 +467,7 @@ def ew_david(flair,
         t1_preprocessed = None
         t1_preprocessing = None
         brain_mask = None
-        if not do_flair_only:
+        if t1 is not None:
             if do_preprocessing == True:
                 t1_preprocessing = preprocess_brain_image(t1,
                     truncate_intensity=(0.01, 0.99),
@@ -485,17 +485,26 @@ def ew_david(flair,
             t1_segmentation = atropos_seg['segmentation_image']
 
         flair_preprocessed = None
-        if not do_t1_only:
+        if flair is not None:
             flair_preprocessed = flair
             if do_preprocessing == True:
-                flair_preprocessing = preprocess_brain_image(flair,
-                    truncate_intensity=(0.01, 0.99),
-                    brain_extraction_modality="flair",
-                    do_bias_correction=True,
-                    do_denoising=False,
-                    antsxnet_cache_directory=antsxnet_cache_directory,
-                    verbose=verbose)
-                brain_mask = flair_preprocessing["brain_mask"]
+                if brain_mask is None:  
+                    flair_preprocessing = preprocess_brain_image(flair,
+                        truncate_intensity=(0.01, 0.99),
+                        brain_extraction_modality="flair",
+                        do_bias_correction=True,
+                        do_denoising=False,
+                        antsxnet_cache_directory=antsxnet_cache_directory,
+                        verbose=verbose)
+                    brain_mask = flair_preprocessing["brain_mask"]
+                else:
+                    flair_preprocessing = preprocess_brain_image(flair,
+                        truncate_intensity=(0.01, 0.99),
+                        brain_extraction_modality=None,
+                        do_bias_correction=True,
+                        do_denoising=False,
+                        antsxnet_cache_directory=antsxnet_cache_directory,
+                        verbose=verbose)
                 flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
 
         if t1_preprocessed is not None:
@@ -518,6 +527,8 @@ def ew_david(flair,
                 t1_preprocessed = ants.resample_image(t1_preprocessed, resampling_params, use_voxels=False, interp_type=0)
             if t1_segmentation is not None:
                 t1_segmentation = ants.resample_image(t1_segmentation, resampling_params, use_voxels=False, interp_type=1)
+            if brain_mask is not None:
+                brain_mask = ants.resample_image(brain_mask, resampling_params, use_voxels=False, interp_type=1)
 
         ################################
         #
