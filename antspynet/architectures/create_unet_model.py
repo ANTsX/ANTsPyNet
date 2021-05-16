@@ -538,7 +538,7 @@ def create_unet_model_3d(input_image_size,
         else:
             outputs = ReLU()(outputs)
 
-    convActivation = ''
+    conv_activation = ''
     if mode == 'sigmoid':
         conv_activation = 'sigmoid'
     elif mode == 'classification':
@@ -549,7 +549,7 @@ def create_unet_model_3d(input_image_size,
         raise ValueError('mode must be either `classification`, `regression` or `sigmoid`.')
 
     outputs = Conv3D(filters=number_of_outputs,
-                     kernel_size=(1, 1),
+                     kernel_size=(1, 1, 1),
                      activation = conv_activation,
                      kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
