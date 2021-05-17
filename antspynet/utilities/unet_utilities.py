@@ -1,5 +1,6 @@
 
 import numpy as np
+import ants
 
 def encode_unet(segmentations_array,
                 segmentation_labels=None):
