@@ -111,7 +111,7 @@ def brain_extraction(image,
         if modality == "t1v0":
             weights_file_name_prefix = "brainExtraction"
         elif modality == "t1":
-            weights_file_name_prefix = "brainExtractionT1"
+            weights_file_name_prefix = "brainExtractionT1v1"
         elif modality == "t2":
             weights_file_name_prefix = "brainExtractionT2"
         elif modality == "flair":
@@ -126,8 +126,6 @@ def brain_extraction(image,
             weights_file_name_prefix = "brainExtractionInfantT1"
         elif modality == "t2infant":
             weights_file_name_prefix = "brainExtractionInfantT2"
-        elif modality == "experimental":
-            weights_file_name_prefix = "brainExtractionT1v1"
         else:
             raise ValueError("Unknown modality type.")
 
@@ -141,13 +139,9 @@ def brain_extraction(image,
         reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 
-        if modality == "t1":
-            classes = ("background", "head", "brain")
-            number_of_classification_labels = len(classes)
-
         number_of_filters = (8, 16, 32, 64)
         mode = "classification"
-        if modality == "experimental":
+        if modality == "t1":
             number_of_filters = (16, 32, 64, 128)
             number_of_classification_labels = 1
             mode = "sigmoid"
