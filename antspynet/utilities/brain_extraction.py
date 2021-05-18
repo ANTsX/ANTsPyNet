@@ -56,6 +56,7 @@ def brain_extraction(image,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..architectures import create_nobrainer_unet_model_3d
+    from ..utilities import decode_unet
 
     classes = ("background", "brain")
     number_of_classification_labels = len(classes)
@@ -110,7 +111,7 @@ def brain_extraction(image,
         if modality == "t1v0":
             weights_file_name_prefix = "brainExtraction"
         elif modality == "t1":
-            weights_file_name_prefix = "brainExtractionT1"
+            weights_file_name_prefix = "brainExtractionT1v1"
         elif modality == "t2":
             weights_file_name_prefix = "brainExtractionT2"
         elif modality == "flair":
@@ -125,8 +126,6 @@ def brain_extraction(image,
             weights_file_name_prefix = "brainExtractionInfantT1"
         elif modality == "t2infant":
             weights_file_name_prefix = "brainExtractionInfantT2"
-        elif modality == "experimental":
-            weights_file_name_prefix = "brainExtractionT1withDistance"
         else:
             raise ValueError("Unknown modality type.")
 
@@ -140,18 +139,18 @@ def brain_extraction(image,
         reorient_template = ants.image_read(reorient_template_file_name_path)
         resampled_image_size = reorient_template.shape
 
-        if modality == "t1" or modality == "experimental":
-            classes = ("background", "head", "brain")
-            number_of_classification_labels = len(classes)
-
-        if modality == "experimental":
-            channel_size = 2
+        number_of_filters = (8, 16, 32, 64)
+        mode = "classification"
+        if modality == "t1":
+            number_of_filters = (16, 32, 64, 128)
+            number_of_classification_labels = 1
+            mode = "sigmoid"
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
-            number_of_outputs = number_of_classification_labels,
-            number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
-            convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-            weight_decay = 1e-5)
+            number_of_outputs=number_of_classification_labels, mode=mode,
+            number_of_filters=number_of_filters, dropout_rate=0.0,
+            convolution_kernel_size=3, deconvolution_kernel_size=2,
+            weight_decay=1e-5)
 
         unet_model.load_weights(weights_file_name)
 
@@ -166,49 +165,22 @@ def brain_extraction(image,
 
         batchX = np.zeros((1, *resampled_image_size, channel_size))
 
-        if modality == "experimental":
-            warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[0], reorient_template)
+        for i in range(len(input_images)):
+            warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[i], reorient_template)
             warped_array = warped_image.numpy()
-            batchX[0,:,:,:,0] = (warped_array - warped_array.mean()) / warped_array.std()
-
-            index = ants.transform_physical_point_to_index(warped_image, ants.get_center_of_mass(warped_image))
-            warped_distance_image = warped_image * 0
-            warped_distance_image[int(index[0]), int(index[1]), int(index[2])] = 1
-            warped_distance_image = ants.iMath_maurer_distance(warped_distance_image)
-
-            warped_distance_array = warped_distance_image.numpy()
-            batchX[0,:,:,:,1] = (warped_distance_array - warped_distance_array.min()) / (warped_distance_array.max() - warped_distance_array.min())
-        else:
-            for i in range(len(input_images)):
-                warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[i], reorient_template)
-                warped_array = warped_image.numpy()
-                batchX[0,:,:,:,i] = (warped_array - warped_array.mean()) / warped_array.std()
+            batchX[0,:,:,:,i] = (warped_array - warped_array.mean()) / warped_array.std()
 
         if verbose == True:
             print("Brain extraction:  prediction and decoding.")
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
-
-        origin = reorient_template.origin
-        spacing = reorient_template.spacing
-        direction = reorient_template.direction
-
-        probability_images_array = list()
-        probability_images_array.append(
-        ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 0]),
-            origin=origin, spacing=spacing, direction=direction))
-        probability_images_array.append(
-            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 1]),
-            origin=origin, spacing=spacing, direction=direction))
-        if modality == "t1" or modality == "experimental":
-            probability_images_array.append(
-                ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 2]),
-                origin=origin, spacing=spacing, direction=direction))
+        probability_images_array = decode_unet(predicted_data, reorient_template)
 
         if verbose == True:
             print("Brain extraction:  renormalize probability mask to native space.")
-        probability_image = ants.apply_ants_transform_to_image(
-            ants.invert_ants_transform(xfrm), probability_images_array[number_of_classification_labels-1], input_images[0])
+
+        xfrm_inv = xfrm.invert()
+        probability_image = xfrm_inv.apply_to_image(probability_images_array[0][number_of_classification_labels-1], input_images[0])
 
         return(probability_image)
 
