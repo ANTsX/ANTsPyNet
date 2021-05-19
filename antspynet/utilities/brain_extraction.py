@@ -87,7 +87,7 @@ def brain_extraction(image,
           antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         brain_mask = ants.iMath_get_largest_component(
           ants.threshold_image(brain_extraction_t1, 0.5, 10000))
-        brain_mask = ants.morphology("close",morphological_radius).iMath_fill_holes()
+        brain_mask = ants.morphology(brain_mask,"close",morphological_radius).iMath_fill_holes()
 
         brain_extraction_t1nobrainer = brain_extraction(image * ants.iMath_MD(brain_mask, radius=morphological_radius),
           modality = "t1nobrainer", antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
