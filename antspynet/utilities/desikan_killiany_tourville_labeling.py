@@ -265,7 +265,7 @@ def desikan_killiany_tourville_labeling(t1,
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
-            brain_extraction_modality="t1v0",
+            brain_extraction_modality="t1",
             template="croppedMni152",
             template_transform_type=template_transform_type,
             do_bias_correction=True,
