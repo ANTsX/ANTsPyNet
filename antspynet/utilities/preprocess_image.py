@@ -113,6 +113,7 @@ def preprocess_brain_image(image,
         probability_mask = brain_extraction(preprocessed_image, modality=brain_extraction_modality,
             antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
+        mask = ants.morphology(mask,"close",6).iMath_fill_holes()
 
     # Template normalization
     transforms = None
