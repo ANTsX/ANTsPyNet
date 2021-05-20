@@ -235,7 +235,7 @@ def sysu_media_wmh_segmentation(flair,
 
     current_start_slice = 0
     for d in range(len(dimensions_to_predict)):
-        current_end_slice = current_start_slice + flair_preprocessed_warped.shape[dimensions_to_predict[d]] - 1
+        current_end_slice = current_start_slice + flair_preprocessed_warped.shape[dimensions_to_predict[d]]
         which_batch_slices = range(current_start_slice, current_end_slice)
         prediction_per_dimension = prediction[which_batch_slices,:,:,:]
         prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
@@ -243,7 +243,7 @@ def sysu_media_wmh_segmentation(flair,
           pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
             flair_preprocessed_warped.shape))
         prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
-        current_start_slice = current_end_slice + 1
+        current_start_slice = current_end_slice
 
     probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm),
         prediction_image_average, flair) * brain_mask
@@ -607,9 +607,9 @@ def ew_david(flair,
 
         wmh_probability_image = None
         if t1 is not None:
-            wmh_probability_image = ants.image_clone(t1) * 0
+            wmh_probability_image = ants.image_clone(t1_preprocessed) * 0
         else:
-            wmh_probability_image = ants.image_clone(flair) * 0
+            wmh_probability_image = ants.image_clone(flair_preprocessed) * 0
 
         wmh_site = np.array([0, 0, 0])
 
@@ -754,7 +754,7 @@ def ew_david(flair,
 
             current_start_slice = 0
             for d in range(len(dimensions_to_predict)):
-                current_end_slice = current_start_slice + wmh_probability_image.shape[dimensions_to_predict[d]] - 1
+                current_end_slice = current_start_slice + wmh_probability_image.shape[dimensions_to_predict[d]]
                 which_batch_slices = range(current_start_slice, current_end_slice)
                 if isinstance(prediction, list):
                     prediction_per_dimension = prediction[0][which_batch_slices,:,:,0]
@@ -765,15 +765,17 @@ def ew_david(flair,
                     pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
                     wmh_probability_image.shape))
                 prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
-
-                current_start_slice = current_end_slice + 1
-
-            if do_resampling:
-                prediction_image_average = ants.resample_image_to_target(prediction_image_average, wmh_probability_image)
+                current_start_slice = current_end_slice
 
             wmh_probability_image = wmh_probability_image + (prediction_image_average - wmh_probability_image) / (n + 1)
             if isinstance(prediction, list):
                 wmh_site = wmh_site + (np.mean(prediction[1], axis=0) - wmh_site) / (n + 1)
+
+        if do_resampling:
+            if t1 is not None:
+                wmh_probability_image = ants.resample_image_to_target(wmh_probability_image, t1)
+            if flair is not None:
+                wmh_probability_image = ants.resample_image_to_target(wmh_probability_image, flair)
 
         if isinstance(prediction, list):
             return([wmh_probability_image, wmh_site])
