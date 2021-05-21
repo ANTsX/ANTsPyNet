@@ -161,9 +161,6 @@ def sysu_media_wmh_segmentation(flair,
                 batchX[slice_count,:,:,1] = t1_slice.numpy()
             slice_count += 1
 
-    ants.image_write(ants.from_numpy(np.squeeze(batchX[:,:,:,1])), "~/Desktop/t1Py.nii.gz") 
-    ants.image_write(ants.from_numpy(np.squeeze(batchX[:,:,:,0])), "~/Desktop/flairPy.nii.gz") 
-
     ################################
     #
     # Do prediction and then restack into the image
