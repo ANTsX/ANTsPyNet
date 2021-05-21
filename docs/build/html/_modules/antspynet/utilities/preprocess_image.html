@@ -6,12 +6,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>antspynet.utilities.preprocess_image &#8212; ANTsPyNet 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -146,6 +147,7 @@
         <span class="n">probability_mask</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">preprocessed_image</span><span class="p">,</span> <span class="n">modality</span><span class="o">=</span><span class="n">brain_extraction_modality</span><span class="p">,</span>
             <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">probability_mask</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">morphology</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span><span class="s2">&quot;close&quot;</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">iMath_fill_holes</span><span class="p">()</span>
 
     <span class="c1"># Template normalization</span>
     <span class="n">transforms</span> <span class="o">=</span> <span class="kc">None</span>
@@ -297,7 +299,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

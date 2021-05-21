@@ -4,9 +4,7 @@ import ants
 
 def sysu_media_wmh_segmentation(flair,
                                 t1=None,
-                                do_preprocessing=True,
                                 use_ensemble=True,
-                                use_axial_slices_only=True,
                                 antsxnet_cache_directory=None,
                                 verbose=False):
 
@@ -33,16 +31,8 @@ def sysu_media_wmh_segmentation(flair,
     t1 : ANTsImage
         input 3-D T1 brain image (not skull-stripped).
 
-    do_preprocessing : boolean
-        perform n4 bias correction.
-
     use_ensemble : boolean
         check whether to use all 3 sets of weights.
-
-    use_axial_slices_only : boolean
-        If True, use original implementation which was trained on axial slices.
-        If False, use ANTsXNet variant implementation which applies the slice-by-slice
-        models to all 3 dimensions and averages the results.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -83,43 +73,11 @@ def sysu_media_wmh_segmentation(flair,
     ################################
 
     flair_preprocessed = flair
-    if do_preprocessing == True:
-        flair_preprocessing = preprocess_brain_image(flair,
-            truncate_intensity=(0.01, 0.99),
-            brain_extraction_modality=None,
-            do_bias_correction=True,
-            do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
-            verbose=verbose)
-        flair_preprocessed = flair_preprocessing["preprocessed_image"]
-
     number_of_channels = 1
+
     if t1 is not None:
         t1_preprocessed = t1
-        if do_preprocessing == True:
-            t1_preprocessing = preprocess_brain_image(t1,
-                truncate_intensity=(0.01, 0.99),
-                brain_extraction_modality=None,
-                do_bias_correction=True,
-                do_denoising=False,
-                antsxnet_cache_directory=antsxnet_cache_directory,
-                verbose=verbose)
-            t1_preprocessed = t1_preprocessing["preprocessed_image"]
         number_of_channels = 2
-
-    ################################
-    #
-    # Estimate mask
-    #
-    ################################
-
-    brain_mask = None
-    if verbose == True:
-        print("Estimating brain mask.")
-    if t1 is not None:
-        brain_mask = brain_extraction(t1, modality="t1")
-    else:
-        brain_mask = brain_extraction(flair, modality="flair")
 
     reference_image = ants.make_image((170, 256, 256),
                                        voxval=1,
@@ -127,20 +85,14 @@ def sysu_media_wmh_segmentation(flair,
                                        origin=(0, 0, 0),
                                        direction=np.identity(3))
     center_of_mass_reference = ants.get_center_of_mass(reference_image)
-    center_of_mass_image = ants.get_center_of_mass(brain_mask)
+    center_of_mass_image = ants.get_center_of_mass(flair_preprocessed)
     translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.asarray(center_of_mass_reference), translation=translation)
     flair_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reference_image)
-    brain_mask_warped = ants.threshold_image(
-        ants.apply_ants_transform_to_image(xfrm, brain_mask, reference_image), 0.5, 1.1, 1, 0 )
 
     if t1 is not None:
         t1_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reference_image)
-
-    flair_preprocessed_warped = flair_preprocessed_warped * brain_mask_warped
-    if t1 is not None:
-        t1_preprocessed_warped = t1_preprocessed_warped * brain_mask_warped
 
     ################################
     #
@@ -148,12 +100,12 @@ def sysu_media_wmh_segmentation(flair,
     #
     ################################
 
-    mean_flair = flair_preprocessed_warped[brain_mask_warped > 0].mean()
-    std_flair = flair_preprocessed_warped[brain_mask_warped > 0].std()
+    mean_flair = flair_preprocessed_warped.mean()
+    std_flair = flair_preprocessed_warped.std()
     flair_preprocessed_warped = (flair_preprocessed_warped - mean_flair) / std_flair
     if number_of_channels == 2:
-        mean_t1 = t1_preprocessed_warped[brain_mask_warped > 0].mean()
-        std_t1 = t1_preprocessed_warped[brain_mask_warped > 0].std()
+        mean_t1 = t1_preprocessed_warped.mean()
+        std_t1 = t1_preprocessed_warped.std()
         t1_preprocessed_warped = (t1_preprocessed_warped - mean_t1) / std_t1
 
     ################################
@@ -185,8 +137,6 @@ def sysu_media_wmh_segmentation(flair,
     ################################
 
     dimensions_to_predict = [2]
-    if use_axial_slices_only == False:
-        dimensions_to_predict = list(range(3))
 
     total_number_of_slices = 0
     for d in range(len(dimensions_to_predict)):
@@ -202,14 +152,17 @@ def sysu_media_wmh_segmentation(flair,
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
-            flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+            flair_slice = pad_or_crop_image_to_size(ants.slice_image(
+                flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
             batchX[slice_count,:,:,0] = flair_slice.numpy()
             if number_of_channels == 2:
-                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+                t1_slice = pad_or_crop_image_to_size(ants.slice_image(
+                    t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
                 batchX[slice_count,:,:,1] = t1_slice.numpy()
-
             slice_count += 1
 
+    ants.image_write(ants.from_numpy(np.squeeze(batchX[:,:,:,1])), "~/Desktop/t1Py.nii.gz") 
+    ants.image_write(ants.from_numpy(np.squeeze(batchX[:,:,:,0])), "~/Desktop/flairPy.nii.gz") 
 
     ################################
     #
@@ -220,11 +173,12 @@ def sysu_media_wmh_segmentation(flair,
     if verbose == True:
         print("Prediction.")
 
-    prediction = unet_models[0].predict(batchX, verbose=verbose)
+    prediction = unet_models[0].predict(np.rot90(batchX, axes=(1, 2), k=1), verbose=verbose)
     if number_of_models > 1:
-       for i in range(1, number_of_models, 1):
-           prediction += unet_models[i].predict(batchX, verbose=verbose)
+        for i in range(1, number_of_models, 1):
+            prediction += unet_models[i].predict(np.rot90(batchX, axes=(1, 2), k=1), verbose=verbose)
     prediction /= number_of_models
+    prediction = np.rot90(prediction, axes=(1, 2), k=-1)
 
     permutations = list()
     permutations.append((0, 1, 2))
@@ -245,8 +199,8 @@ def sysu_media_wmh_segmentation(flair,
         prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
         current_start_slice = current_end_slice
 
-    probability_image = ants.apply_ants_transform_to_image(ants.invert_ants_transform(xfrm),
-        prediction_image_average, flair) * brain_mask
+    probability_image = ants.apply_ants_transform_to_image(
+        ants.invert_ants_transform(xfrm), prediction_image_average, flair)
 
     return(probability_image)
 
