@@ -53,9 +53,7 @@ def sysu_media_wmh_segmentation(flair,
     """
 
     from ..architectures import create_sysu_media_unet_model_2d
-    from ..utilities import brain_extraction
     from ..utilities import get_pretrained_network
-    from ..utilities import preprocess_brain_image
     from ..utilities import pad_or_crop_image_to_size
 
     if flair.dimension != 3:
@@ -205,7 +203,7 @@ def ew_david(flair,
              t1,
              do_preprocessing=True,
              which_model="sysu",
-             which_axes="max",
+             which_axes=2,
              number_of_simulations=0,
              sd_affine=0.01,
              antsxnet_cache_directory=None,
@@ -217,11 +215,12 @@ def ew_david(flair,
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
+       * intensity truncation,
        * brain extraction, and
        * affine registration to MNI.
     The input T1 should undergo the same steps.  If the input T1 is the raw
     T1, these steps can be performed by the internal preprocessing, i.e. set
-    \code{doPreprocessing = TRUE}
+    \code{do_preprocessing = True}
 
     Arguments
     ---------
@@ -232,7 +231,7 @@ def ew_david(flair,
         input 3-D T1 brain image (not skull-stripped).
 
     do_preprocessing : boolean
-        perform n4 bias correction?
+        perform n4 bias correction, intensity truncation, brain extraction.
 
     which_model : string
        one of "sysu", "sysuPlus", "sysuPlusSeg", "sysuWithSite".
@@ -267,14 +266,10 @@ def ew_david(flair,
     """
 
     from ..architectures import create_unet_model_2d
-    from ..architectures import create_unet_model_3d
     from ..utilities import deep_atropos
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
-    from ..utilities import brain_extraction
-    from ..utilities import extract_image_patches
     from ..utilities import randomly_transform_image_data
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import pad_or_crop_image_to_size
 
     do_t1_only = False
@@ -421,9 +416,9 @@ def ew_david(flair,
         if t1 is not None:
             if do_preprocessing == True:
                 t1_preprocessing = preprocess_brain_image(t1,
-                    truncate_intensity=(0.01, 0.99),
+                    truncate_intensity=None,
                     brain_extraction_modality="t1",
-                    do_bias_correction=True,
+                    do_bias_correction=False,
                     do_denoising=False,
                     antsxnet_cache_directory=antsxnet_cache_directory,
                     verbose=verbose)
@@ -441,18 +436,18 @@ def ew_david(flair,
             if do_preprocessing == True:
                 if brain_mask is None:  
                     flair_preprocessing = preprocess_brain_image(flair,
-                        truncate_intensity=(0.01, 0.99),
+                        truncate_intensity=None,
                         brain_extraction_modality="flair",
-                        do_bias_correction=True,
+                        do_bias_correction=False,
                         do_denoising=False,
                         antsxnet_cache_directory=antsxnet_cache_directory,
                         verbose=verbose)
                     brain_mask = flair_preprocessing["brain_mask"]
                 else:
                     flair_preprocessing = preprocess_brain_image(flair,
-                        truncate_intensity=(0.01, 0.99),
+                        truncate_intensity=None,
                         brain_extraction_modality=None,
-                        do_bias_correction=True,
+                        do_bias_correction=False,
                         do_denoising=False,
                         antsxnet_cache_directory=antsxnet_cache_directory,
                         verbose=verbose)
