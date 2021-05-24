@@ -9,6 +9,8 @@ from tensorflow.keras.layers import (Add, Activation, Concatenate, ReLU, LeakyRe
                                      SpatialDropout3D, UpSampling3D,
                                      Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 
+import keras
+
 from ..utilities import InstanceNormalization
 
 
@@ -359,7 +361,7 @@ def create_sysu_media_unet_model_2d(input_image_size,
     >>> model = antspynet.create_sysu_media_unet_model_2d((*image_size, 1))
     """
 
-    def get_crop_shape( target_layer, reference_layer ):
+    def get_crop_shape(target_layer, reference_layer):
 
         delta = K.int_shape(target_layer)[1] - K.int_shape(reference_layer)[1]
         if delta % 2 != 0:
@@ -400,11 +402,11 @@ def create_sysu_media_unet_model_2d(input_image_size,
 
         outputs = Conv2D(filters=number_of_filters[i],
                          kernel_size=kernel1,
-                         padding = 'same' )(outputs)
+                         padding='same')(outputs)
         outputs = Activation('relu')(outputs)
         outputs = Conv2D(filters=number_of_filters[i],
                          kernel_size=kernel2,
-                         padding = 'same' )(outputs)
+                         padding='same')(outputs)
         outputs = Activation('relu')(outputs)
         encoding_layers.append(outputs)
         if i < 4:

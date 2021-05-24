@@ -1,6 +1,6 @@
 
-import numpy as np
 import ants
+import numpy as np
 
 def sysu_media_wmh_segmentation(flair,
                                 t1=None,
@@ -55,6 +55,7 @@ def sysu_media_wmh_segmentation(flair,
     from ..architectures import create_sysu_media_unet_model_2d
     from ..utilities import get_pretrained_network
     from ..utilities import pad_or_crop_image_to_size
+    from ..utilities import preprocess_brain_image
 
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -70,40 +71,83 @@ def sysu_media_wmh_segmentation(flair,
     #
     ################################
 
-    flair_preprocessed = flair
+    def closest_simplified_direction_matrix(direction):
+        closest = np.floor(np.abs(direction + 0.5))
+        closest[direction < 0] *= -1.0
+        return direction
+
+    simplified_direction = closest_simplified_direction_matrix(flair.direction)  
+
+    flair_preprocessing = preprocess_brain_image(flair,
+        truncate_intensity=None,
+        brain_extraction_modality=None,
+        do_bias_correction=False,
+        do_denoising=False,
+        antsxnet_cache_directory=antsxnet_cache_directory,
+        verbose=verbose)
+    flair_preprocessed = flair_preprocessing["preprocessed_image"]
+    flair_preprocessed.set_direction(simplified_direction)
+    flair_preprocessed.set_origin((0, 0, 0))
+    flair_preprocessed.set_spacing((1, 1, 1))
     number_of_channels = 1
 
+    t1_preprocessed = None
     if t1 is not None:
-        t1_preprocessed = t1
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=None,
+            brain_extraction_modality=None,
+            do_bias_correction=False,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        t1_preprocessed = t1_preprocessing["preprocessed_image"]
+        t1_preprocessed.set_direction(simplified_direction)
+        t1_preprocessed.set_origin((0, 0, 0))
+        t1_preprocessed.set_spacing((1, 1, 1))
         number_of_channels = 2
 
-    reference_image = ants.make_image((170, 256, 256),
-                                       voxval=1,
+    ################################
+    #
+    # Reorient images
+    #
+    ################################
+
+    reference_image = ants.make_image((256, 256, 256),
+                                       voxval=0,
                                        spacing=(1, 1, 1),
                                        origin=(0, 0, 0),
                                        direction=np.identity(3))
-    center_of_mass_reference = ants.get_center_of_mass(reference_image)
-    center_of_mass_image = ants.get_center_of_mass(flair_preprocessed)
+    center_of_mass_reference = np.floor(ants.get_center_of_mass(reference_image * 0 + 1))
+    center_of_mass_image = np.floor(ants.get_center_of_mass(flair_preprocessed))
     translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.asarray(center_of_mass_reference), translation=translation)
-    flair_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reference_image)
+    flair_preprocessed_warped = ants.apply_ants_transform_to_image(
+        xfrm, flair_preprocessed, reference_image, interpolation="nearestneighbor")
+    crop_image = ants.image_clone(flair_preprocessed) * 0 + 1
+    crop_image_warped = ants.apply_ants_transform_to_image(
+        xfrm, crop_image, reference_image, interpolation="nearestneighbor")
+    flair_preprocessed_warped = ants.crop_image(flair_preprocessed_warped, crop_image_warped, 1)
 
     if t1 is not None:
-        t1_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reference_image)
+        t1_preprocessed_warped = ants.apply_ants_transform_to_image(
+            xfrm, t1_preprocessed, reference_image, interpolation="nearestneighbor")
+        t1_preprocessed_warped = ants.crop_image(t1_preprocessed_warped, crop_image_warped, 1) 
 
     ################################
     #
-    # Gaussian normalize intensity based on brain mask
+    # Gaussian normalize intensity
     #
     ################################
 
-    mean_flair = flair_preprocessed_warped.mean()
-    std_flair = flair_preprocessed_warped.std()
+    mean_flair = flair_preprocessed.mean()
+    std_flair = flair_preprocessed.std()
+    if number_of_channels == 2:
+        mean_t1 = t1_preprocessed.mean()
+        std_t1 = t1_preprocessed.std()
+
     flair_preprocessed_warped = (flair_preprocessed_warped - mean_flair) / std_flair
     if number_of_channels == 2:
-        mean_t1 = t1_preprocessed_warped.mean()
-        std_t1 = t1_preprocessed_warped.std()
         t1_preprocessed_warped = (t1_preprocessed_warped - mean_t1) / std_t1
 
     ################################
@@ -122,10 +166,12 @@ def sysu_media_wmh_segmentation(flair,
     unet_models = list()
     for i in range(number_of_models):
         if number_of_channels == 1:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), 
+                antsxnet_cache_directory=antsxnet_cache_directory)
         else:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), antsxnet_cache_directory=antsxnet_cache_directory)
-        unet_models.append(create_sysu_media_unet_model_2d((200, 200, number_of_channels)))
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), 
+                antsxnet_cache_directory=antsxnet_cache_directory)
+        unet_models.append(create_sysu_media_unet_model_2d((*image_size, number_of_channels)))
         unet_models[i].load_weights(weights_file_name)
 
     ################################
@@ -140,7 +186,7 @@ def sysu_media_wmh_segmentation(flair,
     for d in range(len(dimensions_to_predict)):
         total_number_of_slices += flair_preprocessed_warped.shape[dimensions_to_predict[d]]
 
-    batchX = np.zeros((total_number_of_slices, 200, 200, number_of_channels))
+    batchX = np.zeros((total_number_of_slices, *image_size, number_of_channels))
 
     slice_count = 0
     for d in range(len(dimensions_to_predict)):
@@ -150,12 +196,10 @@ def sysu_media_wmh_segmentation(flair,
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
-            flair_slice = pad_or_crop_image_to_size(ants.slice_image(
-                flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+            flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
             batchX[slice_count,:,:,0] = flair_slice.numpy()
             if number_of_channels == 2:
-                t1_slice = pad_or_crop_image_to_size(ants.slice_image(
-                    t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
                 batchX[slice_count,:,:,1] = t1_slice.numpy()
             slice_count += 1
 
@@ -168,12 +212,12 @@ def sysu_media_wmh_segmentation(flair,
     if verbose == True:
         print("Prediction.")
 
-    prediction = unet_models[0].predict(np.rot90(batchX, axes=(1, 2), k=1), verbose=verbose)
+    prediction = unet_models[0].predict(np.transpose(batchX, axes=(0, 2, 1, 3)), verbose=verbose)
     if number_of_models > 1:
         for i in range(1, number_of_models, 1):
-            prediction += unet_models[i].predict(np.rot90(batchX, axes=(1, 2), k=1), verbose=verbose)
+            prediction += unet_models[i].predict(np.transpose(batchX, axes=(0, 2, 1, 3)), verbose=verbose)
     prediction /= number_of_models
-    prediction = np.rot90(prediction, axes=(1, 2), k=-1)
+    prediction = np.transpose(prediction, axes=(0, 2, 1, 3))
 
     permutations = list()
     permutations.append((0, 1, 2))
@@ -195,7 +239,8 @@ def sysu_media_wmh_segmentation(flair,
         current_start_slice = current_end_slice
 
     probability_image = ants.apply_ants_transform_to_image(
-        ants.invert_ants_transform(xfrm), prediction_image_average, flair)
+        ants.invert_ants_transform(xfrm), prediction_image_average, flair_preprocessed)
+    probability_image = ants.copy_image_info(flair, probability_image)    
 
     return(probability_image)
 
