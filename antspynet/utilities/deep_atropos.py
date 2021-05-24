@@ -39,7 +39,7 @@ def deep_atropos(t1,
         See description above.
 
     use_spatial_priors : integer
-        Use MNI spatial tissue priors (0, 1, or 2).  0 is no priors.
+        Use MNI spatial tissue priors (0 or 1).  0 is no priors.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -127,8 +127,8 @@ def deep_atropos(t1,
         weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", antsxnet_cache_directory=antsxnet_cache_directory)
     elif use_spatial_priors == 1:
         weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentationWithPriors1", antsxnet_cache_directory=antsxnet_cache_directory)
-    elif use_spatial_priors == 2:
-        weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentationWithPriors2", antsxnet_cache_directory=antsxnet_cache_directory)
+    else:
+        raise ValueError("use_spatial_priors must be a 0 or 1")
     unet_model.load_weights(weights_file_name)
 
     ################################

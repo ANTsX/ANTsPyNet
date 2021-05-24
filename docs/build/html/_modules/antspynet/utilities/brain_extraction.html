@@ -111,16 +111,16 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s2">&quot;Image dimension must be 3.&quot;</span> <span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;t1combined&quot;</span> <span class="ow">in</span> <span class="n">modality</span><span class="p">:</span>
-
-        <span class="n">brain_extraction_t1</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">modality</span><span class="o">=</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span>
-          <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-        <span class="n">brain_mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">iMath_get_largest_component</span><span class="p">(</span>
-          <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">brain_extraction_t1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">10000</span><span class="p">))</span><span class="o">.</span><span class="n">iMath_fill_holes</span><span class="p">()</span>
-
         <span class="c1"># Need to change with voxel resolution</span>
         <span class="n">morphological_radius</span> <span class="o">=</span> <span class="mi">12</span>
         <span class="k">if</span> <span class="s1">&#39;[&#39;</span> <span class="ow">in</span> <span class="n">modality</span> <span class="ow">and</span> <span class="s1">&#39;]&#39;</span> <span class="ow">in</span> <span class="n">modality</span><span class="p">:</span>
             <span class="n">morphological_radius</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">modality</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">brain_extraction_t1</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">modality</span><span class="o">=</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span>
+          <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="n">brain_mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">iMath_get_largest_component</span><span class="p">(</span>
+          <span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">brain_extraction_t1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">10000</span><span class="p">))</span>
+        <span class="n">brain_mask</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">morphology</span><span class="p">(</span><span class="n">brain_mask</span><span class="p">,</span><span class="s2">&quot;close&quot;</span><span class="p">,</span><span class="n">morphological_radius</span><span class="p">)</span><span class="o">.</span><span class="n">iMath_fill_holes</span><span class="p">()</span>
 
         <span class="n">brain_extraction_t1nobrainer</span> <span class="o">=</span> <span class="n">brain_extraction</span><span class="p">(</span><span class="n">image</span> <span class="o">*</span> <span class="n">ants</span><span class="o">.</span><span class="n">iMath_MD</span><span class="p">(</span><span class="n">brain_mask</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">morphological_radius</span><span class="p">),</span>
           <span class="n">modality</span> <span class="o">=</span> <span class="s2">&quot;t1nobrainer&quot;</span><span class="p">,</span> <span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="n">antsxnet_cache_directory</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
@@ -144,7 +144,7 @@
         <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1v0&quot;</span><span class="p">:</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtraction&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionT1&quot;</span>
+            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionT1v1&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span><span class="p">:</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionT2&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;flair&quot;</span><span class="p">:</span>
@@ -159,8 +159,6 @@
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT1&quot;</span>
         <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t2infant&quot;</span><span class="p">:</span>
             <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionInfantT2&quot;</span>
-        <span class="k">elif</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;experimental&quot;</span><span class="p">:</span>
-            <span class="n">weights_file_name_prefix</span> <span class="o">=</span> <span class="s2">&quot;brainExtractionT1v1&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown modality type.&quot;</span><span class="p">)</span>
 
@@ -174,13 +172,9 @@
         <span class="n">reorient_template</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">reorient_template_file_name_path</span><span class="p">)</span>
         <span class="n">resampled_image_size</span> <span class="o">=</span> <span class="n">reorient_template</span><span class="o">.</span><span class="n">shape</span>
 
-        <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span><span class="p">:</span>
-            <span class="n">classes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;background&quot;</span><span class="p">,</span> <span class="s2">&quot;head&quot;</span><span class="p">,</span> <span class="s2">&quot;brain&quot;</span><span class="p">)</span>
-            <span class="n">number_of_classification_labels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-
         <span class="n">number_of_filters</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
         <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;classification&quot;</span>
-        <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;experimental&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">modality</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span><span class="p">:</span>
             <span class="n">number_of_filters</span> <span class="o">=</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
             <span class="n">number_of_classification_labels</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;sigmoid&quot;</span>
