@@ -1,6 +1,7 @@
 
 import ants
 import numpy as np
+from tensorflow import keras
 
 def sysu_media_wmh_segmentation(flair,
                                 t1=None,
@@ -56,6 +57,7 @@ def sysu_media_wmh_segmentation(flair,
     from ..utilities import get_pretrained_network
     from ..utilities import pad_or_crop_image_to_size
     from ..utilities import preprocess_brain_image
+    from ..utilities import binary_dice_coefficient
 
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -171,8 +173,13 @@ def sysu_media_wmh_segmentation(flair,
         else:
             weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), 
                 antsxnet_cache_directory=antsxnet_cache_directory)
-        unet_models.append(create_sysu_media_unet_model_2d((*image_size, number_of_channels)))
-        unet_models[i].load_weights(weights_file_name)
+        unet_model = create_sysu_media_unet_model_2d((*image_size, number_of_channels))             
+        unet_loss = binary_dice_coefficient(smoothing_factor=1.)
+        unet_model.compile(optimizer=keras.optimizers.Adam(learning_rate=2e-4),
+                        loss=unet_loss)
+        unet_model.load_weights(weights_file_name)                
+        unet_models.append(unet_model)
+        
 
     ################################
     #
