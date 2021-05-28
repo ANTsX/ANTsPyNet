@@ -3,7 +3,7 @@ import ants
 
 def deep_atropos(t1,
                  do_preprocessing=True,
-                 use_spatial_priors=0,
+                 use_spatial_priors=1,
                  antsxnet_cache_directory=None,
                  verbose=False):
 
@@ -39,7 +39,8 @@ def deep_atropos(t1,
         See description above.
 
     use_spatial_priors : integer
-        Use MNI spatial tissue priors (0 or 1).  0 is no priors.
+        Use MNI spatial tissue priors (0 or 1).  Currently, only '0' (no priors) and '1'
+        (cerebellar prior only) are the only two options.  Default is 1.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
