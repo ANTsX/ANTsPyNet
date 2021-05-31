@@ -148,11 +148,10 @@ def deep_atropos(t1,
     batchX = np.zeros((*image_patches.shape, channel_size))
     batchX[:,:,:,:,0] = image_patches
     if channel_size > 1:
-        for i in range(channel_size-1):
-            prior_patches = extract_image_patches(mni_priors[i], patch_size=patch_size,
-                                max_number_of_patches="all", stride_length=stride_length,
-                                return_as_array=True)
-            batchX[:,:,:,:,i+1]
+        prior_patches = extract_image_patches(mni_priors[6], patch_size=patch_size,
+                            max_number_of_patches="all", stride_length=stride_length,
+                            return_as_array=True)
+        batchX[:,:,:,:,1] = prior_patches
 
     predicted_data = unet_model.predict(batchX, verbose=verbose)
 
