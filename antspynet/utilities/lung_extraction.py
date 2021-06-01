@@ -38,6 +38,8 @@ def lung_extraction(image,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
+    from ..utilities import extract_image_patches
+    from ..utilities import reconstruct_image_from_patches
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -113,62 +115,127 @@ def lung_extraction(image,
         return(return_dict)
 
     elif modality == "ct":
-        weights_file_name = get_pretrained_network("ctHumanLung")
 
-        classes = ("background", "left_lung", "right_lung", "trachea")
+        ################################
+        #
+        # Preprocess image
+        #
+        ################################
+
+        if verbose == True:
+            print("Preprocess CT image.")
+
+        def closest_simplified_direction_matrix(direction):
+            closest = np.floor(np.abs(direction + 0.5))
+            closest[direction < 0] *= -1.0
+            return direction
+
+        simplified_direction = closest_simplified_direction_matrix(image.direction)
+
+        reference_image_size = (200, 200, 200)
+
+        ct_preprocessed = ants.resample_image(image, reference_image_size, use_voxels=True, interp_type=0)
+        ct_preprocessed[ct_preprocessed < -1000] = -1000
+        ct_preprocessed[ct_preprocessed > 400] = 400
+        ct_preprocessed.set_direction(simplified_direction)
+        ct_preprocessed.set_origin((0, 0, 0))
+        ct_preprocessed.set_spacing((1, 1, 1))
+
+        ################################
+        #
+        # Reorient image
+        #
+        ################################
+
+        reference_image = ants.make_image(reference_image_size,
+                                        voxval=0,
+                                        spacing=(1, 1, 1),
+                                        origin=(0, 0, 0),
+                                        direction=np.identity(3))
+        center_of_mass_reference = np.floor(ants.get_center_of_mass(reference_image * 0 + 1))
+        center_of_mass_image = np.floor(ants.get_center_of_mass(ct_preprocessed * 0 + 1))
+        translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
+        xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
+            center=np.asarray(center_of_mass_reference), translation=translation)
+        ct_preprocessed = ((ct_preprocessed - ct_preprocessed.min()) /
+            (ct_preprocessed.max() - ct_preprocessed.min())) - 0.5
+        ct_preprocessed_warped = ants.apply_ants_transform_to_image(
+            xfrm, ct_preprocessed, reference_image, interpolation="nearestneighbor")
+
+        ################################
+        #
+        # Build models and load weights
+        #
+        ################################
+
+        if verbose == True:
+            print("Build model and load weights.")
+
+        patch_size = (128, 128, 128)
+        stride_length = (reference_image_size[0] - patch_size[0],
+                         reference_image_size[1] - patch_size[1],
+                         reference_image_size[2] - patch_size[2])
+
+        weights_file_name = get_pretrained_network("lungCtOctantWithPriorsSegmentationWeights")
+
+        classes = ("background", "left lung", "right lung", "airways")
         number_of_classification_labels = len(classes)
 
-        reorient_template_file_name_path = get_antsxnet_data("ctLungTemplate",
-            antsxnet_cache_directory=antsxnet_cache_directory)
-        reorient_template = ants.image_read(reorient_template_file_name_path)
-        resampled_image_size = reorient_template.shape
+        luna16_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("luna16LungPriors")))
+        for i in range(len(luna16_priors)):
+            luna16_priors[i] = ants.copy_image_info(ct_preprocessed_warped, luna16_priors[i])
+        channel_size = len(luna16_priors) + 1
 
-        unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
-            number_of_outputs = number_of_classification_labels,
-            number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
-            convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2))
+        unet_model = create_unet_model_3d((*patch_size, channel_size),
+            number_of_outputs=number_of_classification_labels, mode="classification",
+            number_of_layers=4, number_of_filters_at_base_layer=32, dropout_rate=0.0,
+            convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+            weight_decay=1e-5)
         unet_model.load_weights(weights_file_name)
 
-        if verbose == True:
-            print("Lung extraction:  normalizing image to the template.")
-
-        center_of_mass_template = ants.get_center_of_mass(reorient_template * 0 + 1)
-        center_of_mass_image = ants.get_center_of_mass(image * 0 + 1)
-        translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template)
-        xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
-            center=np.asarray(center_of_mass_template), translation=translation)
-        warped_image = ants.apply_ants_transform_to_image(xfrm, image, reorient_template)
-
-        batchX = np.expand_dims(warped_image.numpy(), axis=0)
-        batchX = np.expand_dims(batchX, axis=-1)
-        batchX = (batchX - batchX.mean()) / batchX.std()
-
-        predicted_data = unet_model.predict(batchX, verbose=0)
-
-        origin = warped_image.origin
-        spacing = warped_image.spacing
-        direction = warped_image.direction
-
-        probability_images_array = list()
-        for i in range(number_of_classification_labels):
-            probability_images_array.append(
-            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
-                origin=origin, spacing=spacing, direction=direction))
+        ################################
+        #
+        # Do prediction and normalize to native space
+        #
+        ################################
 
         if verbose == True:
-            print("Lung extraction:  renormalize probability mask to native space.")
+            print("Prediction.")
 
+        image_patches = extract_image_patches(ct_preprocessed_warped, patch_size=patch_size,
+                            max_number_of_patches="all", stride_length=stride_length,
+                            return_as_array=True)
+        batchX = np.zeros((*image_patches.shape, channel_size))
+        batchX[:,:,:,:,0] = image_patches
+
+        for i in range(len(luna16_priors)):
+            prior_patches = extract_image_patches(luna16_priors[i], patch_size=patch_size,
+                                max_number_of_patches="all", stride_length=stride_length,
+                                return_as_array=True)
+            batchX[:,:,:,:,i+1] = prior_patches
+
+        predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+        probability_images = list()
         for i in range(number_of_classification_labels):
-            probability_images_array[i] = ants.apply_ants_transform_to_image(
-                ants.invert_ants_transform(xfrm), probability_images_array[i], image)
+            if verbose == True:
+                print("Reconstructing image", classes[i])
+            reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
+                domain_image=ct_preprocessed_warped, stride_length=stride_length)
+            probability_image = ants.apply_ants_transform_to_image(
+                ants.invert_ants_transform(xfrm), reconstructed_image, ct_preprocessed)
+            probability_image = ants.resample_image(probability_image,
+               resample_params=image.shape, use_voxels=True, interp_type=0)
+            probability_image = ants.copy_image_info(image, probability_image)
+            probability_images.append(probability_image)
 
-        image_matrix = ants.image_list_to_matrix(probability_images_array, image * 0 + 1)
+        image_matrix = ants.image_list_to_matrix(probability_images, image * 0 + 1)
         segmentation_matrix = np.argmax(image_matrix, axis=0)
         segmentation_image = ants.matrix_to_images(
             np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
 
         return_dict = {'segmentation_image' : segmentation_image,
-                       'probability_images' : probability_images_array}
+                       'probability_images' : probability_images}
         return(return_dict)
 
 
