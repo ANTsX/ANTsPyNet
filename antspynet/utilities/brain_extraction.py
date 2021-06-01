@@ -129,11 +129,15 @@ def brain_extraction(image,
         else:
             raise ValueError("Unknown modality type.")
 
+        if verbose == True:
+            print("Brain extraction:  retrieving model weights.")
+
         weights_file_name = get_pretrained_network(weights_file_name_prefix,
           antsxnet_cache_directory=antsxnet_cache_directory)
 
         if verbose == True:
             print("Brain extraction:  retrieving template.")
+
         reorient_template_file_name_path = get_antsxnet_data("S_template3",
           antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)

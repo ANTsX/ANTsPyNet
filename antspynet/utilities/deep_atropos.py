@@ -64,7 +64,6 @@ def deep_atropos(t1,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
     from ..utilities import extract_image_patches
     from ..utilities import reconstruct_image_from_patches
@@ -107,7 +106,6 @@ def deep_atropos(t1,
 
     classes = ("background", "csf", "gray matter", "white matter",
                "deep gray matter", "brain stem", "cerebellum")
-    labels = (0, 1, 2, 3, 4, 5, 6)
 
     mni_priors = None
     channel_size = 1
@@ -115,13 +113,16 @@ def deep_atropos(t1,
         mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors")))
         for i in range(len(mni_priors)):
             mni_priors[i] = ants.copy_image_info(t1_preprocessed, mni_priors[i])
-        channel_size = 2 # T1 and cerebellum
+        channel_size = 2
 
     unet_model = create_unet_model_3d((*patch_size, channel_size),
-        number_of_outputs=len(labels),
+        number_of_outputs=len(classes), mode = "classification",
         number_of_layers=4, number_of_filters_at_base_layer=16, dropout_rate=0.0,
         convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
         weight_decay=1e-5, additional_options=("attentionGating"))
+
+    if verbose == True:
+        print("DeepAtropos:  retrieving model weights.")
 
     weights_file_name = ''
     if use_spatial_priors == 0:
@@ -156,7 +157,7 @@ def deep_atropos(t1,
     predicted_data = unet_model.predict(batchX, verbose=verbose)
 
     probability_images = list()
-    for i in range(len(labels)):
+    for i in range(len(classes)):
         if verbose == True:
             print("Reconstructing image", classes[i])
         reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
@@ -175,10 +176,6 @@ def deep_atropos(t1,
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
-    relabeled_image = ants.image_clone(segmentation_image)
-    for i in range(len(labels)):
-        relabeled_image[segmentation_image==i] = labels[i]
-
-    return_dict = {'segmentation_image' : relabeled_image,
+    return_dict = {'segmentation_image' : segmentation_image,
                    'probability_images' : probability_images}
     return(return_dict)
