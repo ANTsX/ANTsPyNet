@@ -83,11 +83,11 @@ def hypothalamus_segmentation(t1,
     ################################
 
     reference_image = ants.make_image((256, 256, 256),
-                                      voxval=1,
+                                      voxval=0,
                                       spacing=(1, 1, 1),
                                       origin=(0, 0, 0),
                                       direction=np.diag((-1.0, -1.0, 1.0)))
-    center_of_mass_reference = ants.get_center_of_mass(reference_image)
+    center_of_mass_reference = ants.get_center_of_mass(reference_image + 1)
     center_of_mass_image = ants.get_center_of_mass(t1 * 0 + 1)
     translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
