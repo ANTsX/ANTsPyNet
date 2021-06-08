@@ -41,7 +41,7 @@ def claustrum_segmentation(t1,
 
     Returns
     -------
-    WMH segmentation probability image
+    Claustrum segmentation probability image
 
     Example
     -------

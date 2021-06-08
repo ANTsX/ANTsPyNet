@@ -69,6 +69,8 @@ Image voxelwise segmentation
 
 .. autofunction:: antspynet.architectures.create_sysu_media_unet_model_2d
 
+.. autofunction:: antspynet.create_hypothalamus_unet_model_3d
+
 Custom
 ------
 

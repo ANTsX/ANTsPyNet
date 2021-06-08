@@ -80,6 +80,7 @@ Applications
 .. autofunction:: antspynet.utilities.preprocess_brain_image
 .. autofunction:: antspynet.utilities.sysu_media_wmh_segmentation
 .. autofunction:: antspynet.utilities.claustrum_segmentation
+.. autofunction:: antspynet.utilities.hypothalamus_segmentation
 .. autofunction:: antspynet.utilities.hippmapp3r_segmentation
 .. autofunction:: antspynet.utilities.deep_flash
 .. autofunction:: antspynet.utilities.deep_atropos
