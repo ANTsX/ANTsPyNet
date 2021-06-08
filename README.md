@@ -72,6 +72,8 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
 * [Hippmapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
 * [White matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
+* [Hypothalamus segmentation](https://pubmed.ncbi.nlm.nih.gov/32853816/)
+* [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
 * Deep Flash
 * Desikan-Killiany-Tourville cortical labeling
 * Lung extraction
