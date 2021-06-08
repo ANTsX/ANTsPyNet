@@ -533,10 +533,7 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
     outputs = Conv3D(filters=number_of_outputs,
                      kernel_size=(1, 1, 1),
-                     activation='linear')(outputs)
-
-    softmax_lambda = lambda x: softmax(x, axis=4)
-    outputs = Lambda(softmax_lambda)(outputs)
+                     activation='softmax')(outputs)
 
     unet_model = Model(inputs=inputs, outputs=outputs)
 
