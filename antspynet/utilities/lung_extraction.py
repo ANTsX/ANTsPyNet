@@ -171,7 +171,8 @@ def lung_extraction(image,
         if verbose == True:
             print("Build model and load weights.")
 
-        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights")
+        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights", 
+            antsxnet_cache_directory=antsxnet_cache_directory)
 
         classes = ("background", "left lung", "right lung", "airways")
         number_of_classification_labels = len(classes)
