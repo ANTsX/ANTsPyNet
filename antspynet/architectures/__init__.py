@@ -22,6 +22,7 @@ from .create_denseunet_model import create_denseunet_model_2d, create_denseunet_
 from .create_custom_unet_model import create_nobrainer_unet_model_3d
 from .create_custom_unet_model import create_hippmapp3r_unet_model_3d
 from .create_custom_unet_model import create_sysu_media_unet_model_2d
+from .create_custom_unet_model import create_hypothalamus_unet_model_3d
 
 from .create_custom_model import create_simple_fully_convolutional_network_model_3d
 

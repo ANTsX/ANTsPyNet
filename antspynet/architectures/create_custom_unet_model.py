@@ -4,10 +4,12 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (Add, Activation, Concatenate, ReLU, LeakyReLU,
-                                     Conv3D, Conv3DTranspose, Input, MaxPooling3D,
+from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concatenate, ReLU, LeakyReLU,
+                                     Conv3D, Conv3DTranspose, Input, Lambda, MaxPooling3D,
                                      SpatialDropout3D, UpSampling3D,
                                      Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
+
+from tensorflow.keras.activations import softmax
 
 import keras
 
@@ -436,6 +438,102 @@ def create_sysu_media_unet_model_2d(input_image_size,
                      kernel_size=1,
                      activation='sigmoid',
                      padding='same')(outputs)
+
+    unet_model = Model(inputs=inputs, outputs=outputs)
+
+    return(unet_model)
+
+
+def create_hypothalamus_unet_model_3d(input_image_size):
+
+    """
+    Implementation of the U-net architecture for hypothalamus segmentation
+    described in
+
+    https://pubmed.ncbi.nlm.nih.gov/32853816/
+
+    and ported from the original implementation:
+
+        https://github.com/BBillot/hypothalamus_seg
+
+    The network has is characterized by the following parameters:
+        * 3 resolution levels:  24 ---> 48 ---> 96 filters
+        * convolution: kernel size:  (3, 3, 3), activation: 'elu',
+        * pool size: (2, 2, 2)
+
+    Returns
+    -------
+    Keras model
+        A 3-D keras model defining the U-net network.
+
+    Example
+    -------
+    >>> model = create_hypothalamus_unet_model_3d((160, 160, 160, 1))
+    """
+
+    convolution_kernel_size = (3, 3, 3)
+    pool_size = (2, 2, 2)
+    number_of_outputs = 11
+
+    number_of_layers = 3
+    number_of_filters_at_base_layer = 24
+    number_of_filters = list()
+    for i in range(number_of_layers):
+        number_of_filters.append(number_of_filters_at_base_layer * 2**i)
+
+    inputs = Input(shape=(*input_image_size, 1))
+
+    # Encoding path
+
+    encoding_convolution_layers = []
+    pool = None
+    for i in range(number_of_layers):
+
+        if i == 0:
+            conv = Conv3D(filters=number_of_filters[i],
+                          kernel_size=convolution_kernel_size,
+                          padding='same',
+                          activation='elu')(inputs)
+        else:
+            conv = Conv3D(filters=number_of_filters[i],
+                          kernel_size=convolution_kernel_size,
+                          padding='same',
+                          activation='elu')(pool)
+
+        conv = Conv3D(filters=number_of_filters[i],
+                      kernel_size=convolution_kernel_size,
+                      padding='same',
+                      activation='elu')(conv)
+
+        encoding_convolution_layers.append(conv)
+
+        conv = BatchNormalization(axis=-1)(conv)
+
+        if i < number_of_layers - 1:
+            pool = MaxPooling3D(pool_size=pool_size)(conv)
+        else:
+            outputs = conv
+
+    # Decoding path
+
+    for i in range(1, number_of_layers):
+
+        deconv = UpSampling3D(size=pool_size)(outputs)
+        outputs = Concatenate(axis=4)([encoding_convolution_layers[number_of_layers-i-1], deconv])
+        outputs = Conv3D(filters=number_of_filters[number_of_layers-i-1],
+                         kernel_size=convolution_kernel_size,
+                         padding='same',
+                         activation='elu')(outputs)
+        outputs = Conv3D(filters=number_of_filters[number_of_layers-i-1],
+                         kernel_size=convolution_kernel_size,
+                         padding='same',
+                         activation='elu')(outputs)
+
+        outputs = BatchNormalization(axis=-1)(outputs)
+
+    outputs = Conv3D(filters=number_of_outputs,
+                     kernel_size=(1, 1, 1),
+                     activation='softmax')(outputs)
 
     unet_model = Model(inputs=inputs, outputs=outputs)
 

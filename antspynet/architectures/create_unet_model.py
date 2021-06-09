@@ -550,7 +550,7 @@ def create_unet_model_3d(input_image_size,
 
     outputs = Conv3D(filters=number_of_outputs,
                      kernel_size=(1, 1, 1),
-                     activation = conv_activation,
+                     activation=conv_activation,
                      kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
     unet_model = None

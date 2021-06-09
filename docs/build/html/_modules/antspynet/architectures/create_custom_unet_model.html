@@ -6,13 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>antspynet.architectures.create_custom_unet_model &#8212; ANTsPyNet 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -38,10 +37,14 @@
 <span class="kn">import</span> <span class="nn">tensorflow.keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
 
 <span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span> <span class="n">LeakyReLU</span><span class="p">,</span>
-                                     <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">MaxPooling3D</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.layers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Add</span><span class="p">,</span> <span class="n">Activation</span><span class="p">,</span> <span class="n">BatchNormalization</span><span class="p">,</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ReLU</span><span class="p">,</span> <span class="n">LeakyReLU</span><span class="p">,</span>
+                                     <span class="n">Conv3D</span><span class="p">,</span> <span class="n">Conv3DTranspose</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">MaxPooling3D</span><span class="p">,</span>
                                      <span class="n">SpatialDropout3D</span><span class="p">,</span> <span class="n">UpSampling3D</span><span class="p">,</span>
                                      <span class="n">Cropping2D</span><span class="p">,</span> <span class="n">Conv2D</span><span class="p">,</span> <span class="n">MaxPooling2D</span><span class="p">,</span> <span class="n">UpSampling2D</span><span class="p">,</span> <span class="n">ZeroPadding2D</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">tensorflow.keras.activations</span> <span class="kn">import</span> <span class="n">softmax</span>
+
+<span class="kn">import</span> <span class="nn">keras</span>
 
 <span class="kn">from</span> <span class="nn">..utilities</span> <span class="kn">import</span> <span class="n">InstanceNormalization</span>
 
@@ -393,7 +396,7 @@
 <span class="sd">    &gt;&gt;&gt; model = antspynet.create_sysu_media_unet_model_2d((*image_size, 1))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">get_crop_shape</span><span class="p">(</span> <span class="n">target_layer</span><span class="p">,</span> <span class="n">reference_layer</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_crop_shape</span><span class="p">(</span><span class="n">target_layer</span><span class="p">,</span> <span class="n">reference_layer</span><span class="p">):</span>
 
         <span class="n">delta</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">target_layer</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">reference_layer</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">delta</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -434,11 +437,11 @@
 
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel1</span><span class="p">,</span>
-                         <span class="n">padding</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span> <span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+                         <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">kernel2</span><span class="p">,</span>
-                         <span class="n">padding</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span> <span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+                         <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
         <span class="n">outputs</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
         <span class="n">encoding_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
@@ -468,6 +471,105 @@
                      <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                      <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span>
                      <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">unet_model</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_hypothalamus_unet_model_3d"><a class="viewcode-back" href="../../../architectures.html#antspynet.architectures.create_hypothalamus_unet_model_3d">[docs]</a><span class="k">def</span> <span class="nf">create_hypothalamus_unet_model_3d</span><span class="p">(</span><span class="n">input_image_size</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implementation of the U-net architecture for hypothalamus segmentation</span>
+<span class="sd">    described in</span>
+
+<span class="sd">    https://pubmed.ncbi.nlm.nih.gov/32853816/</span>
+
+<span class="sd">    and ported from the original implementation:</span>
+
+<span class="sd">        https://github.com/BBillot/hypothalamus_seg</span>
+
+<span class="sd">    The network has is characterized by the following parameters:</span>
+<span class="sd">        * 3 resolution levels:  24 ---&gt; 48 ---&gt; 96 filters</span>
+<span class="sd">        * convolution: kernel size:  (3, 3, 3), activation: &#39;elu&#39;,</span>
+<span class="sd">        * pool size: (2, 2, 2)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Keras model</span>
+<span class="sd">        A 3-D keras model defining the U-net network.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; model = create_hypothalamus_unet_model_3d((160, 160, 160, 1))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">convolution_kernel_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">pool_size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">number_of_outputs</span> <span class="o">=</span> <span class="mi">11</span>
+
+    <span class="n">number_of_layers</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">number_of_filters_at_base_layer</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">number_of_filters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+        <span class="n">number_of_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">number_of_filters_at_base_layer</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">input_image_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Encoding path</span>
+
+    <span class="n">encoding_convolution_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_layers</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                          <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;elu&#39;</span><span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                          <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                          <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                          <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;elu&#39;</span><span class="p">)(</span><span class="n">pool</span><span class="p">)</span>
+
+        <span class="n">conv</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                      <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                      <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                      <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;elu&#39;</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+
+        <span class="n">encoding_convolution_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">conv</span><span class="p">)</span>
+
+        <span class="n">conv</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">number_of_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="n">MaxPooling3D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)(</span><span class="n">conv</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">conv</span>
+
+    <span class="c1"># Decoding path</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">number_of_layers</span><span class="p">):</span>
+
+        <span class="n">deconv</span> <span class="o">=</span> <span class="n">UpSampling3D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">pool_size</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">4</span><span class="p">)([</span><span class="n">encoding_convolution_layers</span><span class="p">[</span><span class="n">number_of_layers</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">deconv</span><span class="p">])</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">number_of_layers</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                         <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                         <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                         <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;elu&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">[</span><span class="n">number_of_layers</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                         <span class="n">kernel_size</span><span class="o">=</span><span class="n">convolution_kernel_size</span><span class="p">,</span>
+                         <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                         <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;elu&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_outputs</span><span class="p">,</span>
+                     <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                     <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
+
+    <span class="n">softmax_lambda</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="n">softmax_lambda</span><span class="p">)(</span><span class="n">outputs</span><span class="p">)</span>
 
     <span class="n">unet_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
 
@@ -531,7 +633,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
