@@ -38,8 +38,6 @@ def lung_extraction(image,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -132,7 +130,7 @@ def lung_extraction(image,
 
         simplified_direction = closest_simplified_direction_matrix(image.direction)
 
-        reference_image_size = (200, 200, 200)
+        reference_image_size = (128, 128, 128)
 
         ct_preprocessed = ants.resample_image(image, reference_image_size, use_voxels=True, interp_type=0)
         ct_preprocessed[ct_preprocessed < -1000] = -1000
@@ -148,19 +146,21 @@ def lung_extraction(image,
         ################################
 
         reference_image = ants.make_image(reference_image_size,
-                                        voxval=0,
-                                        spacing=(1, 1, 1),
-                                        origin=(0, 0, 0),
-                                        direction=np.identity(3))
+                                          voxval=0,
+                                          spacing=(1, 1, 1),
+                                          origin=(0, 0, 0),
+                                          direction=np.identity(3))
         center_of_mass_reference = np.floor(ants.get_center_of_mass(reference_image * 0 + 1))
         center_of_mass_image = np.floor(ants.get_center_of_mass(ct_preprocessed * 0 + 1))
         translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
         xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
             center=np.asarray(center_of_mass_reference), translation=translation)
         ct_preprocessed = ((ct_preprocessed - ct_preprocessed.min()) /
-            (ct_preprocessed.max() - ct_preprocessed.min())) - 0.5
+            (ct_preprocessed.max() - ct_preprocessed.min()))
         ct_preprocessed_warped = ants.apply_ants_transform_to_image(
             xfrm, ct_preprocessed, reference_image, interpolation="nearestneighbor")
+        ct_preprocessed_warped = ((ct_preprocessed_warped - ct_preprocessed_warped.min()) /
+            (ct_preprocessed_warped.max() - ct_preprocessed_warped.min())) - 0.5
 
         ################################
         #
@@ -171,26 +171,21 @@ def lung_extraction(image,
         if verbose == True:
             print("Build model and load weights.")
 
-        patch_size = (128, 128, 128)
-        stride_length = (reference_image_size[0] - patch_size[0],
-                         reference_image_size[1] - patch_size[1],
-                         reference_image_size[2] - patch_size[2])
-
-        weights_file_name = get_pretrained_network("lungCtOctantWithPriorsSegmentationWeights")
+        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights")
 
         classes = ("background", "left lung", "right lung", "airways")
         number_of_classification_labels = len(classes)
 
         luna16_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("luna16LungPriors")))
         for i in range(len(luna16_priors)):
-            luna16_priors[i] = ants.copy_image_info(ct_preprocessed_warped, luna16_priors[i])
+            luna16_priors[i] = ants.resample_image(luna16_priors[i], reference_image_size, use_voxels=True)
         channel_size = len(luna16_priors) + 1
 
-        unet_model = create_unet_model_3d((*patch_size, channel_size),
+        unet_model = create_unet_model_3d((*reference_image_size, channel_size),
             number_of_outputs=number_of_classification_labels, mode="classification",
-            number_of_layers=4, number_of_filters_at_base_layer=32, dropout_rate=0.0,
+            number_of_layers=4, number_of_filters_at_base_layer=16, dropout_rate=0.0,
             convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
-            weight_decay=1e-5)
+            weight_decay=1e-5, additional_options=("attentionGating",))
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -202,17 +197,11 @@ def lung_extraction(image,
         if verbose == True:
             print("Prediction.")
 
-        image_patches = extract_image_patches(ct_preprocessed_warped, patch_size=patch_size,
-                            max_number_of_patches="all", stride_length=stride_length,
-                            return_as_array=True)
-        batchX = np.zeros((*image_patches.shape, channel_size))
-        batchX[:,:,:,:,0] = image_patches
+        batchX = np.zeros((1, *reference_image_size, channel_size))
+        batchX[:,:,:,:,0] = ct_preprocessed_warped.numpy()
 
         for i in range(len(luna16_priors)):
-            prior_patches = extract_image_patches(luna16_priors[i], patch_size=patch_size,
-                                max_number_of_patches="all", stride_length=stride_length,
-                                return_as_array=True)
-            batchX[:,:,:,:,i+1] = prior_patches
+            batchX[:,:,:,:,i+1] = luna16_priors[i].numpy() - 0.5
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
 
@@ -220,10 +209,11 @@ def lung_extraction(image,
         for i in range(number_of_classification_labels):
             if verbose == True:
                 print("Reconstructing image", classes[i])
-            reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
-                domain_image=ct_preprocessed_warped, stride_length=stride_length)
+            probability_image = ants.from_numpy(np.squeeze(predicted_data[:,:,:,:,i]), 
+                origin=ct_preprocessed_warped.origin, spacing=ct_preprocessed_warped.spacing,
+                direction=ct_preprocessed_warped.direction)    
             probability_image = ants.apply_ants_transform_to_image(
-                ants.invert_ants_transform(xfrm), reconstructed_image, ct_preprocessed)
+                ants.invert_ants_transform(xfrm), probability_image, ct_preprocessed)
             probability_image = ants.resample_image(probability_image,
                resample_params=image.shape, use_voxels=True, interp_type=0)
             probability_image = ants.copy_image_info(image, probability_image)
