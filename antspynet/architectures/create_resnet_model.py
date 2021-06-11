@@ -114,12 +114,10 @@ def create_resnet_model_2d(input_image_size,
         grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
-    def squeeze_and_excite_2d(model,
-                              ratio=16):
+    def squeeze_and_excite_block_2d(model,
+                                    ratio=16):
         initial = model
-        number_of_filters = K.int_shape(initial)[1]
-        if K.image_data_format() == "channels_last":
-            number_of_filters = K.int_shape(initial)[-1]
+        number_of_filters = K.int_shape(initial)[-1]
 
         block_shape = (1, 1, number_of_filters)
 
@@ -133,9 +131,6 @@ def create_resnet_model_2d(input_image_size,
                       activation='sigmoid',
                       kernel_initializer='he_normal',
                       use_bias=False)(block)
-
-        if K.image_data_format() == "channels_first":
-            block = Permute((3, 1, 2))(block)
 
         x = Multiply()([initial, block])
         return(x)
@@ -174,7 +169,7 @@ def create_resnet_model_2d(input_image_size,
             shortcut = BatchNormalization()(shortcut)
 
         if squeeze_and_excite == True:
-            model = squeeze_and_excite_2d(model)
+            model = squeeze_and_excite_block_2d(model)
 
         model = Add()([shortcut, model])
         model = LeakyReLU()(model)
@@ -212,7 +207,8 @@ def create_resnet_model_2d(input_image_size,
                                         number_of_filters_in=n_filters_in,
                                         number_of_filters_out=n_filters_out,
                                         strides=strides,
-                                        project_shortcut=project_shortcut)
+                                        project_shortcut=project_shortcut,
+                                        squeeze_and_excite=squeeze_and_excite)
 
     outputs = GlobalAveragePooling2D()(outputs)
 
@@ -338,12 +334,10 @@ def create_resnet_model_3d(input_image_size,
         grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
-    def squeeze_and_excite_3d(model,
-                              ratio=16):
+    def squeeze_and_excite_block_3d(model,
+                                    ratio=16):
         initial = model
-        number_of_filters = K.int_shape(initial)[1]
-        if K.image_data_format() == "channels_last":
-            number_of_filters = K.int_shape(initial)[-1]
+        number_of_filters = K.int_shape(initial)[-1]
 
         block_shape = (1, 1, 1, number_of_filters)
 
@@ -357,9 +351,6 @@ def create_resnet_model_3d(input_image_size,
                       activation='sigmoid',
                       kernel_initializer='he_normal',
                       use_bias=False)(block)
-
-        if K.image_data_format() == "channels_first":
-            block = Permute((4, 1, 2, 3))(block)
 
         x = Multiply()([initial, block])
         return(x)
@@ -398,7 +389,7 @@ def create_resnet_model_3d(input_image_size,
             shortcut = BatchNormalization()(shortcut)
 
         if squeeze_and_excite == True:
-            model = squeeze_and_excite_3d(model)
+            model = squeeze_and_excite_block_3d(model)
 
         model = Add()([shortcut, model])
         model = LeakyReLU()(model)
@@ -436,7 +427,8 @@ def create_resnet_model_3d(input_image_size,
                                         number_of_filters_in=n_filters_in,
                                         number_of_filters_out=n_filters_out,
                                         strides=strides,
-                                        project_shortcut=project_shortcut)
+                                        project_shortcut=project_shortcut,
+                                        squeeze_and_excite=squeeze_and_excite)
 
 
     outputs = GlobalAveragePooling3D()(outputs)
