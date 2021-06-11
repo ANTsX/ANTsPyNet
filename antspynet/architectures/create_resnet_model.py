@@ -86,7 +86,9 @@ def create_resnet_model_2d(input_image_size,
         model = LeakyReLU()(model)
         return(model)
 
-    def grouped_convolution_layer_2d(model, number_of_filters, strides):
+    def grouped_convolution_layer_2d(model,
+                                     number_of_filters,
+                                     strides):
         # Per standard ResNet, this is just a 2-D convolution
         if cardinality == 1:
             grouped_model = Conv2D(filters=number_of_filters,
@@ -112,7 +114,8 @@ def create_resnet_model_2d(input_image_size,
         grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
-    def squeeze_and_excite_2d(model, ratio=16):
+    def squeeze_and_excite_2d(model,
+                              ratio=16):
         initial = model
         number_of_filters = K.int_shape(initial)[1]
         if K.image_data_format() == "channels_last":
@@ -137,7 +140,12 @@ def create_resnet_model_2d(input_image_size,
         x = Multiply()([initial, block])
         return(x)
 
-    def residual_block_2d(model, number_of_filters_in, number_of_filters_out, strides=(1, 1), project_shortcut=False):
+    def residual_block_2d(model,
+                         number_of_filters_in,
+                         number_of_filters_out,
+                         strides=(1, 1),
+                         project_shortcut=False,
+                         squeeze_and_excite=False):
         shortcut = model
 
         model = Conv2D(filters=number_of_filters_in,
@@ -302,7 +310,9 @@ def create_resnet_model_3d(input_image_size,
         model = LeakyReLU()(model)
         return(model)
 
-    def grouped_convolution_layer_3d(model, number_of_filters, strides):
+    def grouped_convolution_layer_3d(model,
+                                     number_of_filters,
+                                     strides):
         # Per standard ResNet, this is just a 3-D convolution
         if cardinality == 1:
             grouped_model = Conv3D(filters=number_of_filters,
@@ -318,7 +328,7 @@ def create_resnet_model_3d(input_image_size,
 
         convolution_layers = []
         for j in range(cardinality):
-            local_layer = Lambda(lambda z: z[:, :, :,
+            local_layer = Lambda(lambda z: z[:, :, :, :,
               j * number_of_group_filters:j * number_of_group_filters + number_of_group_filters])(model)
             convolution_layers.append(Conv3D(filters=number_of_group_filters,
                                              kernel_size=(3, 3, 3),
@@ -328,7 +338,8 @@ def create_resnet_model_3d(input_image_size,
         grouped_model = Concatenate()(convolution_layers)
         return(grouped_model)
 
-    def squeeze_and_excite_3d(model, ratio=16):
+    def squeeze_and_excite_3d(model,
+                              ratio=16):
         initial = model
         number_of_filters = K.int_shape(initial)[1]
         if K.image_data_format() == "channels_last":
@@ -353,7 +364,12 @@ def create_resnet_model_3d(input_image_size,
         x = Multiply()([initial, block])
         return(x)
 
-    def residual_block_3d(model, number_of_filters_in, number_of_filters_out, strides=(1, 1, 1), project_shortcut=False):
+    def residual_block_3d(model,
+                          number_of_filters_in,
+                          number_of_filters_out,
+                          strides=(1, 1, 1),
+                          project_shortcut=False,
+                          squeeze_and_excite=False):
         shortcut = model
 
         model = Conv3D(filters=number_of_filters_in,
@@ -374,7 +390,7 @@ def create_resnet_model_3d(input_image_size,
                        padding='same')(model)
         model = BatchNormalization()(model)
 
-        if project_shortcut == True or strides != (1,1):
+        if project_shortcut == True or strides != (1,1,1):
             shortcut = Conv3D(filters=number_of_filters_out,
                               kernel_size=(1, 1, 1),
                               strides=strides,

@@ -50,7 +50,7 @@ def hypothalamus_segmentation(t1,
     Example
     -------
     >>> image = ants.image_read("t1.nii.gz")
-    >>> probability_mask = hypothalamus_segmentation(image)
+    >>> hypo = hypothalamus_segmentation(image)
     """
 
     from ..architectures import create_hypothalamus_unet_model_3d
@@ -61,8 +61,6 @@ def hypothalamus_segmentation(t1,
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
-
-    image_size = t1.shape
 
     classes = ("background",
                "left anterior-inferior",
