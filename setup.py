@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='antspynet',
-      version='0.0',
+      version='0.1',
       description='A collection of deep learning architectures ported to the python language and tools for basic medical image processing.',
       url='http://github.com/ntustison/antspynet',
       author='Nicholas J. Tustison and Brian B. Avants and Nick Cullen',
