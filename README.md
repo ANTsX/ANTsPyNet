@@ -9,6 +9,11 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 ![ANTsXNetTools](docs/figures/coreANTsXNetTools.png)
 
+For MacOS and Linux, may install with:
+```bash
+pip install antspynet
+```
+
 ## Architectures
 
 ### Image voxelwise segmentation/regression
@@ -60,7 +65,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 * MRI super-resolution
 * Multi-modal brain extraction
-    * T1 
+    * T1
     * T1 ["no brainer"](https://github.com/neuronets/nobrainer)
     * FLAIR
     * T2
@@ -84,7 +89,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * Image quality assessment
     * [TID2013](https://www.sciencedirect.com/science/article/pii/S0923596514001490)
     * [KonIQ-10k](https://ieeexplore.ieee.org/document/8968750)
-    
+
 ## Miscellaneous
 
 * [Mixture density networks (MDN)](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
@@ -109,7 +114,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 
 * Andrew T. Grainger, Arun Krishnaraj, Michael H. Quinones, Nicholas J. Tustison, Samantha Epstein, Daniela Fuller, Aakash Jha, Kevin L. Allman, Weibin Shi. Deep Learning-based Quantification of Abdominal Subcutaneous and Visceral Fat Volume on CT Images, _Academic Radiology_.  [(pubmed)](https://pubmed.ncbi.nlm.nih.gov/32771313)
 
-* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_, 64:142-153, Dec 2019.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026) 
+* Nicholas J. Tustison, Brian B. Avants, and James C. Gee. Learning image-based spatial transformations via convolutional neural networks: a review,  _Magnetic Resonance Imaging_, 64:142-153, Dec 2019.  [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/31200026)
 
 * Nicholas J. Tustison, Brian B. Avants, Zixuan Lin, Xue Feng, Nicholas Cullen, Jaime F. Mata, Lucia Flors, James C. Gee, Talissa A. Altes, John P. Mugler III, and Kun Qing.  Convolutional Neural Networks with Template-Based Data Augmentation for Functional Lung Image Quantification, _Academic Radiology_, 26(3):412-423, Mar 2019. [(pubmed)](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
 
