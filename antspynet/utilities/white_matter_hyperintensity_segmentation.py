@@ -290,6 +290,7 @@ def ew_david(flair,
             * "sysu" -- same as the original sysu network (without site specific preprocessing),
             * "sysu-ri" -- same as "sysu" but using ranked intensity scaling for input images,
             * "sysuWithAttention" -- "sysu" with attention gating,
+            * "sysuWithAttentionAndSite" -- "sysu" with attention gating with site branch (see "sysuWithSite"),
             * "sysuPlus" -- "sysu" with attention gating and nn-Unet activation,
             * "sysuPlusSeg" -- "sysuPlus" with deep_atropos segmentation in an additional channel, and
             * "sysuWithSite" -- "sysu" with global pooling on encoding channels to predict "site".
@@ -577,6 +578,13 @@ def ew_david(flair,
                 number_of_filters=(64, 96, 128, 256, 512), dropout_rate=0.0,
                 convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
                 weight_decay=0, additional_options=("attentionGating", "initialConvolutionKernelSize[5]"))
+        elif which_model == "sysuWithAttentionAndSite":
+            unet_model = create_unet_model_2d((*template_size, channel_size),
+                number_of_outputs=1, mode="sigmoid",
+                scalar_output_size=3, scalar_output_activation="softmax",
+                number_of_filters=(64, 96, 128, 256, 512), dropout_rate=0.0,
+                convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
+                weight_decay=0, additional_options=("attentionGating", "initialConvolutionKernelSize[5]"))
         elif which_model == "sysuWithSite":
             unet_model = create_unet_model_2d((*template_size, channel_size),
                 number_of_outputs=1, mode="sigmoid",
@@ -616,6 +624,12 @@ def ew_david(flair,
         elif which_model == "sysuWithAttention" and flair is None and t1 is not None:
             weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionT1Only", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuWithAttention" and flair is not None and t1 is None:
+            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionFlairOnly", antsxnet_cache_directory=antsxnet_cache_directory)
+        elif which_model == "sysuWithAttentionAndSite" and flair is not None and t1 is not None:
+            weights_file_name = get_pretrained_network("ewDavidSysuWithAttention", antsxnet_cache_directory=antsxnet_cache_directory)
+        elif which_model == "sysuWithAttentionAndSite" and flair is None and t1 is not None:
+            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionT1Only", antsxnet_cache_directory=antsxnet_cache_directory)
+        elif which_model == "sysuWithAttentionAndSite" and flair is not None and t1 is None:
             weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionFlairOnly", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuPlus" and flair is not None and t1 is not None:
             weights_file_name = get_pretrained_network("ewDavidSysuPlus", antsxnet_cache_directory=antsxnet_cache_directory)
