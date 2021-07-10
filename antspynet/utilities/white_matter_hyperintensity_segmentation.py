@@ -626,11 +626,11 @@ def ew_david(flair,
         elif which_model == "sysuWithAttention" and flair is not None and t1 is None:
             weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionFlairOnly", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuWithAttentionAndSite" and flair is not None and t1 is not None:
-            weights_file_name = get_pretrained_network("ewDavidSysuWithAttention", antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionAndSite", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuWithAttentionAndSite" and flair is None and t1 is not None:
-            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionT1Only", antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionAndSiteT1Only", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuWithAttentionAndSite" and flair is not None and t1 is None:
-            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionFlairOnly", antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("ewDavidSysuWithAttentionAndSiteFlairOnly", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuPlus" and flair is not None and t1 is not None:
             weights_file_name = get_pretrained_network("ewDavidSysuPlus", antsxnet_cache_directory=antsxnet_cache_directory)
         elif which_model == "sysuPlus" and flair is None and t1 is not None:
