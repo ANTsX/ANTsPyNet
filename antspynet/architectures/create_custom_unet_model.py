@@ -11,8 +11,6 @@ from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concat
 
 from tensorflow.keras.activations import softmax
 
-import keras
-
 from ..utilities import InstanceNormalization
 
 
