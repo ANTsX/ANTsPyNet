@@ -1,6 +1,10 @@
 import numpy as np
 import ants
 
+from tensorflow.keras.layers import Conv3D
+from tensorflow.keras.models import Model
+from tensorflow.keras import regularizers
+
 def deep_flash(t1,
                do_preprocessing=True,
                do_per_hemisphere=True,
@@ -368,6 +372,354 @@ def deep_flash(t1,
         for i in range(1, len(probability_images_left)):
             probability_images.append(probability_images_left[i])
             probability_images.append(probability_images_right[i])
+
+    ################################
+    #
+    # Convert probability images to segmentation
+    #
+    ################################
+
+    # image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
+    # segmentation_matrix = np.argmax(image_matrix, axis=0)
+    # segmentation_image = ants.matrix_to_images(
+    #     np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
+
+    image_matrix = ants.image_list_to_matrix(probability_images[1:(len(probability_images))], t1 * 0 + 1)
+    background_foreground_matrix = np.stack([ants.image_list_to_matrix([probability_images[0]], t1 * 0 + 1),
+                                            np.expand_dims(np.sum(image_matrix, axis=0), axis=0)])
+    foreground_matrix = np.argmax(background_foreground_matrix, axis=0)
+    segmentation_matrix = (np.argmax(image_matrix, axis=0) + 1) * foreground_matrix
+    segmentation_image = ants.matrix_to_images(
+        np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
+
+    relabeled_image = ants.image_clone(segmentation_image)
+    for i in range(len(labels)):
+        relabeled_image[segmentation_image==i] = labels[i]
+
+    return_dict = {'segmentation_image' : relabeled_image,
+                   'probability_images' : probability_images}
+    return(return_dict)
+
+
+def deep_flash2(t1,
+                t2=None,
+                do_preprocessing=True,
+                antsxnet_cache_directory=None,
+                verbose=False
+                ):
+
+    """
+    Hippocampal/Enthorhinal segmentation using "Deep Flash"
+
+    Perform hippocampal/entorhinal segmentation in T1 images using
+    labels from Mike Yassa's lab
+
+    https://faculty.sites.uci.edu/myassa/
+
+    The labeling is as follows:
+    Label 0 :  background
+    Label 5 :  left aLEC
+    Label 6 :  right aLEC
+    Label 7 :  left pMEC
+    Label 8 :  right pMEC
+    Label 9 :  left perirhinal
+    Label 10:  right perirhinal
+    Label 11:  left parahippocampal
+    Label 12:  right parahippocampal
+    Label 13:  left DG/CA3
+    Label 14:  right DG/CA3
+    Label 15:  left CA1
+    Label 16:  right CA1
+    Label 17:  left subiculum
+    Label 18:  right subiculum
+
+    Preprocessing on the training data consisted of:
+       * n4 bias correction,
+       * affine registration to the "deep flash" template.
+    The input T1 should undergo the same steps.  If the input T1 is the raw
+    T1, these steps can be performed by the internal preprocessing, i.e. set
+    do_preprocessing = True
+
+    Arguments
+    ---------
+    t1 : ANTsImage
+        raw or preprocessed 3-D T1-weighted brain image.
+
+    t2 : ANTsImage
+        Optional 3-D T2-weighted brain image.  If specified, it is assumed to be
+        pre-aligned to the t1.
+
+    do_preprocessing : boolean
+        See description above.
+
+    do_per_hemisphere : boolean
+        If True, do prediction based on separate networks per hemisphere.  Otherwise,
+        use the single network trained for both hemispheres.
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    List consisting of the segmentation image and probability images for
+    each label.
+
+    Example
+    -------
+    >>> image = ants.image_read("t1.nii.gz")
+    >>> flash = deep_flash(image)
+    """
+
+    from ..architectures import create_unet_model_3d
+    from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
+    from ..utilities import preprocess_brain_image
+
+    if t1.dimension != 3:
+        raise ValueError("Image dimension must be 3.")
+
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
+
+    ################################
+    #
+    # Preprocess images
+    #
+    ################################
+
+    t1_preprocessed = t1
+    t1_preprocessing = None
+    if do_preprocessing == True:
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=(0.01, 0.995),
+            brain_extraction_modality=None,
+            template="deepFlashTemplateT1",
+            template_transform_type="antsRegistrationSyNQuick[a]",
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        t1_preprocessed = t1_preprocessing["preprocessed_image"]
+        t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
+
+    t2_preprocessed = t2
+    if t2 is not None:
+        t2_preprocessing = preprocess_brain_image(t2,
+            truncate_intensity=(0.01, 0.995),
+            brain_extraction_modality=None,
+            template_transform_type=None,
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        t2_preprocessed = ants.apply_transforms(fixed=t1_preprocessed,
+            moving=t2_preprocessing["preprocessed_image"],
+            transformlist=t1_preprocessing['template_transforms']['fwdtransforms'],
+            verbose=verbose)
+        t2_preprocessed = (t2_preprocessed - t2_preprocessed.mean()) / t2_preprocessed.std()
+
+    probability_images = list()
+    labels = (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
+    image_size = (64, 64, 96)
+
+    ################################
+    #
+    # Process left/right in split networks
+    #
+    ################################
+
+    ################################
+    #
+    # Download spatial priors
+    #
+    ################################
+
+    spatial_priors_file_name_path = get_antsxnet_data("deepFlashPriors",
+        antsxnet_cache_directory=antsxnet_cache_directory)
+    spatial_priors = ants.image_read(spatial_priors_file_name_path)
+    priors_image_list = ants.ndimage_to_list(spatial_priors)
+
+    labels_left = labels[1::2]
+    priors_image_left_list = priors_image_list[1::2]
+
+    labels_right = labels[2::2]
+    priors_image_right_list = priors_image_list[2::2]
+
+    ################################
+    #
+    # Left:  build model and load weights
+    #
+    ################################
+
+    channel_size = 1 + len(labels_left)
+    number_of_classification_labels = 1 + len(labels_left)
+
+    network_name = 'deepFlashLeftT1'
+    if t2 is not None:
+        network_name = 'deepFlashLeftBoth'
+        channel_size += 1
+
+    unet_model = create_unet_model_3d((*image_size, channel_size),
+        number_of_outputs=number_of_classification_labels, mode="classification",
+        number_of_filters=(32, 64, 96, 128, 256),
+        convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+        dropout_rate=0.0, weight_decay=0)
+
+    penultimate_layer = unet_model.layers[-2].output
+    output = Conv3D(filters=1,
+                    kernel_size=(1, 1, 1),
+                    activation='sigmoid',
+                    kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+    unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output])
+
+    if verbose == True:
+        print("DeepFlash: retrieving model weights (left).")
+    weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+    unet_model.load_weights(weights_file_name)
+
+    ################################
+    #
+    # Left:  do prediction and normalize to native space
+    #
+    ################################
+
+    if verbose == True:
+        print("Prediction (left).")
+
+    batchX = np.zeros((1, *image_size, channel_size))
+
+    t1_cropped = ants.crop_indices(t1_preprocessed, (76, 74, 56), (140, 138, 152))
+    batchX[0,:,:,:,0] = t1_cropped.numpy()
+    if t2 is not None:
+        t2_cropped = ants.crop_indices(t2_preprocessed, (76, 74, 56), (140, 138, 152))
+        batchX[0,:,:,:,1] = t2_cropped.numpy()
+
+    for i in range(len(priors_image_left_list)):
+        cropped_prior = ants.crop_indices(priors_image_left_list[i], (76, 74, 56), (140, 138, 152))
+        batchX[0,:,:,:,i + (channel_size - len(labels_left))] = cropped_prior.numpy()
+
+    predicted_data = unet_model.predict(batchX, verbose=verbose)[0]
+
+    origin = t1_cropped.origin
+    spacing = t1_cropped.spacing
+    direction = t1_cropped.direction
+
+    probability_images_left = list()
+    for i in range(len(labels_left)):
+        probability_image = \
+            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
+            origin=origin, spacing=spacing, direction=direction)
+        if i > 0:
+            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+        else:
+            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+
+        if do_preprocessing == True:
+            probability_images_left.append(ants.apply_transforms(fixed=t1,
+                moving=decropped_image,
+                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+        else:
+            probability_images_left.append(decropped_image)
+
+    ################################
+    #
+    # Right:  build model and load weights
+    #
+    ################################
+
+    channel_size = 1 + len(labels_right)
+    number_of_classification_labels = 1 + len(labels_right)
+
+    network_name = 'deepFlashRightT1'
+    if t2 is not None:
+        network_name = 'deepFlashRightBoth'
+        channel_size += 1
+
+    unet_model = create_unet_model_3d((*image_size, channel_size),
+        number_of_outputs=number_of_classification_labels, mode="classification",
+        number_of_filters=(32, 64, 96, 128, 256),
+        convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+        dropout_rate=0.0, weight_decay=0)
+
+    penultimate_layer = unet_model.layers[-2].output
+    output = Conv3D(filters=1,
+                    kernel_size=(1, 1, 1),
+                    activation='sigmoid',
+                    kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+    unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output])
+
+    if verbose == True:
+        print("DeepFlash: retrieving model weights (right).")
+    weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+    unet_model.load_weights(weights_file_name)
+
+    ################################
+    #
+    # Right:  do prediction and normalize to native space
+    #
+    ################################
+
+    if verbose == True:
+        print("Prediction (right).")
+
+    batchX = np.zeros((1, *image_size, channel_size))
+
+    t1_cropped = ants.crop_indices(t1_preprocessed, (20, 74, 56), (84, 138, 152))
+    batchX[0,:,:,:,0] = t1_cropped.numpy()
+    if t2 is not None:
+        t2_cropped = ants.crop_indices(t2_preprocessed, (20, 74, 56), (84, 138, 152))
+        batchX[0,:,:,:,1] = t2_cropped.numpy()
+
+    for i in range(len(priors_image_right_list)):
+        cropped_prior = ants.crop_indices(priors_image_right_list[i], (20, 74, 56), (84, 138, 152))
+        batchX[0,:,:,:,i + (channel_size - len(labels_right))] = cropped_prior.numpy()
+
+    predicted_data = unet_model.predict(batchX, verbose=verbose)[0]
+
+    origin = t1_cropped.origin
+    spacing = t1_cropped.spacing
+    direction = t1_cropped.direction
+
+    probability_images_right = list()
+    for i in range(len(labels_left)):
+        probability_image = \
+            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
+            origin=origin, spacing=spacing, direction=direction)
+        if i > 0:
+            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+        else:
+            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+
+        if do_preprocessing == True:
+            probability_images_right.append(ants.apply_transforms(fixed=t1,
+                moving=decropped_image,
+                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+        else:
+            probability_images_right.append(decropped_image)
+
+    ################################
+    #
+    # Combine priors
+    #
+    ################################
+
+    probability_background_image = ants.image_clone(t1) * 0
+    for i in range(1, len(probability_images_left)):
+        probability_background_image += probability_images_left[i]
+    for i in range(1, len(probability_images_right)):
+        probability_background_image += probability_images_right[i]
+
+    probability_images.append(probability_background_image * -1 + 1)
+    for i in range(1, len(probability_images_left)):
+        probability_images.append(probability_images_left[i])
+        probability_images.append(probability_images_right[i])
 
     ################################
     #

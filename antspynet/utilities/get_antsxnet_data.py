@@ -31,11 +31,14 @@ def get_antsxnet_data(file_id=None,
     >>> template_file = get_antsxnet_data('biobank')
     """
 
-    def switch_networks(argument):
+    def switch_data(argument):
         switcher = {
             "biobank": "https://ndownloader.figshare.com/files/22429242",
             "croppedMni152": "https://ndownloader.figshare.com/files/22933754",
             "croppedMni152Priors": "https://ndownloader.figshare.com/files/27688437",
+            "deepFlashPriors": "",
+            "deepFlashTemplateT1": "",
+            "deepFlashTemplateT2": "",
             "mprage_hippmapp3r": "https://ndownloader.figshare.com/files/24984689",
             "protonLungTemplate": "https://ndownloader.figshare.com/files/22707338",
             "ctLungTemplate": "https://ndownloader.figshare.com/files/22707335",
@@ -60,6 +63,9 @@ def get_antsxnet_data(file_id=None,
     valid_list = ("biobank",
                   "croppedMni152",
                   "croppedMni152Priors",
+                  "deepFlashPriors",
+                  "deepFlashTemplateT1",
+                  "deepFlashTemplateT2",
                   "mprage_hippmapp3r",
                   "protonLungTemplate",
                   "ctLungTemplate",
@@ -83,7 +89,7 @@ def get_antsxnet_data(file_id=None,
     if file_id == "show":
        return(valid_list)
 
-    url = switch_networks(file_id)
+    url = switch_data(file_id)
 
     if target_file_name == None:
         target_file_name = file_id + ".nii.gz"
