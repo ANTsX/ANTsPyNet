@@ -610,7 +610,7 @@ def deep_flash2(t1,
     direction = t1_cropped.direction
 
     probability_images_left = list()
-    for i in range(len(labels_left)):
+    for i in range(1 + len(labels_left)):
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
             origin=origin, spacing=spacing, direction=direction)
@@ -687,7 +687,7 @@ def deep_flash2(t1,
     direction = t1_cropped.direction
 
     probability_images_right = list()
-    for i in range(len(labels_left)):
+    for i in range(1 + len(labels_right)):
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
             origin=origin, spacing=spacing, direction=direction)
