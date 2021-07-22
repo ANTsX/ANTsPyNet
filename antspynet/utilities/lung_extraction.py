@@ -16,7 +16,7 @@ def lung_extraction(image,
         input image
 
     modality : string
-        Modality image type.  Options include "ct" and "proton".
+        Modality image type.  Options include "ct", "proton", and "ventilation".
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -35,9 +35,11 @@ def lung_extraction(image,
     >>> output = lung_extraction(lung_image, modality="proton")
     """
 
+    from ..architectures import create_unet_model_2d
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
+    from ..utilities import pad_or_crop_image_to_size
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -171,7 +173,7 @@ def lung_extraction(image,
         if verbose == True:
             print("Build model and load weights.")
 
-        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights", 
+        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights",
             antsxnet_cache_directory=antsxnet_cache_directory)
 
         classes = ("background", "left lung", "right lung", "airways")
@@ -210,9 +212,9 @@ def lung_extraction(image,
         for i in range(number_of_classification_labels):
             if verbose == True:
                 print("Reconstructing image", classes[i])
-            probability_image = ants.from_numpy(np.squeeze(predicted_data[:,:,:,:,i]), 
+            probability_image = ants.from_numpy(np.squeeze(predicted_data[:,:,:,:,i]),
                 origin=ct_preprocessed_warped.origin, spacing=ct_preprocessed_warped.spacing,
-                direction=ct_preprocessed_warped.direction)    
+                direction=ct_preprocessed_warped.direction)
             probability_image = ants.apply_ants_transform_to_image(
                 ants.invert_ants_transform(xfrm), probability_image, ct_preprocessed)
             probability_image = ants.resample_image(probability_image,
@@ -229,6 +231,107 @@ def lung_extraction(image,
                        'probability_images' : probability_images}
         return(return_dict)
 
+    elif modality == "ventilation":
+
+        ################################
+        #
+        # Preprocess image
+        #
+        ################################
+
+        if verbose == True:
+            print("Preprocess ventilation image.")
+
+        template_size = (256, 256)
+
+        image_modalities = ("Ventilation",)
+        channel_size = len(image_modalities)
+
+        preprocessed_image = (image - image.mean()) / image.std()
+        ants.set_direction(preprocessed_image, np.identity(3))
+
+        ################################
+        #
+        # Build models and load weights
+        #
+        ################################
+
+        unet_model = create_unet_model_2d((*template_size, channel_size),
+            number_of_outputs=1, mode='sigmoid',
+            number_of_layers=4, number_of_filters_at_base_layer=32, dropout_rate=0.0,
+            convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
+            weight_decay=0)
+
+        if verbose == True:
+            print("Whole lung mask: retrieving model weights.")
+
+        weights_file_name = get_pretrained_network("wholeLungMaskFromVentilation",
+            antsxnet_cache_directory=antsxnet_cache_directory)
+        unet_model.load_weights(weights_file_name)
+
+        ################################
+        #
+        # Extract slices
+        #
+        ################################
+
+        spacing = ants.get_spacing(preprocessed_image)
+        dimensions_to_predict = (spacing.index(max(spacing)),)
+
+        total_number_of_slices = 0
+        for d in range(len(dimensions_to_predict)):
+            total_number_of_slices += preprocessed_image.shape[dimensions_to_predict[d]]
+
+        batchX = np.zeros((total_number_of_slices, *template_size, channel_size))
+
+        slice_count = 0
+        for d in range(len(dimensions_to_predict)):
+            number_of_slices = preprocessed_image.shape[dimensions_to_predict[d]]
+
+            if verbose == True:
+                print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
+
+            for i in range(number_of_slices):
+                ventilation_slice = pad_or_crop_image_to_size(ants.slice_image(preprocessed_image, dimensions_to_predict[d], i), template_size)
+                batchX[slice_count,:,:,0] = ventilation_slice.numpy()
+                slice_count += 1
+
+        ################################
+        #
+        # Do prediction and then restack into the image
+        #
+        ################################
+
+        if verbose == True:
+            print("Prediction.")
+
+        prediction = unet_model.predict(batchX, verbose=verbose)
+
+        permutations = list()
+        permutations.append((0, 1, 2))
+        permutations.append((1, 0, 2))
+        permutations.append((1, 2, 0))
+
+        probability_image = ants.image_clone(image) * 0
+
+        current_start_slice = 0
+        for d in range(len(dimensions_to_predict)):
+            current_end_slice = current_start_slice + preprocessed_image.shape[dimensions_to_predict[d]] - 1
+            which_batch_slices = range(current_start_slice, current_end_slice)
+
+            prediction_per_dimension = prediction[which_batch_slices,:,:,0]
+            prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
+            prediction_image = ants.copy_image_info(image,
+                pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+                image.shape))
+            probability_image = probability_image + (prediction_image - probability_image) / (d + 1)
+
+            current_start_slice = current_end_slice + 1
+
+        return(probability_image)
+
+    else:
+        return ValueError("Unrecognized modality.")
 
 
 

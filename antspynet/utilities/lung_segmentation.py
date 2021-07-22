@@ -127,7 +127,6 @@ def el_bicho(ventilation_image,
 
             slice_count += 1
 
-
     ################################
     #
     # Do prediction and then restack into the image
@@ -180,4 +179,3 @@ def el_bicho(ventilation_image,
     return_dict = {'segmentation_image' : segmentation_image,
                    'probability_images' : probability_images}
     return(return_dict)
-
