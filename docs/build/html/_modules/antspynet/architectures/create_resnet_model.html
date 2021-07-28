@@ -6,13 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>antspynet.architectures.create_resnet_model &#8212; ANTsPyNet 0.0.1 documentation</title>
-    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
    
@@ -120,7 +119,9 @@
         <span class="n">model</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">grouped_convolution_layer_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">strides</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">grouped_convolution_layer_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                     <span class="n">number_of_filters</span><span class="p">,</span>
+                                     <span class="n">strides</span><span class="p">):</span>
         <span class="c1"># Per standard ResNet, this is just a 2-D convolution</span>
         <span class="k">if</span> <span class="n">cardinality</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">grouped_model</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
@@ -146,11 +147,10 @@
         <span class="n">grouped_model</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">convolution_layers</span><span class="p">)</span>
         <span class="k">return</span><span class="p">(</span><span class="n">grouped_model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">squeeze_and_excite_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">squeeze_and_excite_block_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                    <span class="n">ratio</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
         <span class="n">initial</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">:</span>
-            <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
 
@@ -165,13 +165,15 @@
                       <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_normal&#39;</span><span class="p">,</span>
                       <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_first&quot;</span><span class="p">:</span>
-            <span class="n">block</span> <span class="o">=</span> <span class="n">Permute</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))(</span><span class="n">block</span><span class="p">)</span>
-
         <span class="n">x</span> <span class="o">=</span> <span class="n">Multiply</span><span class="p">()([</span><span class="n">initial</span><span class="p">,</span> <span class="n">block</span><span class="p">])</span>
         <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">residual_block_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters_in</span><span class="p">,</span> <span class="n">number_of_filters_out</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">project_shortcut</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">residual_block_2d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                         <span class="n">number_of_filters_in</span><span class="p">,</span>
+                         <span class="n">number_of_filters_out</span><span class="p">,</span>
+                         <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="n">project_shortcut</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">squeeze_and_excite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">shortcut</span> <span class="o">=</span> <span class="n">model</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">Conv2D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_in</span><span class="p">,</span>
@@ -200,7 +202,7 @@
             <span class="n">shortcut</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">shortcut</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">squeeze_and_excite</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="n">squeeze_and_excite_2d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">squeeze_and_excite_block_2d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">shortcut</span><span class="p">,</span> <span class="n">model</span><span class="p">])</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
@@ -238,7 +240,8 @@
                                         <span class="n">number_of_filters_in</span><span class="o">=</span><span class="n">n_filters_in</span><span class="p">,</span>
                                         <span class="n">number_of_filters_out</span><span class="o">=</span><span class="n">n_filters_out</span><span class="p">,</span>
                                         <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
-                                        <span class="n">project_shortcut</span><span class="o">=</span><span class="n">project_shortcut</span><span class="p">)</span>
+                                        <span class="n">project_shortcut</span><span class="o">=</span><span class="n">project_shortcut</span><span class="p">,</span>
+                                        <span class="n">squeeze_and_excite</span><span class="o">=</span><span class="n">squeeze_and_excite</span><span class="p">)</span>
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">GlobalAveragePooling2D</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
 
@@ -336,7 +339,9 @@
         <span class="n">model</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
         <span class="k">return</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">grouped_convolution_layer_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">,</span> <span class="n">strides</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">grouped_convolution_layer_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                     <span class="n">number_of_filters</span><span class="p">,</span>
+                                     <span class="n">strides</span><span class="p">):</span>
         <span class="c1"># Per standard ResNet, this is just a 3-D convolution</span>
         <span class="k">if</span> <span class="n">cardinality</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">grouped_model</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters</span><span class="p">,</span>
@@ -352,7 +357,7 @@
 
         <span class="n">convolution_layers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cardinality</span><span class="p">):</span>
-            <span class="n">local_layer</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span>
+            <span class="n">local_layer</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:,</span>
               <span class="n">j</span> <span class="o">*</span> <span class="n">number_of_group_filters</span><span class="p">:</span><span class="n">j</span> <span class="o">*</span> <span class="n">number_of_group_filters</span> <span class="o">+</span> <span class="n">number_of_group_filters</span><span class="p">])(</span><span class="n">model</span><span class="p">)</span>
             <span class="n">convolution_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_group_filters</span><span class="p">,</span>
                                              <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
@@ -362,11 +367,10 @@
         <span class="n">grouped_model</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()(</span><span class="n">convolution_layers</span><span class="p">)</span>
         <span class="k">return</span><span class="p">(</span><span class="n">grouped_model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">squeeze_and_excite_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">squeeze_and_excite_block_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                                    <span class="n">ratio</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
         <span class="n">initial</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_last&quot;</span><span class="p">:</span>
-            <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">number_of_filters</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">int_shape</span><span class="p">(</span><span class="n">initial</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="n">block_shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">number_of_filters</span><span class="p">)</span>
 
@@ -381,13 +385,15 @@
                       <span class="n">kernel_initializer</span><span class="o">=</span><span class="s1">&#39;he_normal&#39;</span><span class="p">,</span>
                       <span class="n">use_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">image_data_format</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;channels_first&quot;</span><span class="p">:</span>
-            <span class="n">block</span> <span class="o">=</span> <span class="n">Permute</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))(</span><span class="n">block</span><span class="p">)</span>
-
         <span class="n">x</span> <span class="o">=</span> <span class="n">Multiply</span><span class="p">()([</span><span class="n">initial</span><span class="p">,</span> <span class="n">block</span><span class="p">])</span>
         <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">residual_block_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">number_of_filters_in</span><span class="p">,</span> <span class="n">number_of_filters_out</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">project_shortcut</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">residual_block_3d</span><span class="p">(</span><span class="n">model</span><span class="p">,</span>
+                          <span class="n">number_of_filters_in</span><span class="p">,</span>
+                          <span class="n">number_of_filters_out</span><span class="p">,</span>
+                          <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                          <span class="n">project_shortcut</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">squeeze_and_excite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">shortcut</span> <span class="o">=</span> <span class="n">model</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_in</span><span class="p">,</span>
@@ -408,7 +414,7 @@
                        <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">project_shortcut</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">strides</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">project_shortcut</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">or</span> <span class="n">strides</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">shortcut</span> <span class="o">=</span> <span class="n">Conv3D</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="n">number_of_filters_out</span><span class="p">,</span>
                               <span class="n">kernel_size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                               <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
@@ -416,7 +422,7 @@
             <span class="n">shortcut</span> <span class="o">=</span> <span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">shortcut</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">squeeze_and_excite</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="n">squeeze_and_excite_3d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">squeeze_and_excite_block_3d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="n">Add</span><span class="p">()([</span><span class="n">shortcut</span><span class="p">,</span> <span class="n">model</span><span class="p">])</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
@@ -454,7 +460,8 @@
                                         <span class="n">number_of_filters_in</span><span class="o">=</span><span class="n">n_filters_in</span><span class="p">,</span>
                                         <span class="n">number_of_filters_out</span><span class="o">=</span><span class="n">n_filters_out</span><span class="p">,</span>
                                         <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
-                                        <span class="n">project_shortcut</span><span class="o">=</span><span class="n">project_shortcut</span><span class="p">)</span>
+                                        <span class="n">project_shortcut</span><span class="o">=</span><span class="n">project_shortcut</span><span class="p">,</span>
+                                        <span class="n">squeeze_and_excite</span><span class="o">=</span><span class="n">squeeze_and_excite</span><span class="p">)</span>
 
 
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">GlobalAveragePooling3D</span><span class="p">()(</span><span class="n">outputs</span><span class="p">)</span>
@@ -542,7 +549,7 @@
       &copy;2019, Nick Tustison, Nick Cullen, Brian Avants.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

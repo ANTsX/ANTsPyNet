@@ -817,7 +817,7 @@ Since these can be resused, if is None, these data will be downloaded to a
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>image</strong> (<em>ANTsImage</em>) – input image</p></li>
-<li><p><strong>modality</strong> (<em>string</em>) – Modality image type.  Options include “ct” and “proton”.</p></li>
+<li><p><strong>modality</strong> (<em>string</em>) – Modality image type.  Options include “ct”, “proton”, and “ventilation”.</p></li>
 <li><p><strong>antsxnet_cache_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
 Since these can be resused, if is None, these data will be downloaded to a
 ~/.keras/ANTsXNet/.</p></li>
@@ -1008,7 +1008,7 @@ Since these can be resused, if is None, these data will be downloaded to a
 </dl>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="s2">&quot;t1.nii.gz&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probability_mask</span> <span class="o">=</span> <span class="n">hypothalamus_segmentation</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hypo</span> <span class="o">=</span> <span class="n">hypothalamus_segmentation</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1060,7 +1060,7 @@ Since these can be resused, if is None, these data will be downloaded to a
 
 <dl class="py function">
 <dt id="antspynet.utilities.deep_flash">
-<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">deep_flash</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_per_hemisphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which_hemisphere_models</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'new'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">deep_flash</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_preprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antsxnet_cache_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hippocampal/Enthorhinal segmentation using “Deep Flash”</p>
 <p>Perform hippocampal/entorhinal segmentation in T1 images using
 labels from Mike Yassa’s lab</p>
@@ -1084,9 +1084,7 @@ Label 18:  right subiculum</p>
 <dl class="simple">
 <dt>Preprocessing on the training data consisted of:</dt><dd><ul class="simple">
 <li><p>n4 bias correction,</p></li>
-<li><p>denoising,</p></li>
-<li><p>brain extraction, and</p></li>
-<li><p>affine registration to MNI.</p></li>
+<li><p>affine registration to the “deep flash” template.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1097,6 +1095,8 @@ do_preprocessing = True</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
+<li><p><strong>t2</strong> (<em>ANTsImage</em>) – Optional 3-D T2-weighted brain image.  If specified, it is assumed to be
+pre-aligned to the t1.</p></li>
 <li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
 <li><p><strong>do_per_hemisphere</strong> (<em>boolean</em>) – If True, do prediction based on separate networks per hemisphere.  Otherwise,
 use the single network trained for both hemispheres.</p></li>
