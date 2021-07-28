@@ -71,7 +71,7 @@ def deep_flash(t1,
     Returns
     -------
     List consisting of the segmentation image and probability images for
-    each label.
+    each label and foreground.
 
     Example
     -------
@@ -233,6 +233,28 @@ def deep_flash(t1,
 
     ################################
     #
+    # Left:  do prediction of foreground and normalize to native space
+    #
+    ################################
+
+    foreground_probability_image_left = None
+
+    predicted_data = unet_model.predict(batchX, verbose=verbose)[1]
+
+    probability_image = \
+        ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 0]),
+        origin=origin, spacing=spacing, direction=direction)
+    decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+    if do_preprocessing == True:
+        foreground_probability_image_left = ants.apply_transforms(fixed=t1,
+            moving=decropped_image,
+            transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+            whichtoinvert=[True], interpolator="linear", verbose=verbose)
+    else:
+        foreground_probability_image_left = decropped_image
+
+    ################################
+    #
     # Right:  build model and load weights
     #
     ################################
@@ -310,6 +332,28 @@ def deep_flash(t1,
 
     ################################
     #
+    # Right:  do prediction of foreground and normalize to native space
+    #
+    ################################
+
+    foreground_probability_image_right = None
+
+    predicted_data = unet_model.predict(batchX, verbose=verbose)[1]
+
+    probability_image = \
+        ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, 0]),
+        origin=origin, spacing=spacing, direction=direction)
+    decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+    if do_preprocessing == True:
+        foreground_probability_image_right = ants.apply_transforms(fixed=t1,
+            moving=decropped_image,
+            transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+            whichtoinvert=[True], interpolator="linear", verbose=verbose)
+    else:
+        foreground_probability_image_right = decropped_image
+
+    ################################
+    #
     # Combine priors
     #
     ################################
@@ -348,8 +392,11 @@ def deep_flash(t1,
     for i in range(len(labels)):
         relabeled_image[segmentation_image==i] = labels[i]
 
+    foreground_probability_image = foreground_probability_image_left + foreground_probability_image_right
+
     return_dict = {'segmentation_image' : relabeled_image,
-                   'probability_images' : probability_images}
+                   'probability_images' : probability_images,
+                   'foreground_probability_image' : foreground_probability_image}
     return(return_dict)
 
 
