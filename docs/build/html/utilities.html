@@ -1714,7 +1714,7 @@ or more images (per subject) which are assumed to be mutually aligned.  The
 outer list contains multiple subject lists which are randomly sampled to
 produce output image list.</p></li>
 <li><p><strong>segmentation_image_list</strong> (<em>list of ANTsImages</em>) – List of segmentation images corresponding to the input image list (optional).</p></li>
-<li><p><strong>number_of_simulations</strong> (<em>integer</em>) – Number of output images.</p></li>
+<li><p><strong>number_of_simulations</strong> (<em>integer</em>) – Number of simulated output image sets.</p></li>
 <li><p><strong>transform_type</strong> (<em>string</em>) – One of the following options: “translation”, “rigid”, “scaleShear”, “affine”,
 “deformation”, “affineAndDeformation”.</p></li>
 <li><p><strong>sd_affine</strong> (<em>float</em>) – Parameter dictating deviation amount from identity for random linear
@@ -1734,6 +1734,79 @@ transformations.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list of lists of transformed images</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image1_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image1_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r16&quot;</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image2_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image2_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">image_read</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">get_ants_data</span><span class="p">(</span><span class="s2">&quot;r64&quot;</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_segmentations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_segmentations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span> <span class="s2">&quot;Otsu&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_segmentations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">threshold_image</span><span class="p">(</span><span class="n">image2</span><span class="p">,</span> <span class="s2">&quot;Otsu&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_images</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image1_list</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image2_list</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">antspynet</span><span class="o">.</span><span class="n">randomly_transform_image_data</span><span class="p">(</span><span class="n">image1</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">input_images</span><span class="p">,</span> <span class="n">input_segmentations</span><span class="p">,</span> <span class="n">sd_affine</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">transform_type</span> <span class="o">=</span> <span class="s2">&quot;affineAndDeformation&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="antspynet.utilities.data_augmentation">
+<code class="sig-prename descclassname"><span class="pre">antspynet.utilities.</span></code><code class="sig-name descname"><span class="pre">data_augmentation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_image_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'affineAndDeformation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'additivegaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.05)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_simulated_bias_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd_histogram_warping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_numpy_file_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/data_augmentation.html#data_augmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#antspynet.utilities.data_augmentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly transform image data.</p>
+<p>Given an input image list (possibly multi-modal) and an optional corresponding
+segmentation image list, this function will perform data augmentation with
+the following augmentation possibilities:</p>
+<ul class="simple">
+<li><p>spatial transformations</p></li>
+<li><p>added image noise</p></li>
+<li><p>simulated bias field</p></li>
+<li><p>histogram warping</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_image_list</strong> (<em>list of lists of ANTsImages</em>) – List of lists of input images to warp.  The internal list sets contain one
+or more images (per subject) which are assumed to be mutually aligned.  The
+outer list contains multiple subject lists which are randomly sampled to
+produce output image list.</p></li>
+<li><p><strong>segmentation_image_list</strong> (<em>list of ANTsImages</em>) – List of segmentation images corresponding to the input image list (optional).</p></li>
+<li><p><strong>number_of_simulations</strong> (<em>integer</em>) – Number of simulated output image sets.</p></li>
+<li><p><strong>reference_image</strong> (<em>ANTsImage</em>) – Defines the spatial domain for all output images.  If one is not specified,
+we used the first image in the input image list.</p></li>
+<li><p><strong>transform_type</strong> (<em>string</em>) – One of the following options: “translation”, “rigid”, “scaleShear”, “affine”,
+“deformation”, “affineAndDeformation”.</p></li>
+<li><p><strong>noise_model</strong> (<em>string</em>) – ‘additivegaussian’, ‘saltandpepper’, ‘shot’, or ‘speckle’.</p></li>
+<li><p><strong>noise_parameters</strong> (<em>tuple</em><em> or </em><em>array</em><em> or </em><em>float</em>) – ‘additivegaussian’: (mean, standardDeviation)
+‘saltandpepper’: (probability, saltValue, pepperValue)
+‘shot’: scale
+‘speckle’: standardDeviation
+Note that the standard deviation, scale, and probability values are <em>max</em> values
+and are randomly selected in the range [0, noise_parameter].  Also, the “mean”,
+“saltValue” and “pepperValue” are assumed to be in the intensity normalized range
+of [0, 1].</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>sd_simulated_bias_field<span class="classifier">float</span></dt><dd><p>Characterize the standard deviation of the amplitude.</p>
+</dd>
+<dt>sd_histogram_warping<span class="classifier">float</span></dt><dd><p>Determines the strength of the bias field.</p>
+</dd>
+<dt>output_numpy_file_prefix<span class="classifier">string</span></dt><dd><p>Filename of output numpy array containing all the simulated images and segmentations.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of lists of transformed images and/or outputs to a numpy array.</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>

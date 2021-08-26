@@ -52,6 +52,7 @@ from .histogram_warp_image_intensities import histogram_warp_image_intensities
 from .simulate_bias_field import simulate_bias_field
 
 from .randomly_transform_image_data import randomly_transform_image_data
+from .data_augmentation import data_augmentation
 
 from .preprocess_image import preprocess_brain_image
 from .brain_extraction import brain_extraction

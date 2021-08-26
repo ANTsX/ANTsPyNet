@@ -44,7 +44,7 @@ def randomly_transform_image_data(reference_image,
         List of segmentation images corresponding to the input image list (optional).
 
     number_of_simulations : integer
-        Number of output images.
+        Number of simulated output image sets.
 
     transform_type : string
         One of the following options: "translation", "rigid", "scaleShear", "affine",

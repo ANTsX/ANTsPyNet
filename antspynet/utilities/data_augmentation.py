@@ -93,9 +93,8 @@ def data_augmentation(input_image_list,
     >>> input_images = list()
     >>> input_images.append(image1_list)
     >>> input_images.append(image2_list)
-    >>> data = antspynet.randomly_transform_image_data(image1,
-    >>>     input_images, input_segmentations, sd_affine=0.02,
-    >>>     transform_type = "affineAndDeformation" )
+    >>> data = antspynet.data_augmentation(input_images,
+                                           input_segmentations)
     """
 
     from ..utilities import histogram_warp_image_intensities
