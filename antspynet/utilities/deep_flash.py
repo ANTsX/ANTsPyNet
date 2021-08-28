@@ -101,7 +101,7 @@ def deep_flash(t1,
     if do_preprocessing == True:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.995),
-            brain_extraction_modality=None,
+            brain_extraction_modality="t1",
             template="deepFlashTemplateT1",
             template_transform_type="antsRegistrationSyNQuick[a]",
             do_bias_correction=True,

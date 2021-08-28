@@ -132,7 +132,8 @@ def preprocess_brain_image(image,
             transforms = dict(fwdtransforms=registration['fwdtransforms'],
                               invtransforms=registration['invtransforms'])
         else:
-            template_probability_mask = brain_extraction(template_image, antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+            template_probability_mask = brain_extraction(template_image, modality=brain_extraction_modality, 
+                antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
             template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)
             template_brain_image = template_mask * template_image
 
