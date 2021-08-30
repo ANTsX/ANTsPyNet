@@ -65,7 +65,6 @@ def data_augmentation(input_image_list,
         "saltValue" and "pepperValue" are assumed to be in the intensity normalized range
         of [0, 1].
 
-
     sd_simulated_bias_field : float
         Characterize the standard deviation of the amplitude.
 
@@ -78,7 +77,6 @@ def data_augmentation(input_image_list,
     Returns
     -------
     list of lists of transformed images and/or outputs to a numpy array.
-
 
     Example
     -------
