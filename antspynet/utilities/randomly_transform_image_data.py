@@ -73,10 +73,10 @@ def randomly_transform_image_data(reference_image,
         Standard deviation of the Gaussian smoothing in mm (exponential field only).
 
     input_image_interpolator : string
-        One of the following options "linear", "gaussian", "bspline".
+        One of the following options: "nearestNeighbor", "linear", "gaussian", "bSpline".
 
     segmentation_image_interpolator : string
-        One of the following options "nearestNeighbor" or "genericLabel".
+        Only "nearestNeighbor" is currently available.
 
     Returns
     -------
@@ -99,8 +99,6 @@ def randomly_transform_image_data(reference_image,
     >>>     input_images, input_segmentations, sd_affine=0.02,
     >>>     transform_type = "affineAndDeformation" )
     """
-
-    from ..utilities import histogram_warp_image_intensities
 
     def polar_decomposition(X):
          U, d, V = np.linalg.svd(X, full_matrices=False)
@@ -217,14 +215,14 @@ def randomly_transform_image_data(reference_image,
             single_subject_image = single_subject_image_list[j]
             single_subject_simulated_image_list.append(ants.apply_ants_transform_to_image(
                 simulated_transforms[i], single_subject_image,
-                reference=reference_image))
+                reference=reference_image, interpolation=input_image_interpolator.lower()))
 
         simulated_image_list.append(single_subject_simulated_image_list)
 
         if single_subject_segmentation_image is not None:
             simulated_segmentation_image_list.append(ants.apply_ants_transform_to_image(
                 simulated_transforms[i], single_subject_segmentation_image,
-                reference=reference_image, interpolation="nearestneighbor"))
+                reference=reference_image, interpolation=segmentation_image_interpolator.lower()))
 
     if segmentation_image_list is None:
         return({'simulated_images' : simulated_image_list,
