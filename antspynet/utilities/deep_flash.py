@@ -101,7 +101,7 @@ def deep_flash(t1,
     t1_preprocessed = t1
     t1_preprocessing = None
     t1_preprocessed_flipped = None
-    if do_preprocessing == True:
+    if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.995),
             brain_extraction_modality="t1",
@@ -216,7 +216,7 @@ def deep_flash(t1,
                     kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
     unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output])
 
-    if verbose == True:
+    if verbose:
         print("DeepFlash: retrieving model weights (left).")
     weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)
@@ -227,7 +227,7 @@ def deep_flash(t1,
     #
     ################################
 
-    if verbose == True:
+    if verbose:
         print("Prediction (left).")
 
     batchX = None
@@ -261,26 +261,27 @@ def deep_flash(t1,
                 ants.from_numpy(np.squeeze(predicted_data[0][j, :, :, :, i]),
                 origin=origin_left, spacing=spacing, direction=direction)
             if i > 0:
-                decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+                probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
             else:
-                decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+                probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
-            if do_preprocessing == True:
+            if j == 1:  # flipped
+                probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
+                probability_image = ants.from_numpy(probability_array_flipped,
+                    origin=probability_image.origin, spacing=probability_image.spacing,
+                    direction=probability_image.direction)
+
+            if do_preprocessing:
                 probability_image = ants.apply_transforms(fixed=t1,
-                    moving=decropped_image,
+                    moving=probability_image,
                     transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose)
-            else:
-                probability_image = decropped_image
 
             if j == 0:  # not flipped
                 probability_images_left.append(probability_image)
             else:       # flipped
-                probability_array_flipped = np.flip(probability_image.numpy(), axis=2)
-                probability_image_flipped = ants.from_numpy(probability_array_flipped,
-                    origin=probability_image.origin, spacing=probability_image.spacing,
-                    direction=probability_image.direction)
-                probability_images_right.append(probability_image_flipped)
+                probability_images_right.append(probability_image)
+
 
     ################################
     #
@@ -292,24 +293,24 @@ def deep_flash(t1,
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[1][j, :, :, :, 0]),
             origin=origin_left, spacing=spacing, direction=direction)
-        decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+        probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
 
-        if do_preprocessing == True:
+        if j == 1:  # flipped
+            probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
+            probability_image = ants.from_numpy(probability_array_flipped,
+                origin=probability_image.origin, spacing=probability_image.spacing,
+                direction=probability_image.direction)
+
+        if do_preprocessing:
             probability_image = ants.apply_transforms(fixed=t1,
-                moving=decropped_image,
+                moving=probability_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose)
-        else:
-            probability_image = decropped_image
 
         if j == 0:  # not flipped
             foreground_probability_image_left = probability_image
         else:
-            probability_array_flipped = np.flip(probability_image.numpy(), axis=2)
-            probability_image_flipped = ants.from_numpy(probability_array_flipped,
-                origin=probability_image.origin, spacing=probability_image.spacing,
-                direction=probability_image.direction)
-            foreground_probability_image_right = probability_image_flipped
+            foreground_probability_image_right = probability_image
 
     ################################
     #
@@ -338,7 +339,7 @@ def deep_flash(t1,
                     kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
     unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output])
 
-    if verbose == True:
+    if verbose:
         print("DeepFlash: retrieving model weights (right).")
     weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
     unet_model.load_weights(weights_file_name)
@@ -349,7 +350,7 @@ def deep_flash(t1,
     #
     ################################
 
-    if verbose == True:
+    if verbose:
         print("Prediction (right).")
 
     batchX = None
@@ -383,17 +384,21 @@ def deep_flash(t1,
                 ants.from_numpy(np.squeeze(predicted_data[0][j, :, :, :, i]),
                 origin=origin_right, spacing=spacing, direction=direction)
             if i > 0:
-                decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+                probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
             else:
-                decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+                probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
-            if do_preprocessing == True:
+            if j == 1:  # flipped
+                probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
+                probability_image = ants.from_numpy(probability_array_flipped,
+                    origin=probability_image.origin, spacing=probability_image.spacing,
+                    direction=probability_image.direction)
+
+            if do_preprocessing:
                 probability_image = ants.apply_transforms(fixed=t1,
-                    moving=decropped_image,
+                    moving=probability_image,
                     transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose)
-            else:
-                probability_image = decropped_image
 
             if j == 0:  # not flipped
                 if use_contralaterality:
@@ -401,11 +406,8 @@ def deep_flash(t1,
                 else:
                     probability_images_right.append(probability_image)    
             else:       # flipped
-                probability_array_flipped = np.flip(probability_image.numpy(), axis=2)
-                probability_image_flipped = ants.from_numpy(probability_array_flipped,
-                    origin=probability_image.origin, spacing=probability_image.spacing,
-                    direction=probability_image.direction)
-                probability_images_left[i] = (probability_images_left[i] + probability_image_flipped) / 2
+                probability_images_left[i] = (probability_images_left[i] + probability_image) / 2
+
 
     ################################
     #
@@ -417,27 +419,27 @@ def deep_flash(t1,
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[1][j, :, :, :, 0]),
             origin=origin_right, spacing=spacing, direction=direction)
-        decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+        probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
 
-        if do_preprocessing == True:
-            probability_image = ants.apply_transforms(fixed=t1,
-                moving=decropped_image,
-                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose)
-        else:
-            probability_image = decropped_image
-
-        if j == 0:  # not flipped
-                if use_contralaterality:
-                    foreground_probability_image_right = (foreground_probability_image_right + probability_image) / 2
-                else:    
-                    foreground_probability_image_right = probability_image
-        else:
-            probability_array_flipped = np.flip(probability_image.numpy(), axis=2)
-            probability_image_flipped = ants.from_numpy(probability_array_flipped,
+        if j == 1:  # flipped
+            probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
+            probability_image = ants.from_numpy(probability_array_flipped,
                 origin=probability_image.origin, spacing=probability_image.spacing,
                 direction=probability_image.direction)
-            foreground_probability_image_left = (foreground_probability_image_left + probability_image_flipped) / 2
+
+        if do_preprocessing:
+            probability_image = ants.apply_transforms(fixed=t1,
+                moving=probability_image,
+                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                whichtoinvert=[True], interpolator="linear", verbose=verbose)
+
+        if j == 0:  # not flipped
+            if use_contralaterality:
+                foreground_probability_image_right = (foreground_probability_image_right + probability_image) / 2
+            else:    
+                foreground_probability_image_right = probability_image
+        else:
+            foreground_probability_image_left = (foreground_probability_image_left + probability_image) / 2
 
     ################################
     #
@@ -583,7 +585,7 @@ def deep_flash_deprecated(t1,
     ################################
 
     t1_preprocessed = t1
-    if do_preprocessing == True:
+    if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
             brain_extraction_modality="t1",
@@ -620,7 +622,7 @@ def deep_flash_deprecated(t1,
             convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
             weight_decay=1e-5, additional_options=("attentionGating",))
 
-        if verbose == True:
+        if verbose:
             print("DeepFlash: retrieving model weights.")
 
         weights_file_name = get_pretrained_network("deepFlash", antsxnet_cache_directory=antsxnet_cache_directory)
@@ -632,7 +634,7 @@ def deep_flash_deprecated(t1,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Prediction.")
 
         cropped_image = pad_or_crop_image_to_size(t1_preprocessed, template_size)
@@ -656,7 +658,7 @@ def deep_flash_deprecated(t1,
             else:
                 decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
-            if do_preprocessing == True:
+            if do_preprocessing:
                 probability_images.append(ants.apply_transforms(fixed=t1,
                     moving=decropped_image,
                     transformlist=t1_preprocessing['template_transforms']['invtransforms'],
@@ -708,7 +710,7 @@ def deep_flash_deprecated(t1,
             convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
             weight_decay = 1e-5, additional_options=("attentionGating",))
 
-        if verbose == True:
+        if verbose:
             print("DeepFlash: retrieving model weights (left).")
         weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
         unet_model.load_weights(weights_file_name)
@@ -719,7 +721,7 @@ def deep_flash_deprecated(t1,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Prediction (left).")
 
         cropped_image = ants.crop_indices(t1_preprocessed, (30, 51, 0), (94, 147, 96))
@@ -749,7 +751,7 @@ def deep_flash_deprecated(t1,
             else:
                 decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
-            if do_preprocessing == True:
+            if do_preprocessing:
                 probability_images_left.append(ants.apply_transforms(fixed=t1,
                     moving=decropped_image,
                     transformlist=t1_preprocessing['template_transforms']['invtransforms'],
@@ -802,7 +804,7 @@ def deep_flash_deprecated(t1,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Prediction (right).")
 
         cropped_image = ants.crop_indices(t1_preprocessed, (88, 51, 0), (152, 147, 96))
@@ -832,7 +834,7 @@ def deep_flash_deprecated(t1,
             else:
                 decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
-            if do_preprocessing == True:
+            if do_preprocessing:
                 probability_images_right.append(ants.apply_transforms(fixed=t1,
                     moving=decropped_image,
                     transformlist=t1_preprocessing['template_transforms']['invtransforms'],
