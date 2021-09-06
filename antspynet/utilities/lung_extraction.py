@@ -21,7 +21,7 @@ def lung_extraction(image,
 
     modality : string
         Modality image type.  Options include "ct", "proton", "protonLobes", 
-        and "ventilation".
+        "maskLobes", and "ventilation".
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -119,7 +119,7 @@ def lung_extraction(image,
                        'probability_images' : probability_images_array}
         return(return_dict)
 
-    if modality == "protonLobes":
+    if modality == "protonLobes" or modality == "maskLobes":
         reorient_template_file_name_path = get_antsxnet_data("protonLungTemplate",
             antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
@@ -140,15 +140,19 @@ def lung_extraction(image,
             convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
             dropout_rate=0.0, weight_decay=0, additional_options=("attentionGating",))
 
-        penultimate_layer = unet_model.layers[-2].output
-        outputs2 = Conv3D(filters=1,
-                          kernel_size=(1, 1, 1),
-                          activation='sigmoid',
-                          kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
-        unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, outputs2])
+        if modality == "protonLobes":
+            penultimate_layer = unet_model.layers[-2].output
+            outputs2 = Conv3D(filters=1,
+                            kernel_size=(1, 1, 1),
+                            activation='sigmoid',
+                            kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+            unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, outputs2])
+            weights_file_name = get_pretrained_network("protonLobes",
+                antsxnet_cache_directory=antsxnet_cache_directory)
+        else:
+            weights_file_name = get_pretrained_network("maskLobes",
+                antsxnet_cache_directory=antsxnet_cache_directory)
 
-        weights_file_name = get_pretrained_network("protonLobes",
-            antsxnet_cache_directory=antsxnet_cache_directory)
         unet_model.load_weights(weights_file_name)
 
         if verbose == True:
@@ -161,7 +165,10 @@ def lung_extraction(image,
             center=np.asarray(center_of_mass_template), translation=translation)
         warped_image = ants.apply_ants_transform_to_image(xfrm, image, reorient_template)
         warped_array = warped_image.numpy()
-        warped_array = (warped_array - warped_array.mean()) / warped_array.std()
+        if modality == "protonLobes":
+            warped_array = (warped_array - warped_array.mean()) / warped_array.std()
+        else:
+            warped_array[warped_array != 0] = 1
        
         batchX = np.zeros((1, *warped_array.shape, channel_size))
         batchX[0,:,:,:,0] = warped_array
@@ -176,9 +183,14 @@ def lung_extraction(image,
 
         probability_images_array = list()
         for i in range(number_of_classification_labels):
-            probability_images_array.append(
-            ants.from_numpy(np.squeeze(predicted_data[0][0, :, :, :, i]),
-                origin=origin, spacing=spacing, direction=direction))
+            if modality == "protonLobes":
+                probability_images_array.append(
+                    ants.from_numpy(np.squeeze(predicted_data[0][0, :, :, :, i]),
+                    origin=origin, spacing=spacing, direction=direction))
+            else:
+                probability_images_array.append(
+                    ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
+                    origin=origin, spacing=spacing, direction=direction))
 
         if verbose == True:
             print("Lung extraction:  renormalize probability images to native space.")
@@ -192,15 +204,21 @@ def lung_extraction(image,
         segmentation_image = ants.matrix_to_images(
             np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
 
-        whole_lung_mask = ants.from_numpy(np.squeeze(predicted_data[1][0, :, :, :, 0]),
-            origin=origin, spacing=spacing, direction=direction)
-        whole_lung_mask = ants.apply_ants_transform_to_image(
-            ants.invert_ants_transform(xfrm), whole_lung_mask, image)
+        if modality == "protonLobes":
+            whole_lung_mask = ants.from_numpy(np.squeeze(predicted_data[1][0, :, :, :, 0]),
+                origin=origin, spacing=spacing, direction=direction)
+            whole_lung_mask = ants.apply_ants_transform_to_image(
+                ants.invert_ants_transform(xfrm), whole_lung_mask, image)
 
-        return_dict = {'segmentation_image' : segmentation_image,
-                       'probability_images' : probability_images_array,
-                       'whole_lung_mask_image' : whole_lung_mask}
-        return(return_dict)
+            return_dict = {'segmentation_image' : segmentation_image,
+                           'probability_images' : probability_images_array,
+                           'whole_lung_mask_image' : whole_lung_mask}
+            return(return_dict)
+        else:
+            return_dict = {'segmentation_image' : segmentation_image,
+                           'probability_images' : probability_images_array}
+            return(return_dict)
+
 
     elif modality == "ct":
 
