@@ -89,6 +89,9 @@ Applications
 .. autofunction:: antspynet.utilities.mri_super_resolution
 .. autofunction:: antspynet.utilities.tid_neural_image_assessment
 .. autofunction:: antspynet.utilities.neural_style_transfer
+.. autofunction:: antspynet.utilities.el_bicho
+.. autofunction:: antspynet.utilities.arterial_lesion_segmentation
+
 
 Miscellaneous
 -------------

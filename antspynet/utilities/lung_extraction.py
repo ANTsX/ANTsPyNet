@@ -72,9 +72,9 @@ def lung_extraction(image,
         resampled_image_size = reorient_template.shape
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
-            number_of_outputs = number_of_classification_labels,
-            number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
-            convolution_kernel_size = (7, 7, 5), deconvolution_kernel_size = (7, 7, 5))
+            number_of_outputs=number_of_classification_labels,
+            number_of_layers=4, number_of_filters_at_base_layer=16, dropout_rate=0.0,
+            convolution_kernel_size=(7, 7, 5), deconvolution_kernel_size=(7, 7, 5))
         unet_model.load_weights(weights_file_name)
 
         if verbose == True:
