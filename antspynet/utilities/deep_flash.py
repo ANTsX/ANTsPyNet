@@ -55,8 +55,8 @@ def deep_flash(t1,
         pre-aligned to the t1.
 
     use_contralaterality : boolean
-        Use both hemispherical models to also predict the corresponding contralateral 
-        segmentation and use both sets of priors to produce the results.  Mainly used 
+        Use both hemispherical models to also predict the corresponding contralateral
+        segmentation and use both sets of priors to produce the results.  Mainly used
         for debugging.
 
     do_preprocessing : boolean
@@ -106,7 +106,7 @@ def deep_flash(t1,
             truncate_intensity=(0.01, 0.995),
             brain_extraction_modality="t1",
             template="deepFlashTemplateT1",
-            template_transform_type="antsRegistrationSyNQuick[a]",
+            template_transform_type="antsRegistrationSyNQuickRepro[a]",
             do_bias_correction=True,
             do_denoising=False,
             antsxnet_cache_directory=antsxnet_cache_directory,
@@ -124,26 +124,27 @@ def deep_flash(t1,
     t2_preprocessed = t2
     t2_preprocessed_flipped = None
     if t2 is not None:
-        t2_preprocessing = preprocess_brain_image(t2,
-            truncate_intensity=(0.01, 0.995),
-            brain_extraction_modality=None,
-            template_transform_type=None,
-            do_bias_correction=True,
-            do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
-            verbose=verbose)
-        t2_preprocessed = ants.apply_transforms(fixed=t1_preprocessed,
-            moving=t2_preprocessing["preprocessed_image"],
-            transformlist=t1_preprocessing['template_transforms']['fwdtransforms'],
-            verbose=verbose)
-        t2_preprocessed = (t2_preprocessed - t2_preprocessed.mean()) / t2_preprocessed.std()
-        if use_contralaterality:
-            t2_preprocessed_array = t1_preprocessed.numpy()
-            t2_preprocessed_array_flipped = np.flip(t2_preprocessed_array, axis=0)
-            t2_preprocessed_flipped = ants.from_numpy(t2_preprocessed_array_flipped,
-                                                      origin=t2_preprocessed.origin,
-                                                      spacing=t2_preprocessed.spacing,
-                                                      direction=t2_preprocessed.direction)
+        if do_preprocessing:
+            t2_preprocessing = preprocess_brain_image(t2,
+                truncate_intensity=(0.01, 0.995),
+                brain_extraction_modality=None,
+                template_transform_type=None,
+                do_bias_correction=True,
+                do_denoising=False,
+                antsxnet_cache_directory=antsxnet_cache_directory,
+                verbose=verbose)
+            t2_preprocessed = ants.apply_transforms(fixed=t1_preprocessed,
+                moving=t2_preprocessing["preprocessed_image"],
+                transformlist=t1_preprocessing['template_transforms']['fwdtransforms'],
+                verbose=verbose)
+            t2_preprocessed = (t2_preprocessed - t2_preprocessed.mean()) / t2_preprocessed.std()
+            if use_contralaterality:
+                t2_preprocessed_array = t1_preprocessed.numpy()
+                t2_preprocessed_array_flipped = np.flip(t2_preprocessed_array, axis=0)
+                t2_preprocessed_flipped = ants.from_numpy(t2_preprocessed_array_flipped,
+                                                        origin=t2_preprocessed.origin,
+                                                        spacing=t2_preprocessed.spacing,
+                                                        direction=t2_preprocessed.direction)
 
     probability_images = list()
     labels = (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
@@ -233,7 +234,7 @@ def deep_flash(t1,
     batchX = None
     if use_contralaterality:
         batchX = np.zeros((2, *image_size, channel_size))
-    else:    
+    else:
         batchX = np.zeros((1, *image_size, channel_size))
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_left, upper_bound_left)
@@ -356,7 +357,7 @@ def deep_flash(t1,
     batchX = None
     if use_contralaterality:
         batchX = np.zeros((2, *image_size, channel_size))
-    else:    
+    else:
         batchX = np.zeros((1, *image_size, channel_size))
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_right, upper_bound_right)
@@ -404,7 +405,7 @@ def deep_flash(t1,
                 if use_contralaterality:
                     probability_images_right[i] = (probability_images_right[i] + probability_image) / 2
                 else:
-                    probability_images_right.append(probability_image)    
+                    probability_images_right.append(probability_image)
             else:       # flipped
                 probability_images_left[i] = (probability_images_left[i] + probability_image) / 2
 
@@ -436,7 +437,7 @@ def deep_flash(t1,
         if j == 0:  # not flipped
             if use_contralaterality:
                 foreground_probability_image_right = (foreground_probability_image_right + probability_image) / 2
-            else:    
+            else:
                 foreground_probability_image_right = probability_image
         else:
             foreground_probability_image_left = (foreground_probability_image_left + probability_image) / 2
