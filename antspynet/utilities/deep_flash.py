@@ -108,7 +108,7 @@ def deep_flash(t1,
             template="deepFlashTemplateT1",
             template_transform_type="antsRegistrationSyNQuickRepro[a]",
             do_bias_correction=True,
-            do_denoising=False,
+            do_denoising=True,
             antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"]
@@ -130,7 +130,7 @@ def deep_flash(t1,
                 brain_extraction_modality=None,
                 template_transform_type=None,
                 do_bias_correction=True,
-                do_denoising=False,
+                do_denoising=True,
                 antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             t2_preprocessed = ants.apply_transforms(fixed=t1_preprocessed,
