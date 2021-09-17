@@ -7,6 +7,7 @@ from tensorflow.keras import regularizers
 
 def deep_flash(t1,
                 t2=None,
+                use_hierarchical_parcellation=True,
                 use_contralaterality=True,
                 do_preprocessing=True,
                 antsxnet_cache_directory=None,
@@ -40,6 +41,7 @@ def deep_flash(t1,
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
+       * denoising,
        * affine registration to the "deep flash" template.
     The input T1 should undergo the same steps.  If the input T1 is the raw
     T1, these steps can be performed by the internal preprocessing, i.e. set
@@ -53,6 +55,11 @@ def deep_flash(t1,
     t2 : ANTsImage
         Optional 3-D T2-weighted brain image.  If specified, it is assumed to be
         pre-aligned to the t1.
+
+    use_hierarchical_parcellation : boolean
+        If True, use u-net model with additional outputs of the medial temporal lobe 
+        region, hippocampal, and entorhinal/perirhinal/parahippocampal regions.  Otherwise
+        the only additional output is the medial temporal lobe.
 
     use_contralaterality : boolean
         Use both hemispherical models to also predict the corresponding contralateral
@@ -172,7 +179,7 @@ def deep_flash(t1,
     labels_left = labels[1::2]
     priors_image_left_list = priors_image_list[1::2]
     probability_images_left = list()
-    foreground_probability_image_left = None
+    foreground_probability_images_left = list()
     lower_bound_left = (76, 74, 56)
     upper_bound_left = (140, 138, 152)
     tmp_cropped = ants.crop_indices(t1_preprocessed, lower_bound_left, upper_bound_left)
@@ -184,7 +191,7 @@ def deep_flash(t1,
     labels_right = labels[2::2]
     priors_image_right_list = priors_image_list[2::2]
     probability_images_right = list()
-    foreground_probability_image_right = None
+    foreground_probability_images_right = list()
     lower_bound_right = (20, 74, 56)
     upper_bound_right = (84, 138, 152)
     tmp_cropped = ants.crop_indices(t1_preprocessed, lower_bound_right, upper_bound_right)
@@ -192,17 +199,15 @@ def deep_flash(t1,
 
     ################################
     #
-    # Left:  build model and load weights
+    # Create model
     #
     ################################
 
     channel_size = 1 + len(labels_left)
-    number_of_classification_labels = 1 + len(labels_left)
-
-    network_name = 'deepFlashLeftT1'
     if t2 is not None:
-        network_name = 'deepFlashLeftBoth'
         channel_size += 1
+
+    number_of_classification_labels = 1 + len(labels_left)
 
     unet_model = create_unet_model_3d((*image_size, channel_size),
         number_of_outputs=number_of_classification_labels, mode="classification",
@@ -211,11 +216,43 @@ def deep_flash(t1,
         dropout_rate=0.0, weight_decay=0)
 
     penultimate_layer = unet_model.layers[-2].output
-    output = Conv3D(filters=1,
-                    kernel_size=(1, 1, 1),
-                    activation='sigmoid',
-                    kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
-    unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output])
+
+    # medial temporal lobe
+    output1 = Conv3D(filters=1,
+                     kernel_size=(1, 1, 1),
+                     activation='sigmoid',
+                     kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+
+    if use_hierarchical_parcellation:
+
+        # Hippocampus
+        output2 = Conv3D(filters=1,
+                        kernel_size=(1, 1, 1),
+                        activation='sigmoid',
+                        kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+
+        # EC, perirhinal, and parahippo.
+        output3 = Conv3D(filters=1,
+                        kernel_size=(1, 1, 1),
+                        activation='sigmoid',
+                        kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+
+        unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output1, output2, output3])
+    else:     
+        unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output1])
+
+    ################################
+    #
+    # Left:  build model and load weights
+    #
+    ################################
+
+    network_name = 'deepFlashLeftT1'
+    if t2 is not None:
+        network_name = 'deepFlashLeftBoth'
+
+    if use_hierarchical_parcellation:
+        network_name += "Hierarchical"
 
     if verbose:
         print("DeepFlash: retrieving model weights (left).")
@@ -286,32 +323,33 @@ def deep_flash(t1,
 
     ################################
     #
-    # Left:  do prediction of foreground and normalize to native space
+    # Left:  do prediction of mtl, hippocampal, and ec regions and normalize to native space
     #
     ################################
 
-    for j in range(predicted_data[0].shape[0]):
-        probability_image = \
-            ants.from_numpy(np.squeeze(predicted_data[1][j, :, :, :, 0]),
-            origin=origin_left, spacing=spacing, direction=direction)
-        probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+    for i in range(1, len(predicted_data)):
+        for j in range(predicted_data[i].shape[0]):
+            probability_image = \
+                ants.from_numpy(np.squeeze(predicted_data[i][j, :, :, :, 0]),
+                origin=origin_left, spacing=spacing, direction=direction)
+            probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
 
-        if j == 1:  # flipped
-            probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
-            probability_image = ants.from_numpy(probability_array_flipped,
-                origin=probability_image.origin, spacing=probability_image.spacing,
-                direction=probability_image.direction)
+            if j == 1:  # flipped
+                probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
+                probability_image = ants.from_numpy(probability_array_flipped,
+                    origin=probability_image.origin, spacing=probability_image.spacing,
+                    direction=probability_image.direction)
 
-        if do_preprocessing:
-            probability_image = ants.apply_transforms(fixed=t1,
-                moving=probability_image,
-                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose)
+            if do_preprocessing:
+                probability_image = ants.apply_transforms(fixed=t1,
+                    moving=probability_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose)
 
-        if j == 0:  # not flipped
-            foreground_probability_image_left = probability_image
-        else:
-            foreground_probability_image_right = probability_image
+            if j == 0:  # not flipped
+                foreground_probability_images_left.append(probability_image)
+            else:
+                foreground_probability_images_right.append(probability_image)
 
     ################################
     #
@@ -319,26 +357,12 @@ def deep_flash(t1,
     #
     ################################
 
-    channel_size = 1 + len(labels_right)
-    number_of_classification_labels = 1 + len(labels_right)
-
     network_name = 'deepFlashRightT1'
     if t2 is not None:
         network_name = 'deepFlashRightBoth'
-        channel_size += 1
 
-    unet_model = create_unet_model_3d((*image_size, channel_size),
-        number_of_outputs=number_of_classification_labels, mode="classification",
-        number_of_filters=(32, 64, 96, 128, 256),
-        convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
-        dropout_rate=0.0, weight_decay=0)
-
-    penultimate_layer = unet_model.layers[-2].output
-    output = Conv3D(filters=1,
-                    kernel_size=(1, 1, 1),
-                    activation='sigmoid',
-                    kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
-    unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output])
+    if use_hierarchical_parcellation:
+        network_name += "Hierarchical"
 
     if verbose:
         print("DeepFlash: retrieving model weights (right).")
@@ -412,35 +436,36 @@ def deep_flash(t1,
 
     ################################
     #
-    # Right:  do prediction of foreground and normalize to native space
+    # Right:  do prediction of mtl, hippocampal, and ec regions and normalize to native space
     #
     ################################
 
-    for j in range(predicted_data[0].shape[0]):
-        probability_image = \
-            ants.from_numpy(np.squeeze(predicted_data[1][j, :, :, :, 0]),
-            origin=origin_right, spacing=spacing, direction=direction)
-        probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+    for i in range(1, len(predicted_data)):
+        for j in range(predicted_data[i].shape[0]):
+            probability_image = \
+                ants.from_numpy(np.squeeze(predicted_data[i][j, :, :, :, 0]),
+                origin=origin_right, spacing=spacing, direction=direction)
+            probability_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
 
-        if j == 1:  # flipped
-            probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
-            probability_image = ants.from_numpy(probability_array_flipped,
-                origin=probability_image.origin, spacing=probability_image.spacing,
-                direction=probability_image.direction)
+            if j == 1:  # flipped
+                probability_array_flipped = np.flip(probability_image.numpy(), axis=0)
+                probability_image = ants.from_numpy(probability_array_flipped,
+                    origin=probability_image.origin, spacing=probability_image.spacing,
+                    direction=probability_image.direction)
 
-        if do_preprocessing:
-            probability_image = ants.apply_transforms(fixed=t1,
-                moving=probability_image,
-                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose)
+            if do_preprocessing:
+                probability_image = ants.apply_transforms(fixed=t1,
+                    moving=probability_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose)
 
-        if j == 0:  # not flipped
-            if use_contralaterality:
-                foreground_probability_image_right = (foreground_probability_image_right + probability_image) / 2
+            if j == 0:  # not flipped
+                if use_contralaterality:
+                    foreground_probability_images_right[i-1] = (foreground_probability_images_right[i-1] + probability_image) / 2
+                else:
+                    foreground_probability_images_right.append(probability_image)
             else:
-                foreground_probability_image_right = probability_image
-        else:
-            foreground_probability_image_left = (foreground_probability_image_left + probability_image) / 2
+                foreground_probability_images_left[i-1] = (foreground_probability_images_left[i-1] + probability_image) / 2
 
     ################################
     #
@@ -482,11 +507,24 @@ def deep_flash(t1,
     for i in range(len(labels)):
         relabeled_image[segmentation_image==i] = labels[i]
 
-    foreground_probability_image = foreground_probability_image_left + foreground_probability_image_right
+    foreground_probability_images = list()
+    for i in range(len(foreground_probability_images_left)):
+        foreground_probability_images.append(foreground_probability_images_left[i] + foreground_probability_images_right[i])
 
-    return_dict = {'segmentation_image' : relabeled_image,
-                   'probability_images' : probability_images,
-                   'foreground_probability_image' : foreground_probability_image}
+    return_dict = None
+    if use_hierarchical_parcellation:
+        return_dict = {'segmentation_image' : relabeled_image,
+                       'probability_images' : probability_images,
+                       'medial_temporal_lobe_probability_image' : foreground_probability_images[0],
+                       'hippocampal_probability_image' : foreground_probability_images[1],
+                       'other_region_probability_image' : foreground_probability_images[2]
+                      }
+    else:
+        return_dict = {'segmentation_image' : relabeled_image,
+                       'probability_images' : probability_images,
+                       'medial_temporal_lobe_probability_image' : foreground_probability_images[0]
+                      }
+
     return(return_dict)
 
 
@@ -566,9 +604,7 @@ def deep_flash_deprecated(t1,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import categorical_focal_loss
     from ..utilities import preprocess_brain_image
-    from ..utilities import crop_image_center
     from ..utilities import pad_or_crop_image_to_size
 
     print("This function is deprecated.  Please update to deep_flash().")
