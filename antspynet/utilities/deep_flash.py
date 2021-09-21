@@ -108,6 +108,7 @@ def deep_flash(t1,
     t1_preprocessed = t1
     t1_preprocessing = None
     t1_preprocessed_flipped = None
+    t1_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT1"))
     if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.995),
@@ -115,11 +116,10 @@ def deep_flash(t1,
             template="deepFlashTemplateT1",
             template_transform_type="antsRegistrationSyNQuickRepro[a]",
             do_bias_correction=True,
-            do_denoising=True,
+            do_denoising=False,
             antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"]
-        t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
         if use_contralaterality:
             t1_preprocessed_array = t1_preprocessed.numpy()
             t1_preprocessed_array_flipped = np.flip(t1_preprocessed_array, axis=0)
@@ -130,21 +130,22 @@ def deep_flash(t1,
 
     t2_preprocessed = t2
     t2_preprocessed_flipped = None
+    t2_template = None
     if t2 is not None:
+        t2_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT2"))
         if do_preprocessing:
             t2_preprocessing = preprocess_brain_image(t2,
                 truncate_intensity=(0.01, 0.995),
                 brain_extraction_modality=None,
                 template_transform_type=None,
                 do_bias_correction=True,
-                do_denoising=True,
+                do_denoising=False,
                 antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             t2_preprocessed = ants.apply_transforms(fixed=t1_preprocessed,
                 moving=t2_preprocessing["preprocessed_image"],
                 transformlist=t1_preprocessing['template_transforms']['fwdtransforms'],
                 verbose=verbose)
-            t2_preprocessed = (t2_preprocessed - t2_preprocessed.mean()) / t2_preprocessed.std()
             if use_contralaterality:
                 t2_preprocessed_array = t1_preprocessed.numpy()
                 t2_preprocessed_array_flipped = np.flip(t2_preprocessed_array, axis=0)
@@ -188,6 +189,13 @@ def deep_flash(t1,
     spacing = tmp_cropped.spacing
     direction = tmp_cropped.direction
 
+    t1_template_roi_left = ants.crop_indices(t1_template, lower_bound_left, upper_bound_left)
+    t1_template_roi_left = (t1_template_roi_left - t1_template_roi_left.mean()) / t1_template_roi_left.std()
+    t2_template_roi_left = None
+    if t2_template is not None:
+        t2_template_roi_left = ants.crop_indices(t2_template, lower_bound_left, upper_bound_left)
+        t2_template_roi_left = (t2_template_roi_left - t2_template_roi_left.mean()) / t2_template_roi_left.std()
+
     labels_right = labels[2::2]
     priors_image_right_list = priors_image_list[2::2]
     probability_images_right = list()
@@ -196,6 +204,14 @@ def deep_flash(t1,
     upper_bound_right = (84, 138, 152)
     tmp_cropped = ants.crop_indices(t1_preprocessed, lower_bound_right, upper_bound_right)
     origin_right = tmp_cropped.origin
+
+    t1_template_roi_right = ants.crop_indices(t1_template, lower_bound_right, upper_bound_right)
+    t1_template_roi_right = (t1_template_roi_right - t1_template_roi_right.mean()) / t1_template_roi_right.std()
+    t2_template_roi_right = None
+    if t2_template is not None:
+        t2_template_roi_right = ants.crop_indices(t2_template, lower_bound_right, upper_bound_right)
+        t2_template_roi_right = (t2_template_roi_right - t2_template_roi_right.mean()) / t2_template_roi_right.std()
+    
 
     ################################
     #
@@ -275,15 +291,20 @@ def deep_flash(t1,
         batchX = np.zeros((1, *image_size, channel_size))
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_left, upper_bound_left)
+    t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, True)  
+
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_left, upper_bound_left)
+        t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, True)  
         batchX[1,:,:,:,0] = t1_cropped.numpy()
     if t2 is not None:
         t2_cropped = ants.crop_indices(t2_preprocessed, lower_bound_left, upper_bound_left)
+        t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, True)  
         batchX[0,:,:,:,1] = t2_cropped.numpy()
         if use_contralaterality:
             t2_cropped = ants.crop_indices(t2_preprocessed_flipped, lower_bound_left, upper_bound_left)
+            t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, True)  
             batchX[1,:,:,:,1] = t2_cropped.numpy()
 
     for i in range(len(priors_image_left_list)):
@@ -385,15 +406,19 @@ def deep_flash(t1,
         batchX = np.zeros((1, *image_size, channel_size))
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_right, upper_bound_right)
+    t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, True)  
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_right, upper_bound_right)
+        t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, True)  
         batchX[1,:,:,:,0] = t1_cropped.numpy()
     if t2 is not None:
         t2_cropped = ants.crop_indices(t2_preprocessed, lower_bound_right, upper_bound_right)
+        t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, True)  
         batchX[0,:,:,:,1] = t2_cropped.numpy()
         if use_contralaterality:
             t2_cropped = ants.crop_indices(t2_preprocessed_flipped, lower_bound_right, upper_bound_right)
+            t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, True)  
             batchX[1,:,:,:,1] = t2_cropped.numpy()
 
     for i in range(len(priors_image_right_list)):
