@@ -155,7 +155,7 @@ def deep_flash(t1,
                 transformlist=t1_preprocessing['template_transforms']['fwdtransforms'],
                 verbose=verbose)
             if use_contralaterality:
-                t2_preprocessed_array = t1_preprocessed.numpy()
+                t2_preprocessed_array = t2_preprocessed.numpy()
                 t2_preprocessed_array_flipped = np.flip(t2_preprocessed_array, axis=0)
                 t2_preprocessed_flipped = ants.from_numpy(t2_preprocessed_array_flipped,
                                                         origin=t2_preprocessed.origin,
@@ -300,7 +300,6 @@ def deep_flash(t1,
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_left, upper_bound_left)
     t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, True)  
-
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_left, upper_bound_left)
