@@ -7,8 +7,6 @@ from tensorflow.keras import regularizers
 
 def deep_flash(t1,
                 t2=None,
-                use_hierarchical_parcellation=True,
-                use_contralaterality=True,
                 do_preprocessing=True,
                 antsxnet_cache_directory=None,
                 verbose=False
@@ -56,16 +54,6 @@ def deep_flash(t1,
         Optional 3-D T2-weighted brain image.  If specified, it is assumed to be
         pre-aligned to the t1.
 
-    use_hierarchical_parcellation : boolean
-        If True, use u-net model with additional outputs of the medial temporal lobe 
-        region, hippocampal, and entorhinal/perirhinal/parahippocampal regions.  Otherwise
-        the only additional output is the medial temporal lobe.
-
-    use_contralaterality : boolean
-        Use both hemispherical models to also predict the corresponding contralateral
-        segmentation and use both sets of priors to produce the results.  Mainly used
-        for debugging.
-
     do_preprocessing : boolean
         See description above.
 
@@ -98,6 +86,26 @@ def deep_flash(t1,
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
+
+    ################################
+    #
+    # Options temporarily taken from the user
+    #
+    ################################
+
+    # use_hierarchical_parcellation : boolean
+    #     If True, use u-net model with additional outputs of the medial temporal lobe 
+    #     region, hippocampal, and entorhinal/perirhinal/parahippocampal regions.  Otherwise
+    #     the only additional output is the medial temporal lobe.
+    #
+    # use_contralaterality : boolean
+    #     Use both hemispherical models to also predict the corresponding contralateral
+    #     segmentation and use both sets of priors to produce the results.  Mainly used
+    #     for debugging.
+
+    use_hierarchical_parcellation = True
+    use_contralaterality = True
+
 
     ################################
     #

@@ -1062,7 +1062,7 @@ Since these can be resused, if is None, these data will be downloaded to a
 
 <dl class="py function">
 <dt id="antspynet.utilities.deep_flash">
-<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_flash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t1</span></em>, <em class="sig-param"><span class="n">t2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_contralaterality</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">do_preprocessing</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">antspynet.utilities.</code><code class="sig-name descname">deep_flash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t1</span></em>, <em class="sig-param"><span class="n">t2</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">do_preprocessing</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">antsxnet_cache_directory</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/antspynet/utilities/deep_flash.html#deep_flash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#antspynet.utilities.deep_flash" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hippocampal/Enthorhinal segmentation using “Deep Flash”</p>
 <p>Perform hippocampal/entorhinal segmentation in T1 images using
 labels from Mike Yassa’s lab</p>
@@ -1086,6 +1086,7 @@ Label 18:  right subiculum</p>
 <dl class="simple">
 <dt>Preprocessing on the training data consisted of:</dt><dd><ul class="simple">
 <li><p>n4 bias correction,</p></li>
+<li><p>denoising,</p></li>
 <li><p>affine registration to the “deep flash” template.</p></li>
 </ul>
 </dd>
@@ -1099,9 +1100,6 @@ do_preprocessing = True</p>
 <li><p><strong>t1</strong> (<em>ANTsImage</em>) – raw or preprocessed 3-D T1-weighted brain image.</p></li>
 <li><p><strong>t2</strong> (<em>ANTsImage</em>) – Optional 3-D T2-weighted brain image.  If specified, it is assumed to be
 pre-aligned to the t1.</p></li>
-<li><p><strong>use_contralaterality</strong> (<em>boolean</em>) – Use both hemispherical models to also predict the corresponding contralateral
-segmentation and use both sets of priors to produce the results.  Mainly used
-for debugging.</p></li>
 <li><p><strong>do_preprocessing</strong> (<em>boolean</em>) – See description above.</p></li>
 <li><p><strong>antsxnet_cache_directory</strong> (<em>string</em>) – Destination directory for storing the downloaded template and model weights.
 Since these can be resused, if is None, these data will be downloaded to a
