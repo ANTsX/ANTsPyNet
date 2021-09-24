@@ -249,13 +249,13 @@ def deep_flash(t1,
 
     if use_hierarchical_parcellation:
 
-        # Hippocampus
+        # EC, perirhinal, and parahippo.
         output2 = Conv3D(filters=1,
                         kernel_size=(1, 1, 1),
                         activation='sigmoid',
                         kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
 
-        # EC, perirhinal, and parahippo.
+        # Hippocampus
         output3 = Conv3D(filters=1,
                         kernel_size=(1, 1, 1),
                         activation='sigmoid',
@@ -548,8 +548,8 @@ def deep_flash(t1,
         return_dict = {'segmentation_image' : relabeled_image,
                        'probability_images' : probability_images,
                        'medial_temporal_lobe_probability_image' : foreground_probability_images[0],
-                       'hippocampal_probability_image' : foreground_probability_images[1],
-                       'other_region_probability_image' : foreground_probability_images[2]
+                       'other_region_probability_image' : foreground_probability_images[1],
+                       'hippocampal_probability_image' : foreground_probability_images[2]
                       }
     else:
         return_dict = {'segmentation_image' : relabeled_image,
