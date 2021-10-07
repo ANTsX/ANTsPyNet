@@ -232,7 +232,7 @@ def lung_extraction(image,
             print("Preprocess CT image.")
 
         def closest_simplified_direction_matrix(direction):
-            closest = np.floor(np.abs(direction + 0.5))
+            closest = np.floor(np.abs(direction) + 0.5)
             closest[direction < 0] *= -1.0
             return closest
 
