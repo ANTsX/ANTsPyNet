@@ -74,11 +74,11 @@ def sysu_media_wmh_segmentation(flair,
     ################################
 
     def closest_simplified_direction_matrix(direction):
-        closest = np.floor(np.abs(direction + 0.5))
+        closest = (np.abs(direction) + 0.5).astype(int)
         closest[direction < 0] *= -1.0
         return closest
 
-    simplified_direction = closest_simplified_direction_matrix(flair.direction)  
+    simplified_direction = closest_simplified_direction_matrix(flair.direction)
 
     flair_preprocessing = preprocess_brain_image(flair,
         truncate_intensity=None,
@@ -134,7 +134,7 @@ def sysu_media_wmh_segmentation(flair,
     if t1 is not None:
         t1_preprocessed_warped = ants.apply_ants_transform_to_image(
             xfrm, t1_preprocessed, reference_image, interpolation="nearestneighbor")
-        t1_preprocessed_warped = ants.crop_image(t1_preprocessed_warped, crop_image_warped, 1) 
+        t1_preprocessed_warped = ants.crop_image(t1_preprocessed_warped, crop_image_warped, 1)
 
     ################################
     #
@@ -168,18 +168,18 @@ def sysu_media_wmh_segmentation(flair,
     unet_models = list()
     for i in range(number_of_models):
         if number_of_channels == 1:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i), 
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i),
                 antsxnet_cache_directory=antsxnet_cache_directory)
         else:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i), 
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i),
                 antsxnet_cache_directory=antsxnet_cache_directory)
-        unet_model = create_sysu_media_unet_model_2d((*image_size, number_of_channels))             
+        unet_model = create_sysu_media_unet_model_2d((*image_size, number_of_channels))
         unet_loss = binary_dice_coefficient(smoothing_factor=1.)
         unet_model.compile(optimizer=keras.optimizers.Adam(learning_rate=2e-4),
                         loss=unet_loss)
-        unet_model.load_weights(weights_file_name)                
+        unet_model.load_weights(weights_file_name)
         unet_models.append(unet_model)
-        
+
 
     ################################
     #
@@ -247,7 +247,7 @@ def sysu_media_wmh_segmentation(flair,
 
     probability_image = ants.apply_ants_transform_to_image(
         ants.invert_ants_transform(xfrm), prediction_image_average, flair_preprocessed)
-    probability_image = ants.copy_image_info(flair, probability_image)    
+    probability_image = ants.copy_image_info(flair, probability_image)
 
     return(probability_image)
 
@@ -501,7 +501,7 @@ def ew_david(flair,
         if flair is not None:
             flair_preprocessed = flair
             if do_preprocessing == True:
-                if brain_mask is None:  
+                if brain_mask is None:
                     flair_preprocessing = preprocess_brain_image(flair,
                         truncate_intensity=(0.01, 0.995),
                         brain_extraction_modality="flair",
@@ -519,11 +519,11 @@ def ew_david(flair,
                         antsxnet_cache_directory=antsxnet_cache_directory,
                         verbose=verbose)
                 flair_preprocessed = flair_preprocessing["preprocessed_image"]
-         
+
         if t1_preprocessed is not None:
-            t1_preprocessed = t1_preprocessed * brain_mask 
+            t1_preprocessed = t1_preprocessed * brain_mask
         if flair_preprocessed is not None:
-            flair_preprocessed = flair_preprocessed * brain_mask 
+            flair_preprocessed = flair_preprocessed * brain_mask
 
         if t1_preprocessed is not None:
             resampling_params = list(ants.get_spacing(t1_preprocessed))
@@ -769,13 +769,13 @@ def ew_david(flair,
             if use_rank_intensity_scaling:
                 if batch_t1 is not None:
                     batch_t1 = ants.rank_intensity(batch_t1, batch_brain_mask) - 0.5
-                if batch_flair is not None:    
+                if batch_flair is not None:
                     batch_flair = ants.rank_intensity(flair_preprocessed, batch_brain_mask) - 0.5
             else:
                 if batch_t1 is not None:
-                    batch_t1 = (batch_t1 - batch_t1[batch_brain_mask == 1].mean()) / batch_t1[batch_brain_mask == 1].std()             
-                if batch_flair is not None:    
-                    batch_flair = (batch_flair - batch_flair[batch_brain_mask == 1].mean()) / batch_flair[batch_brain_mask == 1].std()             
+                    batch_t1 = (batch_t1 - batch_t1[batch_brain_mask == 1].mean()) / batch_t1[batch_brain_mask == 1].std()
+                if batch_flair is not None:
+                    batch_flair = (batch_flair - batch_flair[batch_brain_mask == 1].mean()) / batch_flair[batch_brain_mask == 1].std()
 
             slice_count = 0
             for d in range(len(dimensions_to_predict)):
