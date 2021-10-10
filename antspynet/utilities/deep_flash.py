@@ -79,7 +79,7 @@ def deep_flash(t1,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import preprocess_brain_image
+    from ..utilities import brain_extraction
 
     if t1.dimension != 3:
         raise ValueError("Image dimension must be 3.")
@@ -106,7 +106,6 @@ def deep_flash(t1,
     use_hierarchical_parcellation = True
     use_contralaterality = True
 
-
     ################################
     #
     # Preprocess images
@@ -114,53 +113,83 @@ def deep_flash(t1,
     ################################
 
     t1_preprocessed = t1
-    t1_preprocessing = None
+    t1_mask = None
     t1_preprocessed_flipped = None
     t1_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT1"))
+    template_probability_mask = brain_extraction(t1_template, modality="t1", 
+        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+    template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)    
+    t1_template = t1_template * template_mask    
+    template_transforms = None
     if do_preprocessing:
-        t1_preprocessing = preprocess_brain_image(t1,
-            truncate_intensity=(0.01, 0.995),
-            brain_extraction_modality="t1",
-            template="deepFlashTemplateT1",
-            template_transform_type="antsRegistrationSyNQuickRepro[a]",
-            do_bias_correction=True,
-            do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
-            verbose=verbose)
-        t1_preprocessed = t1_preprocessing["preprocessed_image"]
-        if use_contralaterality:
-            t1_preprocessed_array = t1_preprocessed.numpy()
-            t1_preprocessed_array_flipped = np.flip(t1_preprocessed_array, axis=0)
-            t1_preprocessed_flipped = ants.from_numpy(t1_preprocessed_array_flipped,
-                                                      origin=t1_preprocessed.origin,
-                                                      spacing=t1_preprocessed.spacing,
-                                                      direction=t1_preprocessed.direction)
+
+        if verbose == True:
+            print("Preprocessing T1.")
+
+        # Truncate intensity
+        quantiles = (t1_preprocessed.quantile(0.01), t1_preprocessed.quantile(0.995))
+        t1_preprocessed[t1_preprocessed < quantiles[0]] = quantiles[0]
+        t1_preprocessed[t1_preprocessed > quantiles[1]] = quantiles[1]
+
+        # Brain extraction
+        probability_mask = brain_extraction(t1_preprocessed, modality="t1",
+            antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        t1_mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
+        t1_preprocessed = t1_preprocessed * t1_mask
+
+        # Do bias correction
+        t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, t1_mask, shrink_factor=4, verbose=verbose) 
+
+        # Warp to template
+        registration = ants.registration(fixed=t1_template, moving=t1_preprocessed,
+            type_of_transform="antsRegistrationSyNQuickRepro[a]", verbose=verbose)
+        template_transforms = dict(fwdtransforms=registration['fwdtransforms'],
+                                   invtransforms=registration['invtransforms'])
+        t1_preprocessed = registration['warpedmovout']
+
+
+    if use_contralaterality:
+        t1_preprocessed_array = t1_preprocessed.numpy()
+        t1_preprocessed_array_flipped = np.flip(t1_preprocessed_array, axis=0)
+        t1_preprocessed_flipped = ants.from_numpy(t1_preprocessed_array_flipped,
+                                                    origin=t1_preprocessed.origin,
+                                                    spacing=t1_preprocessed.spacing,
+                                                    direction=t1_preprocessed.direction)
 
     t2_preprocessed = t2
     t2_preprocessed_flipped = None
     t2_template = None
     if t2 is not None:
         t2_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT2"))
+        t2_template = t2_template * template_mask
         if do_preprocessing:
-            t2_preprocessing = preprocess_brain_image(t2,
-                truncate_intensity=(0.01, 0.995),
-                brain_extraction_modality=None,
-                template_transform_type=None,
-                do_bias_correction=True,
-                do_denoising=False,
-                antsxnet_cache_directory=antsxnet_cache_directory,
+
+            if verbose == True:
+                print("Preprocessing T2.")
+
+            # Truncate intensity
+            quantiles = (t2.quantile(0.01), t2.quantile(0.995))
+            t2_preprocessed[t2_preprocessed < quantiles[0]] = quantiles[0]
+            t2_preprocessed[t2_preprocessed > quantiles[1]] = quantiles[1]
+
+            # Brain extraction
+            t2_preprocessed = t2_preprocessed * t1_mask
+
+            # Do bias correction
+            t2_preprocessed = ants.n4_bias_field_correction(t2_preprocessed, t1_mask, shrink_factor=4, verbose=verbose) 
+
+            # Warp to template
+            t2_preprocessed = ants.apply_transforms(fixed=t1_template,
+                moving=t2_preprocessed, transformlist=template_transforms['fwdtransforms'],
                 verbose=verbose)
-            t2_preprocessed = ants.apply_transforms(fixed=t1_preprocessed,
-                moving=t2_preprocessing["preprocessed_image"],
-                transformlist=t1_preprocessing['template_transforms']['fwdtransforms'],
-                verbose=verbose)
-            if use_contralaterality:
-                t2_preprocessed_array = t2_preprocessed.numpy()
-                t2_preprocessed_array_flipped = np.flip(t2_preprocessed_array, axis=0)
-                t2_preprocessed_flipped = ants.from_numpy(t2_preprocessed_array_flipped,
-                                                        origin=t2_preprocessed.origin,
-                                                        spacing=t2_preprocessed.spacing,
-                                                        direction=t2_preprocessed.direction)
+
+        if use_contralaterality:
+            t2_preprocessed_array = t2_preprocessed.numpy()
+            t2_preprocessed_array_flipped = np.flip(t2_preprocessed_array, axis=0)
+            t2_preprocessed_flipped = ants.from_numpy(t2_preprocessed_array_flipped,
+                                                    origin=t2_preprocessed.origin,
+                                                    spacing=t2_preprocessed.spacing,
+                                                    direction=t2_preprocessed.direction)
 
     probability_images = list()
     labels = (0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
@@ -340,7 +369,7 @@ def deep_flash(t1,
             if do_preprocessing:
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
-                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    transformlist=template_transforms['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose)
 
             if j == 0:  # not flipped
@@ -371,7 +400,7 @@ def deep_flash(t1,
             if do_preprocessing:
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
-                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    transformlist=template_transforms['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose)
 
             if j == 0:  # not flipped
@@ -454,7 +483,7 @@ def deep_flash(t1,
             if do_preprocessing:
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
-                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    transformlist=template_transforms['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose)
 
             if j == 0:  # not flipped
@@ -488,7 +517,7 @@ def deep_flash(t1,
             if do_preprocessing:
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
-                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    transformlist=template_transforms['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose)
 
             if j == 0:  # not flipped
