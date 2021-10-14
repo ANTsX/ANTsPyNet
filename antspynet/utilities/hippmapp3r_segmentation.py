@@ -178,7 +178,7 @@ def hippmapp3r_segmentation(t1,
     data_refine_stage = np.expand_dims(data_refine_stage, axis=-1)
 
     if verbose == True:
-        print("    HippMapp3r: o Monte Carlo iterations (SpatialDropout).")
+        print("    HippMapp3r: Monte Carlo iterations (SpatialDropout).")
 
     number_of_mci_iterations = 30
     prediction_refine_stage = np.zeros(shape_refine_stage)

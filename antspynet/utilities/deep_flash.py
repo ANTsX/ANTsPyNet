@@ -155,6 +155,7 @@ def deep_flash(t1,
     t2_template = None
     if t2 is not None:
         t2_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT2"))
+        t2_template = ants.copy_image_info(t1_template, t2_template)
         t2_template = t2_template * template_mask
         if do_preprocessing:
 
