@@ -126,11 +126,6 @@ def deep_flash(t1,
         if verbose == True:
             print("Preprocessing T1.")
 
-        # Truncate intensity (source of variation with ANTsRNet solution)
-        quantiles = (t1_preprocessed.quantile(0.01), t1_preprocessed.quantile(0.995))
-        t1_preprocessed[t1_preprocessed < quantiles[0]] = quantiles[0]
-        t1_preprocessed[t1_preprocessed > quantiles[1]] = quantiles[1]
-
         # Brain extraction
         probability_mask = brain_extraction(t1_preprocessed, modality="t1",
             antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
@@ -165,11 +160,6 @@ def deep_flash(t1,
 
             if verbose == True:
                 print("Preprocessing T2.")
-
-            # Truncate intensity (source of variation with ANTsRNet solution)
-            quantiles = (t2_preprocessed.quantile(0.01), t2_preprocessed.quantile(0.995))
-            t2_preprocessed[t2_preprocessed < quantiles[0]] = quantiles[0]
-            t2_preprocessed[t2_preprocessed > quantiles[1]] = quantiles[1]
 
             # Brain extraction
             t2_preprocessed = t2_preprocessed * t1_mask
@@ -226,11 +216,11 @@ def deep_flash(t1,
     direction = tmp_cropped.direction
 
     t1_template_roi_left = ants.crop_indices(t1_template, lower_bound_left, upper_bound_left)
-    t1_template_roi_left = (t1_template_roi_left - t1_template_roi_left.mean()) / t1_template_roi_left.std()
+    t1_template_roi_left = (t1_template_roi_left - t1_template_roi_left.min()) / (t1_template_roi_left.max() - t1_template_roi_left.min()) * 2.0 - 1.0
     t2_template_roi_left = None
     if t2_template is not None:
         t2_template_roi_left = ants.crop_indices(t2_template, lower_bound_left, upper_bound_left)
-        t2_template_roi_left = (t2_template_roi_left - t2_template_roi_left.mean()) / t2_template_roi_left.std()
+        t2_template_roi_left = (t2_template_roi_left - t2_template_roi_left.min()) / (t2_template_roi_left.max() - t2_template_roi_left.min()) * 2.0 - 1.0
 
     labels_right = labels[2::2]
     priors_image_right_list = priors_image_list[2::2]
@@ -242,11 +232,11 @@ def deep_flash(t1,
     origin_right = tmp_cropped.origin
 
     t1_template_roi_right = ants.crop_indices(t1_template, lower_bound_right, upper_bound_right)
-    t1_template_roi_right = (t1_template_roi_right - t1_template_roi_right.mean()) / t1_template_roi_right.std()
+    t1_template_roi_right = (t1_template_roi_right - t1_template_roi_right.min()) / (t1_template_roi_right.max() - t1_template_roi_right.min()) * 2.0 - 1.0
     t2_template_roi_right = None
     if t2_template is not None:
         t2_template_roi_right = ants.crop_indices(t2_template, lower_bound_right, upper_bound_right)
-        t2_template_roi_right = (t2_template_roi_right - t2_template_roi_right.mean()) / t2_template_roi_right.std()
+        t2_template_roi_right = (t2_template_roi_right - t2_template_roi_right.min()) / (t2_template_roi_right.max() - t2_template_roi_right.min()) * 2.0 - 1.0
     
 
     ################################
