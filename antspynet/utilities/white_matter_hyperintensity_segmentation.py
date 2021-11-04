@@ -74,7 +74,7 @@ def sysu_media_wmh_segmentation(flair,
     ################################
 
     def closest_simplified_direction_matrix(direction):
-        closest = (np.abs(direction) + 0.5).astype(int)
+        closest = (np.abs(direction) + 0.5).astype(int).astype(float)
         closest[direction < 0] *= -1.0
         return closest
 
