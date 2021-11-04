@@ -94,7 +94,7 @@ def deep_flash(t1,
     ################################
 
     # use_hierarchical_parcellation : boolean
-    #     If True, use u-net model with additional outputs of the medial temporal lobe 
+    #     If True, use u-net model with additional outputs of the medial temporal lobe
     #     region, hippocampal, and entorhinal/perirhinal/parahippocampal regions.  Otherwise
     #     the only additional output is the medial temporal lobe.
     #
@@ -115,11 +115,7 @@ def deep_flash(t1,
     t1_preprocessed = t1
     t1_mask = None
     t1_preprocessed_flipped = None
-    t1_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT1"))
-    template_probability_mask = brain_extraction(t1_template, modality="t1", 
-        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
-    template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)    
-    t1_template = t1_template * template_mask    
+    t1_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT1SkullStripped"))
     template_transforms = None
     if do_preprocessing:
 
@@ -133,7 +129,7 @@ def deep_flash(t1,
         t1_preprocessed = t1_preprocessed * t1_mask
 
         # Do bias correction
-        t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, t1_mask, shrink_factor=4, verbose=verbose) 
+        t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, t1_mask, shrink_factor=4, verbose=verbose)
 
         # Warp to template
         registration = ants.registration(fixed=t1_template, moving=t1_preprocessed,
@@ -154,9 +150,8 @@ def deep_flash(t1,
     t2_preprocessed_flipped = None
     t2_template = None
     if t2 is not None:
-        t2_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT2"))
+        t2_template = ants.image_read(get_antsxnet_data("deepFlashTemplateT2SkullStripped"))
         t2_template = ants.copy_image_info(t1_template, t2_template)
-        t2_template = t2_template * template_mask
         if do_preprocessing:
 
             if verbose == True:
@@ -166,7 +161,7 @@ def deep_flash(t1,
             t2_preprocessed = t2_preprocessed * t1_mask
 
             # Do bias correction
-            t2_preprocessed = ants.n4_bias_field_correction(t2_preprocessed, t1_mask, shrink_factor=4, verbose=verbose) 
+            t2_preprocessed = ants.n4_bias_field_correction(t2_preprocessed, t1_mask, shrink_factor=4, verbose=verbose)
 
             # Warp to template
             t2_preprocessed = ants.apply_transforms(fixed=t1_template,
@@ -238,7 +233,7 @@ def deep_flash(t1,
     if t2_template is not None:
         t2_template_roi_right = ants.crop_indices(t2_template, lower_bound_right, upper_bound_right)
         t2_template_roi_right = (t2_template_roi_right - t2_template_roi_right.min()) / (t2_template_roi_right.max() - t2_template_roi_right.min()) * 2.0 - 1.0
-    
+
 
     ################################
     #
@@ -281,7 +276,7 @@ def deep_flash(t1,
                         kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
 
         unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output1, output2, output3])
-    else:     
+    else:
         unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, output1])
 
     ################################
@@ -318,19 +313,19 @@ def deep_flash(t1,
         batchX = np.zeros((1, *image_size, channel_size))
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_left, upper_bound_left)
-    t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, False)  
+    t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, False)
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_left, upper_bound_left)
-        t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, False)  
+        t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, False)
         batchX[1,:,:,:,0] = t1_cropped.numpy()
     if t2 is not None:
         t2_cropped = ants.crop_indices(t2_preprocessed, lower_bound_left, upper_bound_left)
-        t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, False)  
+        t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, False)
         batchX[0,:,:,:,1] = t2_cropped.numpy()
         if use_contralaterality:
             t2_cropped = ants.crop_indices(t2_preprocessed_flipped, lower_bound_left, upper_bound_left)
-            t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, False)  
+            t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, False)
             batchX[1,:,:,:,1] = t2_cropped.numpy()
 
     for i in range(len(priors_image_left_list)):
@@ -432,19 +427,19 @@ def deep_flash(t1,
         batchX = np.zeros((1, *image_size, channel_size))
 
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_right, upper_bound_right)
-    t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)  
+    t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_right, upper_bound_right)
-        t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)  
+        t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)
         batchX[1,:,:,:,0] = t1_cropped.numpy()
     if t2 is not None:
         t2_cropped = ants.crop_indices(t2_preprocessed, lower_bound_right, upper_bound_right)
-        t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, False)  
+        t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, False)
         batchX[0,:,:,:,1] = t2_cropped.numpy()
         if use_contralaterality:
             t2_cropped = ants.crop_indices(t2_preprocessed_flipped, lower_bound_right, upper_bound_right)
-            t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, False)  
+            t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, False)
             batchX[1,:,:,:,1] = t2_cropped.numpy()
 
     for i in range(len(priors_image_right_list)):

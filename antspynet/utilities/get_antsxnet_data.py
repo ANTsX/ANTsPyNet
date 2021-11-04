@@ -1,4 +1,6 @@
 import tensorflow as tf
+import ants
+import os
 
 def get_antsxnet_data(file_id=None,
                       target_file_name=None,
@@ -31,6 +33,8 @@ def get_antsxnet_data(file_id=None,
     >>> template_file = get_antsxnet_data('biobank')
     """
 
+    from ..utilities import brain_extraction
+
     def switch_data(argument):
         switcher = {
             "biobank": "https://ndownloader.figshare.com/files/22429242",
@@ -38,7 +42,9 @@ def get_antsxnet_data(file_id=None,
             "croppedMni152Priors": "https://ndownloader.figshare.com/files/27688437",
             "deepFlashPriors": "https://figshare.com/ndownloader/files/31208272",
             "deepFlashTemplateT1": "https://figshare.com/ndownloader/files/31207795",
+            "deepFlashTemplateT1SkullStripped": "DERIVED",
             "deepFlashTemplateT2": "https://figshare.com/ndownloader/files/31207798",
+            "deepFlashTemplateT2SkullStripped": "DERIVED",
             "mprage_hippmapp3r": "https://ndownloader.figshare.com/files/24984689",
             "protonLobePriors": "https://figshare.com/ndownloader/files/30678452",
             "protonLungTemplate": "https://ndownloader.figshare.com/files/22707338",
@@ -67,7 +73,9 @@ def get_antsxnet_data(file_id=None,
                   "ctLungTemplate",
                   "deepFlashPriors",
                   "deepFlashTemplateT1",
+                  "deepFlashTemplateT1SkullStripped",
                   "deepFlashTemplateT2",
+                  "deepFlashTemplateT2SkullStripped",
                   "luna16LungPriors",
                   "mprage_hippmapp3r",
                   "priorDktLabels",
@@ -99,7 +107,22 @@ def get_antsxnet_data(file_id=None,
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
 
-    target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
-        cache_subdir=antsxnet_cache_directory)
+    if url is not "DERIVED":
+        target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
+            cache_subdir=antsxnet_cache_directory)
+    else:
+        target_file_name_path = "~/.keras/" + antsxnet_cache_directory + "/" + target_file_name
+        if not os.path.exists(target_file_name_path):
+            if file_id == "deepFlashTemplateT1SkullStripped" or file_id == "deepFlashTemplateT2SkullStripped":
+                t1_file = get_antsxnet_data("deepFlashTemplateT1", antsxnet_cache_directory=antsxnet_cache_directory)
+                t1 = ants.image_read(t1_file)
+                probability_mask = brain_extraction(t1, modality="t1", antsxnet_cache_directory=antsxnet_cache_directory, verbose=False)
+                mask = ants.threshold_image(probability_mask, 0.5, 1.1, 1, 0)
+                if file_id == "deepFlashTemplateT2SkullStripped":
+                    t2_file = get_antsxnet_data("deepFlashTemplateT2", antsxnet_cache_directory=antsxnet_cache_directory)
+                    t2 = ants.image_read(t2_file)
+                    ants.image_write(t2 * mask, target_file_name_path)
+                else:
+                    ants.image_write(t1 * mask, target_file_name_path)
 
     return(target_file_name_path)
