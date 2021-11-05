@@ -39,7 +39,6 @@ def deep_flash(t1,
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
-       * denoising,
        * affine registration to the "deep flash" template.
     The input T1 should undergo the same steps.  If the input T1 is the raw
     T1, these steps can be performed by the internal preprocessing, i.e. set
