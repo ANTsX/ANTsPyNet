@@ -24,6 +24,12 @@ def sysu_media_wmh_segmentation(flair,
 
     https://github.com/hongweilibran/wmh_ibbmTum
 
+    The original implementation used global thresholding as a quick
+    brain extraction approach.  Due to possible generalization difficulties,
+    we leave such post-processing steps to the user.  For brain or white
+    matter masking see functions brain_extraction or deep_atropos,
+    respectively.
+
     Arguments
     ---------
     flair : ANTsImage
@@ -262,7 +268,7 @@ def ew_david(flair,
              verbose=False):
 
     """
-    Perform White matter hypterintensity probabilistic segmentation
+    Perform White matter hyperintensity probabilistic segmentation
     using deep learning
 
     Preprocessing on the training data consisted of:
