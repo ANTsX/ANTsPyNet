@@ -23,7 +23,7 @@ def arterial_lesion_segmentation(image,
 
     Returns
     -------
-    Dictionary of ANTs segmentation and probability images.
+    Foreground probability image.
 
     Example
     -------
@@ -44,16 +44,13 @@ def arterial_lesion_segmentation(image,
     weights_file_name = get_pretrained_network("arterialLesionWeibinShi",
         antsxnet_cache_directory=antsxnet_cache_directory)
 
-    classes = ("background", "foreground")
-    number_of_classification_labels = len(classes)
-
     resampled_image_size = (512, 512)
 
     unet_model = create_unet_model_2d((*resampled_image_size, channel_size),
-        number_of_outputs=number_of_classification_labels, mode="classification",
+        number_of_outputs=1, mode="sigmoid",
         number_of_filters=(64, 96, 128, 256, 512),
         convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
-        dropout_rate=0.0, weight_decay=0, 
+        dropout_rate=0.0, weight_decay=0,
         additional_options=("initialConvolutionKernelSize[5]", "attentionGating"))
     unet_model.load_weights(weights_file_name)
 
@@ -64,7 +61,7 @@ def arterial_lesion_segmentation(image,
     preprocessed_image = preprocessed_image / preprocessed_image.max()
     preprocessed_image = ants.resample_image(preprocessed_image, resampled_image_size, use_voxels=True, interp_type=0)
     mask = ants.image_clone(preprocessed_image) * 0 + 1
-    preprocessed_image = ants.n4_bias_field_correction(preprocessed_image, mask=mask, shrink_factor=2, return_bias_field=False, verbose=verbose)    
+    preprocessed_image = ants.n4_bias_field_correction(preprocessed_image, mask=mask, shrink_factor=2, return_bias_field=False, verbose=verbose)
 
     batchX = np.expand_dims(preprocessed_image.numpy(), axis=0)
     batchX = np.expand_dims(batchX, axis=-1)
@@ -76,25 +73,13 @@ def arterial_lesion_segmentation(image,
     spacing = preprocessed_image.spacing
     direction = preprocessed_image.direction
 
-    probability_images_array = list()
-    for i in range(number_of_classification_labels):
-        probability_images_array.append(
-        ants.from_numpy(np.squeeze(predicted_data[0, :, :, i]),
-            origin=origin, spacing=spacing, direction=direction))
+    foreground_probability_image = ants.from_numpy(np.squeeze(predicted_data[0, :, :, 0]),
+        origin=origin, spacing=spacing, direction=direction)
 
     if verbose == True:
         print("Post-processing:  resampling to original space.")
 
-    for i in range(number_of_classification_labels):
-        probability_images_array[i] = ants.resample_image_to_target( 
-            probability_images_array[i], image)
+    foreground_probability_image = ants.resample_image_to_target(foreground_probability_image, image)
 
-    image_matrix = ants.image_list_to_matrix(probability_images_array, image * 0 + 1)
-    segmentation_matrix = np.argmax(image_matrix, axis=0)
-    segmentation_image = ants.matrix_to_images(
-        np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
-
-    return_dict = {'segmentation_image' : segmentation_image,
-                    'probability_images' : probability_images_array}
-    return(return_dict)
+    return(foreground_probability_image)
 

@@ -33,7 +33,7 @@ def get_pretrained_network(file_id=None,
 
     def switch_networks(argument):
         switcher = {
-            "arterialLesionWeibinShi": "https://figshare.com/ndownloader/files/30761716",
+            "arterialLesionWeibinShi": "https://figshare.com/ndownloader/files/31624922",
             "brainAgeGender": "https://ndownloader.figshare.com/files/22179948",
             "brainAgeDeepBrainNet": "https://ndownloader.figshare.com/files/23573402",
             "brainExtraction": "https://ndownloader.figshare.com/files/22944632",
