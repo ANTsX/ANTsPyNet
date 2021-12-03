@@ -226,8 +226,10 @@ def randomly_transform_image_data(reference_image,
 
     if segmentation_image_list is None:
         return({'simulated_images' : simulated_image_list,
-                'simulated_transforms' : simulated_transforms})
+                'simulated_transforms' : simulated_transforms,
+                'which_subject' : random_indices})
     else:
         return({'simulated_images' : simulated_image_list,
                 'simulated_segmentation_images' : simulated_segmentation_image_list,
-                'simulated_transforms' : simulated_transforms})
+                'simulated_transforms' : simulated_transforms,
+                'which_subject' : random_indices})
