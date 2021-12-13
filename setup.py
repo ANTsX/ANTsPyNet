@@ -3,7 +3,7 @@ from setuptools import setup
 long_description = open("README.md").read()
 
 setup(name='antspynet',
-      version='0.1.3',
+      version='0.1.4',
       description='A collection of deep learning architectures ported to the python language and tools for basic medical image processing.',
       long_description=long_description,
       long_description_content_type="text/markdown; charset=UTF-8; variant=GFM",
