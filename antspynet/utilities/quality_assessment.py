@@ -178,9 +178,10 @@ def tid_neural_image_assessment(image,
             for d in range(len(dimensions_to_predict)):
                 not_padded_image_size = list(padded_image_size)
                 del(not_padded_image_size[dimensions_to_predict[d]])
-                batchX = np.zeros((padded_image_size[dimensions_to_predict[d]],
-                    (*tuple(not_padded_image_size)), number_of_channels))
-
+                newsize =  not_padded_image_size
+                newsize.insert( 0, padded_image_size[dimensions_to_predict[d]])
+                newsize.append( number_of_channels)
+                batchX = np.zeros(newsize)
                 batchX[0,:,:,0] = (ants.slice_image(evaluation_image, axis=0, idx=dimensions_to_predict[d])).numpy()
                 batchX[0,:,:,1] = (ants.slice_image(evaluation_image, axis=0, idx=dimensions_to_predict[d])).numpy()
                 batchX[0,:,:,2] = (ants.slice_image(evaluation_image, axis=1, idx=dimensions_to_predict[d])).numpy()
@@ -352,16 +353,3 @@ def tid_neural_image_assessment(image,
                                'sharpness.mean' : (mos_standard_deviation[mask >= 0.5]).mean()
                               }
                 return(return_dict)
-
-
-
-
-
-
-
-
-
-
-
-
-
