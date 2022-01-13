@@ -10,6 +10,8 @@ def tid_neural_image_assessment(image,
                                 dimensions_to_predict=0,
                                 antsxnet_cache_directory=None,
                                 which_model="tidsQualityAssessment",
+                                image_scaling = [255,127.5],
+                                do_patch_scaling=False,
                                 verbose=False):
 
     """
@@ -58,10 +60,18 @@ def tid_neural_image_assessment(image,
         Since these can be resused, if is None, these data will be downloaded to
         ~/.keras/ANTsXNet/.
 
-    which_model : string
+    which_model : string or tf/keras model
         model type e.g. string tidsQualityAssessment, koniqMS, koniqMS2 or koniqMS3 where
         the former predicts mean opinion score (MOS) and MOS standard deviation and
         the latter koniq models predict mean opinion score (MOS) and sharpness.
+        user_defined is also valid.
+
+    image_scaling : a two-vector where the first value is the multiplier and the
+        second value the subtractor so each image will be scaled as
+        img = ants.iMath(img,"Normalize")*m  - s.
+
+    do_patch_scaling :boolean controlling whether each patch is scaled or
+        (if False) only a global scaling of the image is used.
 
     verbose : boolean
         Print progress to the screen.
@@ -104,7 +114,7 @@ def tid_neural_image_assessment(image,
             f += 6
         return True
 
-    valid_models = ("tidsQualityAssessment", "koniqMS", "koniqMS2", "koniqMS3")
+    valid_models = ("tidsQualityAssessment", "koniqMS", "koniqMS2", "koniqMS3", "user_defined")
     if not which_model in valid_models:
         raise ValueError("Please pass valid model")
 
@@ -115,8 +125,11 @@ def tid_neural_image_assessment(image,
         print("Neural QA:  retreiving model and weights.")
 
     is_koniq = "koniq" in which_model
-    model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
-    tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
+    if which_model is not "user_defined":
+        model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
+        tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
+    else:
+        tid_model = which_model
 
     padding_size_vector = padding_size
     if isinstance(padding_size, int):
@@ -142,13 +155,16 @@ def tid_neural_image_assessment(image,
     #  Global
     #
     ###############
+    if which_model == "tidsQualityAssessment":
+        evaluation_image = ants.iMath(padded_image, "Normalize") * 255
+
+    if is_koniq:
+        evaluation_image = ants.iMath(padded_image, "Normalize") * 2.0 - 1.0
+
+    if which_model == "user_defined":
+        evaluation_image = ants.iMath(padded_image, "Normalize") * image_scaling[0] - image_scaling[1]
 
     if patch_size == 'global':
-        if which_model == "tidsQualityAssessment":
-            evaluation_image = ants.iMath(padded_image, "Normalize") * 255
-
-        if is_koniq:
-            evaluation_image = ants.iMath(padded_image, "Normalize") * 2.0 - 1.0
 
         if image.dimension == 2:
             batchX = np.zeros((1, evaluation_image.shape, number_of_channels))
@@ -164,7 +180,7 @@ def tid_neural_image_assessment(image,
                               }
                 return(return_dict)
 
-            elif is_koniq:
+            elif is_koniq or which_model == "user_defined":
                 return_dict = {'MOS.mean' : predicted_data[0, 0],
                                'sharpness.mean' : predicted_data[0, 1]
                               }
@@ -224,10 +240,8 @@ def tid_neural_image_assessment(image,
 
     else:
 
-        evaluation_image = padded_image
-
-        if not is_prime(patch_size):
-            print("patch_size should be a prime number:  13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97...")
+        # if not is_prime(patch_size):
+        #    print("patch_size should be a prime number:  13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97...")
 
         stride_length_vector = stride_length
         if isinstance(stride_length, int):
@@ -281,10 +295,12 @@ def tid_neural_image_assessment(image,
                     patch_image = patch_image - patch_image.min()
 
                     if patch_image.max() > 0:
-                        if which_model == "tidsQualityAssessment":
+                        if which_model == "tidsQualityAssessment" and do_patch_scaling:
                             patch_image = patch_image / patch_image.max() * 255
-                        elif is_koniq:
+                        elif is_koniq and do_patch_scaling:
                             patch_image = patch_image / patch_image.max() * 2.0 - 1.0
+                        elif which_model == "user_defined" and do_patch_scaling:
+                            patch_image = patch_image / patch_image.max() * image_scaling[0] - image_scaling[1]
 
                     if image.dimension == 2:
                         for j in range(number_of_channels):
@@ -328,7 +344,7 @@ def tid_neural_image_assessment(image,
                               }
                 return(return_dict)
 
-            elif is_koniq:
+            elif is_koniq or which_model == 'user_defined':
                 return_dict = {'MOS' : mos,
                                'sharpness' : mos_standard_deviation,
                                'MOS.mean' : mos.mean(),
@@ -346,7 +362,7 @@ def tid_neural_image_assessment(image,
                               }
                 return(return_dict)
 
-            elif is_koniq:
+            elif is_koniq or which_model == 'user_defined':
                 return_dict = {'MOS' : mos * mask,
                                'sharpness' : mos_standard_deviation * mask,
                                'MOS.mean' : (mos[mask >= 0.5]).mean(),
