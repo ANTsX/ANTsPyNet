@@ -290,7 +290,7 @@ def tid_neural_image_assessment(image,
                         for j in range(number_of_channels):
                             batchX[i,:,:,j] = patch_image
                     elif image.dimension == 3:
-                        batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image.numpy()), permutations[dimensions_to_predict[d]])
+                        batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image), permutations[dimensions_to_predict[d]])
 
             good_batchX = batchX[is_good_patch,:,:,:]
             predicted_data = tid_model.predict(good_batchX, verbose=verbose)
