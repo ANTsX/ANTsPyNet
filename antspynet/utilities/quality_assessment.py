@@ -64,7 +64,7 @@ def tid_neural_image_assessment(image,
         model type e.g. string tidsQualityAssessment, koniqMS, koniqMS2 or koniqMS3 where
         the former predicts mean opinion score (MOS) and MOS standard deviation and
         the latter koniq models predict mean opinion score (MOS) and sharpness.
-        user_defined is also valid.
+        passing a user-defined model is also valid.
 
     image_scaling : a two-vector where the first value is the multiplier and the
         second value the subtractor so each image will be scaled as
@@ -114,6 +114,10 @@ def tid_neural_image_assessment(image,
             f += 6
         return True
 
+    if type( which_model ) is not type("x"):
+        tid_model = which_model # should be a tf model
+        which_model = "user_defined"
+
     valid_models = ("tidsQualityAssessment", "koniqMS", "koniqMS2", "koniqMS3", "user_defined")
     if not which_model in valid_models:
         raise ValueError("Please pass valid model")
@@ -128,8 +132,6 @@ def tid_neural_image_assessment(image,
     if which_model is not "user_defined":
         model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
         tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
-    else:
-        tid_model = which_model
 
     padding_size_vector = padding_size
     if isinstance(padding_size, int):
