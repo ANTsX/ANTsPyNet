@@ -192,7 +192,9 @@ def tid_neural_image_assessment(image,
             mos_mean = 0
             mos_standard_deviation = 0
             x = tuple(range(image.dimension))
-            for d in 0: # range(len(dimensions_to_predict)):
+            d=0
+            if True:
+#            for d in 0: # range(len(dimensions_to_predict)):
                 not_padded_image_size = list(padded_image_size)
                 del(not_padded_image_size[dimensions_to_predict[d]])
                 newsize =  not_padded_image_size
