@@ -209,7 +209,8 @@ def create_unet_model_2d(input_image_size,
         encoding_convolution_layers.append(conv)
 
         if i < number_of_layers - 1:
-            pool = MaxPooling2D(pool_size=pool_size)(encoding_convolution_layers[i])
+            pool = MaxPooling2D(pool_size=pool_size,
+                                strides=strides)(encoding_convolution_layers[i])
 
     scalar_output = None
     if scalar_output_size > 0:
@@ -485,7 +486,8 @@ def create_unet_model_3d(input_image_size,
         encoding_convolution_layers.append(conv)
 
         if i < number_of_layers - 1:
-            pool = MaxPooling3D(pool_size=pool_size)(encoding_convolution_layers[i])
+            pool = MaxPooling3D(pool_size=pool_size,
+                                strides=strides)(encoding_convolution_layers[i])
 
     scalar_output = None
     if scalar_output_size > 0:
