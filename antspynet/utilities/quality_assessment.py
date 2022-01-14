@@ -191,32 +191,16 @@ def tid_neural_image_assessment(image,
         elif image.dimension == 3:
             mos_mean = 0
             mos_standard_deviation = 0
-
             x = tuple(range(image.dimension))
-            for d in range(len(dimensions_to_predict)):
+            for d in 0: # range(len(dimensions_to_predict)):
                 not_padded_image_size = list(padded_image_size)
                 del(not_padded_image_size[dimensions_to_predict[d]])
                 newsize =  not_padded_image_size
                 newsize.insert( 0, padded_image_size[dimensions_to_predict[d]])
                 newsize.append( number_of_channels)
                 batchX = np.zeros(newsize)
-                batchX[0,:,:,0] = (ants.slice_image(evaluation_image, axis=0, idx=dimensions_to_predict[d])).numpy()
-                batchX[0,:,:,1] = (ants.slice_image(evaluation_image, axis=0, idx=dimensions_to_predict[d])).numpy()
-                batchX[0,:,:,2] = (ants.slice_image(evaluation_image, axis=1, idx=dimensions_to_predict[d])).numpy()
-                for i in range(1, padded_image_size[dimensions_to_predict[d]] - 1):
-                    batchX[i,:,:,0] = (ants.slice_image(evaluation_image, axis=i-1, idx=dimensions_to_predict[d])).numpy()
-                    batchX[i,:,:,1] = (ants.slice_image(evaluation_image, axis=i  , idx=dimensions_to_predict[d])).numpy()
-                    batchX[i,:,:,2] = (ants.slice_image(evaluation_image, axis=i+1, idx=dimensions_to_predict[d])).numpy()
-                batchX[padded_image_size[dimensions_to_predict[d]],:,:,0] = (
-                    ants.slice_image(evaluation_image, axis=padded_image_size[dimensions_to_predict[d]]-1,
-                        idx=dimensions_to_predict[d])).numpy()
-                batchX[padded_image_size[dimensions_to_predict[d]],:,:,1] = (
-                    ants.slice_image(evaluation_image, axis=padded_image_size[dimensions_to_predict[d]],
-                        idx=dimensions_to_predict[d])).numpy()
-                batchX[padded_image_size[dimensions_to_predict[d]],:,:,2] = (
-                    ants.slice_image(evaluation_image, axis=padded_image_size[dimensions_to_predict[d]],
-                        idx=dimensions_to_predict[d])).numpy()
-
+                for k in range(3):
+                    batchX[:,:,:,k] = evaluation_image.numpy()
                 predicted_data = tid_model.predict(batchX, verbose=verbose)
                 mos_mean += predicted_data[0, 0]
                 mos_standard_deviation += predicted_data[0, 1]
@@ -228,7 +212,7 @@ def tid_neural_image_assessment(image,
                                'MOS.standardDeviationMean' : mos_standard_deviation
                               }
                 return(return_dict)
-            elif is_koniq:
+            else :
                 return_dict = {'MOS.mean' : mos_mean,
                                'sharpness.mean' : mos_standard_deviation
                               }
