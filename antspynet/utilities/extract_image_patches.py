@@ -166,13 +166,12 @@ def extract_image_patches(image,
             # each patch must have a masked voxel at its midPatchIndex.
 
             mask_indices = np.column_stack(np.where(mask_array != 0))
-
             for d in range(dimensionality):
                 shifted_mask_indices = np.subtract(mask_indices[:, d], mid_patch_index[d])
                 outside_indices = np.where(shifted_mask_indices < 0)
                 mask_indices = np.delete(mask_indices, outside_indices, axis = 0)
-                shifted_mask_indices = np.add(mask_indices[d], mid_patch_index[d])
-                outside_indices = np.where(shifted_mask_indices >= image_size[d])
+                shifted_mask_indices = np.add(mask_indices[:, d], mid_patch_index[d])
+                outside_indices = np.where(shifted_mask_indices >= image_size[d] - 1)
                 mask_indices = np.delete(mask_indices, outside_indices, axis = 0)
 
             # After pruning the mask indices, which were originally defined in terms of the
@@ -201,7 +200,7 @@ def extract_image_patches(image,
             else:
                 patch_array = np.zeros((number_of_extracted_patches, *patch_size, number_of_image_components))
 
-        start_index = np.ones( dimensionality )
+        start_index = np.zeros( dimensionality )
         for i in range(number_of_extracted_patches):
             start_index = random_indices[i, :]
             end_index = np.add(start_index, patch_size)
@@ -231,7 +230,7 @@ def extract_image_patches(image,
                         patch_array[i, :, :, :] = patch
                 else:
                     if number_of_image_components == 1:
-                        patch_array[i, :, :] = patch
+                        patch_array[i, :, :, :] = patch
                     else:
                         patch_array[i, :, :, :, :] = patch
             else:
