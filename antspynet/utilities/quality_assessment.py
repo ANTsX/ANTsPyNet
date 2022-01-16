@@ -305,7 +305,7 @@ def tid_neural_image_assessment(image,
                     stride_length=stride_length_vector, return_as_array=False)
             else:
                 patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
-                    max_number_of_patches=int(mask.sum()),
+                    max_number_of_patches=int((mask==1).sum()),
                     return_as_array=False, mask_image=mask,  randomize=False )
 
             batchX = np.zeros((len(patches), patch_size, patch_size, number_of_channels))
