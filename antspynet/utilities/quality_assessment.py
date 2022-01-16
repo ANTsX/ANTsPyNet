@@ -42,6 +42,7 @@ def tid_neural_image_assessment(image,
                                 which_model="tidsQualityAssessment",
                                 image_scaling = [255,127.5],
                                 do_patch_scaling=False,
+                                no_reconstruction=False,
                                 verbose=False):
 
     """
@@ -102,6 +103,9 @@ def tid_neural_image_assessment(image,
 
     do_patch_scaling :boolean controlling whether each patch is scaled or
         (if False) only a global scaling of the image is used.
+
+    no_reconstruction : boolean reconstruction is time consuming - turn this on
+        if you just want the predicted values
 
     verbose : boolean
         Print progress to the screen.
@@ -314,9 +318,8 @@ def tid_neural_image_assessment(image,
             if verbose:
                 print("Predict begin")
 
-            if mask is None:
-                is_good_patch = np.repeat(False, len(patches))
-                for i in range(len(patches)):
+            is_good_patch = np.repeat(False, len(patches))
+            for i in range(len(patches)):
                     if patches[i].var() > 0:
                         is_good_patch[i] = True
                         patch_image = patches[i]
@@ -336,12 +339,11 @@ def tid_neural_image_assessment(image,
                         elif image.dimension == 3:
                             batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image), permutations[dimensions_to_predict[d]])
 
-                good_batchX = batchX[is_good_patch,:,:,:]
-                predicted_data = tid_model.predict(good_batchX, verbose=verbose)
-            else:
-                patch_image = patches[0]
-                is_good_patch = np.repeat(True, len(patches))
-                predicted_data = tid_model.predict(batchX, verbose=verbose)
+            good_batchX = batchX[is_good_patch,:,:,:]
+            predicted_data = tid_model.predict(good_batchX, verbose=verbose)
+
+            if no_reconstruction:
+                return predicted_data
 
             if verbose:
                 print("Predict done")
