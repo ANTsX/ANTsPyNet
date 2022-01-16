@@ -1,9 +1,8 @@
 import numpy as np
 import tensorflow as tf
 import ants
+import random
 
-
-def random_mask( x, lothresh=-0.01, hithresh=0.01 ):
     """
     Subsample voxels from the input mask to create a random mask
 
@@ -12,9 +11,7 @@ def random_mask( x, lothresh=-0.01, hithresh=0.01 ):
     x : ANTsImage (2-D or 3-D)
         input mask.
 
-    lothresh : float usually less than zero
-
-    hithresh : float usually greater than zero
+    n : number of nonzero entries
 
     Returns
     -------
@@ -24,13 +21,20 @@ def random_mask( x, lothresh=-0.01, hithresh=0.01 ):
     -------
     >>> image = ants.image_read(ants.get_data("r16"))
     >>> mask = ants.get_mask(image)
-    >>> mask = antspynet.random_mask( mask )
+    >>> mask = antspynet.random_mask( mask, 5 )
     """
-    xsz=np.prod( x.shape )
-    newmask = np.random.randn( xsz ).reshape( x.shape )
-    newmask = ants.from_numpy( newmask ).threshold_image( lothresh, hithresh )
-    newmask = ants.copy_image_info( x, newmask )
-    return newmask*x
+def random_mask( x,  n ):
+    xsz=(x==1).sum()
+    binvec = np.zeros( xsz )
+    if n > xsz:
+        return x
+    randinds = []
+    for k in range( n ):
+        randinds.append( random.randint(0, xsz) )
+    binvec[randinds]=1
+    xnew=x*0
+    xnew[x==1]=binvec
+    return xnew
 
 def tid_neural_image_assessment(image,
                                 mask=None,
