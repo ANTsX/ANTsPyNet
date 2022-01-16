@@ -3,6 +3,7 @@ import tensorflow as tf
 import ants
 import random
 
+def random_mask( x,  n ):
     """
     Subsample voxels from the input mask to create a random mask
 
@@ -23,7 +24,6 @@ import random
     >>> mask = ants.get_mask(image)
     >>> mask = antspynet.random_mask( mask, 5 )
     """
-def random_mask( x,  n ):
     xsz=(x==1).sum()
     binvec = np.zeros( xsz )
     if n > xsz:
