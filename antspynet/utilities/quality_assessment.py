@@ -400,16 +400,16 @@ def tid_neural_image_assessment(image,
         else:
 
             if which_model == "tidsQualityAssessment":
-                return_dict = {'MOS' : mos * mask,
-                               'MOS.standardDeviation' : mos_standard_deviation * mask,
+                return_dict = {'MOS' : mos,
+                               'MOS.standardDeviation' : mos_standard_deviation,
                                'MOS.mean' : (mos[mask >= 0.5]).mean(),
                                'MOS.standardDeviationMean' : (mos_standard_deviation[mask >= 0.5]).mean()
                               }
                 return(return_dict)
 
             elif is_koniq or which_model == 'user_defined':
-                return_dict = {'MOS' : mos * mask,
-                               'sharpness' : mos_standard_deviation * mask,
+                return_dict = {'MOS' : mos,
+                               'sharpness' : mos_standard_deviation,
                                'MOS.mean' : (mos[mask >= 0.5]).mean(),
                                'sharpness.mean' : (mos_standard_deviation[mask >= 0.5]).mean()
                               }
