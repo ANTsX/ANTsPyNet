@@ -2,6 +2,36 @@ import numpy as np
 import tensorflow as tf
 import ants
 
+
+def random_mask( x, lothresh=-0.01, hithresh=0.01 ):
+    """
+    Subsample voxels from the input mask to create a random mask
+
+    Arguments
+    ---------
+    x : ANTsImage (2-D or 3-D)
+        input mask.
+
+    lothresh : float usually less than zero
+
+    hithresh : float usually greater than zero
+
+    Returns
+    -------
+    ansImage
+
+    Example
+    -------
+    >>> image = ants.image_read(ants.get_data("r16"))
+    >>> mask = ants.get_mask(image)
+    >>> mask = antspynet.random_mask( mask )
+    """
+    xsz=np.prod( x.shape )
+    newmask = np.random.randn( xsz ).reshape( x.shape )
+    newmask = ants.from_numpy( newmask ).threshold_image( lothresh, hithresh )
+    newmask = ants.copy_image_info( x, newmask )
+    return newmask*x
+
 def tid_neural_image_assessment(image,
                                 mask=None,
                                 patch_size=101,
@@ -129,7 +159,7 @@ def tid_neural_image_assessment(image,
         print("Neural QA:  retreiving model and weights.")
 
     is_koniq = "koniq" in which_model
-    if which_model is not "user_defined":
+    if which_model != "user_defined":
         model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
         tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
 
@@ -148,7 +178,7 @@ def tid_neural_image_assessment(image,
     number_of_channels = 3
 
     if stride_length is None and patch_size != "global":
-        stride_length = round(min(patch_size) / 2)
+        stride_length = round(patch_size / 2)
         if image.dimension == 3:
             stride_length = (stride_length, stride_length, 1)
 
@@ -270,34 +300,51 @@ def tid_neural_image_assessment(image,
                 else:
                     raise ValueError("dimensions_to_predict elements should be 1, 2, and/or 3 for 3-D image.")
 
-            patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
-            stride_length=stride_length_vector, return_as_array=False)
+            if mask is None:
+                patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
+                    stride_length=stride_length_vector, return_as_array=False)
+            else:
+                patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
+                    max_number_of_patches=int(mask.sum()),
+                    return_as_array=False, mask_image=mask,  randomize=False )
 
             batchX = np.zeros((len(patches), patch_size, patch_size, number_of_channels))
 
-            is_good_patch = np.repeat(False, len(patches))
-            for i in range(len(patches)):
-                if patches[i].var() > 0:
-                    is_good_patch[i] = True
-                    patch_image = patches[i]
-                    patch_image = patch_image - patch_image.min()
+            verbose=False
+            if verbose:
+                print("Predict begin")
 
-                    if patch_image.max() > 0:
-                        if which_model == "tidsQualityAssessment" and do_patch_scaling:
-                            patch_image = patch_image / patch_image.max() * 255
-                        elif is_koniq and do_patch_scaling:
-                            patch_image = patch_image / patch_image.max() * 2.0 - 1.0
-                        elif which_model == "user_defined" and do_patch_scaling:
-                            patch_image = patch_image / patch_image.max() * image_scaling[0] - image_scaling[1]
+            if mask is None:
+                is_good_patch = np.repeat(False, len(patches))
+                for i in range(len(patches)):
+                    if patches[i].var() > 0:
+                        is_good_patch[i] = True
+                        patch_image = patches[i]
+                        patch_image = patch_image - patch_image.min()
 
-                    if image.dimension == 2:
-                        for j in range(number_of_channels):
-                            batchX[i,:,:,j] = patch_image
-                    elif image.dimension == 3:
-                        batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image), permutations[dimensions_to_predict[d]])
+                        if patch_image.max() > 0:
+                            if which_model == "tidsQualityAssessment" and do_patch_scaling:
+                                patch_image = patch_image / patch_image.max() * 255
+                            elif is_koniq and do_patch_scaling:
+                                patch_image = patch_image / patch_image.max() * 2.0 - 1.0
+                            elif which_model == "user_defined" and do_patch_scaling:
+                                patch_image = patch_image / patch_image.max() * image_scaling[0] - image_scaling[1]
 
-            good_batchX = batchX[is_good_patch,:,:,:]
-            predicted_data = tid_model.predict(good_batchX, verbose=verbose)
+                        if image.dimension == 2:
+                            for j in range(number_of_channels):
+                                batchX[i,:,:,j] = patch_image
+                        elif image.dimension == 3:
+                            batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image), permutations[dimensions_to_predict[d]])
+
+                good_batchX = batchX[is_good_patch,:,:,:]
+                predicted_data = tid_model.predict(good_batchX, verbose=verbose)
+            else:
+                patch_image = patches[0]
+                is_good_patch = np.repeat(True, len(patches))
+                predicted_data = tid_model.predict(batchX, verbose=verbose)
+
+            if verbose:
+                print("Predict done")
 
             patches_mos = list()
             patches_mos_standard_deviation = list()
@@ -314,10 +361,20 @@ def tid_neural_image_assessment(image,
                     patches_mos.append(zero_patch_image)
                     patches_mos_standard_deviation.append(zero_patch_image)
 
-            mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
-                patches_mos, evaluation_image, stride_length=stride_length_vector), image.shape)
-            mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
-                patches_mos_standard_deviation, evaluation_image, stride_length=stride_length_vector), image.shape)
+            if verbose:
+                print("reconstruct")
+
+            if mask is None:
+                mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos, evaluation_image, stride_length=stride_length_vector), image.shape)
+                mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos_standard_deviation, evaluation_image,
+                    stride_length=stride_length_vector), image.shape)
+            else:
+                mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos, mask, domain_image_is_mask=True), image.shape)
+                mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos_standard_deviation, mask,  domain_image_is_mask=True), image.shape)
 
         mos /= len(dimensions_to_predict)
         mos_standard_deviation /= len(dimensions_to_predict)

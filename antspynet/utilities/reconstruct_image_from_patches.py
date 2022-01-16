@@ -65,6 +65,7 @@ def reconstruct_image_from_patches(patches,
     mid_patch_index = tuple(np.int_(np.subtract(np.round(0.5 * (np.array(patch_size))), 1)))
 
     image_array = np.zeros((*image_size, number_of_image_components))
+    count_array = np.zeros((*image_size, number_of_image_components))
 
     stride_length_tuple = stride_length
     if isinstance(stride_length, int):
@@ -107,9 +108,12 @@ def reconstruct_image_from_patches(patches,
                             patch = np.expand_dims(patch, axis = 2)
 
                         image_array[start_index[0]:end_index[0],
-                                    start_index[1]:end_index[1], :][mid_patch_index[0],
-                                                                    mid_patch_index[1], :] += patch
+                                    start_index[1]:end_index[1], :] += patch
+                        count_array[start_index[0]:end_index[0],
+                                    start_index[1]:end_index[1], :] += 1
                         count += 1
+
+            image_array[count_array>0] = image_array[count_array>0] / count_array[count_array>0]
 
             if not domain_image_is_mask:
                 for i in range(image_size[0]):
@@ -119,7 +123,6 @@ def reconstruct_image_from_patches(patches,
 
                         image_array[i, j, :] /= factor
         else:
-            count_array = np.zeros(image_array.shape[0:dimensionality])
             for i in range(0, image_size[0] - patch_size[0] + 1, stride_length_tuple[0]):
                 for j in range(0, image_size[1] - patch_size[1] + 1, stride_length_tuple[1]):
                     start_index = (i, j)
@@ -180,10 +183,14 @@ def reconstruct_image_from_patches(patches,
 
                             image_array[start_index[0]:end_index[0],
                                         start_index[1]:end_index[1],
-                                        start_index[2]:end_index[2], :][mid_patch_index[0],
-                                                                        mid_patch_index[1],
-                                                                        mid_patch_index[2], :] += patch
+                                        start_index[2]:end_index[2], :] += patch
+                            count_array[start_index[0]:end_index[0],
+                                        start_index[1]:end_index[1],
+                                        start_index[2]:end_index[2], :] += 1
                             count += 1
+
+            image_array[count_array>0] = image_array[count_array>0] / count_array[count_array>0]
+
 
             if not domain_image_is_mask:
                 for i in range(image_size[0] + 1):
@@ -240,8 +247,3 @@ def reconstruct_image_from_patches(patches,
                                           has_components=(number_of_image_components != 1))
 
     return(reconstructed_image)
-
-
-
-
-

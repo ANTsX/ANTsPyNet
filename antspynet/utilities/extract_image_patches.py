@@ -73,7 +73,7 @@ def extract_image_patches(image,
     if len(image_size) != len(patch_size):
         raise ValueError("Mismatch between the image size and the specified patch size.")
 
-    if patch_size > image_size:
+    if tuple(patch_size) > image_size:
         raise ValueError("Patch size is greater than the image size.")
 
     image_array = image.numpy()
