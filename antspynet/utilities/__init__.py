@@ -72,6 +72,7 @@ from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labe
 from .brain_age import brain_age
 from .mri_super_resolution import mri_super_resolution
 from .quality_assessment import tid_neural_image_assessment
+from .quality_assessment import random_mask
 from .lung_segmentation import el_bicho
 
 from .neural_style_transfer import neural_style_transfer

@@ -1,6 +1,40 @@
 import numpy as np
 import tensorflow as tf
 import ants
+import random
+
+def random_mask( x,  n ):
+    """
+    Subsample voxels from the input mask to create a random mask
+
+    Arguments
+    ---------
+    x : ANTsImage (2-D or 3-D)
+        input mask.
+
+    n : number of nonzero entries
+
+    Returns
+    -------
+    ansImage
+
+    Example
+    -------
+    >>> image = ants.image_read(ants.get_data("r16"))
+    >>> mask = ants.get_mask(image)
+    >>> mask = antspynet.random_mask( mask, 5 )
+    """
+    xsz=(x==1).sum()
+    binvec = np.zeros( xsz )
+    if n > xsz:
+        return x
+    randinds = []
+    for k in range( n ):
+        randinds.append( random.randint(0, xsz) )
+    binvec[randinds]=1
+    xnew=x*0
+    xnew[x==1]=binvec
+    return xnew
 
 def tid_neural_image_assessment(image,
                                 mask=None,
@@ -10,6 +44,9 @@ def tid_neural_image_assessment(image,
                                 dimensions_to_predict=0,
                                 antsxnet_cache_directory=None,
                                 which_model="tidsQualityAssessment",
+                                image_scaling = [255,127.5],
+                                do_patch_scaling=False,
+                                no_reconstruction=False,
                                 verbose=False):
 
     """
@@ -58,10 +95,21 @@ def tid_neural_image_assessment(image,
         Since these can be resused, if is None, these data will be downloaded to
         ~/.keras/ANTsXNet/.
 
-    which_model : string
+    which_model : string or tf/keras model
         model type e.g. string tidsQualityAssessment, koniqMS, koniqMS2 or koniqMS3 where
         the former predicts mean opinion score (MOS) and MOS standard deviation and
         the latter koniq models predict mean opinion score (MOS) and sharpness.
+        passing a user-defined model is also valid.
+
+    image_scaling : a two-vector where the first value is the multiplier and the
+        second value the subtractor so each image will be scaled as
+        img = ants.iMath(img,"Normalize")*m  - s.
+
+    do_patch_scaling :boolean controlling whether each patch is scaled or
+        (if False) only a global scaling of the image is used.
+
+    no_reconstruction : boolean reconstruction is time consuming - turn this on
+        if you just want the predicted values
 
     verbose : boolean
         Print progress to the screen.
@@ -104,7 +152,11 @@ def tid_neural_image_assessment(image,
             f += 6
         return True
 
-    valid_models = ("tidsQualityAssessment", "koniqMS", "koniqMS2", "koniqMS3")
+    if type( which_model ) is not type("x"):
+        tid_model = which_model # should be a tf model
+        which_model = "user_defined"
+
+    valid_models = ("tidsQualityAssessment", "koniqMS", "koniqMS2", "koniqMS3", "user_defined")
     if not which_model in valid_models:
         raise ValueError("Please pass valid model")
 
@@ -115,8 +167,9 @@ def tid_neural_image_assessment(image,
         print("Neural QA:  retreiving model and weights.")
 
     is_koniq = "koniq" in which_model
-    model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
-    tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
+    if which_model != "user_defined":
+        model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
+        tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
 
     padding_size_vector = padding_size
     if isinstance(padding_size, int):
@@ -133,7 +186,7 @@ def tid_neural_image_assessment(image,
     number_of_channels = 3
 
     if stride_length is None and patch_size != "global":
-        stride_length = round(min(patch_size) / 2)
+        stride_length = round(patch_size / 2)
         if image.dimension == 3:
             stride_length = (stride_length, stride_length, 1)
 
@@ -142,13 +195,16 @@ def tid_neural_image_assessment(image,
     #  Global
     #
     ###############
+    if which_model == "tidsQualityAssessment":
+        evaluation_image = ants.iMath(padded_image, "Normalize") * 255
+
+    if is_koniq:
+        evaluation_image = ants.iMath(padded_image, "Normalize") * 2.0 - 1.0
+
+    if which_model == "user_defined":
+        evaluation_image = ants.iMath(padded_image, "Normalize") * image_scaling[0] - image_scaling[1]
 
     if patch_size == 'global':
-        if which_model == "tidsQualityAssessment":
-            evaluation_image = ants.iMath(padded_image, "Normalize") * 255
-
-        if is_koniq:
-            evaluation_image = ants.iMath(padded_image, "Normalize") * 2.0 - 1.0
 
         if image.dimension == 2:
             batchX = np.zeros((1, evaluation_image.shape, number_of_channels))
@@ -164,7 +220,7 @@ def tid_neural_image_assessment(image,
                               }
                 return(return_dict)
 
-            elif is_koniq:
+            elif is_koniq or which_model == "user_defined":
                 return_dict = {'MOS.mean' : predicted_data[0, 0],
                                'sharpness.mean' : predicted_data[0, 1]
                               }
@@ -173,32 +229,18 @@ def tid_neural_image_assessment(image,
         elif image.dimension == 3:
             mos_mean = 0
             mos_standard_deviation = 0
-
             x = tuple(range(image.dimension))
-            for d in range(len(dimensions_to_predict)):
+            d=0
+            if True:
+#            for d in 0: # range(len(dimensions_to_predict)):
                 not_padded_image_size = list(padded_image_size)
                 del(not_padded_image_size[dimensions_to_predict[d]])
                 newsize =  not_padded_image_size
                 newsize.insert( 0, padded_image_size[dimensions_to_predict[d]])
                 newsize.append( number_of_channels)
                 batchX = np.zeros(newsize)
-                batchX[0,:,:,0] = (ants.slice_image(evaluation_image, axis=0, idx=dimensions_to_predict[d])).numpy()
-                batchX[0,:,:,1] = (ants.slice_image(evaluation_image, axis=0, idx=dimensions_to_predict[d])).numpy()
-                batchX[0,:,:,2] = (ants.slice_image(evaluation_image, axis=1, idx=dimensions_to_predict[d])).numpy()
-                for i in range(1, padded_image_size[dimensions_to_predict[d]] - 1):
-                    batchX[i,:,:,0] = (ants.slice_image(evaluation_image, axis=i-1, idx=dimensions_to_predict[d])).numpy()
-                    batchX[i,:,:,1] = (ants.slice_image(evaluation_image, axis=i  , idx=dimensions_to_predict[d])).numpy()
-                    batchX[i,:,:,2] = (ants.slice_image(evaluation_image, axis=i+1, idx=dimensions_to_predict[d])).numpy()
-                batchX[padded_image_size[dimensions_to_predict[d]],:,:,0] = (
-                    ants.slice_image(evaluation_image, axis=padded_image_size[dimensions_to_predict[d]]-1,
-                        idx=dimensions_to_predict[d])).numpy()
-                batchX[padded_image_size[dimensions_to_predict[d]],:,:,1] = (
-                    ants.slice_image(evaluation_image, axis=padded_image_size[dimensions_to_predict[d]],
-                        idx=dimensions_to_predict[d])).numpy()
-                batchX[padded_image_size[dimensions_to_predict[d]],:,:,2] = (
-                    ants.slice_image(evaluation_image, axis=padded_image_size[dimensions_to_predict[d]],
-                        idx=dimensions_to_predict[d])).numpy()
-
+                for k in range(3):
+                    batchX[:,:,:,k] = evaluation_image.numpy()
                 predicted_data = tid_model.predict(batchX, verbose=verbose)
                 mos_mean += predicted_data[0, 0]
                 mos_standard_deviation += predicted_data[0, 1]
@@ -210,7 +252,7 @@ def tid_neural_image_assessment(image,
                                'MOS.standardDeviationMean' : mos_standard_deviation
                               }
                 return(return_dict)
-            elif is_koniq:
+            else :
                 return_dict = {'MOS.mean' : mos_mean,
                                'sharpness.mean' : mos_standard_deviation
                               }
@@ -224,10 +266,8 @@ def tid_neural_image_assessment(image,
 
     else:
 
-        evaluation_image = padded_image
-
-        if not is_prime(patch_size):
-            print("patch_size should be a prime number:  13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97...")
+        # if not is_prime(patch_size):
+        #    print("patch_size should be a prime number:  13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97...")
 
         stride_length_vector = stride_length
         if isinstance(stride_length, int):
@@ -268,32 +308,49 @@ def tid_neural_image_assessment(image,
                 else:
                     raise ValueError("dimensions_to_predict elements should be 1, 2, and/or 3 for 3-D image.")
 
-            patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
-            stride_length=stride_length_vector, return_as_array=False)
+            if mask is None:
+                patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
+                    stride_length=stride_length_vector, return_as_array=False)
+            else:
+                patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
+                    max_number_of_patches=int((mask==1).sum()),
+                    return_as_array=False, mask_image=mask,  randomize=False )
 
             batchX = np.zeros((len(patches), patch_size, patch_size, number_of_channels))
 
+            verbose=False
+            if verbose:
+                print("Predict begin")
+
             is_good_patch = np.repeat(False, len(patches))
             for i in range(len(patches)):
-                if patches[i].var() > 0:
-                    is_good_patch[i] = True
-                    patch_image = patches[i]
-                    patch_image = patch_image - patch_image.min()
+                    if patches[i].var() > 0:
+                        is_good_patch[i] = True
+                        patch_image = patches[i]
+                        patch_image = patch_image - patch_image.min()
 
-                    if patch_image.max() > 0:
-                        if which_model == "tidsQualityAssessment":
-                            patch_image = patch_image / patch_image.max() * 255
-                        elif is_koniq:
-                            patch_image = patch_image / patch_image.max() * 2.0 - 1.0
+                        if patch_image.max() > 0:
+                            if which_model == "tidsQualityAssessment" and do_patch_scaling:
+                                patch_image = patch_image / patch_image.max() * 255
+                            elif is_koniq and do_patch_scaling:
+                                patch_image = patch_image / patch_image.max() * 2.0 - 1.0
+                            elif which_model == "user_defined" and do_patch_scaling:
+                                patch_image = patch_image / patch_image.max() * image_scaling[0] - image_scaling[1]
 
-                    if image.dimension == 2:
-                        for j in range(number_of_channels):
-                            batchX[i,:,:,j] = patch_image
-                    elif image.dimension == 3:
-                        batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image.numpy()), permutations[dimensions_to_predict[d]])
+                        if image.dimension == 2:
+                            for j in range(number_of_channels):
+                                batchX[i,:,:,j] = patch_image
+                        elif image.dimension == 3:
+                            batchX[i,:,:,:] = np.transpose(np.squeeze(patch_image), permutations[dimensions_to_predict[d]])
 
             good_batchX = batchX[is_good_patch,:,:,:]
             predicted_data = tid_model.predict(good_batchX, verbose=verbose)
+
+            if no_reconstruction:
+                return predicted_data
+
+            if verbose:
+                print("Predict done")
 
             patches_mos = list()
             patches_mos_standard_deviation = list()
@@ -310,10 +367,20 @@ def tid_neural_image_assessment(image,
                     patches_mos.append(zero_patch_image)
                     patches_mos_standard_deviation.append(zero_patch_image)
 
-            mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
-                patches_mos, evaluation_image, stride_length=stride_length_vector), image.shape)
-            mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
-                patches_mos_standard_deviation, evaluation_image, stride_length=stride_length_vector), image.shape)
+            if verbose:
+                print("reconstruct")
+
+            if mask is None:
+                mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos, evaluation_image, stride_length=stride_length_vector), image.shape)
+                mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos_standard_deviation, evaluation_image,
+                    stride_length=stride_length_vector), image.shape)
+            else:
+                mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos, mask, domain_image_is_mask=True), image.shape)
+                mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                    patches_mos_standard_deviation, mask,  domain_image_is_mask=True), image.shape)
 
         mos /= len(dimensions_to_predict)
         mos_standard_deviation /= len(dimensions_to_predict)
@@ -328,7 +395,7 @@ def tid_neural_image_assessment(image,
                               }
                 return(return_dict)
 
-            elif is_koniq:
+            elif is_koniq or which_model == 'user_defined':
                 return_dict = {'MOS' : mos,
                                'sharpness' : mos_standard_deviation,
                                'MOS.mean' : mos.mean(),
@@ -339,16 +406,16 @@ def tid_neural_image_assessment(image,
         else:
 
             if which_model == "tidsQualityAssessment":
-                return_dict = {'MOS' : mos * mask,
-                               'MOS.standardDeviation' : mos_standard_deviation * mask,
+                return_dict = {'MOS' : mos,
+                               'MOS.standardDeviation' : mos_standard_deviation,
                                'MOS.mean' : (mos[mask >= 0.5]).mean(),
                                'MOS.standardDeviationMean' : (mos_standard_deviation[mask >= 0.5]).mean()
                               }
                 return(return_dict)
 
-            elif is_koniq:
-                return_dict = {'MOS' : mos * mask,
-                               'sharpness' : mos_standard_deviation * mask,
+            elif is_koniq or which_model == 'user_defined':
+                return_dict = {'MOS' : mos,
+                               'sharpness' : mos_standard_deviation,
                                'MOS.mean' : (mos[mask >= 0.5]).mean(),
                                'sharpness.mean' : (mos_standard_deviation[mask >= 0.5]).mean()
                               }

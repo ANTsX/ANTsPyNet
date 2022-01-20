@@ -225,6 +225,7 @@ def brain_extraction(image,
         brain_mask_array = np.squeeze(model.predict(image_array, verbose=verbose))
         brain_mask_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(brain_mask_array))
         brain_mask_image = ants.resample_image(brain_mask_resampled, image.shape, use_voxels=True, interp_type=1)
+        brain_mask_image = brain_mask_image * ants.threshold_image( brain_mask_image, 0.50, 1e9 )
 
         spacing = ants.get_spacing(image)
         spacing_product = spacing[0] * spacing[1] * spacing[2]
