@@ -31,8 +31,8 @@ def deep_flash(t1,
     Label 10:  right perirhinal
     Label 11:  left parahippocampal
     Label 12:  right parahippocampal
-    Label 13:  left DG/CA3
-    Label 14:  right DG/CA3
+    Label 13:  left DG/CA2/CA3/CA4
+    Label 14:  right DG/CA2/CA3/CA4
     Label 15:  left CA1
     Label 16:  right CA1
     Label 17:  left subiculum
@@ -58,7 +58,7 @@ def deep_flash(t1,
         See description above.
 
     use_rank_intensity : boolean
-        If false, use histogram matching with cropped template ROI.  Otherwise, 
+        If false, use histogram matching with cropped template ROI.  Otherwise,
         use a rank intensity transform on the cropped ROI.
 
     antsxnet_cache_directory : string
@@ -297,7 +297,7 @@ def deep_flash(t1,
         network_name += "Hierarchical"
 
     if use_rank_intensity:
-        network_name += "_ri"    
+        network_name += "_ri"
 
     if verbose:
         print("DeepFlash: retrieving model weights (left).")
@@ -322,28 +322,28 @@ def deep_flash(t1,
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_left, upper_bound_left)
     if use_rank_intensity:
         t1_cropped = ants.rank_intensity(t1_cropped)
-    else:    
+    else:
         t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, False)
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_left, upper_bound_left)
         if use_rank_intensity:
             t1_cropped = ants.rank_intensity(t1_cropped)
-        else:    
+        else:
             t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_left, 255, 64, False)
         batchX[1,:,:,:,0] = t1_cropped.numpy()
     if t2 is not None:
         t2_cropped = ants.crop_indices(t2_preprocessed, lower_bound_left, upper_bound_left)
         if use_rank_intensity:
             t2_cropped = ants.rank_intensity(t2_cropped)
-        else:            
+        else:
             t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, False)
         batchX[0,:,:,:,1] = t2_cropped.numpy()
         if use_contralaterality:
             t2_cropped = ants.crop_indices(t2_preprocessed_flipped, lower_bound_left, upper_bound_left)
             if use_rank_intensity:
                 t2_cropped = ants.rank_intensity(t2_cropped)
-            else:            
+            else:
                 t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_left, 255, 64, False)
             batchX[1,:,:,:,1] = t2_cropped.numpy()
 
@@ -426,7 +426,7 @@ def deep_flash(t1,
         network_name += "Hierarchical"
 
     if use_rank_intensity:
-        network_name += "_ri"    
+        network_name += "_ri"
 
     if verbose:
         print("DeepFlash: retrieving model weights (right).")
@@ -451,28 +451,28 @@ def deep_flash(t1,
     t1_cropped = ants.crop_indices(t1_preprocessed, lower_bound_right, upper_bound_right)
     if use_rank_intensity:
         t1_cropped = ants.rank_intensity(t1_cropped)
-    else:            
+    else:
         t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)
     batchX[0,:,:,:,0] = t1_cropped.numpy()
     if use_contralaterality:
         t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_right, upper_bound_right)
         if use_rank_intensity:
             t1_cropped = ants.rank_intensity(t1_cropped)
-        else:            
+        else:
             t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)
         batchX[1,:,:,:,0] = t1_cropped.numpy()
     if t2 is not None:
         t2_cropped = ants.crop_indices(t2_preprocessed, lower_bound_right, upper_bound_right)
         if use_rank_intensity:
             t2_cropped = ants.rank_intensity(t2_cropped)
-        else:            
+        else:
             t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, False)
         batchX[0,:,:,:,1] = t2_cropped.numpy()
         if use_contralaterality:
             t2_cropped = ants.crop_indices(t2_preprocessed_flipped, lower_bound_right, upper_bound_right)
             if use_rank_intensity:
                 t2_cropped = ants.rank_intensity(t2_cropped)
-            else:            
+            else:
                 t2_cropped = ants.histogram_match_image(t2_cropped, t2_template_roi_right, 255, 64, False)
             batchX[1,:,:,:,1] = t2_cropped.numpy()
 
