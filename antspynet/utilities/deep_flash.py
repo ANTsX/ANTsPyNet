@@ -8,7 +8,7 @@ from tensorflow.keras import regularizers
 def deep_flash(t1,
                 t2=None,
                 do_preprocessing=True,
-                use_rank_intensity=False,
+                use_rank_intensity=True,
                 antsxnet_cache_directory=None,
                 verbose=False
                 ):
