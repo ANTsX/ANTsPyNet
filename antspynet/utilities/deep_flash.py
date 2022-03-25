@@ -16,7 +16,7 @@ def deep_flash(t1,
     """
     Hippocampal/Enthorhinal segmentation using "Deep Flash"
 
-    Perform hippocampal/entorhinal segmentation in T1 images using
+    Perform hippocampal/entorhinal segmentation in T1 and T1/T2 images using
     labels from Mike Yassa's lab
 
     https://faculty.sites.uci.edu/myassa/
@@ -41,9 +41,7 @@ def deep_flash(t1,
     Preprocessing on the training data consisted of:
        * n4 bias correction,
        * affine registration to the "deep flash" template.
-    The input T1 should undergo the same steps.  If the input T1 is the raw
-    T1, these steps can be performed by the internal preprocessing, i.e. set
-    do_preprocessing = True
+    which is performed on the input images if do_preprocessing = True.
 
     Arguments
     ---------
