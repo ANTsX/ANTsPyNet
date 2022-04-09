@@ -38,8 +38,14 @@ def simulate_bias_field(domain_image,
     Example
     -------
     >>> import ants
+    >>> import numpy as np
     >>> image = ants.image_read(ants.get_ants_data("r64"))
-    >>> bias_field_image = simulate_bias_field( image )
+    >>> log_field = simulate_bias_field(image, number_of_points=10, sd_bias_field=1.0,
+    ...    number_of_fitting_levels=2, mesh_size=10)
+    >>> log_field = log_field.iMath("Normalize")
+    >>> log_field_array = np.power(np.exp(log_field.numpy()), 4)
+    >>> image = image * ants.from_numpy(log_field_array, origin=image.origin,
+    ...    spacing=image.spacing, direction=image.direction)
     """
 
     dimension = domain_image.dimension
