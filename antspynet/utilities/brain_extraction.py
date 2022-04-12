@@ -22,8 +22,7 @@ def brain_extraction(image,
 
     modality : string
         Modality image type.  Options include:
-            * "t1": T1-weighted MRI---ANTs-trained.  Update from "t1v0".
-            * "t1v0":  T1-weighted MRI---ANTs-trained.
+            * "t1": T1-weighted MRI---ANTs-trained.  Previous versions are specified as "t1.v0", "t1.v1".
             * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
             * "t1combined": Brian's combination of "t1" and "t1nobrainer".  One can also specify
                             "t1combined[X]" where X is the morphological radius.  X = 12 by default.
@@ -108,10 +107,12 @@ def brain_extraction(image,
 
         weights_file_name_prefix = None
 
-        if modality == "t1v0":
+        if modality == "t1.v0":
             weights_file_name_prefix = "brainExtraction"
-        elif modality == "t1":
+        elif modality == "t1.v1":
             weights_file_name_prefix = "brainExtractionT1v1"
+        elif modality == "t1":
+            weights_file_name_prefix = "brainExtractionRobustT1"
         elif modality == "t2":
             weights_file_name_prefix = "brainExtractionT2"
         elif modality == "flair":
@@ -145,7 +146,7 @@ def brain_extraction(image,
 
         number_of_filters = (8, 16, 32, 64)
         mode = "classification"
-        if modality == "t1":
+        if modality == "t1.v1" or modality == "t1":
             number_of_filters = (16, 32, 64, 128)
             number_of_classification_labels = 1
             mode = "sigmoid"
@@ -171,8 +172,11 @@ def brain_extraction(image,
 
         for i in range(len(input_images)):
             warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[i], reorient_template)
-            warped_array = warped_image.numpy()
-            batchX[0,:,:,:,i] = (warped_array - warped_array.mean()) / warped_array.std()
+            if modality == "t1":
+                batchX[0,:,:,:,i] = (ants.iMath(warped_image, "Normalize")).numpy()
+            else:
+                warped_array = warped_image.numpy()
+                batchX[0,:,:,:,i] = (warped_array - warped_array.mean()) / warped_array.std()
 
         if verbose == True:
             print("Brain extraction:  prediction and decoding.")
@@ -225,7 +229,6 @@ def brain_extraction(image,
         brain_mask_array = np.squeeze(model.predict(image_array, verbose=verbose))
         brain_mask_resampled = ants.copy_image_info(image_resampled, ants.from_numpy(brain_mask_array))
         brain_mask_image = ants.resample_image(brain_mask_resampled, image.shape, use_voxels=True, interp_type=1)
-        brain_mask_image = brain_mask_image * ants.threshold_image( brain_mask_image, 0.50, 1e9 )
 
         spacing = ants.get_spacing(image)
         spacing_product = spacing[0] * spacing[1] * spacing[2]
