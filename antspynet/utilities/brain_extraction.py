@@ -142,6 +142,8 @@ def brain_extraction(image,
         reorient_template_file_name_path = get_antsxnet_data("S_template3",
           antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
+        if modality == "t1":
+            ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
         resampled_image_size = reorient_template.shape
 
         number_of_filters = (8, 16, 32, 64)
