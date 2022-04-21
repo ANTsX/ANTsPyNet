@@ -4,7 +4,7 @@ import tensorflow as tf
 import ants
 
 def brain_extraction(image,
-                     modality="t1v0",
+                     modality,
                      antsxnet_cache_directory=None,
                      verbose=False):
 
@@ -26,10 +26,11 @@ def brain_extraction(image,
             * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
             * "t1combined": Brian's combination of "t1" and "t1nobrainer".  One can also specify
                             "t1combined[X]" where X is the morphological radius.  X = 12 by default.
-            * "flair": FLAIR MRI.
-            * "t2": T2 MRI.
-            * "bold": 3-D BOLD MRI.
-            * "fa": Fractional anisotropy.
+            * "flair": FLAIR MRI.   Previous versions are specified as "flair.v0".
+            * "t2": T2 MRI.  Previous versions are specified as "t2.v0".
+            * "t2star": T2Star MRI.
+            * "bold": 3-D mean BOLD MRI.  Previous versions are specified as "bold.v0".
+            * "fa": fractional anisotropy.  Previous versions are specified as "fa.v0".
             * "t1t2infant": Combined T1-w/T2-w infant MRI h/t Martin Styner.
             * "t1infant": T1-w infant MRI h/t Martin Styner.
             * "t2infant": T2-w infant MRI h/t Martin Styner.
@@ -106,21 +107,39 @@ def brain_extraction(image,
         #####################
 
         weights_file_name_prefix = None
+        is_standard_network = False
 
         if modality == "t1.v0":
             weights_file_name_prefix = "brainExtraction"
         elif modality == "t1.v1":
             weights_file_name_prefix = "brainExtractionT1v1"
+            is_standard_network = True
         elif modality == "t1":
             weights_file_name_prefix = "brainExtractionRobustT1"
-        elif modality == "t2":
+            is_standard_network = True
+        elif modality == "t2.v0":
             weights_file_name_prefix = "brainExtractionT2"
-        elif modality == "flair":
+        elif modality == "t2":
+            weights_file_name_prefix = "brainExtractionRobustT2"
+            is_standard_network = True
+        elif modality == "t2star":
+            weights_file_name_prefix = "brainExtractionRobustT2Star"
+            is_standard_network = True
+        elif modality == "flair.v0":
             weights_file_name_prefix = "brainExtractionFLAIR"
-        elif modality == "bold":
+        elif modality == "flair":
+            weights_file_name_prefix = "brainExtractionRobustFLAIR"
+            is_standard_network = True
+        elif modality == "bold.v0":
             weights_file_name_prefix = "brainExtractionBOLD"
-        elif modality == "fa":
+        elif modality == "bold":
+            weights_file_name_prefix = "brainExtractionRobustBOLD"
+            is_standard_network = True
+        elif modality == "fa.v0":
             weights_file_name_prefix = "brainExtractionFA"
+        elif modality == "fa":
+            weights_file_name_prefix = "brainExtractionRobustFA"
+            is_standard_network = True
         elif modality == "t1t2infant":
             weights_file_name_prefix = "brainExtractionInfantT1T2"
         elif modality == "t1infant":
@@ -142,13 +161,13 @@ def brain_extraction(image,
         reorient_template_file_name_path = get_antsxnet_data("S_template3",
           antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
-        if modality == "t1":
+        if is_standard_network and modality != "t1.v1":
             ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
         resampled_image_size = reorient_template.shape
 
         number_of_filters = (8, 16, 32, 64)
         mode = "classification"
-        if modality == "t1.v1" or modality == "t1":
+        if is_standard_network:
             number_of_filters = (16, 32, 64, 128)
             number_of_classification_labels = 1
             mode = "sigmoid"
@@ -174,7 +193,7 @@ def brain_extraction(image,
 
         for i in range(len(input_images)):
             warped_image = ants.apply_ants_transform_to_image(xfrm, input_images[i], reorient_template)
-            if modality == "t1":
+            if is_standard_network and modality != "t1.v1":
                 batchX[0,:,:,:,i] = (ants.iMath(warped_image, "Normalize")).numpy()
             else:
                 warped_array = warped_image.numpy()
