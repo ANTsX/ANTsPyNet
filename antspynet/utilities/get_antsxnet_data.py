@@ -1,6 +1,6 @@
 import tensorflow as tf
 import ants
-import os
+import os.path
 
 def get_antsxnet_data(file_id=None,
                       target_file_name=None,
@@ -107,7 +107,15 @@ def get_antsxnet_data(file_id=None,
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
 
-    target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
-        cache_subdir=antsxnet_cache_directory)
+    # keras get_file does not work on read-only file systems. It will attempt to download the file even
+    # if it exists. This is a problem for shared cache directories and read-only containers.
+    #
+    # Check if the file exists here, and if so, return it. Else let keras handle the download
+    target_file_name_path = os.path.join(os.path.expanduser('~'), '.keras', antsxnet_cache_directory,
+                                        target_file_name)
+
+    if not os.path.exists(target_file_name_path):
+        target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
+                                                        cache_subdir = antsxnet_cache_directory)
 
     return(target_file_name_path)
