@@ -33,3 +33,4 @@ from .create_improved_wasserstein_gan_model import ImprovedWassersteinGanModel
 from .create_cycle_gan_model import CycleGanModel
 from .create_super_resolution_gan_model import SuperResolutionGanModel
 
+from .create_dense_model import create_dense_model
