@@ -1,4 +1,4 @@
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, LeakyReLU
 
 def create_dense_model(input_vector_size,
@@ -36,24 +36,24 @@ def create_dense_model(input_vector_size,
 
     """
 
-    model = Sequential()
-    model.add(Input(shape=(input_vector_size,)))
+    input = Input(shape=(input_vector_size,))
+
+    output = input
 
     number_of_filters = number_of_filters_at_base_layer
     for i in range(number_of_layers):
 
-        model.add(Dense(units=number_of_filters))
-        model.add(LeakyReLU(alpha=0.2))
+        output = Dense(units=number_of_filters)(output)
+        output = LeakyReLU(alpha=0.2)(output)
         number_of_filters = int(number_of_filters / 2)
 
     if mode == "classification":
-        model.add(Dense(units=number_of_classification_labels,
-                        activation='softmax'))
+        output = Dense(units=number_of_classification_labels, activation='softmax')(output)
     elif mode == "regression":
-        model.add(Dense(units=1,
-                        activation='linear'))
+        output.Dense(units=1, activation='linear')(output)
     else:
         raise ValueError("Unrecognized activation.")
 
+    model = Model(inputs=input, outputs=output)
 
     return(model)
