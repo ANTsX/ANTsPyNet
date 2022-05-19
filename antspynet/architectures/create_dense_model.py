@@ -50,7 +50,7 @@ def create_dense_model(input_vector_size,
     if mode == "classification":
         output = Dense(units=number_of_classification_labels, activation='softmax')(output)
     elif mode == "regression":
-        output.Dense(units=1, activation='linear')(output)
+        output = Dense(units=1, activation='linear')(output)
     else:
         raise ValueError("Unrecognized activation.")
 
