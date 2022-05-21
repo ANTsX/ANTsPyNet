@@ -154,7 +154,7 @@ def e13x5_brain_extraction(image,
         additional_options=("initialConvolutionKernelSize[5]", "attentionGating"))
     unet_model.load_weights(weights_file_name)
 
-    if verbose == True:
+    if verbose:
         print("Preprocessing:  Resampling.")
 
     number_of_channels = image.components
@@ -192,19 +192,19 @@ def e13x5_brain_extraction(image,
             batch_X[count,:,:,0] = slice_array
             count = count + 1
 
-    if verbose == True:
+    if verbose:
         print("Prediction: ")
 
     predicted_data = unet_model.predict(batch_X, verbose=int(verbose))
     if number_of_channels > 1:
-        if verbose == True:
+        if verbose:
             print("Averaging across channels.")
         predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0) 
         predicted_data = np.zeros((number_of_slices, *resampled_image_size, 1))
         for i in range(number_of_channels):
             predicted_data = (predicted_data * i + predicted_data_temp[i]) / (i + 1)
 
-    if verbose == True:
+    if verbose:
         print("Post-processing:  resampling to original space.")
 
     foreground_probability_array = np.zeros(image.shape)
@@ -218,7 +218,7 @@ def e13x5_brain_extraction(image,
                 foreground_probability_array[j,:,:] = slice.numpy()
             elif which_axis == 1:
                 foreground_probability_array[:,j,:] = slice.numpy()
-            elif which_axis == 2:
+            else:
                 foreground_probability_array[:,:,j] = slice.numpy()
 
     origin = image.origin
