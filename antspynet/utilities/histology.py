@@ -1,4 +1,3 @@
-from shutil import which
 import numpy as np
 import ants
 
