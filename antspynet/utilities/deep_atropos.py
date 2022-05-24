@@ -110,7 +110,7 @@ def deep_atropos(t1,
     mni_priors = None
     channel_size = 1
     if use_spatial_priors != 0:
-        mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors")))
+        mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors", antsxnet_cache_directory=antsxnet_cache_directory)))
         for i in range(len(mni_priors)):
             mni_priors[i] = ants.copy_image_info(t1_preprocessed, mni_priors[i])
         channel_size = 2
