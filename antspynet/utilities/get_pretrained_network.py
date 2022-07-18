@@ -29,7 +29,7 @@ def get_pretrained_network(file_id=None,
 
     Example
     -------
-    >>> model_file = get_pretrained_network('dbpn4x')
+    >>> model_file = get_pretrained_network('brainExtraction')
     """
 
     def switch_networks(argument):
@@ -63,7 +63,6 @@ def get_pretrained_network(file_id=None,
             "claustrum_coronal_1": "https://ndownloader.figshare.com/files/27844071",
             "claustrum_coronal_2": "https://ndownloader.figshare.com/files/27844065",
             "ctHumanLung": "https://ndownloader.figshare.com/files/20005217",
-            "dbpn4x": "https://figshare.com/ndownloader/files/35295394",
             "deepFlashLeftT1": "https://ndownloader.figshare.com/files/28966269",
             "deepFlashRightT1": "https://ndownloader.figshare.com/files/28966266",
             "deepFlashLeftBoth": "https://ndownloader.figshare.com/files/28966275",
@@ -140,8 +139,7 @@ def get_pretrained_network(file_id=None,
     if file_id == None:
         raise ValueError("Missing file id.")
 
-    valid_list = ("dbpn4x",
-                  "arterialLesionWeibinShi",
+    valid_list = ("arterialLesionWeibinShi",
                   "brainAgeGender",
                   "brainAgeDeepBrainNet",
                   "brainExtraction",
