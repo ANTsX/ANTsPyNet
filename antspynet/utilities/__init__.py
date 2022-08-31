@@ -59,7 +59,8 @@ from .brain_extraction import brain_extraction
 from .cortical_thickness import cortical_thickness
 from .cortical_thickness import longitudinal_cortical_thickness
 from .histology import arterial_lesion_segmentation
-from .histology import e13x5_brain_extraction
+from .histology import allen_e13x5_brain_extraction
+from .histology import allen_histology_brain_mask
 from .lung_extraction import lung_extraction
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import ew_david

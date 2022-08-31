@@ -19,7 +19,7 @@ def brain_age(t1,
 
     and described in the following article:
 
-    https://academic.oup.com/brain/article-abstract/doi/10.1093/brain/awaa160/5863667?redirectedFrom=fulltext
+    https://pubmed.ncbi.nlm.nih.gov/32591831/
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
