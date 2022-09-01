@@ -184,11 +184,11 @@ def allen_e13x5_brain_extraction(image,
                 slice = ants.from_numpy(image_channel_slice_array)
             else:
                 slice = image_channels[i]
-            slice_resampled = ants.resample_image(slice, resampled_image_size, use_voxels=True, interp_type=0)
-            slice_array = slice_resampled.numpy()
-            if slice_array.max() > slice_array.min():
+            if slice.max() > slice.min():
+                slice_resampled = ants.resample_image(slice, resampled_image_size, use_voxels=True, interp_type=0)
+                slice_array = slice_resampled.numpy()
                 slice_array = (slice_array - slice_array.min()) / (slice_array.max() - slice_array.min())
-            batch_X[count,:,:,0] = slice_array
+                batch_X[count,:,:,0] = slice_array
             count = count + 1
 
     if verbose:
@@ -318,11 +318,11 @@ def allen_histology_brain_mask(image,
                 slice = ants.from_numpy(image_channel_slice_array)
             else:
                 slice = image_channels[i]
-            slice_resampled = ants.resample_image(slice, resampled_image_size, use_voxels=True, interp_type=0)
-            slice_array = slice_resampled.numpy()
-            if slice_array.max() > slice_array.min():
+            if slice.max() > slice.min():
+                slice_resampled = ants.resample_image(slice, resampled_image_size, use_voxels=True, interp_type=0)
+                slice_array = slice_resampled.numpy()
                 slice_array = (slice_array - slice_array.min()) / (slice_array.max() - slice_array.min())
-            batch_X[count,:,:,0] = slice_array
+                batch_X[count,:,:,0] = slice_array
             count = count + 1
 
     if verbose:
