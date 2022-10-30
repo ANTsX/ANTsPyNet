@@ -84,14 +84,14 @@ def arterial_lesion_segmentation(image,
     return(foreground_probability_image)
 
 
-def allen_e13x5_brain_extraction(image,
-                                 view = "sagittal",
-                                 which_axis=2,
-                                 antsxnet_cache_directory=None,
-                                 verbose=False):
+def allen_ex5_brain_extraction(image,
+                               view = "sagittal",
+                               which_axis=2,
+                               antsxnet_cache_directory=None,
+                               verbose=False):
 
     """
-    Perform brain extraction of Allen's E13.5 mouse embroyonic data.
+    Perform brain extraction of Allen's E13.5 and E15.5 mouse embroyonic data.
 
     Arguments
     ---------
@@ -132,10 +132,10 @@ def allen_e13x5_brain_extraction(image,
 
     weights_file_name = ""
     if view.lower() == "coronal":  
-        weights_file_name = get_pretrained_network("e13x5_coronal_weights",
+        weights_file_name = get_pretrained_network("ex5_coronal_weights",
             antsxnet_cache_directory=antsxnet_cache_directory)
     elif view.lower() == "sagittal":
-        weights_file_name = get_pretrained_network("e13x5_sagittal_weights",
+        weights_file_name = get_pretrained_network("ex5_sagittal_weights",
             antsxnet_cache_directory=antsxnet_cache_directory)
     else:
         raise ValueError("Valid view options are coronal and sagittal.")
