@@ -75,8 +75,9 @@ pip install antspynet
 * Six-tissue Atropos brain segmentation
 * [Cortical thickness](https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1.full)
 * [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
-* [Hippmapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
-* [White matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
+* [HippMapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
+* [Sysu white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
+* [HyperMapp3r white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/35088930/)
 * [Hypothalamus segmentation](https://pubmed.ncbi.nlm.nih.gov/32853816/)
 * [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
 * Deep Flash
