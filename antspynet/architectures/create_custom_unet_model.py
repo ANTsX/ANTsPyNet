@@ -327,9 +327,11 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
     return(unet_model)
 
 def create_hypermapp3r_unet_model_3d(input_image_size,
-                                      data_format="channels_first"):
+                                      data_format="channels_last"):
     """
     Implementation of the "HyperMapp3r" U-net architecture
+
+    https://pubmed.ncbi.nlm.nih.gov/35088930/
 
     Arguments
     ---------

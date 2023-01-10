@@ -1,6 +1,7 @@
 
 import ants
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
 
 def sysu_media_wmh_segmentation(flair,
@@ -255,6 +256,166 @@ def sysu_media_wmh_segmentation(flair,
         ants.invert_ants_transform(xfrm), prediction_image_average, flair_preprocessed)
     probability_image = ants.copy_image_info(flair, probability_image)
 
+    return(probability_image)
+
+def hypermapp3r_segmentation(t1,
+                             flair,
+                             number_of_monte_carlo_iterations=30,
+                             do_preprocessing=True,
+                             antsxnet_cache_directory=None,
+                             verbose=False):
+
+    """
+    Perform HyperMapp3r (white matter hyperintensities) segmentation described in
+
+    https://pubmed.ncbi.nlm.nih.gov/35088930/
+
+    with models and architecture ported from
+
+    https://github.com/mgoubran/HyperMapp3r
+
+    Additional documentation and attribution resources found at
+
+    https://hypermapp3r.readthedocs.io/en/latest/
+
+    Preprocessing consists of:
+       * n4 bias correction and
+       * brain extraction
+    The input T1 should undergo the same steps.  If the input T1 is the raw
+    T1, these steps can be performed by the internal preprocessing, i.e. set
+    do_preprocessing = True
+
+    Arguments
+    ---------
+    t1 : ANTsImage
+        input image
+
+    do_preprocessing : boolean
+        See description above.
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be resused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    ANTs labeled wmh segmentationimage.
+
+    Example
+    -------
+    >>> mask = hypermapp3r_segmentation(t1, flair)
+    """
+
+    from ..architectures import create_hypermapp3r_unet_model_3d
+    from ..utilities import preprocess_brain_image
+    from ..utilities import get_pretrained_network
+
+    if t1.dimension != 3:
+        raise ValueError( "Image dimension must be 3." )
+
+    if antsxnet_cache_directory == None:
+        antsxnet_cache_directory = "ANTsXNet"
+
+    ################################
+    #
+    # Preprocess images
+    #
+    ################################
+
+    if verbose == True:
+        print("*************  Preprocessing  ***************")
+        print("")
+
+    t1_preprocessed = t1
+    brain_mask = None
+    if do_preprocessing == True:
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=(0.01, 0.99),
+            brain_extraction_modality="t1",
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        brain_mask = t1_preprocessing['brain_mask']
+        t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
+    else:
+        # If we don't generate the mask from the preprocessing, we assume that we
+        # can extract the brain directly from the foreground of the t1 image.
+        brain_mask = ants.threshold_image(t1, 0, 0, 0, 1)
+
+    t1_preprocessed_mean = t1_preprocessed[brain_mask > 0].mean()
+    t1_preprocessed_std = t1_preprocessed[brain_mask > 0].std()
+    t1_preprocessed[brain_mask > 0] = (t1_preprocessed[brain_mask > 0] - t1_preprocessed_mean) / t1_preprocessed_std
+
+    flair_preprocessed = flair
+    if do_preprocessing == True:
+        flair_preprocessing = preprocess_brain_image(flair,
+            truncate_intensity=(0.01, 0.99),
+            brain_extraction_modality=None,
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
+
+    flair_preprocessed_mean = flair_preprocessed[brain_mask > 0].mean()
+    flair_preprocessed_std = flair_preprocessed[brain_mask > 0].std()
+    flair_preprocessed[brain_mask > 0] = (flair_preprocessed[brain_mask > 0] - flair_preprocessed_mean) / flair_preprocessed_std
+
+    if verbose == True:
+        print("    HyperMapp3r: reorient input images.")
+
+    channel_size = 2
+    input_image_size = (224, 224, 224)
+    template_array = np.ones(input_image_size)
+    template_direction = np.eye(3)
+    template_direction[1, 1] = -1.0
+    reorient_template = ants.from_numpy(template_array, origin=(0, 0, 0), spacing=(1, 1, 1),
+        direction=template_direction)
+
+    center_of_mass_template = ants.get_center_of_mass(reorient_template)
+    center_of_mass_image = ants.get_center_of_mass(brain_mask)
+    translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template)
+    xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
+        center=np.asarray(center_of_mass_template), translation=translation)
+
+    batchX = np.zeros((1, *input_image_size, channel_size))
+
+    t1_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reorient_template)
+    batchX[0,:,:,:,0] = t1_preprocessed_warped.numpy()
+
+    flair_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reorient_template)
+    batchX[0,:,:,:,1] = flair_preprocessed_warped.numpy()
+
+    if verbose == True:
+        print("    HyperMapp3r: generate network and load weights.")
+
+    model = create_hypermapp3r_unet_model_3d((*input_image_size, 2))
+    weights_file_name = get_pretrained_network("hyperMapp3r", antsxnet_cache_directory=antsxnet_cache_directory)
+    model.load_weights(weights_file_name)
+
+    if verbose == True:
+        print("    HyperMapp3r: prediction.")
+
+    if verbose == True:
+        print("    HyperMapp3r: Monte Carlo iterations (SpatialDropout).")
+
+    prediction_array = np.zeros(input_image_size)
+    for i in range(number_of_monte_carlo_iterations):
+        tf.random.set_seed(i)
+        if verbose == True:
+            print("        Monte Carlo iteration", i + 1, "out of", number_of_monte_carlo_iterations)
+        prediction_array = (np.squeeze(model.predict(batchX, verbose=verbose)) + i * prediction_array) / (i + 1)
+
+    prediction_image = ants.from_numpy(prediction_array, origin=reorient_template.origin,
+        spacing=reorient_template.spacing, direction=reorient_template.direction)
+
+    xfrm_inv = xfrm.invert()
+    probability_image = xfrm_inv.apply_to_image(prediction_image, t1)
     return(probability_image)
 
 def ew_david(flair,

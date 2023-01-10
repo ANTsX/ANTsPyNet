@@ -64,6 +64,7 @@ from .histology import allen_histology_brain_mask
 from .lung_extraction import lung_extraction
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import ew_david
+from .white_matter_hyperintensity_segmentation import hypermapp3r_segmentation
 from .claustrum_segmentation import claustrum_segmentation
 from .hypothalamus_segmentation import hypothalamus_segmentation
 from .hippmapp3r_segmentation import hippmapp3r_segmentation

@@ -1,5 +1,5 @@
 antspyx
-tensorflow>=2.6
+tensorflow
 tensorflow_probability
 keras
 requests
