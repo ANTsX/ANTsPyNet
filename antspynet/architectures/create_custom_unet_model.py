@@ -326,6 +326,133 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
 
     return(unet_model)
 
+def create_hypermapp3r_unet_model_3d(input_image_size,
+                                      data_format="channels_first"):
+    """
+    Implementation of the "HyperMapp3r" U-net architecture
+
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    data_format : string
+        One of "channels_first" or "channels_last".  We do this for this specific
+        architecture as the original weights were saved in "channels_first" format.
+
+    Returns
+    -------
+    Keras model
+        A 3-D keras model defining the U-net network.
+
+    Example
+    -------
+    >>> model = antspynet.create_hypermapp3r_unet_model_3d((2, 224, 224, 224), True)
+    >>> model.load_weights(antspynet.get_pretrained_network("hypermapper_224iso_multi"))
+    """
+
+    channels_axis = None
+    if data_format == "channels_last":
+        channels_axis = 4
+    elif data_format == "channels_first":
+        channels_axis = 1
+    else:
+        raise ValueError("Unexpected string for data_format.")
+
+    def convB_3d_layer(input, number_of_filters, kernel_size=3, strides=1):
+        block = Conv3D(filters=number_of_filters,
+                       kernel_size=kernel_size,
+                       strides=strides,
+                       padding='same',
+                       data_format=data_format)(input)
+        block = InstanceNormalization(axis=channels_axis)(block)
+        block = LeakyReLU()(block)
+        return(block)
+
+    def residual_block_3d(input, number_of_filters):
+        block = convB_3d_layer(input, number_of_filters)
+        block = SpatialDropout3D(rate=0.3,
+                                 data_format=data_format)(block)
+        block = convB_3d_layer(block, number_of_filters)
+        return(block)
+
+    def upsample_block_3d(input, number_of_filters):
+        block = UpSampling3D(data_format=data_format)(input)
+        block = convB_3d_layer(block, number_of_filters)
+        return(block)
+
+    def feature_block_3d(input, number_of_filters):
+        block = convB_3d_layer(input, number_of_filters)
+        block = convB_3d_layer(block, number_of_filters, kernel_size=1)
+        return(block)
+
+    number_of_filters_at_base_layer = 8
+    number_of_layers = 4
+
+    inputs = Input(shape=input_image_size)
+
+    # Encoding path
+
+    add = None
+
+    encoding_convolution_layers = []
+    for i in range(number_of_layers):
+        number_of_filters = number_of_filters_at_base_layer * 2 ** i
+        conv = None
+        if i == 0:
+            conv = convB_3d_layer(inputs, number_of_filters)
+        else:
+            conv = convB_3d_layer(add, number_of_filters, strides=2)
+        residual_block = residual_block_3d(conv, number_of_filters)
+        add = Add()([conv, residual_block])
+        encoding_convolution_layers.append(add)
+
+    # Decoding path
+
+    outputs = encoding_convolution_layers[number_of_layers-1]
+
+    # 64
+    number_of_filters = (number_of_filters_at_base_layer *
+      2 ** (number_of_layers - 2))
+    outputs = upsample_block_3d(outputs, number_of_filters)
+
+    # 64, 32
+    outputs = Concatenate(axis=channels_axis)([encoding_convolution_layers[2], outputs])
+    feature64 = feature_block_3d(outputs, number_of_filters)
+    number_of_filters = int(number_of_filters / 2)
+    outputs = upsample_block_3d(feature64, number_of_filters)
+    back64 = Conv3D(filters=1,
+                    kernel_size=1,
+                    data_format=data_format)(feature64)
+    back64 = UpSampling3D(data_format=data_format)(back64)
+
+    # 32, 16
+    outputs = Concatenate(axis=channels_axis)([encoding_convolution_layers[1], outputs])
+    feature32 = feature_block_3d(outputs, number_of_filters)
+    number_of_filters = int(number_of_filters / 2)
+    outputs = upsample_block_3d(feature32, number_of_filters)
+    back32 = Conv3D(filters=1,
+                    kernel_size=1,
+                    data_format=data_format)(feature32)
+    back32 = Add()([back64, back32])
+    back32 = UpSampling3D(data_format=data_format)(back32)
+
+    # Final
+    outputs = Concatenate(axis=channels_axis)([encoding_convolution_layers[0], outputs])
+    outputs = convB_3d_layer(outputs, number_of_filters, 3)
+    outputs = convB_3d_layer(outputs, number_of_filters, 1)
+    outputs = Conv3D(filters=1,
+                     kernel_size=1,
+                     data_format=data_format)(outputs)
+    outputs = Add()([back32, outputs])
+    outputs = Activation('sigmoid')(outputs)
+
+    unet_model = Model(inputs=inputs, outputs=outputs)
+
+    return(unet_model)
+
 def create_sysu_media_unet_model_2d(input_image_size,
                                     anatomy="wmh"):
     """
@@ -536,3 +663,5 @@ def create_hypothalamus_unet_model_3d(input_image_size):
     unet_model = Model(inputs=inputs, outputs=outputs)
 
     return(unet_model)
+
+
