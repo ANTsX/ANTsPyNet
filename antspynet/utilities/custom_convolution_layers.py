@@ -25,7 +25,7 @@ class PartialConv2D(Conv2D):
         kernel_shape = self.kernel_size + (self.input_dim, self.filters)
         self.kernel = self.add_weight(shape=kernel_shape,
                                       initializer=self.kernel_initializer,
-                                      name='img_kernel',
+                                      name='image_kernel',
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         # Mask kernel
@@ -158,7 +158,7 @@ class PartialConv3D(Conv3D):
         kernel_shape = self.kernel_size + (self.input_dim, self.filters)
         self.kernel = self.add_weight(shape=kernel_shape,
                                       initializer=self.kernel_initializer,
-                                      name='img_kernel',
+                                      name='image_kernel',
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         # Mask kernel
@@ -194,7 +194,7 @@ class PartialConv3D(Conv3D):
 
         # Both image and mask must be supplied
         if type(inputs) is not list or len(inputs) != 2:
-            raise Exception('PartialConvolution2D must be called on a list of two tensors [img, mask]. Instead got: ' + str(inputs))
+            raise Exception('PartialConvolution3D must be called on a list of two tensors [img, mask]. Instead got: ' + str(inputs))
 
         # Padding done explicitly so that padding becomes part of the masked partial convolution
         images = K.spatial_3d_padding(inputs[0], self.pconv_padding, self.data_format)
