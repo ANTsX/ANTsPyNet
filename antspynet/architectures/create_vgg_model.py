@@ -147,7 +147,7 @@ def create_vgg_model_2d(input_image_size,
     if mode == 'classification':
         layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('unrecognized mode.')
 
