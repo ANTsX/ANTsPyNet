@@ -152,7 +152,7 @@ def create_vgg_model_2d(input_image_size,
         raise ValueError('unrecognized mode.')
 
     outputs = Dense(units=number_of_classification_labels,
-                    activation =layer_activation)(outputs)
+                    activation=layer_activation)(outputs)
 
     vgg_model = Model(inputs=inputs, outputs=outputs)
 

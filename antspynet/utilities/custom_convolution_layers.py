@@ -23,13 +23,14 @@ class PartialConv2D(Conv2D):
 
         # Image kernel
         kernel_shape = self.kernel_size + (self.input_dim, self.filters)
+
         self.kernel = self.add_weight(shape=kernel_shape,
                                       initializer=self.kernel_initializer,
                                       name='image_kernel',
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         # Mask kernel
-        self.kernel_mask = K.ones(shape=self.kernel_size + (self.input_dim, self.filters))
+        self.kernel_mask = K.ones(shape=kernel_shape)
 
         # Calculate padding size to achieve zero-padding
         self.pconv_padding = (
@@ -76,7 +77,7 @@ class PartialConv2D(Conv2D):
         )
 
         # Apply convolutions to image
-        img_output = K.conv2d(
+        image_output = K.conv2d(
             (images*masks), self.kernel,
             strides=self.strides,
             padding='valid',
@@ -94,20 +95,20 @@ class PartialConv2D(Conv2D):
         mask_ratio = mask_ratio * mask_output
 
         # Normalize iamge output
-        img_output = img_output * mask_ratio
+        image_output = image_output * mask_ratio
 
         # Apply bias only to the image (if chosen to do so)
         if self.use_bias:
-            img_output = K.bias_add(
-                img_output,
+            image_output = K.bias_add(
+                image_output,
                 self.bias,
                 data_format=self.data_format)
 
         # Apply activations on the image
         if self.activation is not None:
-            img_output = self.activation(img_output)
+            image_output = self.activation(image_output)
 
-        return [img_output, mask_output]
+        return [image_output, mask_output]
 
     def compute_output_shape(self, input_shape):
         if self.data_format == 'channels_last':
@@ -162,7 +163,7 @@ class PartialConv3D(Conv3D):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         # Mask kernel
-        self.kernel_mask = K.ones(shape=self.kernel_size + (self.input_dim, self.filters))
+        self.kernel_mask = K.ones(shape=kernel_shape)
 
         # Calculate padding size to achieve zero-padding
         self.pconv_padding = (
@@ -210,7 +211,7 @@ class PartialConv3D(Conv3D):
         )
 
         # Apply convolutions to image
-        img_output = K.conv3d(
+        image_output = K.conv3d(
             (images*masks), self.kernel,
             strides=self.strides,
             padding='valid',
@@ -228,20 +229,20 @@ class PartialConv3D(Conv3D):
         mask_ratio = mask_ratio * mask_output
 
         # Normalize iamge output
-        img_output = img_output * mask_ratio
+        image_output = image_output * mask_ratio
 
         # Apply bias only to the image (if chosen to do so)
         if self.use_bias:
-            img_output = K.bias_add(
-                img_output,
+            image_output = K.bias_add(
+                image_output,
                 self.bias,
                 data_format=self.data_format)
 
         # Apply activations on the image
         if self.activation is not None:
-            img_output = self.activation(img_output)
+            image_output = self.activation(image_output)
 
-        return [img_output, mask_output]
+        return [image_output, mask_output]
 
     def compute_output_shape(self, input_shape):
         if self.data_format == 'channels_last':
@@ -270,3 +271,4 @@ class PartialConv3D(Conv3D):
                 new_space.append(new_dim)
             new_shape = (input_shape[0], self.filters) + tuple(new_space)
             return [new_shape, new_shape]
+

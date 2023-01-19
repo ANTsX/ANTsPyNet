@@ -24,6 +24,7 @@ from .create_custom_unet_model import create_hippmapp3r_unet_model_3d
 from .create_custom_unet_model import create_hypermapp3r_unet_model_3d
 from .create_custom_unet_model import create_sysu_media_unet_model_2d
 from .create_custom_unet_model import create_hypothalamus_unet_model_3d
+from .create_custom_unet_model import create_partial_convolution_unet_model_2d
 
 from .create_custom_model import create_simple_fully_convolutional_network_model_3d
 
