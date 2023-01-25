@@ -288,7 +288,10 @@ def hypermapp3r_segmentation(t1,
     Arguments
     ---------
     t1 : ANTsImage
-        input image
+        input 3-D t1-weighted MR image.  Assumed to be aligned with the flair.
+
+    flair : ANTsImage
+        input 3-D flair MR image.  Assumed to be aligned with the t1.
 
     do_preprocessing : boolean
         See description above.

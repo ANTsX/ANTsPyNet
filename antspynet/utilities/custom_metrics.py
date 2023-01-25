@@ -227,3 +227,12 @@ def maximum_mean_discrepancy(sigma=1.0):
         return mmd_value
 
     return(maximum_mean_discrepancy_fixed)
+
+def masked_mse_loss(mask_exclude_value=-1):
+    def f(y_true, y_pred):
+        mask_true = K.cast(K.not_equal(y_true, mask_exclude_value), K.floatx())
+        masked_squared_error = K.square(mask_true * (y_true - y_pred))
+        masked_mse = K.sum(K.flatten(masked_squared_error)) / K.sum(K.flatten(mask_true))
+        return masked_mse
+    f.__name__ = 'Masked MSE (mask_value={})'.format(mask_exclude_value)
+    return f

@@ -28,9 +28,6 @@ def simulate_bias_field(domain_image,
     number_of_fitting_levels : integer
         B-spline fitting parameter.
 
-    clamp_end_points : integer or tuple
-        B-spline fitting parameter.
-
     Returns
     -------
     ANTs image

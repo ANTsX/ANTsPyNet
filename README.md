@@ -80,7 +80,7 @@ pip install antspynet
 * [HyperMapp3r white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/35088930/)
 * [Hypothalamus segmentation](https://pubmed.ncbi.nlm.nih.gov/32853816/)
 * [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
-* Deep Flash
+* [Deep Flash](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v1)
 * Desikan-Killiany-Tourville cortical labeling
 * Lung extraction
     * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
@@ -90,10 +90,11 @@ pip install antspynet
 * Image quality assessment
     * [TID2013](https://www.sciencedirect.com/science/article/pii/S0923596514001490)
     * [KonIQ-10k](https://ieeexplore.ieee.org/document/8968750)
-
-## Miscellaneous
-
 * [Mixture density networks (MDN)](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
+
+## Related
+
+* [Training scripts](https://github.com/ntustison/ANTsXNetTraining)
 
 --------------------------------------
 
@@ -108,6 +109,8 @@ pip install antspynet
        ```
 
 ## Publications
+
+* Nicholas J. Tustison, Michael A Yassa, Batool Rizvi, Andrew J. Holbrook, Mithra Sathishkumar, James C. Gee, James R. Stone, and Brian B. Avants. ANTsX neuroimaging-derived structural phenotypes of UK Biobank.  [(medrxiv)](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v1)
 
 * Nicholas J. Tustison,  Talissa A. Altes, Kun Qing, Mu He, G. Wilson Miller, Brian B. Avants, Yun M. Shim, James C. Gee, John P. Mugler III, and Jaime F. Mata.  Image- versus histogram-based considerations in semantic segmentation of pulmonary hyperpolarized gas images. _Magnetic Resonance in Medicine_, 86(5):2822-2836, Nov 2021. [(pubmed)](https://pubmed.ncbi.nlm.nih.gov/34227163/)
 

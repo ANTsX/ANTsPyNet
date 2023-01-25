@@ -44,6 +44,9 @@ from .custom_normalization_layers import InstanceNormalization
 
 from .custom_activation_layers import LogSoftmax
 
+from .custom_convolution_layers import PartialConv2D
+from .custom_convolution_layers import PartialConv3D
+
 from .cropping_and_padding_utilities import crop_image_center
 from .cropping_and_padding_utilities import pad_or_crop_image_to_size
 from .cropping_and_padding_utilities import pad_image_by_factor
