@@ -68,6 +68,11 @@ def regression_match_image(source_image,
         matched_source_intensities[matched_source_intensities < min_reference_value] = min_reference_value
         matched_source_intensities[matched_source_intensities > max_reference_value] = max_reference_value
 
+    if mask is not None:
+        source_intensities = np.expand_dims((source_image.numpy()).flatten(), axis=1)
+        source_intensities[np.where(mask_intensities != 0)] = matched_source_intensities
+        matched_source_intensities = source_intensities
+
     matched_source_image = ants.make_image(source_image.shape, matched_source_intensities)
     matched_source_image = ants.copy_image_info(source_image,  matched_source_image)
 
