@@ -168,7 +168,8 @@ class PartialConv3D(Conv3D):
                                       initializer=self.kernel_initializer,
                                       name='image_kernel',
                                       regularizer=self.kernel_regularizer,
-                                      constraint=self.kernel_constraint)
+                                      constraint=self.kernel_constraint,
+                                      trainable=True)
         # Mask kernel
         self.kernel_mask = self.add_weight(shape=kernel_shape,
                                       initializer='ones',
@@ -192,7 +193,8 @@ class PartialConv3D(Conv3D):
                                         initializer=self.bias_initializer,
                                         name='bias',
                                         regularizer=self.bias_regularizer,
-                                        constraint=self.bias_constraint)
+                                        constraint=self.bias_constraint,
+                                        trainable=True)
         else:
             self.bias = None
         self.built = True
