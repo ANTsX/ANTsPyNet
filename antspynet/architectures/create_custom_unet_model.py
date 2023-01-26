@@ -703,7 +703,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                    strides=2,
                                    padding="same")([image_in, mask_in])
         if do_batch_normalization:
-            conv = BatchNormalization()(conv)
+            conv = BatchNormalization()(conv, training=do_batch_normalization)
         conv = Activation('relu')(conv)
         return conv, mask
 
@@ -716,7 +716,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                    kernel_size,
                                    padding='same')([concatenate_image, concatenate_mask])
         if do_batch_normalization:
-            conv = BatchNormalization()(conv)
+            conv = BatchNormalization()(conv, training=do_batch_normalization)
         conv = LeakyReLU(alpha=0.2)(conv)
         return conv, mask
 
