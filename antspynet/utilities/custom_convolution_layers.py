@@ -6,7 +6,7 @@ from keras.layers import Conv2D, Conv3D, InputSpec
 
 class PartialConv2D(Conv2D):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, n_channels=3, mono=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_spec = [InputSpec(ndim=4), InputSpec(ndim=4)]
 
@@ -28,9 +28,15 @@ class PartialConv2D(Conv2D):
                                       initializer=self.kernel_initializer,
                                       name='image_kernel',
                                       regularizer=self.kernel_regularizer,
-                                      constraint=self.kernel_constraint)
+                                      constraint=self.kernel_constraint,
+                                      trainable=True)
         # Mask kernel
-        self.kernel_mask = K.ones(shape=kernel_shape)
+        self.kernel_mask = self.add_weight(shape=kernel_shape,
+                                      initializer='ones',
+                                      name='mask_kernel',
+                                      regularizer=self.kernel_regularizer,
+                                      constraint=self.kernel_constraint,
+                                      trainable=False)
 
         # Calculate padding size to achieve zero-padding
         self.pconv_padding = (
@@ -46,7 +52,8 @@ class PartialConv2D(Conv2D):
                                         initializer=self.bias_initializer,
                                         name='bias',
                                         regularizer=self.bias_regularizer,
-                                        constraint=self.bias_constraint)
+                                        constraint=self.bias_constraint,
+                                        trainable=True)
         else:
             self.bias = None
         self.built = True
@@ -94,7 +101,7 @@ class PartialConv2D(Conv2D):
         # Remove ratio values where there are holes
         mask_ratio = mask_ratio * mask_output
 
-        # Normalize iamge output
+        # Normalize image output
         image_output = image_output * mask_ratio
 
         # Apply bias only to the image (if chosen to do so)
@@ -163,7 +170,12 @@ class PartialConv3D(Conv3D):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         # Mask kernel
-        self.kernel_mask = K.ones(shape=kernel_shape)
+        self.kernel_mask = self.add_weight(shape=kernel_shape,
+                                      initializer='ones',
+                                      name='mask_kernel',
+                                      regularizer=self.kernel_regularizer,
+                                      constraint=self.kernel_constraint,
+                                      trainable=False)
 
         # Calculate padding size to achieve zero-padding
         self.pconv_padding = (

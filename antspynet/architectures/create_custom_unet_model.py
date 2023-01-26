@@ -668,7 +668,7 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
 
 def create_partial_convolution_unet_model_2d(input_image_size,
-                                             do_batch_normalization=True):
+                                             batch_normalization_training=True):
 
     """
     Implementation of the U-net architecture for hypothalamus segmentation
@@ -697,17 +697,17 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     # Encoding path
 
-    def create_encoder_layer(image_in, mask_in, filters, kernel_size, do_batch_normalization=True):
+    def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=True):
         conv, mask = PartialConv2D(filters,
                                    kernel_size,
                                    strides=2,
                                    padding="same")([image_in, mask_in])
-        if do_batch_normalization:
-            conv = BatchNormalization()(conv, training=do_batch_normalization)
+        if add_batch_normalization:
+            conv = BatchNormalization()(conv, training=batch_normalization_training)
         conv = Activation('relu')(conv)
         return conv, mask
 
-    def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, do_batch_normalization=True):
+    def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=True):
         up_image = UpSampling2D(size=(2,2))(image_in)
         up_mask = UpSampling2D(size=(2,2))(mask_in)
         concatenate_image = Concatenate(axis=3)([encoder_layer, up_image])
@@ -715,32 +715,32 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         conv, mask = PartialConv2D(filters,
                                    kernel_size,
                                    padding='same')([concatenate_image, concatenate_mask])
-        if do_batch_normalization:
-            conv = BatchNormalization()(conv, training=do_batch_normalization)
+        if add_batch_normalization:
+            conv = BatchNormalization()(conv)
         conv = LeakyReLU(alpha=0.2)(conv)
         return conv, mask
 
     # Encoding path
 
-    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, 64, 7, do_batch_normalization=False)
-    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, 128, 5, do_batch_normalization=do_batch_normalization)
-    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, 256, 5, do_batch_normalization=do_batch_normalization)
-    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, 512, 3, do_batch_normalization=do_batch_normalization)
-    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, 512, 3, do_batch_normalization=do_batch_normalization)
-    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, 512, 3, do_batch_normalization=do_batch_normalization)
-    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, 512, 3, do_batch_normalization=do_batch_normalization)
-    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, 512, 3, do_batch_normalization=do_batch_normalization)
+    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, 64, 7, add_batch_normalization=False)
+    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, 128, 5)
+    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, 256, 5)
+    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, 512, 3)
+    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, 512, 3)
+    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, 512, 3)
+    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, 512, 3)
+    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, 512, 3)
 
     # Decoding path
 
-    decoder_layer9, decoder_mask9 = create_decoder_layer(encoder_layer8, encoder_mask8, encoder_layer7, encoder_mask7, 512, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer10, decoder_mask10 = create_decoder_layer(decoder_layer9, decoder_mask9, encoder_layer6, encoder_mask6, 512, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer11, decoder_mask11 = create_decoder_layer(decoder_layer10, decoder_mask10, encoder_layer5, encoder_mask5, 512, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer12, decoder_mask12 = create_decoder_layer(decoder_layer11, decoder_mask11, encoder_layer4, encoder_mask4, 512, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer13, decoder_mask13 = create_decoder_layer(decoder_layer12, decoder_mask12, encoder_layer3, encoder_mask3, 256, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer14, decoder_mask14 = create_decoder_layer(decoder_layer13, decoder_mask13, encoder_layer2, encoder_mask2, 128, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, 64, 3, do_batch_normalization=do_batch_normalization)
-    decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 3, 3, do_batch_normalization=False)
+    decoder_layer9, decoder_mask9 = create_decoder_layer(encoder_layer8, encoder_mask8, encoder_layer7, encoder_mask7, 512, 3)
+    decoder_layer10, decoder_mask10 = create_decoder_layer(decoder_layer9, decoder_mask9, encoder_layer6, encoder_mask6, 512, 3)
+    decoder_layer11, decoder_mask11 = create_decoder_layer(decoder_layer10, decoder_mask10, encoder_layer5, encoder_mask5, 512, 3)
+    decoder_layer12, decoder_mask12 = create_decoder_layer(decoder_layer11, decoder_mask11, encoder_layer4, encoder_mask4, 512, 3)
+    decoder_layer13, decoder_mask13 = create_decoder_layer(decoder_layer12, decoder_mask12, encoder_layer3, encoder_mask3, 256, 3)
+    decoder_layer14, decoder_mask14 = create_decoder_layer(decoder_layer13, decoder_mask13, encoder_layer2, encoder_mask2, 128, 3)
+    decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, 64, 3)
+    decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 3, 3, add_batch_normalization=False)
 
     output = Conv2D(filters=3,
                     kernel_size=1,
