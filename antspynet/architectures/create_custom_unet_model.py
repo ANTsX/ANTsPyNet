@@ -703,7 +703,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                    strides=2,
                                    padding="same")([image_in, mask_in])
         if add_batch_normalization:
-            conv = BatchNormalization()(conv, trainable=batch_normalization_training)
+            conv = BatchNormalization()(conv, training=batch_normalization_training)
         conv = Activation('relu')(conv)
         return conv, mask
 
