@@ -52,7 +52,7 @@ def regression_match_image(source_image,
     else:
         mask_intensities = (mask.numpy()).flatten()
         source_intensities = np.expand_dims(source_image.numpy().flatten()[np.where(mask_intensities != 0)], axis=1)
-        reference_intensities = np.expand_dims(source_image.numpy().flatten()[np.where(mask_intensities != 0)], axis=1)
+        reference_intensities = np.expand_dims(reference_image.numpy().flatten()[np.where(mask_intensities != 0)], axis=1)
 
     poly_features = PolynomialFeatures(degree=poly_order)
     source_intensities_poly = poly_features.fit_transform(source_intensities)
