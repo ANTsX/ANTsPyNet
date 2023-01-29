@@ -668,7 +668,8 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
 
 def create_partial_convolution_unet_model_2d(input_image_size,
-                                             batch_normalization_training=True):
+                                             batch_normalization_training=True,
+                                             number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512)):
 
     """
     Implementation of the U-net architecture for hypothalamus segmentation
@@ -679,6 +680,20 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     and ported from the original implementation:
 
         https://github.com/MathiasGruber/PConv-Keras
+
+    Arguments
+    ---------
+    input_image_size : tuple of length 3
+        Tuple of ints of length 3 specifying 2-D image size and channel size.
+
+    batch_normalization_training : boolean
+        First stage of training uses batch normalization but then is turned off
+        for refinement.  THe idea is that masking introduces a bias in batch
+        normalization.
+
+    number_of_filters: tuple of length 8
+        Specifies the filter schedule.  Defaults to the number of filters used in
+        the paper.
 
     Returns
     -------
@@ -691,6 +706,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     """
 
     from ..utilities import PartialConv2D
+
+    if len(number_of_filters) != 8:
+        raise ValueError("Number of filters must be of length 8.")
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
@@ -722,24 +740,24 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     # Encoding path
 
-    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, 64, 7, add_batch_normalization=False)
-    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, 128, 5)
-    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, 256, 5)
-    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, 512, 3)
-    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, 512, 3)
-    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, 512, 3)
-    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, 512, 3)
-    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, 512, 3)
+    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, number_of_filters[0], 7, add_batch_normalization=False)
+    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, number_of_filters[1], 5)
+    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, number_of_filters[2], 5)
+    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, number_of_filters[3], 3)
+    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, number_of_filters[4], 3)
+    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, number_of_filters[5], 3)
+    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, number_of_filters[6], 3)
+    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, number_of_filters[7], 3)
 
     # Decoding path
 
-    decoder_layer9, decoder_mask9 = create_decoder_layer(encoder_layer8, encoder_mask8, encoder_layer7, encoder_mask7, 512, 3)
-    decoder_layer10, decoder_mask10 = create_decoder_layer(decoder_layer9, decoder_mask9, encoder_layer6, encoder_mask6, 512, 3)
-    decoder_layer11, decoder_mask11 = create_decoder_layer(decoder_layer10, decoder_mask10, encoder_layer5, encoder_mask5, 512, 3)
-    decoder_layer12, decoder_mask12 = create_decoder_layer(decoder_layer11, decoder_mask11, encoder_layer4, encoder_mask4, 512, 3)
-    decoder_layer13, decoder_mask13 = create_decoder_layer(decoder_layer12, decoder_mask12, encoder_layer3, encoder_mask3, 256, 3)
-    decoder_layer14, decoder_mask14 = create_decoder_layer(decoder_layer13, decoder_mask13, encoder_layer2, encoder_mask2, 128, 3)
-    decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, 64, 3)
+    decoder_layer9, decoder_mask9 = create_decoder_layer(encoder_layer8, encoder_mask8, encoder_layer7, encoder_mask7, number_of_filters[6], 3)
+    decoder_layer10, decoder_mask10 = create_decoder_layer(decoder_layer9, decoder_mask9, encoder_layer6, encoder_mask6, number_of_filters[5], 3)
+    decoder_layer11, decoder_mask11 = create_decoder_layer(decoder_layer10, decoder_mask10, encoder_layer5, encoder_mask5, number_of_filters[4], 3)
+    decoder_layer12, decoder_mask12 = create_decoder_layer(decoder_layer11, decoder_mask11, encoder_layer4, encoder_mask4, number_of_filters[3], 3)
+    decoder_layer13, decoder_mask13 = create_decoder_layer(decoder_layer12, decoder_mask12, encoder_layer3, encoder_mask3, number_of_filters[2], 3)
+    decoder_layer14, decoder_mask14 = create_decoder_layer(decoder_layer13, decoder_mask13, encoder_layer2, encoder_mask2, number_of_filters[1], 3)
+    decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, number_of_filters[0], 3)
     decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 3, 3, add_batch_normalization=False)
 
     output = Conv2D(filters=3,
