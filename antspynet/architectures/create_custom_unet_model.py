@@ -713,6 +713,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
 
+    number_of_channels = input_image_size[-1]
+
     # Encoding path
 
     def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=True):
@@ -760,7 +762,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, number_of_filters[0], 3)
     decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 3, 3, add_batch_normalization=False)
 
-    output = Conv2D(filters=3,
+    output = Conv2D(filters=number_of_channels,
                     kernel_size=1,
                     activation='sigmoid')(decoder_layer16)
 
