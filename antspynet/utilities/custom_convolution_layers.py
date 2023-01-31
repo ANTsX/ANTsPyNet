@@ -6,7 +6,7 @@ from keras.layers import Conv2D, Conv3D, InputSpec
 
 class PartialConv2D(Conv2D):
 
-    def __init__(self, *args, n_channels=3, mono=False, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_spec = [InputSpec(ndim=4), InputSpec(ndim=4)]
 
