@@ -669,8 +669,7 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
 def create_partial_convolution_unet_model_2d(input_image_size,
                                              batch_normalization_training=True,
-                                             number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512),
-                                             number_of_priors=0):
+                                             number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512)):
 
     """
     Implementation of the U-net architecture for hypothalamus segmentation
@@ -713,11 +712,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
-    number_of_channels = input_image_size[-1]
-
-    input_priors = None
-    if number_of_priors > 0:
-        input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
 
     # Encoding path
 
@@ -764,21 +758,11 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     decoder_layer13, decoder_mask13 = create_decoder_layer(decoder_layer12, decoder_mask12, encoder_layer3, encoder_mask3, number_of_filters[2], 3)
     decoder_layer14, decoder_mask14 = create_decoder_layer(decoder_layer13, decoder_mask13, encoder_layer2, encoder_mask2, number_of_filters[1], 3)
     decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, number_of_filters[0], 3)
-    decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 3, 3, add_batch_normalization=False)
+    decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 1, 3, add_batch_normalization=False)
 
-    inputs = []
-    if number_of_priors > 0:
-        output = Concatenate(axis=3)([decoder_layer16, input_priors])
-        output = Conv2D(filters=number_of_channels,
-                        kernel_size=1,
-                        activation='sigmoid')(output)
-        inputs = [input_image, input_mask, input_priors]
-    else:
-        output = Conv2D(filters=number_of_channels,
-                        kernel_size=1,
-                        activation='sigmoid')(decoder_layer16)
-        inputs = [input_image, input_mask]
-
-    unet_model = Model(inputs=inputs, outputs=output)
+    output = Conv2D(filters=1,
+                    kernel_size=1,
+                    activation='sigmoid')(decoder_layer16)
+    unet_model = Model(inputs=[input_image, input_mask], outputs=output)
 
     return unet_model, input_mask
