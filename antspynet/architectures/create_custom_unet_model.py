@@ -713,6 +713,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
+    number_of_channels = input_image_size[-1]
 
     input_priors = None
     if number_of_priors > 0:
@@ -767,13 +768,13 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     inputs = []
     if number_of_priors > 0:
-        output = Concatenate(axis=-1)([decoder_layer16, input_priors])
-        output = Conv2D(filters=3,
+        output = Concatenate(axis=3)([decoder_layer16, input_priors])
+        output = Conv2D(filters=number_of_channels,
                         kernel_size=1,
                         activation='sigmoid')(output)
         inputs = [input_image, input_mask, input_priors]
     else:
-        output = Conv2D(filters=3,
+        output = Conv2D(filters=number_of_channels,
                         kernel_size=1,
                         activation='sigmoid')(decoder_layer16)
         inputs = [input_image, input_mask]
