@@ -5,8 +5,8 @@ import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concatenate, ReLU, LeakyReLU,
-                                     Conv3D, Conv3DTranspose, Input, Lambda, MaxPooling3D,
-                                     SpatialDropout3D, UpSampling3D,
+                                     Conv3D, Conv3DTranspose, Input, MaxPooling3D,
+                                     ReLU, SpatialDropout3D, UpSampling3D,
                                      Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 
 from tensorflow.keras.activations import softmax
@@ -761,8 +761,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 1, 3, add_batch_normalization=False)
 
     output = Conv2D(filters=1,
-                    kernel_size=1,
-                    activation='sigmoid')(decoder_layer16)
+                    kernel_size=1)(decoder_layer16)
+    output = ReLU(max_value=1.0)(output)
+
     unet_model = Model(inputs=[input_image, input_mask], outputs=output)
 
     return unet_model, input_mask
