@@ -669,7 +669,8 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
 def create_partial_convolution_unet_model_2d(input_image_size,
                                              batch_normalization_training=True,
-                                             number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512)):
+                                             number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512),
+                                             kernel_size=(7, 5, 5, 3, 3, 3, 3, 3)):
 
     """
     Implementation of the U-net architecture for hypothalamus segmentation
@@ -695,6 +696,10 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         Specifies the filter schedule.  Defaults to the number of filters used in
         the paper.
 
+    number_of_filters: single scalar or tuple of length 8
+        Specifies the kernel size schedule for the encoding path.  Defaults to the
+        kernel sizes used in the paper.
+
     Returns
     -------
     Keras model
@@ -709,6 +714,13 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     if len(number_of_filters) != 8:
         raise ValueError("Number of filters must be of length 8.")
+
+    if isinstance(kernel_size, int):
+        kernel_size = [kernel_size] * 8
+    elif len(kernel_size) == 1:
+        kernel_size = [kernel_size[0]] * 8
+    elif len(kernel_size) != 8:
+        raise ValueError("kernel_size must be a scalar or of length 8.")
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
@@ -740,14 +752,14 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     # Encoding path
 
-    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, number_of_filters[0], 7, add_batch_normalization=False)
-    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, number_of_filters[1], 5)
-    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, number_of_filters[2], 5)
-    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, number_of_filters[3], 3)
-    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, number_of_filters[4], 3)
-    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, number_of_filters[5], 3)
-    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, number_of_filters[6], 3)
-    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, number_of_filters[7], 3)
+    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, number_of_filters[0], kernel_size[0], add_batch_normalization=False)
+    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, number_of_filters[1], kernel_size[1])
+    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, number_of_filters[2], kernel_size[2])
+    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, number_of_filters[3], kernel_size[3])
+    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, number_of_filters[4], kernel_size[4])
+    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, number_of_filters[5], kernel_size[5])
+    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, number_of_filters[6], kernel_size[6])
+    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, number_of_filters[7], kernel_size[7])
 
     # Decoding path
 
