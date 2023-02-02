@@ -738,8 +738,10 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         return conv, mask
 
     def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=True):
-        up_image = UpSampling2D(size=(2,2))(image_in)
-        up_mask = UpSampling2D(size=(2,2))(mask_in)
+        up_image = UpSampling2D(size=(2,2), 
+                                interpolation="bilinear")(image_in)
+        up_mask = UpSampling2D(size=(2,2), 
+                               interpolation="nearest")(mask_in)
         concatenate_image = Concatenate(axis=3)([encoder_layer, up_image])
         concatenate_mask = Concatenate(axis=3)([encoder_mask, up_mask])
         conv, mask = PartialConv2D(filters,
