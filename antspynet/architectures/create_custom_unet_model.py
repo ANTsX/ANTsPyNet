@@ -695,7 +695,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         normalization.
 
     number_of_priors : int
-        Specify tissue priors for use during the decoding branch. 
+        Specify tissue priors for use during the decoding branch.
 
     number_of_filters: tuple of length 8
         Specifies the filter schedule.  Defaults to the number of filters used in
@@ -729,7 +729,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
-    
+
     if number_of_priors > 0:
         input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
 
@@ -746,9 +746,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         return conv, mask
 
     def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=True):
-        up_image = UpSampling2D(size=(2,2), 
+        up_image = UpSampling2D(size=(2,2),
                                 interpolation="bilinear")(image_in)
-        up_mask = UpSampling2D(size=(2,2), 
+        up_mask = UpSampling2D(size=(2,2),
                                interpolation="nearest")(mask_in)
 
         if number_of_priors > 0:
@@ -771,30 +771,34 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     # Encoding path
 
-    encoder_layer1, encoder_mask1 = create_encoder_layer(input_image, input_mask, number_of_filters[0], kernel_size[0], add_batch_normalization=False)
-    encoder_layer2, encoder_mask2 = create_encoder_layer(encoder_layer1, encoder_mask1, number_of_filters[1], kernel_size[1])
-    encoder_layer3, encoder_mask3 = create_encoder_layer(encoder_layer2, encoder_mask2, number_of_filters[2], kernel_size[2])
-    encoder_layer4, encoder_mask4 = create_encoder_layer(encoder_layer3, encoder_mask3, number_of_filters[3], kernel_size[3])
-    encoder_layer5, encoder_mask5 = create_encoder_layer(encoder_layer4, encoder_mask4, number_of_filters[4], kernel_size[4])
-    encoder_layer6, encoder_mask6 = create_encoder_layer(encoder_layer5, encoder_mask5, number_of_filters[5], kernel_size[5])
-    encoder_layer7, encoder_mask7 = create_encoder_layer(encoder_layer6, encoder_mask6, number_of_filters[6], kernel_size[6])
-    encoder_layer8, encoder_mask8 = create_encoder_layer(encoder_layer7, encoder_mask7, number_of_filters[7], kernel_size[7])
+    encoder_layers = list()
+    encoder_masks = list()
+    for i in range(len(number_of_filters)):
+        if i == 0:
+            encoder_layer, encoder_mask = create_encoder_layer(input_image, input_mask, number_of_filters[i], kernel_size[i], add_batch_normalization=False)
+        else:
+            encoder_layer, encoder_mask = create_encoder_layer(encoder_layers[i-1], encoder_masks[i-1], number_of_filters[i], kernel_size[i], add_batch_normalization=True)
+        encoder_layers.append(encoder_layer)
+        encoder_masks.append(encoder_mask)
 
     # Decoding path
-
-    decoder_layer9, decoder_mask9 = create_decoder_layer(encoder_layer8, encoder_mask8, encoder_layer7, encoder_mask7, number_of_filters[6], 3)
-    decoder_layer10, decoder_mask10 = create_decoder_layer(decoder_layer9, decoder_mask9, encoder_layer6, encoder_mask6, number_of_filters[5], 3)
-    decoder_layer11, decoder_mask11 = create_decoder_layer(decoder_layer10, decoder_mask10, encoder_layer5, encoder_mask5, number_of_filters[4], 3)
-    decoder_layer12, decoder_mask12 = create_decoder_layer(decoder_layer11, decoder_mask11, encoder_layer4, encoder_mask4, number_of_filters[3], 3)
-    decoder_layer13, decoder_mask13 = create_decoder_layer(decoder_layer12, decoder_mask12, encoder_layer3, encoder_mask3, number_of_filters[2], 3)
-    decoder_layer14, decoder_mask14 = create_decoder_layer(decoder_layer13, decoder_mask13, encoder_layer2, encoder_mask2, number_of_filters[1], 3)
-    decoder_layer15, decoder_mask15 = create_decoder_layer(decoder_layer14, decoder_mask14, encoder_layer1, encoder_mask1, number_of_filters[0], 3)
-    decoder_layer16, decoder_mask16 = create_decoder_layer(decoder_layer15, decoder_mask15, input_image, input_mask, 1, 3, add_batch_normalization=False)
+    decoder_layers = list()
+    decoder_masks = list()
+    for i in range(len(number_of_filters)):
+        index = len(number_of_filters) - 1 - i
+        if i == 0:
+            decoder_layer, decoder_mask = create_decoder_layer(encoder_layers[-1], encoder_masks[-1], encoder_layers[-2], encoder_masks[-2], number_of_filters[-2], 3, add_batch_normalization=True)
+        elif i == len(number_of_filters) - 1:
+            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1], input_image, input_mask, 1, 3, add_batch_normalization=False)
+        else:
+            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1], encoder_layers[index-1], encoder_masks[index-1], number_of_filters[index-1], 3, add_batch_normalization=True)
+        decoder_layers.append(decoder_layer)
+        decoder_masks.append(decoder_mask)
 
     output = Conv2D(filters=1,
-                    kernel_size=1)(decoder_layer16)
+                    kernel_size=1)(decoder_layers[-1])
     output = ReLU(max_value=1.0)(output)
- 
+
     unet_model = None
     if number_of_priors > 0:
         unet_model = Model(inputs=[input_image, input_mask, input_priors], outputs=output)
