@@ -763,7 +763,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                    padding='same')([concatenate_image, concatenate_mask])
         if add_batch_normalization:
             conv = BatchNormalization()(conv)
-        conv = LeakyReLU(alpha=0.2)(conv)
+        conv = Activation('relu')(conv)
         return conv, mask
 
     # Encoding path
@@ -793,8 +793,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         decoder_masks.append(decoder_mask)
 
     output = Conv2D(filters=1,
-                    kernel_size=1)(decoder_layers[-1])
-    output = ReLU(max_value=1.0)(output)
+                    kernel_size=1,
+                    activation="sigmoid")(decoder_layers[-1])
 
     unet_model = None
     if number_of_priors > 0:
