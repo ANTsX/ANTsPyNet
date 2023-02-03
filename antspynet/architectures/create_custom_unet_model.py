@@ -717,15 +717,12 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     from ..utilities import PartialConv2D
 
-    if len(number_of_filters) != 8:
-        raise ValueError("Number of filters must be of length 8.")
-
     if isinstance(kernel_size, int):
-        kernel_size = [kernel_size] * 8
+        kernel_size = [kernel_size] * len(number_of_filters)
     elif len(kernel_size) == 1:
-        kernel_size = [kernel_size[0]] * 8
-    elif len(kernel_size) != 8:
-        raise ValueError("kernel_size must be a scalar or of length 8.")
+        kernel_size = [kernel_size[0]] * len(number_of_filters)
+    elif len(kernel_size) != len(number_of_filters):
+        raise ValueError("kernel_size must be a scalar or of equal length as the number_of_filters.")
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
