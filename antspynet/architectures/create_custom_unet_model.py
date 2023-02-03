@@ -5,13 +5,14 @@ import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concatenate, ReLU, LeakyReLU,
-                                     Conv3D, Conv3DTranspose, Input, MaxPooling3D,
+                                     Conv3D, Conv3DTranspose, Input, Lambda, MaxPooling3D,
                                      ReLU, SpatialDropout3D, UpSampling3D,
                                      Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 
 from tensorflow.keras.activations import softmax
 
 from ..utilities import InstanceNormalization
+from ..utilities import ResampleTensorLayer2D
 
 
 def create_nobrainer_unet_model_3d(input_image_size):
@@ -669,6 +670,7 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
 def create_partial_convolution_unet_model_2d(input_image_size,
                                              batch_normalization_training=True,
+                                             number_of_priors=0,
                                              number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512),
                                              kernel_size=(7, 5, 5, 3, 3, 3, 3, 3)):
 
@@ -692,11 +694,14 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         for refinement.  THe idea is that masking introduces a bias in batch
         normalization.
 
+    number_of_priors : int
+        Specify tissue priors for use during the decoding branch. 
+
     number_of_filters: tuple of length 8
         Specifies the filter schedule.  Defaults to the number of filters used in
         the paper.
 
-    number_of_filters: single scalar or tuple of length 8
+    kernel_size: single scalar or tuple of length 8
         Specifies the kernel size schedule for the encoding path.  Defaults to the
         kernel sizes used in the paper.
 
@@ -724,6 +729,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     input_image = Input(input_image_size)
     input_mask = Input(input_image_size)
+    
+    if number_of_priors > 0:
+        input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
 
     # Encoding path
 
@@ -742,8 +750,17 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                 interpolation="bilinear")(image_in)
         up_mask = UpSampling2D(size=(2,2), 
                                interpolation="nearest")(mask_in)
+
+        if number_of_priors > 0:
+            resampled_priors = ResampleTensorLayer2D(shape=(up_image.shape[1], up_image.shape[2]),
+                                                     interpolation_type='linear')(input_priors)
+            up_image = Concatenate(axis=3)([up_image, resampled_priors])
+            resampled_priors_mask = Lambda(lambda x: tf.ones_like(x))(resampled_priors)
+            up_mask = Concatenate(axis=3)([up_mask, resampled_priors_mask])
+
         concatenate_image = Concatenate(axis=3)([encoder_layer, up_image])
         concatenate_mask = Concatenate(axis=3)([encoder_mask, up_mask])
+
         conv, mask = PartialConv2D(filters,
                                    kernel_size,
                                    padding='same')([concatenate_image, concatenate_mask])
@@ -777,7 +794,11 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     output = Conv2D(filters=1,
                     kernel_size=1)(decoder_layer16)
     output = ReLU(max_value=1.0)(output)
-
-    unet_model = Model(inputs=[input_image, input_mask], outputs=output)
+ 
+    unet_model = None
+    if number_of_priors > 0:
+        unet_model = Model(inputs=[input_image, input_mask, input_priors], outputs=output)
+    else:
+        unet_model = Model(inputs=[input_image, input_mask], outputs=output)
 
     return unet_model, input_mask
