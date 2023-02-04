@@ -730,8 +730,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     if number_of_priors > 0:
         input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
 
-    # Encoding path
-
     def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=True, do_max_pooling=True):
         conv, mask = PartialConv2D(filters,
                                    kernel_size,
@@ -776,7 +774,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         return conv, mask
 
     # Encoding path
-
     encoder_layers = list()
     encoder_masks = list()
     for i in range(len(number_of_filters)):
