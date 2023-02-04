@@ -7,7 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concatenate, ReLU, LeakyReLU,
                                      Conv3D, Conv3DTranspose, Input, Lambda, MaxPooling3D,
                                      ReLU, SpatialDropout3D, UpSampling3D,
-                                     Cropping2D, Conv2D, MaxPooling2D, UpSampling2D, ZeroPadding2D)
+                                     Cropping2D, Conv2D, Conv2DTranspose, MaxPooling2D, UpSampling2D, ZeroPadding2D)
 
 from tensorflow.keras.activations import softmax
 
@@ -748,8 +748,12 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         return conv, mask
 
     def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=True):
+        up_image = Conv2DTranspose(filters=image_in.shape[-1],
+                                   kernel_size=(2,2),
+                                   padding='same')(image_in)
+
         up_image = UpSampling2D(size=(2,2),
-                                interpolation="bilinear")(image_in)
+                                interpolation="bilinear")(up_image)
         up_mask = UpSampling2D(size=(2,2),
                                interpolation="nearest")(mask_in)
 
