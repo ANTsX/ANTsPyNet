@@ -730,22 +730,28 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     if number_of_priors > 0:
         input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
 
-    def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=True, do_max_pooling=True):
+    def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=False, do_max_pooling=True):
         conv, mask = PartialConv2D(filters,
                                    kernel_size,
                                    padding="same")([image_in, mask_in])
         if add_batch_normalization:
             conv = BatchNormalization()(conv, training=batch_normalization_training)
         conv = Activation('relu')(conv)
+
+        conv, mask = PartialConv2D(filters,
+                                   kernel_size,
+                                   padding="same")([conv, mask])
+        conv = Activation('relu')(conv)
+
         if do_max_pooling:
             conv = MaxPooling2D(strides=(2, 2),
                                 pool_size=(2, 2),
-                                padding='same')(conv) 
+                                padding='same')(conv)
         mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
                                                     interpolation_type='nearest_neighbor')(mask)
         return conv, mask
 
-    def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=True):
+    def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=False):
         up_image = Conv2DTranspose(filters=image_in.shape[-1],
                                    kernel_size=(2,2),
                                    padding='same')(image_in)
@@ -778,10 +784,10 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     encoder_masks = list()
     for i in range(len(number_of_filters)):
         if i == 0:
-            encoder_layer, encoder_mask = create_encoder_layer(input_image, input_mask, 
+            encoder_layer, encoder_mask = create_encoder_layer(input_image, input_mask,
                 number_of_filters[i], kernel_size[i], add_batch_normalization=False)
         else:
-            encoder_layer, encoder_mask = create_encoder_layer(encoder_layers[i-1], encoder_masks[i-1], 
+            encoder_layer, encoder_mask = create_encoder_layer(encoder_layers[i-1], encoder_masks[i-1],
                 number_of_filters[i], kernel_size[i], add_batch_normalization=True)
         encoder_layers.append(encoder_layer)
         encoder_masks.append(encoder_mask)
@@ -792,13 +798,13 @@ def create_partial_convolution_unet_model_2d(input_image_size,
     for i in range(len(number_of_filters)):
         index = len(number_of_filters) - 1 - i
         if i == 0:
-            decoder_layer, decoder_mask = create_decoder_layer(encoder_layers[-1], encoder_masks[-1], 
+            decoder_layer, decoder_mask = create_decoder_layer(encoder_layers[-1], encoder_masks[-1],
                 encoder_layers[-2], encoder_masks[-2], number_of_filters[-2], 3, add_batch_normalization=True)
         elif i == len(number_of_filters) - 1:
-            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1], 
+            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1],
                 input_image, input_mask, 1, 3, add_batch_normalization=False)
         else:
-            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1], 
+            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1],
                 encoder_layers[index-1], encoder_masks[index-1], number_of_filters[index-1], 3, add_batch_normalization=True)
         decoder_layers.append(decoder_layer)
         decoder_masks.append(decoder_mask)
