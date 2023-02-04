@@ -53,7 +53,7 @@ class ResampleTensorLayer2D(Layer):
 
     def call(self, x, mask=None):
         resampled_tensor = None
-        if self.interpolation_type == 'nearest_neighbor':
+        if self.interpolation_type == 'nearest_neighbor' or self.interpolation_type == 'nearest':
             resampled_tensor = tf.image.resize(x, size=self.shape, method='nearest')
         elif self.interpolation_type == 'linear':
             resampled_tensor = tf.image.resize(x, size=self.shape, method='bilinear')
