@@ -731,17 +731,27 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
 
     def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=False, do_max_pooling=True):
-        conv, mask = PartialConv2D(filters,
-                                   kernel_size,
-                                   padding="same")([image_in, mask_in])
+        # conv, mask = PartialConv2D(filters,
+        #                            kernel_size,
+        #                            padding="same")([image_in, mask_in])
+        conv = Conv2D(filters,
+                      kernel_size,
+                      padding="same")(image_in)
         if add_batch_normalization:
             conv = BatchNormalization()(conv, training=batch_normalization_training)
         conv = Activation('relu')(conv)
+        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
+                                     interpolation_type='nearest_neighbor')(mask_in)
 
-        conv, mask = PartialConv2D(filters,
-                                   kernel_size,
-                                   padding="same")([conv, mask])
+        # conv, mask = PartialConv2D(filters,
+        #                            kernel_size,
+        #                            padding="same")([conv, mask])
+        conv = Conv2D(filters,
+                      kernel_size,
+                      padding="same")(image_in)
         conv = Activation('relu')(conv)
+        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
+                                     interpolation_type='nearest_neighbor')(mask_in)
 
         if do_max_pooling:
             conv = MaxPooling2D(strides=(2, 2),
@@ -771,9 +781,14 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         concatenate_image = Concatenate(axis=3)([encoder_layer, up_image])
         concatenate_mask = Concatenate(axis=3)([encoder_mask, up_mask])
 
-        conv, mask = PartialConv2D(filters,
-                                   kernel_size,
-                                   padding='same')([concatenate_image, concatenate_mask])
+        # conv, mask = PartialConv2D(filters,
+        #                            kernel_size,
+        #                            padding='same')([concatenate_image, concatenate_mask])
+        conv = Conv2D(filters,
+                      kernel_size,
+                      padding="same")(concatenate_image)
+        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
+                                     interpolation_type='nearest_neighbor')(mask_in)
         if add_batch_normalization:
             conv = BatchNormalization()(conv)
         conv = Activation('relu')(conv)
