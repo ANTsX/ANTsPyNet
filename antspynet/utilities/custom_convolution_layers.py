@@ -30,13 +30,13 @@ class PartialConv2D(Conv2D):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint,
                                       trainable=True)
-        # Mask kernel
-        self.kernel_mask = self.add_weight(shape=kernel_shape,
-                                      initializer='ones',
-                                      name='mask_kernel',
-                                      regularizer=self.kernel_regularizer,
-                                      constraint=self.kernel_constraint,
-                                      trainable=False)
+        # # Mask kernel
+        # self.kernel_mask = self.add_weight(shape=kernel_shape,
+        #                               initializer='ones',
+        #                               name='mask_kernel',
+        #                               regularizer=self.kernel_regularizer,
+        #                               constraint=self.kernel_constraint,
+        #                               trainable=False)
 
         # Calculate padding size to achieve zero-padding
         self.pconv_padding = (
@@ -74,9 +74,11 @@ class PartialConv2D(Conv2D):
         images = K.spatial_2d_padding(inputs[0], self.pconv_padding, self.data_format)
         masks = K.spatial_2d_padding(inputs[1], self.pconv_padding, self.data_format)
 
+        kernel_mask = K.ones(shape=self.kernel_size + (self.input_dim, self.filters))
+
         # Apply convolutions to mask
         mask_output = K.conv2d(
-            masks, self.kernel_mask,
+            masks, kernel_mask,
             strides=self.strides,
             padding='valid',
             data_format=self.data_format,

@@ -669,10 +669,10 @@ def create_hypothalamus_unet_model_3d(input_image_size):
 
 
 def create_partial_convolution_unet_model_2d(input_image_size,
-                                             batch_normalization_training=True,
                                              number_of_priors=0,
                                              number_of_filters=(64, 128, 256, 512, 512, 512, 512, 512),
-                                             kernel_size=(7, 5, 5, 3, 3, 3, 3, 3)):
+                                             kernel_size=(7, 5, 5, 3, 3, 3, 3, 3),
+                                             use_partial_conv=True):
 
     """
     Implementation of the U-net architecture for hypothalamus segmentation
@@ -729,115 +729,110 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
     if number_of_priors > 0:
         input_priors = Input((input_image_size[0], input_image_size[1], number_of_priors))
-
-    def create_encoder_layer(image_in, mask_in, filters, kernel_size, add_batch_normalization=False, do_max_pooling=True):
-        # conv, mask = PartialConv2D(filters,
-        #                            kernel_size,
-        #                            padding="same")([image_in, mask_in])
-        conv = Conv2D(filters,
-                      kernel_size,
-                      padding="same")(image_in)
-        if add_batch_normalization:
-            conv = BatchNormalization()(conv, training=batch_normalization_training)
-        conv = Activation('relu')(conv)
-        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
-                                     interpolation_type='nearest_neighbor')(mask_in)
-
-        # conv, mask = PartialConv2D(filters,
-        #                            kernel_size,
-        #                            padding="same")([conv, mask])
-        conv = Conv2D(filters,
-                      kernel_size,
-                      padding="same")(image_in)
-        conv = Activation('relu')(conv)
-        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
-                                     interpolation_type='nearest_neighbor')(mask_in)
-
-        if do_max_pooling:
-            conv = MaxPooling2D(strides=(2, 2),
-                                pool_size=(2, 2),
-                                padding='same')(conv)
-        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
-                                                    interpolation_type='nearest_neighbor')(mask)
-        return conv, mask
-
-    def create_decoder_layer(image_in, mask_in, encoder_layer, encoder_mask, filters, kernel_size, add_batch_normalization=True):
-        up_image = Conv2DTranspose(filters=image_in.shape[-1],
-                                   kernel_size=(2,2),
-                                   padding='same')(image_in)
-
-        up_image = UpSampling2D(size=(2,2),
-                                interpolation="bilinear")(up_image)
-        up_mask = UpSampling2D(size=(2,2),
-                               interpolation="nearest")(mask_in)
-
-        if number_of_priors > 0:
-            resampled_priors = ResampleTensorLayer2D(shape=(up_image.shape[1], up_image.shape[2]),
-                                                     interpolation_type='linear')(input_priors)
-            up_image = Concatenate(axis=3)([up_image, resampled_priors])
-            resampled_priors_mask = Lambda(lambda x: tf.ones_like(x))(resampled_priors)
-            up_mask = Concatenate(axis=3)([up_mask, resampled_priors_mask])
-
-        concatenate_image = Concatenate(axis=3)([encoder_layer, up_image])
-        concatenate_mask = Concatenate(axis=3)([encoder_mask, up_mask])
-
-        # conv, mask = PartialConv2D(filters,
-        #                            kernel_size,
-        #                            padding='same')([concatenate_image, concatenate_mask])
-        conv = Conv2D(filters,
-                      kernel_size,
-                      padding="same")(concatenate_image)
-        mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
-                                     interpolation_type='nearest_neighbor')(mask_in)
-        if add_batch_normalization:
-            conv = BatchNormalization()(conv)
-        conv = Activation('relu')(conv)
-        return conv, mask
+        inputs = [input_image, input_mask, input_priors]
+    else:
+        inputs = [input_image, input_mask]
 
     # Encoding path
-    encoder_layers = list()
-    encoder_masks = list()
-    for i in range(len(number_of_filters)):
+
+    number_of_layers = len(number_of_filters)
+
+    encoding_convolution_layers = []
+    pool = None
+    for i in range(number_of_layers):
+
         if i == 0:
-            encoder_layer, encoder_mask = create_encoder_layer(input_image, input_mask,
-                number_of_filters[i], kernel_size[i], add_batch_normalization=False)
+            if use_partial_conv:
+                conv, mask = PartialConv2D(filters=number_of_filters[i],
+                                           kernel_size=kernel_size[i],
+                                           padding="same")([inputs[0], inputs[1]])
+            else:
+                conv = Conv2D(filters=number_of_filters[i],
+                              kernel_size=kernel_size[i],
+                              padding='same')(inputs[0])
         else:
-            # encoder_layer, encoder_mask = create_encoder_layer(encoder_layers[i-1], encoder_masks[i-1],
-            #     number_of_filters[i], kernel_size[i], add_batch_normalization=True)
-            encoder_layer, encoder_mask = create_encoder_layer(encoder_layers[i-1], encoder_masks[i-1],
-                number_of_filters[i], kernel_size[i], add_batch_normalization=False)
-        encoder_layers.append(encoder_layer)
-        encoder_masks.append(encoder_mask)
+            if use_partial_conv:
+                mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
+                                             interpolation_type='nearest_neighbor')(mask)
+                conv, mask = PartialConv2D(filters=number_of_filters[i],
+                                           kernel_size=kernel_size[i],
+                                           padding="same")([pool, mask])
+            else:
+                conv = Conv2D(filters=number_of_filters[i],
+                              kernel_size=kernel_size[i],
+                              padding='same')(pool)
+        conv = ReLU()(conv)
+
+        if use_partial_conv:
+            mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
+                                         interpolation_type='nearest_neighbor')(mask)
+            conv, mask = PartialConv2D(filters=number_of_filters[i],
+                                       kernel_size=kernel_size[i],
+                                       padding="same")([conv, mask])
+        else:
+            conv = Conv2D(filters=number_of_filters[i],
+                          kernel_size=kernel_size[i],
+                          padding='same')(conv)
+        conv = ReLU()(conv)
+
+        encoding_convolution_layers.append(conv)
+
+        if i < number_of_layers - 1:
+            pool = MaxPooling2D(pool_size=(2,2),
+                                strides=(2,2))(encoding_convolution_layers[i])
 
     # Decoding path
-    decoder_layers = list()
-    decoder_masks = list()
-    for i in range(len(number_of_filters)):
-        index = len(number_of_filters) - 1 - i
-        if i == 0:
-            # decoder_layer, decoder_mask = create_decoder_layer(encoder_layers[-1], encoder_masks[-1],
-            #     encoder_layers[-2], encoder_masks[-2], number_of_filters[-2], 3, add_batch_normalization=True)
-            decoder_layer, decoder_mask = create_decoder_layer(encoder_layers[-1], encoder_masks[-1],
-                encoder_layers[-2], encoder_masks[-2], number_of_filters[-2], 3, add_batch_normalization=False)
-        elif i == len(number_of_filters) - 1:
-            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1],
-                input_image, input_mask, 1, 3, add_batch_normalization=False)
-        else:
-            # decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1],
-            #     encoder_layers[index-1], encoder_masks[index-1], number_of_filters[index-1], 3, add_batch_normalization=True)
-            decoder_layer, decoder_mask = create_decoder_layer(decoder_layers[-1], decoder_masks[-1],
-                encoder_layers[index-1], encoder_masks[index-1], number_of_filters[index-1], 3, add_batch_normalization=False)
-        decoder_layers.append(decoder_layer)
-        decoder_masks.append(decoder_mask)
 
-    output = Conv2D(filters=1,
-                    kernel_size=1,
-                    activation="sigmoid")(decoder_layers[-1])
+    outputs = encoding_convolution_layers[number_of_layers - 1]
+    for i in range(1, number_of_layers):
+        deconv = Conv2DTranspose(filters=number_of_filters[number_of_layers-i-1],
+                                 kernel_size=2,
+                                 padding='same')(outputs)
+        deconv = UpSampling2D(size=(2,2))(deconv)
+        mask = UpSampling2D(size=(2,2),
+                            interpolation="nearest")(mask)
+
+        if number_of_priors > 0:
+            resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
+                                                     interpolation_type='linear')(input_priors)
+            deconv = Concatenate(axis=3)([deconv, resampled_priors])
+            resampled_priors_mask = Lambda(lambda x: tf.ones_like(x))(resampled_priors)
+            mask = Concatenate(axis=3)([mask, resampled_priors_mask])
+
+        outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
+
+        if use_partial_conv:
+            mask = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
+                                         interpolation_type='nearest_neighbor')(mask)
+            outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
+                                       kernel_size=3,
+                                       padding="same")([outputs, mask])
+        else:
+            outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
+                             kernel_size=3,
+                             padding='same')(outputs)
+        outputs = ReLU()(outputs)
+
+        if use_partial_conv:
+            mask = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
+                                         interpolation_type='nearest_neighbor')(mask)
+            outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
+                                       kernel_size=3,
+                                       padding="same")([outputs, mask])
+        else:
+            outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
+                             kernel_size=3,
+                             padding='same')(outputs)
+        outputs = ReLU()(outputs)
+
+    outputs = Conv2D(filters=1,
+                     kernel_size=(1, 1),
+                     activation = 'sigmoid')(outputs)
 
     unet_model = None
     if number_of_priors > 0:
-        unet_model = Model(inputs=[input_image, input_mask, input_priors], outputs=output)
+        unet_model = Model(inputs=[input_image, input_mask, input_priors], outputs=outputs)
     else:
-        unet_model = Model(inputs=[input_image, input_mask], outputs=output)
+        unet_model = Model(inputs=[input_image, input_mask], outputs=outputs)
 
     return unet_model, input_mask
