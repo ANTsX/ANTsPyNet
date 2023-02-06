@@ -81,8 +81,15 @@ class PartialConv2D(Conv2D):
         )
 
         # Apply convolutions to image
+        # image_output = K.conv2d(
+        #     (images*masks), self.kernel,
+        #     strides=self.strides,
+        #     padding='valid',
+        #     data_format=self.data_format,
+        #     dilation_rate=self.dilation_rate
+        # )
         image_output = K.conv2d(
-            (images*masks), self.kernel,
+            images, self.kernel,
             strides=self.strides,
             padding='valid',
             data_format=self.data_format,
@@ -99,7 +106,7 @@ class PartialConv2D(Conv2D):
         mask_ratio = mask_ratio * mask_output
 
         # Normalize image output
-        image_output = image_output * mask_ratio
+        # image_output = image_output * mask_ratio
 
         # Apply bias only to the image (if chosen to do so)
         if self.use_bias:
