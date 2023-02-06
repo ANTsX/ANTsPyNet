@@ -106,7 +106,7 @@ class PartialConv2D(Conv2D):
         mask_ratio = mask_ratio * mask_output
 
         # Normalize image output
-        # image_output = image_output * mask_ratio
+        image_output = image_output * mask_ratio
 
         # Apply bias only to the image (if chosen to do so)
         if self.use_bias:
