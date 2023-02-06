@@ -790,8 +790,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                  padding='same')(outputs)
         deconv = UpSampling2D(size=(2,2))(deconv)
         if use_partial_conv:
-            mask = UpSampling2D(size=(2,2),
-                                interpolation="nearest")(mask)
+            mask = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
+                                         interpolation_type='nearest_neighbor')(inputs[1])
 
         if number_of_priors > 0:
             resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
@@ -804,7 +804,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
         if use_partial_conv:
             mask = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
-                                         interpolation_type='nearest_neighbor')(mask)
+                                         interpolation_type='nearest_neighbor')(inputs[1])
             outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
                                        kernel_size=3,
                                        padding="same")([outputs, mask])
@@ -816,7 +816,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
         if use_partial_conv:
             mask = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
-                                         interpolation_type='nearest_neighbor')(mask)
+                                         interpolation_type='nearest_neighbor')(inputs[1])
             outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
                                        kernel_size=3,
                                        padding="same")([outputs, mask])
