@@ -785,6 +785,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                  kernel_size=2,
                                  padding='same')(outputs)
         deconv = UpSampling2D(size=(2,2))(deconv)
+        mask = UpSampling2D(size=(2,2),
+                            interpolation="nearest")(mask)
         if use_partial_conv:
             if number_of_priors > 0:
                 resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
