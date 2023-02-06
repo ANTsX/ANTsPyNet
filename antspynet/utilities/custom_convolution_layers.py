@@ -33,7 +33,7 @@ class PartialConv2D(Conv2D):
                                       constraint=self.kernel_constraint,
                                       trainable=True)
 
-        self.kernel_mask = np.ones(shape=self.kernel_size + (self.input_dim, self.filters), dtype=np.float32)
+        self.kernel_mask = np.ones(shape=kernel_shape, dtype=np.float32)
 
         # Calculate padding size to achieve zero-padding
         self.pconv_padding = (
@@ -89,11 +89,12 @@ class PartialConv2D(Conv2D):
             dilation_rate=self.dilation_rate
         )
 
+        # Calculate the mask ratio on each pixel in the output mask
+        mask_ratio = self.window_size / (mask_output + 1e-6)
+        mask_ratio = K.clip(mask_ratio, 0, 1)
+
         # Clip output to be between 0 and 1
         mask_output = K.clip(mask_output, 0, 1)
-
-        # Calculate the mask ratio on each pixel in the output mask
-        mask_ratio = self.window_size / (mask_output + 1e-8)
 
         # Remove ratio values where there are holes
         mask_ratio = mask_ratio * mask_output
@@ -112,7 +113,7 @@ class PartialConv2D(Conv2D):
         if self.activation is not None:
             image_output = self.activation(image_output)
 
-        return [image_output, mask_ratio]
+        return [image_output, mask_output]
 
     def compute_output_shape(self, input_shape):
         if self.data_format == 'channels_last':
