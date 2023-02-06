@@ -2,15 +2,17 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import backend as K
 from keras.utils import conv_utils
-from keras.layers import Conv2D, Conv3D, InputSpec
-
-import numpy as np
+from keras.layers import InputSpec, Conv2D, Conv3D
 
 class PartialConv2D(Conv2D):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self,
+                 *args,
+                 eps=1e-6,
+                 **kwargs):
+        super(PartialConv2D, self).__init__(*args, **kwargs)
         self.input_spec = [InputSpec(ndim=4), InputSpec(ndim=4)]
+        self.eps = eps
 
     def build(self, input_shape):
         if self.data_format == 'channels_first':
@@ -18,102 +20,70 @@ class PartialConv2D(Conv2D):
         else:
             channel_axis = -1
 
-        if input_shape[0][channel_axis] is None:
-            raise ValueError('The channel dimension of the inputs should be defined. Found `None`.')
-
         self.input_dim = input_shape[0][channel_axis]
 
         # Image kernel
         kernel_shape = self.kernel_size + (self.input_dim, self.filters)
 
-        self.kernel = self.add_weight(shape=kernel_shape,
+        self.kernel = self.add_weight(name="kernel",
+                                      shape=kernel_shape,
                                       initializer=self.kernel_initializer,
-                                      name='image_kernel',
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint,
-                                      trainable=True)
-
-        self.kernel_mask = np.ones(shape=kernel_shape, dtype=np.float32)
-
-        # Calculate padding size to achieve zero-padding
-        self.pconv_padding = (
-            (int((self.kernel_size[0]-1)/2), int((self.kernel_size[0]-1)/2)),
-            (int((self.kernel_size[1]-1)/2), int((self.kernel_size[1]-1)/2))
-        )
-
-        # Window size - used for normalization
-        self.window_size = self.kernel_size[0] * self.kernel_size[1]
+                                      trainable=True,
+                                      dtype=self.dtype)
+        mask_fanin = tf.reduce_prod(kernel_shape[:3])
+        self.mask_kernel = tf.ones(kernel_shape) / tf.cast(mask_fanin, 'float32')
 
         if self.use_bias:
-            self.bias = self.add_weight(shape=(self.filters,),
+            self.bias = self.add_weight(name='bias',
+                                        shape=(self.filters,),
                                         initializer=self.bias_initializer,
-                                        name='bias',
                                         regularizer=self.bias_regularizer,
                                         constraint=self.bias_constraint,
-                                        trainable=True)
+                                        trainable=True,
+                                        dtype=self.dtype)
         else:
             self.bias = None
+
         self.built = True
 
     def call(self, inputs, mask=None):
-        '''
-        We will be using the Keras conv2d method, and essentially we have
-        to do here is multiply the mask with the input X, before we apply the
-        convolutions. For the mask itself, we apply convolutions with all weights
-        set to 1. Subsequently, we clip mask values to between 0 and 1.
-        '''
 
-        # Both image and mask must be supplied
-        if type(inputs) is not list or len(inputs) != 2:
-            raise Exception('PartialConvolution2D must be called on a list of two tensors [img, mask]. Instead got: ' + str(inputs))
+        features = inputs[0]
+        mask = inputs[1]
+        if mask.shape[-1] == 1:
+            mask = tf.repeat(mask, tf.shape(features)[-1], axis=-1)
 
-        # Padding done explicitly so that padding becomes part of the masked partial convolution
-        images = K.spatial_2d_padding(inputs[0], self.pconv_padding, self.data_format)
-        masks = K.spatial_2d_padding(inputs[1], self.pconv_padding, self.data_format)
-
-        # Apply convolutions to mask
-        mask_output = K.conv2d(
-            masks, self.kernel_mask,
+        features = tf.multiply(features, mask)
+        features = K.conv2d(features,
+            self.kernel,
             strides=self.strides,
-            padding='valid',
+            padding=self.padding,
             data_format=self.data_format,
             dilation_rate=self.dilation_rate
         )
 
-        # Apply convolutions to image
-        image_output = K.conv2d(
-            (images*masks), self.kernel,
+        norm = K.conv2d(mask,
+            self.mask_kernel,
             strides=self.strides,
-            padding='valid',
+            padding=self.padding,
             data_format=self.data_format,
             dilation_rate=self.dilation_rate
         )
 
-        # Calculate the mask ratio on each pixel in the output mask
-        mask_ratio = self.window_size / (mask_output + 1e-6)
-        mask_ratio = K.clip(mask_ratio, 0, 1)
+        features = tf.math.divide_no_nan(features, norm)
 
-        # Clip output to be between 0 and 1
-        mask_output = K.clip(mask_output, 0, 1)
-
-        # Remove ratio values where there are holes
-        mask_ratio = mask_ratio * mask_output
-
-        # Normalize image output
-        image_output = image_output * mask_ratio
-
-        # Apply bias only to the image (if chosen to do so)
         if self.use_bias:
-            image_output = K.bias_add(
-                image_output,
-                self.bias,
-                data_format=self.data_format)
+            features = tf.add(features, self.bias)
 
         # Apply activations on the image
         if self.activation is not None:
-            image_output = self.activation(image_output)
+            features = self.activation(features)
 
-        return [image_output, mask_output]
+        mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
+
+        return [features, mask]
 
     def compute_output_shape(self, input_shape):
         if self.data_format == 'channels_last':
@@ -123,7 +93,7 @@ class PartialConv2D(Conv2D):
                 new_dim = conv_utils.conv_output_length(
                     space[i],
                     self.kernel_size[i],
-                    padding='same',
+                    padding=self.padding,
                     stride=self.strides[i],
                     dilation=self.dilation_rate[i])
                 new_space.append(new_dim)
@@ -136,7 +106,7 @@ class PartialConv2D(Conv2D):
                 new_dim = conv_utils.conv_output_length(
                     space[i],
                     self.kernel_size[i],
-                    padding='same',
+                    padding=self.padding,
                     stride=self.strides[i],
                     dilation=self.dilation_rate[i])
                 new_space.append(new_dim)
