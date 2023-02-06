@@ -752,8 +752,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                               padding='same')(inputs[0])
         else:
             if use_partial_conv:
-                mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
-                                             interpolation_type='nearest_neighbor')(mask)
                 conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
                                            padding="same")([pool, mask])
@@ -764,8 +762,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         conv = ReLU()(conv)
 
         if use_partial_conv:
-            mask = ResampleTensorLayer2D(shape=(conv.shape[1], conv.shape[2]),
-                                         interpolation_type='nearest_neighbor')(mask)
             conv, mask = PartialConv2D(filters=number_of_filters[i],
                                        kernel_size=kernel_size[i],
                                        padding="same")([conv, mask])
@@ -790,21 +786,16 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                  padding='same')(outputs)
         deconv = UpSampling2D(size=(2,2))(deconv)
         if use_partial_conv:
-            mask = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
-                                         interpolation_type='nearest_neighbor')(inputs[1])
-
-        if number_of_priors > 0:
-            resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
-                                                     interpolation_type='linear')(input_priors)
-            deconv = Concatenate(axis=3)([deconv, resampled_priors])
-            resampled_priors_mask = Lambda(lambda x: tf.ones_like(x))(resampled_priors)
-            mask = Concatenate(axis=3)([mask, resampled_priors_mask])
+            if number_of_priors > 0:
+                resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
+                                                         interpolation_type='linear')(input_priors)
+                deconv = Concatenate(axis=3)([deconv, resampled_priors])
+                resampled_priors_mask = Lambda(lambda x: tf.ones_like(x))(resampled_priors)
+                mask = Concatenate(axis=3)([mask, resampled_priors_mask])
 
         outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         if use_partial_conv:
-            mask = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
-                                         interpolation_type='nearest_neighbor')(inputs[1])
             outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
                                        kernel_size=3,
                                        padding="same")([outputs, mask])
@@ -815,8 +806,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         outputs = ReLU()(outputs)
 
         if use_partial_conv:
-            mask = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
-                                         interpolation_type='nearest_neighbor')(inputs[1])
             outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
                                        kernel_size=3,
                                        padding="same")([outputs, mask])
