@@ -23,7 +23,7 @@ class PartialConv2D(Conv2D):
         self.input_dim = input_shape[0][channel_axis]
 
         # Image kernel
-        kernel_shape = self.kernel_size + (self.input_dim, self.filters)
+        kernel_shape = (*self.kernel_size, self.input_dim, self.filters)
 
         self.kernel = self.add_weight(name="kernel",
                                       shape=kernel_shape,
