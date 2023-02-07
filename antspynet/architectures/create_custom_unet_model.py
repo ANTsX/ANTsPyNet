@@ -753,8 +753,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                               padding='same')(inputs[0])
         else:
             if use_partial_conv:
-                # mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
-                #                              interpolation_type='nearest_neighbor')(mask)
+                mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
+                                             interpolation_type='nearest_neighbor')(mask)
                 conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
                                            padding="same")([pool, mask])
@@ -779,14 +779,10 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         if i < number_of_layers - 1:
             pool = MaxPooling2D(pool_size=(2,2),
                                 strides=(2,2))(encoding_convolution_layers[i])
-            mask = MaxPooling2D(pool_size=(2,2),
-                                strides=(2,2),
-                                trainable=False)(mask)
 
     # Decoding path
 
     outputs = encoding_convolution_layers[number_of_layers - 1]
-
     for i in range(1, number_of_layers):
         deconv = Conv2DTranspose(filters=number_of_filters[number_of_layers-i-1],
                                  kernel_size=2,

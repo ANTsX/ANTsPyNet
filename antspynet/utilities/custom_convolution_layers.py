@@ -46,7 +46,7 @@ class PartialConv2D(Conv2D):
         else:
             self.bias = None
 
-        self.built = True
+        super(PartialConv2D, self).build(input_shape[0])
 
     def call(self, inputs, mask=None):
 
@@ -86,8 +86,13 @@ class PartialConv2D(Conv2D):
         return [features, mask]
 
     def compute_output_shape(self, input_shape):
+        if type(input_shape) is list:
+            feature_shape = input_shape[0]
+        else:
+            feature_shape = input_shape
+
         if self.data_format == 'channels_last':
-            space = input_shape[0][1:-1]
+            space = feature_shape[1:-1]
             new_space = []
             for i in range(len(space)):
                 new_dim = conv_utils.conv_output_length(
@@ -97,7 +102,7 @@ class PartialConv2D(Conv2D):
                     stride=self.strides[i],
                     dilation=self.dilation_rate[i])
                 new_space.append(new_dim)
-            new_shape = (input_shape[0][0],) + tuple(new_space) + (self.filters,)
+            new_shape = (feature_shape[0],) + tuple(new_space) + (self.filters,)
             return [new_shape, new_shape]
         elif self.data_format == 'channels_first':
             space = input_shape[2:]
@@ -110,6 +115,6 @@ class PartialConv2D(Conv2D):
                     stride=self.strides[i],
                     dilation=self.dilation_rate[i])
                 new_space.append(new_dim)
-            new_shape = (input_shape[0], self.filters) + tuple(new_space)
+            new_shape = (feature_shape[0], self.filters) + tuple(new_space)
             return [new_shape, new_shape]
 
