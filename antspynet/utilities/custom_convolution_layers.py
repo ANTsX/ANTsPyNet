@@ -148,6 +148,8 @@ class PartialConv2D(Conv2D):
                                       constraint=self.kernel_constraint,
                                       trainable=True,
                                       dtype=self.dtype)
+        mask_fanin = self.kernel_size[0] * self.kernel_size[1]
+        self.mask_kernel = tf.ones(kernel_shape) / tf.cast(mask_fanin, 'float32')
 
         if self.use_bias:
             self.bias = self.add_weight(name='bias',
