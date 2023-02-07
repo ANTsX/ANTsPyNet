@@ -72,8 +72,8 @@ class PartialConv2D(Conv2D):
             dilation_rate=self.dilation_rate
         )
         padding_dim = list()
-        padding_dim.append(int((features.shape[1] - norm.shape[1]) / 2))
-        padding_dim.append(int((features.shape[2] - norm.shape[2]) / 2))
+        padding_dim.append((features.shape[1] - norm.shape[1]) // 2)
+        padding_dim.append((features.shape[2] - norm.shape[2]) // 2)
         paddings = tf.constant([[0, 0], [padding_dim[0], padding_dim[0]],
                                 [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
         norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=1)
