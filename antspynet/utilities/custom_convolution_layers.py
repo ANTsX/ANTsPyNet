@@ -78,7 +78,7 @@ class PartialConv2D(Conv2D):
                                 [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
         norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=1)
 
-        features = tf.math.divide_no_nan(features, norm)
+        # features = tf.math.divide_no_nan(features, norm)
 
         if self.use_bias:
             features = tf.add(features, self.bias)
@@ -87,9 +87,9 @@ class PartialConv2D(Conv2D):
         if self.activation is not None:
             features = self.activation(features)
 
-        mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
+        # mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
 
-        return [features, mask]
+        return [features, norm]
 
     def compute_output_shape(self, input_shape):
         if type(input_shape) is list:
