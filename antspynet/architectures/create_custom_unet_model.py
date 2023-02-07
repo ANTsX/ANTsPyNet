@@ -744,26 +744,20 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
         if i == 0:
             if use_partial_conv:
-                # conv, mask = PartialConv2D(filters=number_of_filters[i],
-                #                            kernel_size=kernel_size[i],
-                #                            padding="same")([inputs[0], inputs[1]])
-                conv = PartialConv2D(filters=number_of_filters[i],
+                conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
-                                           padding="same")(inputs[0])
+                                           padding="same")([inputs[0], inputs[1]])
             else:
                 conv = Conv2D(filters=number_of_filters[i],
                               kernel_size=kernel_size[i],
                               padding='same')(inputs[0])
         else:
             if use_partial_conv:
-                # mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
-                #                              interpolation_type='nearest_neighbor')(mask)
-                # conv, mask = PartialConv2D(filters=number_of_filters[i],
-                #                            kernel_size=kernel_size[i],
-                #                            padding="same")([pool, mask])
-                conv = PartialConv2D(filters=number_of_filters[i],
+                mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
+                                             interpolation_type='nearest_neighbor')(mask)
+                conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
-                                           padding="same")(pool)
+                                           padding="same")([pool, mask])
             else:
                 conv = Conv2D(filters=number_of_filters[i],
                               kernel_size=kernel_size[i],
@@ -771,12 +765,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         conv = ReLU()(conv)
 
         if use_partial_conv:
-            # conv, mask = PartialConv2D(filters=number_of_filters[i],
-            #                            kernel_size=kernel_size[i],
-            #                            padding="same")([conv, mask])
-            conv = PartialConv2D(filters=number_of_filters[i],
+            conv, mask = PartialConv2D(filters=number_of_filters[i],
                                        kernel_size=kernel_size[i],
-                                       padding="same")(conv)
+                                       padding="same")([conv, mask])
         else:
             conv = Conv2D(filters=number_of_filters[i],
                           kernel_size=kernel_size[i],
@@ -798,9 +789,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                  padding='same')(outputs)
         deconv = UpSampling2D(size=(2,2))(deconv)
 
-        # if use_partial_conv:
-        #     mask = UpSampling2D(size=(2,2),
-        #                         interpolation="nearest")(mask)
+        if use_partial_conv:
+            mask = UpSampling2D(size=(2,2),
+                                interpolation="nearest")(mask)
 
         if number_of_priors > 0:
             resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
@@ -813,12 +804,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         if use_partial_conv:
-            # outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
-            #                            kernel_size=3,
-            #                            padding="same")([outputs, mask])
-            outputs = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
-                                    kernel_size=3,
-                                    padding="same")(outputs)
+            outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
+                                       kernel_size=3,
+                                       padding="same")([outputs, mask])
         else:
             outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
                              kernel_size=3,
@@ -826,12 +814,9 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         outputs = ReLU()(outputs)
 
         if use_partial_conv:
-            # outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
-            #                            kernel_size=3,
-            #                            padding="same")([outputs, mask])
-            outputs = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
-                                    kernel_size=3,
-                                    padding="same")(outputs)
+            outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
+                                       kernel_size=3,
+                                       padding="same")([outputs, mask])
         else:
             outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
                              kernel_size=3,

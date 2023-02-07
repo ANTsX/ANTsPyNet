@@ -127,7 +127,7 @@ class PartialConv2D(Conv2D):
                  eps=1e-6,
                  **kwargs):
         super(PartialConv2D, self).__init__(*args, **kwargs)
-        self.input_spec = [InputSpec(ndim=4)]
+        self.input_spec = [InputSpec(ndim=4), InputSpec(ndim=4)]
         self.eps = eps
 
     def build(self, input_shape):
@@ -136,7 +136,7 @@ class PartialConv2D(Conv2D):
         else:
             channel_axis = -1
 
-        self.input_dim = input_shape[channel_axis]
+        self.input_dim = input_shape[0][channel_axis]
 
         # Image kernel
         kernel_shape = (*self.kernel_size, self.input_dim, self.filters)
@@ -160,12 +160,16 @@ class PartialConv2D(Conv2D):
         else:
             self.bias = None
 
-        super(PartialConv2D, self).build(input_shape)
+        super(PartialConv2D, self).build(input_shape[0])
 
     def call(self, inputs, mask=None):
 
-        features = inputs
+        features = inputs[0]
+        mask = inputs[1]
+        if mask.shape[-1] == 1:
+            mask = tf.repeat(mask, tf.shape(features)[-1], axis=-1)
 
+        # features = tf.multiply(features, mask)
         features = K.conv2d(features,
             self.kernel,
             strides=self.strides,
@@ -181,11 +185,13 @@ class PartialConv2D(Conv2D):
         if self.activation is not None:
             features = self.activation(features)
 
-        return features
+        return [features, mask]
 
     def compute_output_shape(self, input_shape):
-
-        feature_shape = input_shape
+        if type(input_shape) is list:
+            feature_shape = input_shape[0]
+        else:
+            feature_shape = input_shape
 
         if self.data_format == 'channels_last':
             space = feature_shape[1:-1]
@@ -199,7 +205,18 @@ class PartialConv2D(Conv2D):
                     dilation=self.dilation_rate[i])
                 new_space.append(new_dim)
             new_shape = (feature_shape[0],) + tuple(new_space) + (self.filters,)
-            return new_shape
+            return [new_shape, new_shape]
         elif self.data_format == 'channels_first':
-            raise ValueError("HERE")
+            space = input_shape[2:]
+            new_space = []
+            for i in range(len(space)):
+                new_dim = conv_utils.conv_output_length(
+                    space[i],
+                    self.kernel_size[i],
+                    padding=self.padding,
+                    stride=self.strides[i],
+                    dilation=self.dilation_rate[i])
+                new_space.append(new_dim)
+            new_shape = (feature_shape[0], self.filters) + tuple(new_space)
+            return [new_shape, new_shape]
 
