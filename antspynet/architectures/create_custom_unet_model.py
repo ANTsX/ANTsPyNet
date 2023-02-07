@@ -781,7 +781,7 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                 strides=(2,2))(encoding_convolution_layers[i])
             mask = MaxPooling2D(pool_size=(2,2),
                                 strides=(2,2),
-                                trainable=False)(encoding_mask_layers[i])
+                                trainable=False)(mask)
 
     # Decoding path
 
