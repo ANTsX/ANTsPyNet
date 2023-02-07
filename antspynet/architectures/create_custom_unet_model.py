@@ -752,6 +752,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                               padding='same')(inputs[0])
         else:
             if use_partial_conv:
+                mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
+                                             interpolation_type='nearest_neighbor')(mask)
                 conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
                                            padding="same")([pool, mask])
