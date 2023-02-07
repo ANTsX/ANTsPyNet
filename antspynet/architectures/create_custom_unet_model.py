@@ -744,11 +744,11 @@ def create_partial_convolution_unet_model_2d(input_image_size,
 
         if i == 0:
             if use_partial_conv:
-                conv, norm = PartialConv2D(filters=number_of_filters[i],
+                conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
                                            padding="same")([inputs[0], inputs[1]])
-                conv = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([conv, norm])
-                mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
+                # conv = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([conv, norm])
+                # mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
             else:
                 conv = Conv2D(filters=number_of_filters[i],
                               kernel_size=kernel_size[i],
@@ -757,11 +757,11 @@ def create_partial_convolution_unet_model_2d(input_image_size,
             if use_partial_conv:
                 mask = ResampleTensorLayer2D(shape=(pool.shape[1], pool.shape[2]),
                                              interpolation_type='nearest_neighbor')(mask)
-                conv, norm = PartialConv2D(filters=number_of_filters[i],
+                conv, mask = PartialConv2D(filters=number_of_filters[i],
                                            kernel_size=kernel_size[i],
                                            padding="same")([pool, mask])
-                conv = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([conv, norm])
-                mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
+                # conv = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([conv, norm])
+                # mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
             else:
                 conv = Conv2D(filters=number_of_filters[i],
                               kernel_size=kernel_size[i],
@@ -772,8 +772,8 @@ def create_partial_convolution_unet_model_2d(input_image_size,
             conv, norm = PartialConv2D(filters=number_of_filters[i],
                                        kernel_size=kernel_size[i],
                                        padding="same")([conv, mask])
-            conv = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([conv, norm])
-            mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
+            # conv = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([conv, norm])
+            # mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
         else:
             conv = Conv2D(filters=number_of_filters[i],
                           kernel_size=kernel_size[i],
@@ -810,11 +810,11 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         if use_partial_conv:
-            outputs, norm = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
+            outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
                                        kernel_size=3,
                                        padding="same")([outputs, mask])
-            outputs = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([outputs, norm])
-            mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
+            # outputs = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([outputs, norm])
+            # mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
         else:
             outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
                              kernel_size=3,
@@ -822,11 +822,11 @@ def create_partial_convolution_unet_model_2d(input_image_size,
         outputs = ReLU()(outputs)
 
         if use_partial_conv:
-            outputs, norm = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
+            outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
                                        kernel_size=3,
                                        padding="same")([outputs, mask])
-            outputs = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([outputs, norm])
-            mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
+            # outputs = Lambda(lambda x: tf.math.divide_no_nan(x[0], x[1]))([outputs, norm])
+            # mask = Lambda(lambda x: tf.where(tf.greater(x, 1e-6), 1.0, 0.0))(norm)
         else:
             outputs = Conv2D(filters=number_of_filters[number_of_layers-i-1],
                              kernel_size=3,

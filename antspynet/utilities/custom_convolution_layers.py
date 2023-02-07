@@ -67,12 +67,18 @@ class PartialConv2D(Conv2D):
         norm = K.conv2d(mask,
             self.mask_kernel,
             strides=self.strides,
-            padding=self.padding,
+            padding="valid",
             data_format=self.data_format,
             dilation_rate=self.dilation_rate
         )
+        padding_dim = list()
+        padding_dim.append(int((features.shape[1] - norm.shape[1]) / 2))
+        padding_dim.append(int((features.shape[2] - norm.shape[2]) / 2))
+        paddings = tf.constant([[0, 0], [padding_dim[0], padding_dim[0]],
+                                [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
+        norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=1)
 
-        # features = tf.math.divide_no_nan(features, norm)
+        features = tf.math.divide_no_nan(features, norm)
 
         if self.use_bias:
             features = tf.add(features, self.bias)
@@ -81,9 +87,9 @@ class PartialConv2D(Conv2D):
         if self.activation is not None:
             features = self.activation(features)
 
-        # mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
+        mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
 
-        return [features, norm]
+        return [features, mask]
 
     def compute_output_shape(self, input_shape):
         if type(input_shape) is list:
