@@ -32,8 +32,8 @@ class PartialConv2D(Conv2D):
                                       constraint=self.kernel_constraint,
                                       trainable=True,
                                       dtype=self.dtype)
-        mask_fanin = self.kernel_size[0] * self.kernel_size[1]
-        self.mask_kernel = tf.ones(kernel_shape) / tf.cast(mask_fanin, 'float32')
+        self.mask_fanin = self.kernel_size[0] * self.kernel_size[1]
+        self.mask_kernel = tf.ones(kernel_shape) / tf.cast(self.mask_fanin, 'float32')
 
         if self.use_bias:
             self.bias = self.add_weight(name='bias',
@@ -67,16 +67,16 @@ class PartialConv2D(Conv2D):
         norm = K.conv2d(mask,
             self.mask_kernel,
             strides=self.strides,
-            padding="valid",
+            padding="same",
             data_format=self.data_format,
             dilation_rate=self.dilation_rate
         )
-        padding_dim = list()
-        padding_dim.append((features.shape[1] - norm.shape[1]) // 2)
-        padding_dim.append((features.shape[2] - norm.shape[2]) // 2)
-        paddings = tf.constant([[0, 0], [padding_dim[0], padding_dim[0]],
-                                [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
-        norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=1)
+#        padding_dim = list()
+#        padding_dim.append((features.shape[1] - norm.shape[1]) // 2)
+#        padding_dim.append((features.shape[2] - norm.shape[2]) // 2)
+#        paddings = tf.constant([[0, 0], [padding_dim[0], padding_dim[0]],
+#                                [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
+#        norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=self.mask_fanin)
 
         # features = tf.math.divide_no_nan(features, norm)
 
