@@ -6,11 +6,27 @@ from keras.layers import InputSpec, Conv2D, Conv3D
 
 class PartialConv2D(Conv2D):
 
+    """
+    Implementation of the U-net architecture for hypothalamus segmentation
+    described in
+
+    https://github.com/MathiasGruber/PConv-Keras/blob/master/libs/pconv_layer.py
+
+    and ported from the original implementation:
+
+        https://github.com/MathiasGruber/PConv-Keras/blob/master/libs/pconv_layer.py
+
+    Returns
+    -------
+    Keras model
+        A 3-D keras model defining the U-net network.
+
+    """
+
     def __init__(self,
-                 *args,
                  eps=1e-6,
                  **kwargs):
-        super(PartialConv2D, self).__init__(*args, **kwargs)
+        super(PartialConv2D, self).__init__(**kwargs)
         self.input_spec = [InputSpec(ndim=4), InputSpec(ndim=4)]
         self.eps = eps
 
@@ -46,7 +62,7 @@ class PartialConv2D(Conv2D):
         else:
             self.bias = None
 
-        super(PartialConv2D, self).build(input_shape[0])
+        self.built = True
 
     def call(self, inputs, mask=None):
 
@@ -67,18 +83,18 @@ class PartialConv2D(Conv2D):
         norm = K.conv2d(mask,
             self.mask_kernel,
             strides=self.strides,
-            padding="same",
+            padding="valid",
             data_format=self.data_format,
             dilation_rate=self.dilation_rate
         )
-#        padding_dim = list()
-#        padding_dim.append((features.shape[1] - norm.shape[1]) // 2)
-#        padding_dim.append((features.shape[2] - norm.shape[2]) // 2)
-#        paddings = tf.constant([[0, 0], [padding_dim[0], padding_dim[0]],
-#                                [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
-#        norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=self.mask_fanin)
+        padding_dim = list()
+        padding_dim.append((features.shape[1] - norm.shape[1]) // 2)
+        padding_dim.append((features.shape[2] - norm.shape[2]) // 2)
+        paddings = tf.constant([[0, 0], [padding_dim[0], padding_dim[0]],
+                                [padding_dim[1], padding_dim[1]], [0, 0]], dtype=tf.int32)
+        norm = tf.pad(norm, paddings=paddings, mode="CONSTANT", constant_values=1)
 
-        # features = tf.math.divide_no_nan(features, norm)
+        features = tf.math.divide_no_nan(features, norm)
 
         if self.use_bias:
             features = tf.add(features, self.bias)
@@ -87,9 +103,9 @@ class PartialConv2D(Conv2D):
         if self.activation is not None:
             features = self.activation(features)
 
-        # mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
+        mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
 
-        return [features, norm]
+        return [features, mask]
 
     def compute_output_shape(self, input_shape):
         if type(input_shape) is list:
