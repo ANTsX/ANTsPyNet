@@ -98,8 +98,9 @@ class PartialConv2D(Conv2D):
         # input.  I traced it to the following two normalization lines.  From what I'm
         # guessing, the division operation incorporating the input mask causes the
         # back-propagation gradient to die.  However, given that the normalization kernel
-        # will have a finite set of values in the range {0,...,mask_fanin}, the replacement
-        # code seems to not have the same issue.
+        # will have a finite set of values in the range {0,...,mask_fanin}, I replaced the
+        # earlier convolution divide with a search-and-replace.  The replacement code
+        # seems to not have the same issue.
         #
         # norm = tf.math.divide(norm, mask_fanin)
         # features = tf.math.divide_no_nan(features, norm)
