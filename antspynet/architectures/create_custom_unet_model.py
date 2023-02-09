@@ -793,15 +793,16 @@ def create_partial_convolution_unet_model_2d(input_image_size,
             mask = UpSampling2D(size=(2,2),
                                 interpolation="nearest")(mask)
 
+        outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
+        mask = Lambda(lambda x: tf.repeat(tf.gather(x[0], [0], axis=-1), tf.shape(x[1])[-1], axis=-1))([mask, outputs])
+
         if number_of_priors > 0:
-            resampled_priors = ResampleTensorLayer2D(shape=(deconv.shape[1], deconv.shape[2]),
+            resampled_priors = ResampleTensorLayer2D(shape=(outputs.shape[1], outputs.shape[2]),
                                                      interpolation_type='linear')(input_priors)
-            deconv = Concatenate(axis=3)([deconv, resampled_priors])
+            outputs = Concatenate(axis=3)([outputs, resampled_priors])
             if use_partial_conv:
                 resampled_priors_mask = Lambda(lambda x: tf.ones_like(x))(resampled_priors)
                 mask = Concatenate(axis=3)([mask, resampled_priors_mask])
-
-        outputs = Concatenate(axis=3)([deconv, encoding_convolution_layers[number_of_layers-i-1]])
 
         if use_partial_conv:
             outputs, mask = PartialConv2D(filters=number_of_filters[number_of_layers-i-1],
