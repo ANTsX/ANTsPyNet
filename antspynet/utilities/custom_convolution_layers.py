@@ -49,8 +49,7 @@ class PartialConv2D(Conv2D):
                                       trainable=True,
                                       dtype=self.dtype)
 
-        mask_fanin = self.kernel_size[0] * self.kernel_size[1]
-        self.mask_kernel = tf.Variable(initial_value=tf.ones(kernel_shape) / tf.cast(mask_fanin, 'float32'),
+        self.mask_kernel = tf.Variable(initial_value=tf.ones(kernel_shape),
                                        trainable=False)
 
         if self.use_bias:
@@ -83,14 +82,33 @@ class PartialConv2D(Conv2D):
         )
 
         norm = K.conv2d(mask,
-            self.mask_kernel,
-            strides=self.strides,
-            padding="same",
-            data_format=self.data_format,
-            dilation_rate=self.dilation_rate
+           self.mask_kernel,
+           strides=self.strides,
+           padding="same",
+           data_format=self.data_format,
+           dilation_rate=self.dilation_rate
         )
 
-        features = tf.math.divide_no_nan(features, norm)
+        # The following commented normalization code wasn't producing expected results
+        # for inpainting.  So I compared the PartialConv2D with an all-ones mask vs. a
+        # conventional Conv2D in a simple U-net model trained to predict an output from
+        # an identical input using mse as the loss (e.g., input r16 slice and get out the
+        # same r16 slice).  As expected, the Conv2D option resulted in expected results.
+        # In contrast, the PartialConv2D output looked like a blurred version of the
+        # input.  I traced it to the following two normalization lines.  From what I'm
+        # guessing, the division operation incorporating the input mask causes the
+        # back-propagation gradient to die.  However, given that the normalization kernel
+        # will have a finite set of values in the range {0,...,mask_fanin}, the replacement
+        # code seems to not have the same issue.
+        #
+        # norm = tf.math.divide(norm, mask_fanin)
+        # features = tf.math.divide_no_nan(features, norm)
+
+        mask_fanin = self.kernel_size[0] * self.kernel_size[1]
+        for i in range(2, mask_fanin+1):
+            features = tf.where(tf.equal(norm, tf.constant(i, dtype=tf.float32)),
+                                    tf.math.divide(features, tf.constant(i, dtype=tf.float32)),
+                                    features)
 
         if self.use_bias:
             features = tf.add(features, self.bias)
