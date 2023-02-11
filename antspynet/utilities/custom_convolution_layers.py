@@ -76,7 +76,7 @@ class PartialConv2D(Conv2D):
         features = K.conv2d(features,
             self.kernel,
             strides=self.strides,
-            padding=self.padding,
+            padding="same",
             data_format=self.data_format,
             dilation_rate=self.dilation_rate
         )
