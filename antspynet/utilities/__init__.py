@@ -58,11 +58,13 @@ from .data_augmentation import data_augmentation
 
 from .preprocess_image import preprocess_brain_image
 from .brain_extraction import brain_extraction
+from .inpainting import whole_head_inpainting
 from .cortical_thickness import cortical_thickness
 from .cortical_thickness import longitudinal_cortical_thickness
 from .histology import arterial_lesion_segmentation
 from .histology import allen_ex5_brain_extraction
 from .histology import allen_histology_brain_mask
+from .histology import allen_histology_hemispherical_coronal_mask
 from .lung_extraction import lung_extraction
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import ew_david
