@@ -675,35 +675,29 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                                              use_partial_conv=True):
 
     """
-    Implementation of the U-net architecture for hypothalamus segmentation
-    described in
+    2-D implementation of the U-net architecture for inpainting using partial
+    convolution.
 
-    https://arxiv.org/abs/1804.07723
-
-    and ported from the original implementation:
-
-        https://github.com/MathiasGruber/PConv-Keras
+        https://arxiv.org/abs/1804.07723
 
     Arguments
     ---------
     input_image_size : tuple of length 3
         Tuple of ints of length 3 specifying 2-D image size and channel size.
 
-    batch_normalization_training : boolean
-        First stage of training uses batch normalization but then is turned off
-        for refinement.  THe idea is that masking introduces a bias in batch
-        normalization.
-
     number_of_priors : int
         Specify tissue priors for use during the decoding branch.
 
-    number_of_filters: tuple of length 8
+    number_of_filters: tuple
         Specifies the filter schedule.  Defaults to the number of filters used in
         the paper.
 
-    kernel_size: single scalar or tuple of length 8
+    kernel_size: single scalar or tuple of same length as the number of filters.
         Specifies the kernel size schedule for the encoding path.  Defaults to the
         kernel sizes used in the paper.
+
+    use_partial_conv:  boolean
+        Testing.  Switch between vanilla convolution layers and partial convolution layers.
 
     Returns
     -------
@@ -829,10 +823,6 @@ def create_partial_convolution_unet_model_2d(input_image_size,
                      kernel_size=(1, 1),
                      activation = 'linear')(outputs)
 
-    unet_model = None
-    if number_of_priors > 0:
-        unet_model = Model(inputs=[input_image, input_mask, input_priors], outputs=outputs)
-    else:
-        unet_model = Model(inputs=[input_image, input_mask], outputs=outputs)
+    unet_model = Model(inputs=inputs, outputs=outputs)
 
     return unet_model

@@ -68,11 +68,11 @@ class PartialConv2D(Conv2D):
     def call(self, inputs, mask=None):
 
         features = inputs[0]
-        mask = inputs[1]
-        if mask.shape[-1] == 1:
-            mask = tf.repeat(mask, tf.shape(features)[-1], axis=-1)
+        feature_mask = inputs[1]
+        if feature_mask.shape[-1] == 1:
+            feature_mask = tf.repeat(feature_mask, tf.shape(features)[-1], axis=-1)
 
-        features = tf.multiply(features, mask)
+        features = tf.multiply(features, feature_mask)
         features = K.conv2d(features,
             self.kernel,
             strides=self.strides,
@@ -81,7 +81,7 @@ class PartialConv2D(Conv2D):
             dilation_rate=self.dilation_rate
         )
 
-        norm = K.conv2d(mask,
+        norm = K.conv2d(feature_mask,
            self.mask_kernel,
            strides=self.strides,
            padding="same",
@@ -105,8 +105,8 @@ class PartialConv2D(Conv2D):
         # norm = tf.math.divide(norm, mask_fanin)
         # features = tf.math.divide_no_nan(features, norm)
 
-        mask_fanin = self.kernel_size[0] * self.kernel_size[1]
-        for i in range(2, mask_fanin+1):
+        feature_mask_fanin = self.kernel_size[0] * self.kernel_size[1]
+        for i in range(2, feature_mask_fanin+1):
             features = tf.where(tf.equal(norm, tf.constant(i, dtype=tf.float32)),
                                     tf.math.divide(features, tf.constant(i, dtype=tf.float32)),
                                     features)
@@ -118,9 +118,9 @@ class PartialConv2D(Conv2D):
         if self.activation is not None:
             features = self.activation(features)
 
-        mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
+        feature_mask = tf.where(tf.greater(norm, self.eps), 1.0, 0.0)
 
-        return [features, mask]
+        return [features, feature_mask]
 
     def compute_output_shape(self, input_shape):
         if type(input_shape) is list:

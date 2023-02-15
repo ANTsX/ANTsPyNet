@@ -117,7 +117,7 @@ def pad_or_crop_image_to_size(image,
     delta = image_size - np.array(size)
 
     if np.any(delta < 0):
-        pad_size = abs(delta.min())
+        pad_size = 2 * math.ceil(0.5 * abs(delta.min()))
         pad_shape = image_size + pad_size
         image = ants.pad_image(image, shape=pad_shape)
 

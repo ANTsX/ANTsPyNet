@@ -37,7 +37,7 @@ def whole_head_inpainting(image,
 
     Example
     -------
-    >>> 
+    >>>
     """
 
     from ..architectures import create_partial_convolution_unet_model_2d
@@ -53,13 +53,10 @@ def whole_head_inpainting(image,
         antsxnet_cache_directory = "ANTsXNet"
 
     image_size = (256, 256)
-    channel_modalities = ["T1"]
-    channel_size = len(channel_modalities)
+    channel_size = 1
 
-    reorient_template = ants.image_read(get_antsxnet_data("oasis"))    
+    reorient_template = ants.image_read(get_antsxnet_data("oasis"))
     template_priors = list()
-    # for i in range(6):
-    #     template_priors.append(ants.image_read("~/Desktop/Oasis/priors" + str(i+1) + ".nii.gz"))
 
     inpainting_unet = create_partial_convolution_unet_model_2d((*image_size, channel_size),
                                                                 number_of_priors=0,
@@ -81,8 +78,8 @@ def whole_head_inpainting(image,
     if verbose:
         print("Preprocessing:  Reorientation.")
 
-    center_of_mass_template = np.asarray(ants.get_center_of_mass(reorient_template)).round()
-    center_of_mass_image = np.asarray(ants.get_center_of_mass(image)).round()
+    center_of_mass_template = np.asarray(ants.get_center_of_mass(reorient_template))
+    center_of_mass_image = np.asarray(ants.get_center_of_mass(image))
     translation = center_of_mass_image - center_of_mass_template
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.asarray(center_of_mass_template), translation=translation)
@@ -98,7 +95,7 @@ def whole_head_inpainting(image,
     lower_slice = int(geoms['BoundingBoxLower_y'])
     upper_slice = int(geoms['BoundingBoxUpper_y'])
     number_of_slices = upper_slice - lower_slice + 1
-       
+
     if verbose:
         print("Preprocessing:  Slicing data.")
 
@@ -129,11 +126,10 @@ def whole_head_inpainting(image,
             prior_slice = ants.slice_image(template_priors[j], axis=1, idx=index, collapse_strategy=1)
             prior_slice = pad_or_crop_image_to_size(prior_slice, image_size)
             batchXPriors[i,:,:,j] = prior_slice.numpy()
-        
+
     if verbose:
         print("Prediction.")
 
-    predicted_data = None
     predicted_data = inpainting_unet.predict([batchX, batchXMask], verbose=int(verbose))
     # predicted_data = inpainting_unet.predict([batchX, batchXMask, batchXPriors], verbose=int(verbose))
     predicted_data[batchXMask == 1] = batchX[batchXMask == 1]
@@ -146,23 +142,21 @@ def whole_head_inpainting(image,
         index = lower_slice + i
 
         slice = ants.slice_image(image_reoriented, axis=1, idx=index, collapse_strategy=1)
-        mask_slice = ants.slice_image(roi_inverted_mask_reoriented, axis=1, idx=index, collapse_strategy=1)
-        predicted_slice = ants.from_numpy(np.squeeze(predicted_data[i,:,:,0]), origin=slice.origin, 
+        predicted_slice = ants.from_numpy(np.squeeze(predicted_data[i,:,:,0]), origin=slice.origin,
             spacing=slice.spacing, direction=slice.direction)
         predicted_slice = pad_or_crop_image_to_size(predicted_slice, slice.shape)
-        ants.set_origin(predicted_slice, slice.origin)
-        predicted_slice = regression_match_image(predicted_slice, slice)  
+        predicted_slice = regression_match_image(predicted_slice, slice)
         image_reoriented_array[:,index,:] = predicted_slice.numpy()
-        
-    inpainted_image = ants.from_numpy(np.squeeze(image_reoriented_array), 
+
+    inpainted_image = ants.from_numpy(np.squeeze(image_reoriented_array),
        origin=image_reoriented.origin, spacing=image_reoriented.spacing,
        direction=image_reoriented.direction)
-     
-    if verbose == True:
+
+    if verbose:
         print("Post-processing:  reorienting to original space.")
 
     xfrm_inv = xfrm.invert()
-    inpainted_image = xfrm_inv.apply_to_image(inpainted_image, image, interpolation="linear")  
+    inpainted_image = xfrm_inv.apply_to_image(inpainted_image, image, interpolation="linear")
     inpainted_image = ants.copy_image_info(image, inpainted_image)
     inpainted_image[roi_mask == 0] = image[roi_mask == 0]
 
