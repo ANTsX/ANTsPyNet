@@ -46,6 +46,8 @@ from .custom_activation_layers import LogSoftmax
 
 from .custom_convolution_layers import PartialConv2D, PartialConv3D
 
+from .gaussian_diffusion_utilities import GaussianDiffusion
+
 from .cropping_and_padding_utilities import crop_image_center
 from .cropping_and_padding_utilities import pad_or_crop_image_to_size
 from .cropping_and_padding_utilities import pad_image_by_factor
