@@ -27,7 +27,7 @@ def whole_head_inpainting(image,
     slicewise : boolean
         Two models per modality are available for processing the data.  One model
         is based on training/prediction using 2-D axial slice data whereas the
-        other us
+        other uses 64x64x64 patches.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
