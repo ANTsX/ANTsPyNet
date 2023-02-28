@@ -422,7 +422,7 @@ def lung_extraction(image,
 
         current_start_slice = 0
         for d in range(len(dimensions_to_predict)):
-            current_end_slice = current_start_slice + preprocessed_image.shape[dimensions_to_predict[d]] - 1
+            current_end_slice = current_start_slice + preprocessed_image.shape[dimensions_to_predict[d]]
             which_batch_slices = range(current_start_slice, current_end_slice)
 
             prediction_per_dimension = prediction[which_batch_slices,:,:,0]
