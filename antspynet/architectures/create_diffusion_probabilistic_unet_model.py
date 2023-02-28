@@ -1,9 +1,11 @@
 import tensorflow as tf
+import tensorflow_addons as tfa
+
 import math
 
 from tensorflow import keras
 
-from keras.layers import (Add, Concatenate, Conv2D, Conv3D, Dense, GroupNormalization,
+from keras.layers import (Add, Concatenate, Conv2D, Conv3D, Dense,
                           Input, Layer, UpSampling2D, UpSampling3D)
 from keras.initializers import VarianceScaling
 from keras.activations import swish
@@ -78,7 +80,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
             self.groups = groups
             super().__init__(**kwargs)
 
-            self.norm = GroupNormalization(groups=groups)
+            self.norm = tfa.layers.GroupNormalization(groups=groups)
             self.query = Dense(units,
                                kernel_initializer=kernel_init(1.0))
             self.key = Dense(units,
@@ -125,7 +127,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
             temb = Dense(width,
                          kernel_initializer=kernel_init(1.0))(temb)[:, None, None, :]
 
-            x = GroupNormalization(groups=groups)(x)
+            x = tfa.layers.GroupNormalization(groups=groups)(x)
             x = activation_function(x)
             x = Conv2D(width,
                        kernel_size=3,
@@ -134,7 +136,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
             )(x)
 
             x = Add()([x, temb])
-            x = GroupNormalization(groups=groups)(x)
+            x = tfa.layers.GroupNormalization(groups=groups)(x)
             x = activation_function(x)
 
             x = Conv2D(width,
@@ -223,7 +225,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
                            interpolation=interpolation)(x)
 
     # End block
-    x = GroupNormalization(groups=number_of_normalization_groups)(x)
+    x = tfa.layers.GroupNormalization(groups=number_of_normalization_groups)(x)
     x = activation_function(x)
     x = Conv2D(3,
                kernel_size=(3, 3),
