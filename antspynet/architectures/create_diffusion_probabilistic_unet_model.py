@@ -227,7 +227,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
     # End block
     x = tfa.layers.GroupNormalization(groups=number_of_normalization_groups)(x)
     x = activation_function(x)
-    x = Conv2D(3,
+    x = Conv2D(1,
                kernel_size=(3, 3),
                padding="same",
                kernel_initializer=kernel_init(0.0))(x)
