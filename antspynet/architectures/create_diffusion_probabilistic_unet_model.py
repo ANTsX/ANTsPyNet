@@ -42,6 +42,7 @@ def TimeMLP(units, activation_function=swish):
 
 def create_diffusion_probabilistic_unet_model_2d(input_image_size,
                                                  number_of_filters=(64, 128, 256, 512),
+                                                 number_of_outputs=1,
                                                  has_attention=[False, False, True, True],
                                                  number_of_residual_blocks=2,
                                                  number_of_normalization_groups=8,
@@ -79,7 +80,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
             self.groups = groups
             super().__init__(**kwargs)
 
-            self.norm = number_of_filtersGroupNormalization(groups=groups)
+            self.norm = GroupNormalization(groups=groups)
             self.query = Dense(units,
                                kernel_initializer=kernel_init(1.0))
             self.key = Dense(units,
@@ -126,7 +127,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
             temb = Dense(width,
                          kernel_initializer=kernel_init(1.0))(temb)[:, None, None, :]
 
-            x = number_of_filtersGroupNormalization(groups=groups)(x)
+            x = GroupNormalization(groups=groups)(x)
             x = activation_function(x)
             x = Conv2D(width,
                        kernel_size=3,
@@ -135,7 +136,7 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
             )(x)
 
             x = Add()([x, temb])
-            x = number_of_filtersGroupNormalization(groups=groups)(x)
+            x = GroupNormalization(groups=groups)(x)
             x = activation_function(x)
 
             x = Conv2D(width,
@@ -224,9 +225,9 @@ def create_diffusion_probabilistic_unet_model_2d(input_image_size,
                            interpolation=interpolation)(x)
 
     # End block
-    x = number_of_filtersGroupNormalization(groups=number_of_normalization_groups)(x)
+    x = GroupNormalization(groups=number_of_normalization_groups)(x)
     x = activation_function(x)
-    x = Conv2D(1,
+    x = Conv2D(number_of_outputs,
                kernel_size=(3, 3),
                padding="same",
                kernel_initializer=kernel_init(0.0))(x)
