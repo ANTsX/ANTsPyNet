@@ -149,7 +149,7 @@ def el_bicho(ventilation_image,
 
     current_start_slice = 0
     for d in range(len(dimensions_to_predict)):
-        current_end_slice = current_start_slice + preprocessed_image.shape[dimensions_to_predict[d]] - 1
+        current_end_slice = current_start_slice + preprocessed_image.shape[dimensions_to_predict[d]]
         which_batch_slices = range(current_start_slice, current_end_slice)
 
         for l in range(number_of_classification_labels):
