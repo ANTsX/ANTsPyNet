@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ANTsX/ANTsPyNet.svg?branch=master)](https://travis-ci.org/ANTsX/ANTsPyNet)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/antspynet?label=pypi%20downloads)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
 # ANTsPyNet
