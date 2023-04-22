@@ -166,10 +166,10 @@ def sysu_media_wmh_segmentation(flair,
     ################################
 
     number_of_models = 1
-    if use_ensemble == True:
+    if use_ensemble:
         number_of_models = 3
 
-    if verbose == True:
+    if verbose:
         print("White matter hyperintensity:  retrieving model weights.")
 
     unet_models = list()
@@ -206,7 +206,7 @@ def sysu_media_wmh_segmentation(flair,
     for d in range(len(dimensions_to_predict)):
         number_of_slices = flair_preprocessed_warped.shape[dimensions_to_predict[d]]
 
-        if verbose == True:
+        if verbose:
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
@@ -223,7 +223,7 @@ def sysu_media_wmh_segmentation(flair,
     #
     ################################
 
-    if verbose == True:
+    if verbose:
         print("Prediction.")
 
     prediction = unet_models[0].predict(np.transpose(batchX, axes=(0, 2, 1, 3)), verbose=verbose)
@@ -329,13 +329,13 @@ def hypermapp3r_segmentation(t1,
     #
     ################################
 
-    if verbose == True:
+    if verbose:
         print("*************  Preprocessing  ***************")
         print("")
 
     t1_preprocessed = t1
     brain_mask = None
-    if do_preprocessing == True:
+    if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
             brain_extraction_modality="t1",
@@ -355,7 +355,7 @@ def hypermapp3r_segmentation(t1,
     t1_preprocessed[brain_mask > 0] = (t1_preprocessed[brain_mask > 0] - t1_preprocessed_mean) / t1_preprocessed_std
 
     flair_preprocessed = flair
-    if do_preprocessing == True:
+    if do_preprocessing:
         flair_preprocessing = preprocess_brain_image(flair,
             truncate_intensity=(0.01, 0.99),
             brain_extraction_modality=None,
@@ -369,7 +369,7 @@ def hypermapp3r_segmentation(t1,
     flair_preprocessed_std = flair_preprocessed[brain_mask > 0].std()
     flair_preprocessed[brain_mask > 0] = (flair_preprocessed[brain_mask > 0] - flair_preprocessed_mean) / flair_preprocessed_std
 
-    if verbose == True:
+    if verbose:
         print("    HyperMapp3r: reorient input images.")
 
     channel_size = 2
@@ -394,23 +394,22 @@ def hypermapp3r_segmentation(t1,
     flair_preprocessed_warped = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reorient_template)
     batchX[0,:,:,:,1] = flair_preprocessed_warped.numpy()
 
-    if verbose == True:
+    if verbose:
         print("    HyperMapp3r: generate network and load weights.")
 
     model = create_hypermapp3r_unet_model_3d((*input_image_size, 2))
     weights_file_name = get_pretrained_network("hyperMapp3r", antsxnet_cache_directory=antsxnet_cache_directory)
     model.load_weights(weights_file_name)
 
-    if verbose == True:
+    if verbose:
         print("    HyperMapp3r: prediction.")
 
-    if verbose == True:
+    if verbose:
         print("    HyperMapp3r: Monte Carlo iterations (SpatialDropout).")
 
     prediction_array = np.zeros(input_image_size)
     for i in range(number_of_monte_carlo_iterations):
-        tf.random.set_seed(i)
-        if verbose == True:
+        if verbose:
             print("        Monte Carlo iteration", i + 1, "out of", number_of_monte_carlo_iterations)
         prediction_array = (np.squeeze(model.predict(batchX, verbose=verbose)) + i * prediction_array) / (i + 1)
 
@@ -540,7 +539,7 @@ def ew_david(flair,
 
         # t1_preprocessed = t1
         # t1_preprocessing = None
-        # if do_preprocessing == True:
+        # if do_preprocessing:
         #     t1_preprocessing = preprocess_brain_image(t1,
         #         truncate_intensity=(0.01, 0.99),
         #         brain_extraction_modality="t1",
@@ -553,7 +552,7 @@ def ew_david(flair,
         #     t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
         # flair_preprocessed = flair
-        # if do_preprocessing == True:
+        # if do_preprocessing:
         #     flair_preprocessing = preprocess_brain_image(flair,
         #         truncate_intensity=(0.01, 0.99),
         #         brain_extraction_modality="t1",
@@ -600,7 +599,7 @@ def ew_david(flair,
         # #
         # ################################
 
-        # if verbose == True:
+        # if verbose:
         #     print("ew_david:  prediction.")
 
         # batchX = np.zeros((8, *patch_size, channel_size))
@@ -625,7 +624,7 @@ def ew_david(flair,
         #     reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
         #         domain_image=t1_preprocessed, stride_length=stride_length)
 
-        #     if do_preprocessing == True:
+        #     if do_preprocessing:
         #         probability_images.append(ants.apply_transforms(fixed=t1,
         #             moving=reconstructed_image,
         #             transformlist=t1_preprocessing['template_transforms']['invtransforms'],
@@ -651,7 +650,7 @@ def ew_david(flair,
         t1_preprocessing = None
         brain_mask = None
         if t1 is not None:
-            if do_preprocessing == True:
+            if do_preprocessing:
                 t1_preprocessing = preprocess_brain_image(t1,
                     truncate_intensity=(0.01, 0.995),
                     brain_extraction_modality="t1",
@@ -670,7 +669,7 @@ def ew_david(flair,
         flair_preprocessed = None
         if flair is not None:
             flair_preprocessed = flair
-            if do_preprocessing == True:
+            if do_preprocessing:
                 if brain_mask is None:
                     flair_preprocessing = preprocess_brain_image(flair,
                         truncate_intensity=(0.01, 0.995),
@@ -777,7 +776,7 @@ def ew_david(flair,
                 weight_decay=0,
                 additional_options=("nnUnetActivationStyle", "attentionGating", "initialConvolutionKernelSize[5]"))
 
-        if verbose == True:
+        if verbose:
             print("ewDavid:  retrieving model weights.")
 
         weights_file_name = None
@@ -956,7 +955,7 @@ def ew_david(flair,
                 else:
                     number_of_slices = batch_flair.shape[dimensions_to_predict[d]]
 
-                if verbose == True:
+                if verbose:
                     print("Extracting slices for dimension ", dimensions_to_predict[d])
 
                 for i in range(number_of_slices):
@@ -987,7 +986,7 @@ def ew_david(flair,
             #
             ################################
 
-            if verbose == True:
+            if verbose:
                 if n == 0:
                     print("Prediction")
                 else:
