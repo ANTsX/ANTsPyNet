@@ -102,8 +102,7 @@ def deep_flash(t1,
     #
     # use_contralaterality : boolean
     #     Use both hemispherical models to also predict the corresponding contralateral
-    #     segmentation and use both sets of priors to produce the results.  Mainly used
-    #     for debugging.
+    #     segmentation and use both sets of priors to produce the results.  
 
     use_hierarchical_parcellation = True
     use_contralaterality = True
@@ -121,7 +120,7 @@ def deep_flash(t1,
     template_transforms = None
     if do_preprocessing:
 
-        if verbose == True:
+        if verbose:
             print("Preprocessing T1.")
 
         # Brain extraction
@@ -156,7 +155,7 @@ def deep_flash(t1,
         t2_template = ants.copy_image_info(t1_template, t2_template)
         if do_preprocessing:
 
-            if verbose == True:
+            if verbose:
                 print("Preprocessing T2.")
 
             # Brain extraction
