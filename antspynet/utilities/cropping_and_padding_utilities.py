@@ -13,12 +13,12 @@ def crop_image_center(image,
     image : ANTsImage
         Input image
 
-    crop_size: n-D tuple (depending on dimensionality).
+    crop_size: n-D tuple
         Width, height, depth (if 3-D), and time (if 4-D) of crop region.
 
     Returns
     -------
-    A list (or array) of patches.
+    ANTs image.
 
     Example
     -------
@@ -60,7 +60,7 @@ def pad_image_by_factor(image,
 
     Returns
     -------
-    A padded image
+    ANTs image.
 
     Example
     -------
