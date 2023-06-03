@@ -66,7 +66,9 @@ from .cortical_thickness import longitudinal_cortical_thickness
 from .histology import arterial_lesion_segmentation
 from .histology import allen_ex5_brain_extraction
 from .histology import allen_histology_brain_mask
+from .histology import allen_histology_cerebellum_mask
 from .histology import allen_histology_hemispherical_coronal_mask
+from .histology import allen_histology_super_resolution
 from .lung_extraction import lung_extraction
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import ew_david
@@ -78,6 +80,7 @@ from .deep_flash import deep_flash
 from .deep_flash import deep_flash_deprecated
 from .deep_atropos import deep_atropos
 from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
+from .cerebellum_segmentation import cerebellum_segmentation
 from .brain_age import brain_age
 from .mri_super_resolution import mri_super_resolution
 from .quality_assessment import tid_neural_image_assessment
