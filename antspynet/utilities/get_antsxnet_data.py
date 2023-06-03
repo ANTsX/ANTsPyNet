@@ -33,8 +33,6 @@ def get_antsxnet_data(file_id=None,
     >>> template_file = get_antsxnet_data('biobank')
     """
 
-    from ..utilities import brain_extraction
-
     def switch_data(argument):
         switcher = {
             "biobank": "https://ndownloader.figshare.com/files/22429242",
@@ -60,7 +58,12 @@ def get_antsxnet_data(file_id=None,
             "mni152": "https://ndownloader.figshare.com/files/25516349",
             "nki": "https://ndownloader.figshare.com/files/25516355",
             "nki10": "https://ndownloader.figshare.com/files/25516346",
-            "oasis": "https://ndownloader.figshare.com/files/25516352"
+            "oasis": "https://ndownloader.figshare.com/files/25516352",
+            "magetTemplate": "https://figshare.com/ndownloader/files/41052572",
+            "magetTemplateBrainMask": "https://figshare.com/ndownloader/files/41052569",
+            "magetCerebellumTemplate": "https://figshare.com/ndownloader/files/41052581",
+            "magetCerebellumTemplatePriors": "https://figshare.com/ndownloader/files/41052578",
+            "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575"            
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -91,6 +94,11 @@ def get_antsxnet_data(file_id=None,
                   "nki",
                   "nki10",
                   "oasis",
+                  "magetTemplate",
+                  "magetTemplateBrainMask",
+                  "magetCerebellumTemplate",
+                  "magetCerebellumTemplatePriors",
+                  "magetCerebellumxTemplate0GenericAffine",
                   "show")
 
     if not file_id in valid_list:
@@ -102,7 +110,10 @@ def get_antsxnet_data(file_id=None,
     url = switch_data(file_id)
 
     if target_file_name == None:
-        target_file_name = file_id + ".nii.gz"
+        if file_id == "magetCerebellumxTemplate0GenericAffine":
+            target_file_name = file_id + ".mat"
+        else:
+            target_file_name = file_id + ".nii.gz"
 
     if antsxnet_cache_directory == None:
         antsxnet_cache_directory = "ANTsXNet"
