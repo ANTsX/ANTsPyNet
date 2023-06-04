@@ -175,7 +175,6 @@ def cerebellum_segmentation(t1,
                                                             transformlist=cerebellum_x_template_xfrm,
                                                             interpolator='nearestNeighbor',
                                                             whichtoinvert=[True])
-        ants.image_write(t1_cerebellum_template_mask, "~/Desktop/t1_cerebellum_template_mask.nii.gz")    
 
         if verbose:
             print("Register T1 cerebellum to the cerebellum of the whole brain template.")
@@ -191,8 +190,6 @@ def cerebellum_segmentation(t1,
 
     t1_preprocessed_in_cerebellum_space = ants.apply_transforms(t1_cerebellum_template, t1_preprocessed,
                                                                 transformlist=registration['fwdtransforms'])
-
-    ants.image_write(t1_preprocessed_in_cerebellum_space, "~/Desktop/t1_preprocessed_in_cerebellum_space.nii.gz")    
     
     ################################
     #
@@ -259,10 +256,6 @@ def cerebellum_segmentation(t1,
     batchX[0,:,:,:,0] = pad_or_crop_image_to_size(t1_preprocessed_in_cerebellum_space, image_size).numpy()
     batchX[1,:,:,:,0] = np.flip(batchX[0,:,:,:,0], axis=0)
     
-    # padded = pad_or_crop_image_to_size(t1_preprocessed_in_cerebellum_space, image_size)
-    # ants.image_write(ants.from_numpy(np.squeeze(batchX[0,:,:,:,0]), origin=padded.origin, spacing=padded.spacing, direction=padded.direction), "~/Desktop/BatchX0.nii.gz")
-    # ants.image_write(ants.from_numpy(np.squeeze(batchX[1,:,:,:,0]), origin=padded.origin, spacing=padded.spacing, direction=padded.direction), "~/Desktop/BatchX1.nii.gz")
-
     for i in range(len(priors_image_list)):
         for j in range(batchX.shape[0]):
             batchX[j,:,:,:,i+1] = pad_or_crop_image_to_size(priors_image_list[i], image_size).numpy()
