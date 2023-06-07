@@ -274,13 +274,22 @@ def cerebellum_segmentation(t1,
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
 
+        def decrop_to_cerebellum_template_space(target_image, reference_image):
+            target_image_padded = pad_or_crop_image_to_size(target_image, reference_image.shape)
+            one_padding_shape = np.array(target_image_padded.shape) + 1
+            target_image_padded = ants.pad_image(target_image_padded, shape=one_padding_shape)
+            lower_indices = np.array((1, 1, 0))
+            upper_indices = np.array(reference_image.shape) + np.array((1, 1, 0))
+            target_image_decropped = ants.crop_indices(target_image_padded, lower_indices, upper_indices)
+            target_image_decropped = ants.copy_image_info(reference_image, target_image_decropped)
+            return target_image_decropped
+
         if m == 0:
 
             # whole cerebellum foreground
             probability_image = ants.from_numpy(0.5 * (np.squeeze(predicted_data[0,:,:,:,1]) +
                                                 np.flip(np.squeeze(predicted_data[1,:,:,:,1]), axis=0)))
-            probability_image = pad_or_crop_image_to_size(probability_image, t1_cerebellum_template.shape)
-            probability_image = ants.copy_image_info(t1_cerebellum_template, probability_image)
+            probability_image = decrop_to_cerebellum_template_space(probability_image, t1_cerebellum_template)
             t1_preprocessed_mask_in_cerebellum_space = ants.threshold_image(probability_image, 0.5, 1, 1, 0)
             probability_image = ants.apply_transforms(fixed=t1,
                 moving=probability_image,
@@ -294,8 +303,7 @@ def cerebellum_segmentation(t1,
             for i in range(len(tissue_labels)):
                 probability_image = ants.from_numpy(0.5 * (np.squeeze(predicted_data[0,:,:,:,i]) +
                                                     np.flip(np.squeeze(predicted_data[1,:,:,:,i]), axis=0)))
-                probability_image = pad_or_crop_image_to_size(probability_image, t1_cerebellum_template.shape)
-                probability_image = ants.copy_image_info(t1_cerebellum_template, probability_image)
+                probability_image = decrop_to_cerebellum_template_space(probability_image, t1_cerebellum_template)
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
                     transformlist=template_transforms['invtransforms'],
@@ -315,8 +323,7 @@ def cerebellum_segmentation(t1,
             for i in range(len(region_labels)):
                 probability_image = ants.from_numpy(0.5 * (np.squeeze(predicted_data[0,:,:,:,i]) +
                                                     np.flip(np.squeeze(predicted_data[1,:,:,:,i]), axis=0)))
-                probability_image = pad_or_crop_image_to_size(probability_image, t1_cerebellum_template.shape)
-                probability_image = ants.copy_image_info(t1_cerebellum_template, probability_image)
+                probability_image = decrop_to_cerebellum_template_space(probability_image, t1_cerebellum_template)
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
                     transformlist=template_transforms['invtransforms'],

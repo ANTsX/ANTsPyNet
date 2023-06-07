@@ -17,11 +17,11 @@ class GaussianDiffusion:
     """
 
     def __init__(self,
-                 beta_start = 1e-4,
-                 beta_end = 0.02,
-                 time_steps = 1000,
-                 clip_min = -1.0,
-                 clip_max = 1.0):
+                 beta_start=1e-4,
+                 beta_end=0.02,
+                 time_steps=1000,
+                 clip_min=-1.0,
+                 clip_max=1.0):
 
         self.beta_start = beta_start
         self.beta_end = beta_end
