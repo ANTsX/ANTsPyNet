@@ -11,7 +11,7 @@ def data_augmentation(input_image_list,
                       transform_type='affineAndDeformation',
                       noise_model='additivegaussian',
                       noise_parameters=(0.0, 0.05),
-                      sd_simulated_bias_field=0.05,
+                      sd_simulated_bias_field=1.0,
                       sd_histogram_warping=0.05,
                       sd_affine=0.05,
                       output_numpy_file_prefix=None,
@@ -236,7 +236,6 @@ def data_augmentation(input_image_list,
                    else:
                        raise ValueError("Unrecognized noise model.")
 
-
             # Simulated bias field
 
             if sd_simulated_bias_field > 0:
@@ -244,8 +243,10 @@ def data_augmentation(input_image_list,
                 if verbose:
                     print("        Adding simulated bias field.")
 
-                bias_field = simulate_bias_field(image, sd_bias_field=sd_simulated_bias_field)
-                image = image * (bias_field + 1)
+                log_field = simulate_bias_field(image, number_of_points=10, sd_bias_field=sd_simulated_bias_field, number_of_fitting_levels=2, mesh_size=10)
+                log_field = log_field.iMath("Normalize")
+                field_array = np.power(np.exp(log_field.numpy()), random.sample((2, 3, 4), 1)[0])
+                image = image * ants.from_numpy(field_array, origin=image.origin, spacing=image.spacing, direction=image.direction)                
 
             # Histogram intensity warping
 
