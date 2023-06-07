@@ -1,16 +1,13 @@
 import numpy as np
 import ants
 
-from tensorflow.keras.layers import Conv3D
-from tensorflow.keras.models import Model
-from tensorflow.keras import regularizers
-
-def cerebellum_segmentation(t1,
-                            initial_cerebellum_mask=None,
-                            do_preprocessing=True,
-                            antsxnet_cache_directory=None,
-                            verbose=False
-                            ):
+def cerebellum_morphology(t1,
+                          initial_cerebellum_mask=None,
+                          compute_thickness_image=False,
+                          do_preprocessing=True,
+                          antsxnet_cache_directory=None,
+                          verbose=False
+                          ):
 
     """
     Cerebellum tissue segmentation and Schmahmann parcellation.
@@ -38,9 +35,9 @@ def cerebellum_segmentation(t1,
     Label 10  : L_VIIIB
     Label 11  : L_IX
     Label 12  : L_X
-    Label 13  : L_CM
+    XX Label 13  : L_CM
 
-    Label 100 : CSF
+    XX Label 100 : CSF
 
     Label 101 : R_I_II
     Label 102 : R_III
@@ -54,11 +51,10 @@ def cerebellum_segmentation(t1,
     Label 110 : R_VIIIB
     Label 111 : R_IX
     Label 112 : R_X
-    Label 113 : R_CM
+    XX Label 113 : R_CM
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
-       * affine registration to the "deep flash" template.
     which is performed on the input images if do_preprocessing = True.
 
     Arguments
@@ -70,6 +66,9 @@ def cerebellum_segmentation(t1,
         First option for initialization.  If not specified, and if the brain_mask
         is not specified, the cerebellum ROI is determined using ANTsXNet
         brain_extraction followed by registration to a template.
+
+    compute_thickness_image : boolean
+        Compute KellyKapowski thickness image of the gray matter.
 
     brain_mask : ANTsImage
         Second option for initialization.
@@ -198,7 +197,8 @@ def cerebellum_segmentation(t1,
     ################################
 
     tissue_labels = (0, 1, 2, 3)
-    region_labels = (0, *list(range(1, 14)), *list(range(100, 114)))
+    region_labels = (0, *list(range(1, 13)), *list(range(101, 113)))
+
 
     image_size = (240, 144, 144)
 
@@ -214,23 +214,26 @@ def cerebellum_segmentation(t1,
             channel_size = 1
             which_priors = None
             network_name = "cerebellumWhole"
+            additional_options = None
         elif m == 1:
             labels = (0, 1, 2, 3)
             channel_size = len(labels)
             which_priors = (0, 1, 2)
             network_name = "cerebellumTissue"
+            additional_options = None
         else:  #  m == 2:
-            labels = (0, *list(range(1, 14)), *list(range(100, 114)))
+            labels = (0, *list(range(1, 13)), *list(range(101, 113)))
             channel_size = len(labels)
-            which_priors = tuple(range(3,30))
+            which_priors = (*list(range(3, 15)), *list(range(16, 28)))
             network_name = "cerebellumLabels"
+            additional_options = ["attentionGating"]
 
         number_of_classification_labels = len(labels)
         unet_model = create_unet_model_3d((*image_size, channel_size),
             number_of_outputs=number_of_classification_labels, mode="classification",
             number_of_filters=(32, 64, 96, 128, 256),
             convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
-            dropout_rate=0.0, weight_decay=0)
+            dropout_rate=0.0, weight_decay=0, additional_options=additional_options)
 
         if verbose:
             print("Processing " + network_name)
@@ -313,11 +316,10 @@ def cerebellum_segmentation(t1,
         else:
             # region labels
 
-            # first switch the contralateral labels for the flipped version
-            for i in range(1, 14):
+            for i in range(1, 13):
                 tmp_array = predicted_data[1,:,:,:,i]
-                predicted_data[1,:,:,:,i] = predicted_data[1,:,:,:,i+14]
-                predicted_data[1,:,:,:,i+14] = tmp_array
+                predicted_data[1,:,:,:,i] = predicted_data[1,:,:,:,i+12]
+                predicted_data[1,:,:,:,i+12] = tmp_array
 
             region_probability_images = list()
             for i in range(len(region_labels)):
@@ -375,13 +377,39 @@ def cerebellum_segmentation(t1,
 
     tissue_segmentation = ants.image_clone(relabeled_image)
 
-    return_dict = {'cerebellum_probability_image' : cerebellum_probability_image,
-                   'parcellation_segmentation_image' : region_segmentation,
-                   'parcellation_probability_images' : region_probability_images,
-                   'tissue_segmentation_image' : tissue_segmentation,
-                   'tissue_probability_images' : tissue_probability_images
-                    }
+    if compute_thickness_image:
 
-    return(return_dict)
+        ################################
+        #
+        # Compute thickness image using KK
+        #
+        ################################
+
+        kk = ants.kelly_kapowski(s=tissue_segmentation,
+                                 g=tissue_probability_images[2],
+                                 w=tissue_probability_images[3],
+                                 its=45,
+                                 r=0.025,
+                                 m=1.5,
+                                 x=0,
+                                 verbose=int(verbose))
+
+        return_dict = {'cerebellum_probability_image' : cerebellum_probability_image,
+                       'parcellation_segmentation_image' : region_segmentation,
+                       'parcellation_probability_images' : region_probability_images,
+                       'tissue_segmentation_image' : tissue_segmentation,
+                       'thickness_image' : kk
+                        }
+        return(return_dict)
+
+    else:
+        return_dict = {'cerebellum_probability_image' : cerebellum_probability_image,
+                       'parcellation_segmentation_image' : region_segmentation,
+                       'parcellation_probability_images' : region_probability_images,
+                       'tissue_segmentation_image' : tissue_segmentation,
+                       'tissue_probability_images' : tissue_probability_images
+                        }
+        return(return_dict)
+
 
 
