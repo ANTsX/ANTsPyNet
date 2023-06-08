@@ -10,7 +10,7 @@ def cerebellum_morphology(t1,
                           ):
 
     """
-    Cerebellum tissue segmentation and Schmahmann parcellation.
+    Cerebellum tissue segmentation, Schmahmann parcellation, and thickness.
 
     Perform cerebellum segmentation using a modification of the set of
     MaGET cerebellum atlases --- https://github.com/CoBrALab/MAGeTbrain.
@@ -35,10 +35,6 @@ def cerebellum_morphology(t1,
     Label 10  : L_VIIIB
     Label 11  : L_IX
     Label 12  : L_X
-    XX Label 13  : L_CM
-
-    XX Label 100 : CSF
-
     Label 101 : R_I_II
     Label 102 : R_III
     Label 103 : R_IV
@@ -51,7 +47,6 @@ def cerebellum_morphology(t1,
     Label 110 : R_VIIIB
     Label 111 : R_IX
     Label 112 : R_X
-    XX Label 113 : R_CM
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
@@ -63,15 +58,12 @@ def cerebellum_morphology(t1,
         raw or preprocessed 3-D T1-weighted brain image.
 
     initial_cerebellum_mask : ANTsImage
-        First option for initialization.  If not specified, and if the brain_mask
-        is not specified, the cerebellum ROI is determined using ANTsXNet
-        brain_extraction followed by registration to a template.
+        Option for initialization.  If not specified, the cerebellum ROI is
+        determined using ANTsXNet brain_extraction followed by registration
+        to a template.
 
     compute_thickness_image : boolean
         Compute KellyKapowski thickness image of the gray matter.
-
-    brain_mask : ANTsImage
-        Second option for initialization.
 
     do_preprocessing : boolean
         See description above.
@@ -87,12 +79,12 @@ def cerebellum_morphology(t1,
     Returns
     -------
     List consisting of the multiple segmentation images and probability images for
-    each label and foreground.
+    each label and foreground.  Optional thickness image.
 
     Example
     -------
     >>> image = ants.image_read("t1.nii.gz")
-    >>> seg = cerebellum_segmentation(image)
+    >>> cereb = cerebellum_morphology(image)
     """
 
     from ..architectures import create_unet_model_3d
@@ -198,7 +190,6 @@ def cerebellum_morphology(t1,
 
     tissue_labels = (0, 1, 2, 3)
     region_labels = (0, *list(range(1, 13)), *list(range(101, 113)))
-
 
     image_size = (240, 144, 144)
 
@@ -321,7 +312,6 @@ def cerebellum_morphology(t1,
                 predicted_data[1,:,:,:,i] = predicted_data[1,:,:,:,i+12]
                 predicted_data[1,:,:,:,i+12] = tmp_array
 
-            region_probability_images = list()
             for i in range(len(region_labels)):
                 probability_image = ants.from_numpy(0.5 * (np.squeeze(predicted_data[0,:,:,:,i]) +
                                                     np.flip(np.squeeze(predicted_data[1,:,:,:,i]), axis=0)))
@@ -398,6 +388,7 @@ def cerebellum_morphology(t1,
                        'parcellation_segmentation_image' : region_segmentation,
                        'parcellation_probability_images' : region_probability_images,
                        'tissue_segmentation_image' : tissue_segmentation,
+                       'tissue_probability_images' : tissue_probability_images,
                        'thickness_image' : kk
                         }
         return(return_dict)
