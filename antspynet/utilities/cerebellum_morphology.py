@@ -141,7 +141,7 @@ def cerebellum_morphology(t1,
             print("Preprocessing T1.")
 
         # Do bias correction
-        t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, t1_mask, shrink_factor=4, verbose=verbose)
+        t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, shrink_factor=4, verbose=verbose)
 
     if initial_cerebellum_mask is None:
         # Brain extraction
