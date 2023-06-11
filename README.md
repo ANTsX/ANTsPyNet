@@ -82,6 +82,7 @@ pip install antspynet
 * [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
 * [Deep Flash](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v1)
 * Desikan-Killiany-Tourville cortical labeling
+* Cerebellum segmentation, parcellation, and thickness
 * Lung extraction
     * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
     * CT
