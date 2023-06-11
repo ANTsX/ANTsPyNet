@@ -2,7 +2,7 @@ import numpy as np
 import ants
 
 def cerebellum_morphology(t1,
-                          initial_cerebellum_mask=None,
+                          cerebellum_mask=None,
                           compute_thickness_image=False,
                           do_preprocessing=True,
                           antsxnet_cache_directory=None,
@@ -57,7 +57,7 @@ def cerebellum_morphology(t1,
     t1 : ANTsImage
         raw or preprocessed 3-D T1-weighted brain image.
 
-    initial_cerebellum_mask : ANTsImage
+    cerebellum_mask : ANTsImage
         Option for initialization.  If not specified, the cerebellum ROI is
         determined using ANTsXNet brain_extraction followed by registration
         to a template.
@@ -143,7 +143,7 @@ def cerebellum_morphology(t1,
         # Do bias correction
         t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, shrink_factor=4, verbose=verbose)
 
-    if initial_cerebellum_mask is None:
+    if cerebellum_mask is None:
         # Brain extraction
         probability_mask = brain_extraction(t1_preprocessed, modality="t1",
             antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
@@ -171,16 +171,20 @@ def cerebellum_morphology(t1,
             print("Register T1 cerebellum to the cerebellum of the whole brain template.")
 
         registration = ants.registration(fixed=t1_template_brain * t1_cerebellum_template_mask,
-                                         moving=t1_preprocessed * initial_cerebellum_mask,
+                                         moving=t1_preprocessed * cerebellum_mask,
                                          type_of_transform=transform_type, verbose=verbose)
         registration['invtransforms'].append(cerebellum_x_template_xfrm)
         registration['fwdtransforms'].insert(0, cerebellum_x_template_xfrm)
         template_transforms = dict(fwdtransforms=registration['fwdtransforms'],
                                    invtransforms=registration['invtransforms'])
 
-
     t1_preprocessed_in_cerebellum_space = ants.apply_transforms(t1_cerebellum_template, t1_preprocessed,
                                                                 transformlist=registration['fwdtransforms'])
+    t1_preprocessed_mask_in_cerebellum_space = None
+    if cerebellum_mask is not None:
+        t1_preprocessed_mask_in_cerebellum_space = ants.apply_transforms(t1_cerebellum_template, cerebellum_mask,
+                                                                         transformlist=registration['fwdtransforms'])
+
 
     ################################
     #
@@ -193,13 +197,16 @@ def cerebellum_morphology(t1,
 
     image_size = (240, 144, 144)
 
-    t1_preprocessed_mask_in_cerebellum_space = None
     cerebellum_probability_image = None
     tissue_probability_images = list()
     region_probability_images = list()
     which_priors = None
 
-    for m in range(3):
+    start_m = 0
+    if cerebellum_mask is not None:
+        start_m = 1
+        cerebellum_probability_image = ants.image_clone(cerebellum_mask)
+    for m in range(start_m, 3):
         if m == 0:
             labels = (0, 1)
             channel_size = 1
