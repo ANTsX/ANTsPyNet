@@ -114,6 +114,8 @@ def cerebellum_morphology(t1,
     t1_template_brain_mask = ants.image_read(get_antsxnet_data("magetTemplateBrainMask"))
     t1_template_brain = t1_template * t1_template_brain_mask
     t1_cerebellum_template = ants.image_read(get_antsxnet_data("magetCerebellumTemplate"))
+    t1_cerebellum_template = ((t1_cerebellum_template - t1_cerebellum_template.min()) / 
+                              (t1_cerebellum_template.max() - t1_cerebellum_template.min()))
     cerebellum_x_template_xfrm = get_antsxnet_data("magetCerebellumxTemplate0GenericAffine")
 
     # spatial priors are in the space of the cerebellar template.  First three are
@@ -161,7 +163,7 @@ def cerebellum_morphology(t1,
         template_transforms = dict(fwdtransforms=registration['fwdtransforms'],
                                    invtransforms=registration['invtransforms'])
     else:
-        t1_cerebellum_template_mask = ants.threshold_image(t1_cerebellum_template, -0.01, 100, 0, 1)
+        t1_cerebellum_template_mask = ants.threshold_image(t1_cerebellum_template, 0.1, 1.1, 1, 0)
         t1_cerebellum_template_mask = ants.apply_transforms(t1_template, t1_cerebellum_template_mask,
                                                             transformlist=cerebellum_x_template_xfrm,
                                                             interpolator='nearestNeighbor',
@@ -209,18 +211,18 @@ def cerebellum_morphology(t1,
     for m in range(start_m, 3):
         if m == 0:
             labels = (0, 1)
-            channel_size = 1
+            channel_size = 2
             which_priors = None
             network_name = "cerebellumWhole"
-            additional_options = None
+            additional_options = ["attentionGating"]
         elif m == 1:
-            labels = (0, 1, 2, 3)
+            labels = tissue_labels
             channel_size = len(labels)
             which_priors = (0, 1, 2)
             network_name = "cerebellumTissue"
             additional_options = None
         else:  #  m == 2:
-            labels = (0, *list(range(1, 13)), *list(range(101, 113)))
+            labels = region_labels
             channel_size = len(labels)
             which_priors = (*list(range(3, 15)), *list(range(16, 28)))
             network_name = "cerebellumLabels"
@@ -268,6 +270,9 @@ def cerebellum_morphology(t1,
         batchX[0,:,:,:,0] = pad_or_crop_image_to_size(t1_preprocessed_in_cerebellum_space, image_size).numpy()
         batchX[1,:,:,:,0] = np.flip(batchX[0,:,:,:,0], axis=0)
 
+        if m == 0:
+            for j in range(batchX.shape[0]):
+                batchX[j,:,:,:,1] = pad_or_crop_image_to_size(t1_cerebellum_template, image_size).numpy()
         if m > 0:
             for i in range(len(which_priors)):
                 for j in range(batchX.shape[0]):
