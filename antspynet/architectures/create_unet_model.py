@@ -184,7 +184,7 @@ def create_unet_model_2d(input_image_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(pool)
 
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             conv = nn_unet_activation(conv)
         else:
             conv = ReLU()(conv)
@@ -201,7 +201,7 @@ def create_unet_model_2d(input_image_size,
                           kernel_size=convolution_kernel_size,
                           padding='same')(conv)
 
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             conv = nn_unet_activation(conv)
         else:
             conv = ReLU()(conv)
@@ -229,7 +229,7 @@ def create_unet_model_2d(input_image_size,
                                  kernel_size=deconvolution_kernel_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             deconv = nn_unet_activation(deconv)
         deconv = UpSampling2D(size=pool_size)(deconv)
 
@@ -245,7 +245,7 @@ def create_unet_model_2d(input_image_size,
                          kernel_size=convolution_kernel_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             outputs = nn_unet_activation(outputs)
         else:
             outputs = ReLU()(outputs)
@@ -258,7 +258,7 @@ def create_unet_model_2d(input_image_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             outputs = nn_unet_activation(outputs)
         else:
             outputs = ReLU()(outputs)
@@ -461,7 +461,7 @@ def create_unet_model_3d(input_image_size,
                           padding='same',
                           kernel_regularizer=regularizers.l2(weight_decay))(pool)
 
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             conv = nn_unet_activation(conv)
         else:
             conv = ReLU()(conv)
@@ -478,7 +478,7 @@ def create_unet_model_3d(input_image_size,
                           kernel_size=convolution_kernel_size,
                           padding='same')(conv)
 
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             conv = nn_unet_activation(conv)
         else:
             conv = ReLU()(conv)
@@ -506,7 +506,7 @@ def create_unet_model_3d(input_image_size,
                                  kernel_size=deconvolution_kernel_size,
                                  padding='same',
                                  kernel_regularizer=regularizers.l2(weight_decay))(outputs)
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             deconv = nn_unet_activation(deconv)
         deconv = UpSampling3D(size=pool_size)(deconv)
 
@@ -522,7 +522,7 @@ def create_unet_model_3d(input_image_size,
                          kernel_size=convolution_kernel_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             outputs = nn_unet_activation(outputs)
         else:
             outputs = ReLU()(outputs)
@@ -535,7 +535,7 @@ def create_unet_model_3d(input_image_size,
                          padding='same',
                          kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
-        if nn_unet_activation_style == True:
+        if nn_unet_activation_style:
             outputs = nn_unet_activation(outputs)
         else:
             outputs = ReLU()(outputs)
