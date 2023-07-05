@@ -233,7 +233,7 @@ def create_unet_model_2d(input_image_size,
             deconv = nn_unet_activation(deconv)
         deconv = UpSampling2D(size=pool_size)(deconv)
 
-        if add_attention_gating == True:
+        if add_attention_gating:
             outputs = attention_gate_2d(deconv,
               encoding_convolution_layers[number_of_layers-i-1],
               number_of_filters[number_of_layers-i-1] // 4)
@@ -510,7 +510,7 @@ def create_unet_model_3d(input_image_size,
             deconv = nn_unet_activation(deconv)
         deconv = UpSampling3D(size=pool_size)(deconv)
 
-        if add_attention_gating == True:
+        if add_attention_gating:
             outputs = attention_gate_3d(deconv,
               encoding_convolution_layers[number_of_layers-i-1],
               number_of_filters[number_of_layers-i-1] // 4)
