@@ -64,7 +64,7 @@ def create_resnet_model_2d(input_image_size,
         add the squeeze-and-excite block variant.
 
     mode : string
-        'classification' or 'regression'.  Default = 'classification'.
+        'classification', 'sigmoid' or 'regression'.  Default = 'classification'.
 
     Returns
     -------
@@ -213,6 +213,8 @@ def create_resnet_model_2d(input_image_size,
         layer_activation = 'softmax'
     elif mode == 'regression':
         layer_activation = 'linear'
+    elif mode == 'sigmoid':
+        layer_activation = 'sigmoid'
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
@@ -284,7 +286,7 @@ def create_resnet_model_3d(input_image_size,
         add the squeeze-and-excite block variant.
 
     mode : string
-        'classification' or 'regression'.  Default = 'classification'.
+        'classification', 'sigmoid' or 'regression'.  Default = 'classification'.
 
     Returns
     -------
@@ -434,6 +436,8 @@ def create_resnet_model_3d(input_image_size,
         layer_activation = 'softmax'
     elif mode == 'regression':
         layer_activation = 'linear'
+    elif mode == 'sigmoid':
+        layer_activation = 'sigmoid'
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
