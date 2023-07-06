@@ -58,7 +58,10 @@ def data_augmentation(input_image_list,
         "deformation", "affineAndDeformation".
 
     noise_model : string
-        'additivegaussian', 'saltandpepper', 'shot', or 'speckle'.
+        'additivegaussian', 'saltandpepper', 'shot', and 'speckle'. Alternatively, one
+        can specify a tuple or list of one or more of the options and one is selected
+        at random with reasonable, randomized parameters.  Note that the "speckle" model
+        takes much longer than the others.
 
     noise_parameters : tuple or array or float
         'additivegaussian': (mean, standardDeviation)
@@ -208,33 +211,48 @@ def data_augmentation(input_image_list,
 
             if noise_model is not None:
 
+                if not isinstance(noise_model, str):
+                    noise_model = random.sample(noise_model, 1)[0]
+                    # Just picked some parameters that looked reasonable
+                    if noise_model == "additivegaussian":
+                        noise_parameters = (random.uniform(0.0, 1.0),
+                                            random.uniform(0.01, 0.25))
+                    elif noise_model == "saltandpepper":
+                        noise_parameters = (random.uniform(0.0, 0.25),
+                                            random.uniform(0.0, 0.25),
+                                            random.uniform(0.75, 1.0))
+                    elif noise_model == "shot":
+                        noise_parameters = (random.uniform(10, 1000),)
+                    elif noise_model == "speckle":
+                        noise_parameters = (random.uniform(0.1, 1),)
+                    else:
+                        raise ValueError("Unrecognized noise model.")
+
                 if verbose:
                     print("        Adding noise (" + noise_model + ").")
 
-                if any( np.array(noise_parameters) > 0 ):
-
-                   if noise_model.lower() == "additivegaussian":
-                       parameters = (noise_parameters[0], random.uniform(0.0, noise_parameters[1]))
-                       image = ants.add_noise_to_image(image,
-                                                       noise_model="additivegaussian",
-                                                       noise_parameters=parameters)
-                   elif noise_model.lower() == "saltandpepper":
-                       parameters = (random.uniform(0.0, noise_parameters[0]), noise_parameters[1], noise_parameters[2])
-                       image = ants.add_noise_to_image(image,
-                                                       noise_model="saltandpepper",
-                                                       noise_parameters=parameters)
-                   elif noise_model.lower() == "shot":
-                       parameters = (random.uniform(0.0, noise_parameters[0]))
-                       image = ants.add_noise_to_image(image,
-                                                       noise_model="shot",
-                                                       noise_parameters=parameters)
-                   elif noise_model.lower() == "speckle":
-                       parameters = (random.uniform(0.0, noise_parameters[0]))
-                       image = ants.add_noise_to_image(image,
-                                                       noise_model="speckle",
-                                                       noise_parameters=parameters)
-                   else:
-                       raise ValueError("Unrecognized noise model.")
+                if noise_model.lower() == "additivegaussian":
+                    parameters = (noise_parameters[0], random.uniform(0.0, noise_parameters[1]))
+                    image = ants.add_noise_to_image(image,
+                                                    noise_model="additivegaussian",
+                                                    noise_parameters=parameters)
+                elif noise_model.lower() == "saltandpepper":
+                    parameters = (random.uniform(0.0, noise_parameters[0]), noise_parameters[1], noise_parameters[2])
+                    image = ants.add_noise_to_image(image,
+                                                    noise_model="saltandpepper",
+                                                    noise_parameters=parameters)
+                elif noise_model.lower() == "shot":
+                    parameters = (random.uniform(0.0, noise_parameters[0]))
+                    image = ants.add_noise_to_image(image,
+                                                    noise_model="shot",
+                                                    noise_parameters=parameters)
+                elif noise_model.lower() == "speckle":
+                    parameters = (random.uniform(0.0, noise_parameters[0]))
+                    image = ants.add_noise_to_image(image,
+                                                    noise_model="speckle",
+                                                    noise_parameters=parameters)
+                else:
+                    raise ValueError("Unrecognized noise model.")
 
             # Simulated bias field
 
@@ -246,7 +264,7 @@ def data_augmentation(input_image_list,
                 log_field = simulate_bias_field(image, number_of_points=10, sd_bias_field=sd_simulated_bias_field, number_of_fitting_levels=2, mesh_size=10)
                 log_field = log_field.iMath("Normalize")
                 field_array = np.power(np.exp(log_field.numpy()), random.sample((2, 3, 4), 1)[0])
-                image = image * ants.from_numpy(field_array, origin=image.origin, spacing=image.spacing, direction=image.direction)                
+                image = image * ants.from_numpy(field_array, origin=image.origin, spacing=image.spacing, direction=image.direction)
 
             # Histogram intensity warping
 

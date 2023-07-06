@@ -57,7 +57,7 @@ def create_resnet_model_2d(input_image_size,
         Number of filters at the initial layer.
 
     cardinality : integer
-        perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
+        perform ResNet (cardinality = 1) or ResNeX (cardinality is not 1 but,
         instead, powers of 2---try '32').
 
     squeeze_and_excite : boolean
@@ -96,7 +96,7 @@ def create_resnet_model_2d(input_image_size,
         if number_of_filters % cardinality != 0:
             raise ValueError('number_of_filters `%` cardinality != 0')
 
-        number_of_group_filters = int(number_of_filters / cardinality)
+        number_of_group_filters = number_of_filters // cardinality
 
         convolution_layers = []
         for j in range(cardinality):
@@ -132,11 +132,11 @@ def create_resnet_model_2d(input_image_size,
         return(x)
 
     def residual_block_2d(model,
-                         number_of_filters_in,
-                         number_of_filters_out,
-                         strides=(1, 1),
-                         project_shortcut=False,
-                         squeeze_and_excite=False):
+                          number_of_filters_in,
+                          number_of_filters_out,
+                          strides=(1, 1),
+                          project_shortcut=False,
+                          squeeze_and_excite=False):
         shortcut = model
 
         model = Conv2D(filters=number_of_filters_in,
@@ -157,14 +157,14 @@ def create_resnet_model_2d(input_image_size,
                        padding='same')(model)
         model = BatchNormalization()(model)
 
-        if project_shortcut == True or strides != (1,1):
+        if project_shortcut or strides != (1,1):
             shortcut = Conv2D(filters=number_of_filters_out,
                               kernel_size=(1, 1),
                               strides=strides,
                               padding='same')(shortcut)
             shortcut = BatchNormalization()(shortcut)
 
-        if squeeze_and_excite == True:
+        if squeeze_and_excite:
             model = squeeze_and_excite_block_2d(model)
 
         model = Add()([shortcut, model])
@@ -277,7 +277,7 @@ def create_resnet_model_3d(input_image_size,
         Number of filters at the initial layer.
 
     cardinality : integer
-        perform ResNet (cardinality = 1) or ResNeX (cardinality does not 1 but,
+        perform ResNet (cardinality = 1) or ResNeX (cardinality is not 1 but,
         instead, powers of 2---try '32').
 
     squeeze_and_excite : boolean
@@ -316,7 +316,7 @@ def create_resnet_model_3d(input_image_size,
         if number_of_filters % cardinality != 0:
             raise ValueError('number_of_filters `%` cardinality != 0')
 
-        number_of_group_filters = int(number_of_filters / cardinality)
+        number_of_group_filters = number_of_filters // cardinality
 
         convolution_layers = []
         for j in range(cardinality):
@@ -377,14 +377,14 @@ def create_resnet_model_3d(input_image_size,
                        padding='same')(model)
         model = BatchNormalization()(model)
 
-        if project_shortcut == True or strides != (1,1,1):
+        if project_shortcut or strides != (1,1,1):
             shortcut = Conv3D(filters=number_of_filters_out,
                               kernel_size=(1, 1, 1),
                               strides=strides,
                               padding='same')(shortcut)
             shortcut = BatchNormalization()(shortcut)
 
-        if squeeze_and_excite == True:
+        if squeeze_and_excite:
             model = squeeze_and_excite_block_3d(model)
 
         model = Add()([shortcut, model])
