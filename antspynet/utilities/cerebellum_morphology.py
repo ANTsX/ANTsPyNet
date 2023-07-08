@@ -13,7 +13,7 @@ def cerebellum_morphology(t1,
     Cerebellum tissue segmentation, Schmahmann parcellation, and thickness.
 
     Perform cerebellum segmentation using a modification of the set of
-    MaGET cerebellum atlases --- https://github.com/CoBrALab/MAGeTbrain.
+    MaGET cerebellum atlases --- https://www.cobralab.ca/cerebellum-lobules
 
     The tissue labeling is as follows:
 
