@@ -87,4 +87,6 @@ from .quality_assessment import tid_neural_image_assessment
 from .quality_assessment import random_mask
 from .lung_segmentation import el_bicho
 
+from .mri_modality_classification import mri_modality_classification
+
 from .neural_style_transfer import neural_style_transfer
