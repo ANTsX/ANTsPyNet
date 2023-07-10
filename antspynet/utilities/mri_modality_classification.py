@@ -8,7 +8,7 @@ def mri_modality_classification(image,
                                 verbose=False):
 
     """
-    Predict MRI modality type.
+    Predict MRI modality type (whole-head only).
 
     Modalities:
         T1
@@ -22,7 +22,7 @@ def mri_modality_classification(image,
     Arguments
     ---------
     image : ANTsImage
-        raw or preprocessed 3-D MRI brain image.
+        raw 3-D MRI whole head image.
 
     verbose : boolean
         Print progress to the screen.
@@ -34,7 +34,7 @@ def mri_modality_classification(image,
 
     Example
     -------
-    >>> image = ants.image_read("t1.nii.gz")
+    >>> image = ants.image_read(antspynet.get_antsxnet_data("mprage_hippmapp3r"))
     >>> classification = mri_modality_classification(image)
     """
 
