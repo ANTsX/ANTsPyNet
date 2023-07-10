@@ -72,6 +72,8 @@ def mri_modality_classification(image,
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.asarray(center_of_mass_template), translation=translation)
     image = ants.apply_ants_transform_to_image(xfrm, image, template)
+    
+    image = (image - image.min()) / (image.max() - image.min())
 
     ################################
     #
