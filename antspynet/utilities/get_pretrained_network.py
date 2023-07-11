@@ -281,7 +281,7 @@ def get_pretrained_network(file_id=None,
         target_file_name = file_id + ".h5"
 
     if antsxnet_cache_directory is None:
-        antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), '.keras/ANTsXNet")
+        antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), ".keras/ANTsXNet")
     target_file_name_path = os.path.join(antsxnet_cache_directory, target_file_name)
 
     # keras get_file does not work on read-only file systems. It will attempt to download the file even
