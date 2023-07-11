@@ -63,7 +63,7 @@ def get_antsxnet_data(file_id=None,
             "magetTemplateBrainMask": "https://figshare.com/ndownloader/files/41052569",
             "magetCerebellumTemplate": "https://figshare.com/ndownloader/files/41052581",
             "magetCerebellumTemplatePriors": "https://figshare.com/ndownloader/files/41052578",
-            "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575"            
+            "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -109,24 +109,22 @@ def get_antsxnet_data(file_id=None,
 
     url = switch_data(file_id)
 
-    if target_file_name == None:
+    if target_file_name is None:
         if file_id == "magetCerebellumxTemplate0GenericAffine":
             target_file_name = file_id + ".mat"
         else:
             target_file_name = file_id + ".nii.gz"
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
+    if antsxnet_cache_directory is None:
+        antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), ".keras/ANTsXNet")
+    target_file_name_path = os.path.join(antsxnet_cache_directory, target_file_name)
 
     # keras get_file does not work on read-only file systems. It will attempt to download the file even
     # if it exists. This is a problem for shared cache directories and read-only containers.
     #
     # Check if the file exists here, and if so, return it. Else let keras handle the download
-    target_file_name_path = os.path.join(os.path.expanduser('~'), '.keras', antsxnet_cache_directory,
-                                        target_file_name)
-
     if not os.path.exists(target_file_name_path):
         target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
-                                                        cache_subdir = antsxnet_cache_directory)
+                                                        cache_subdir=antsxnet_cache_directory)
 
     return(target_file_name_path)
