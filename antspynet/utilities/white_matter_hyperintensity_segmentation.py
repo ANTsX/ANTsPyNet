@@ -69,9 +69,6 @@ def sysu_media_wmh_segmentation(flair,
     if flair.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     image_size = (200, 200)
 
     ################################
@@ -320,9 +317,6 @@ def hypermapp3r_segmentation(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     ################################
     #
     # Preprocess images
@@ -521,9 +515,6 @@ def ew_david(flair,
 
     if use_t1_segmentation and do_preprocessing == False:
         raise ValueError("Using the t1 segmentation requires do_preprocessing=True.")
-
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
 
     do_slicewise = True
 

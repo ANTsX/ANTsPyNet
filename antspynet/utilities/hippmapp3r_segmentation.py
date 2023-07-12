@@ -60,9 +60,6 @@ def hippmapp3r_segmentation(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if verbose == True:
         print("*************  Preprocessing  ***************")
         print("")

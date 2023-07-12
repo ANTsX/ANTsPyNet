@@ -37,9 +37,6 @@ def arterial_lesion_segmentation(image,
     if image.dimension != 2:
         raise ValueError( "Image dimension must be 2." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     channel_size = 1
 
     weights_file_name = get_pretrained_network("arterialLesionWeibinShi",
@@ -125,14 +122,11 @@ def allen_ex5_brain_extraction(image,
     from ..architectures import create_unet_model_2d
     from ..utilities import get_pretrained_network
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if which_axis < 0 or which_axis > 2:
         raise ValueError("Chosen axis not supported.")
 
     weights_file_name = ""
-    if view.lower() == "coronal":  
+    if view.lower() == "coronal":
         weights_file_name = get_pretrained_network("ex5_coronal_weights",
             antsxnet_cache_directory=antsxnet_cache_directory)
     elif view.lower() == "sagittal":
@@ -161,15 +155,15 @@ def allen_ex5_brain_extraction(image,
     number_of_slices = 1
     if image.dimension > 2:
         number_of_slices = image.shape[which_axis]
-    
+
     image_channels = list()
     if number_of_channels == 1:
         image_channels.append(image)
     else:
         image_channels = ants.split_channels(image)
-     
+
     batch_X = np.zeros((number_of_channels * number_of_slices, *resampled_image_size, 1))
-    
+
     count = 0
     for i in range(number_of_channels):
         image_channel_array = image_channels[i].numpy()
@@ -199,7 +193,7 @@ def allen_ex5_brain_extraction(image,
     if number_of_channels > 1:
         if verbose:
             print("Averaging across channels.")
-        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0) 
+        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0)
         predicted_data = np.zeros((number_of_slices, *resampled_image_size, 1))
         for i in range(number_of_channels):
             predicted_data = (predicted_data * i + predicted_data_temp[i]) / (i + 1)
@@ -211,7 +205,7 @@ def allen_ex5_brain_extraction(image,
     for j in range(number_of_slices):
         slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:,1]))
         slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
-        if image.dimension == 2: 
+        if image.dimension == 2:
             foreground_probability_array[:,:] = slice.numpy()
         else:
             if which_axis == 0:
@@ -266,9 +260,6 @@ def allen_histology_brain_mask(image,
     from ..architectures import create_unet_model_2d
     from ..utilities import get_pretrained_network
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if which_axis < 0 or which_axis > 2:
         raise ValueError("Chosen axis not supported.")
 
@@ -295,15 +286,15 @@ def allen_histology_brain_mask(image,
     number_of_slices = 1
     if image.dimension > 2:
         number_of_slices = image.shape[which_axis]
-    
+
     image_channels = list()
     if number_of_channels == 1:
         image_channels.append(image)
     else:
         image_channels = ants.split_channels(image)
-     
+
     batch_X = np.zeros((number_of_channels * number_of_slices, *resampled_image_size, 1))
-    
+
     count = 0
     for i in range(number_of_channels):
         image_channel_array = image_channels[i].numpy()
@@ -333,7 +324,7 @@ def allen_histology_brain_mask(image,
     if number_of_channels > 1:
         if verbose:
             print("Averaging across channels.")
-        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0) 
+        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0)
         predicted_data = np.zeros((number_of_slices, *resampled_image_size, 1))
         for i in range(number_of_channels):
             predicted_data = (predicted_data * i + predicted_data_temp[i]) / (i + 1)
@@ -345,7 +336,7 @@ def allen_histology_brain_mask(image,
     for j in range(number_of_slices):
         slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:,1]))
         slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
-        if image.dimension == 2: 
+        if image.dimension == 2:
             foreground_probability_array[:,:] = slice.numpy()
         else:
             if which_axis == 0:
@@ -370,7 +361,7 @@ def allen_histology_hemispherical_coronal_mask(image,
                                                verbose=False):
 
     """
-    Determine left and right hemisphere brain masks of Allen's mouse data in coronal 
+    Determine left and right hemisphere brain masks of Allen's mouse data in coronal
     acquisitions for both P* and E*x5 data.  This assumes that the original histology
     image has been pre-extracted.
 
@@ -402,9 +393,6 @@ def allen_histology_hemispherical_coronal_mask(image,
     from ..architectures import create_unet_model_2d
     from ..utilities import get_pretrained_network
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if which_axis < 0 or which_axis > 2:
         raise ValueError("Chosen axis not supported.")
 
@@ -434,15 +422,15 @@ def allen_histology_hemispherical_coronal_mask(image,
     number_of_slices = 1
     if image.dimension > 2:
         number_of_slices = image.shape[which_axis]
-    
+
     image_channels = list()
     if number_of_channels == 1:
         image_channels.append(image)
     else:
         image_channels = ants.split_channels(image)
-     
+
     batch_X = np.zeros((number_of_channels * number_of_slices, *resampled_image_size, 1))
-    
+
     count = 0
     for i in range(number_of_channels):
         image_channel_array = image_channels[i].numpy()
@@ -473,7 +461,7 @@ def allen_histology_hemispherical_coronal_mask(image,
     if number_of_channels > 1:
         if verbose:
             print("Averaging across channels.")
-        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0) 
+        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0)
         predicted_data = np.zeros((number_of_slices, *resampled_image_size, 1))
         for i in range(number_of_channels):
             predicted_data = (predicted_data * i + predicted_data_temp[i]) / (i + 1)
@@ -494,7 +482,7 @@ def allen_histology_hemispherical_coronal_mask(image,
         for j in range(number_of_slices):
             slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:,i]))
             slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
-            if image.dimension == 2: 
+            if image.dimension == 2:
                 probability_image_array[:,:] = slice.numpy()
             else:
                 if which_axis == 0:
@@ -554,9 +542,6 @@ def allen_histology_cerebellum_mask(image,
     from ..architectures import create_unet_model_2d
     from ..utilities import get_pretrained_network
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if which_axis < 0 or which_axis > 2:
         raise ValueError("Chosen axis not supported.")
 
@@ -564,11 +549,11 @@ def allen_histology_cerebellum_mask(image,
     if view == "sagittal":
         weights_file_name = get_pretrained_network("allen_cerebellum_sagittal_mask_weights",
             antsxnet_cache_directory=antsxnet_cache_directory)
-    elif view == "coronal":   
+    elif view == "coronal":
         weights_file_name = get_pretrained_network("allen_cerebellum_coronal_mask_weights",
             antsxnet_cache_directory=antsxnet_cache_directory)
     else:
-        raise ValueError("Unrecognized option for view.  Must be sagittal or coronal.")    
+        raise ValueError("Unrecognized option for view.  Must be sagittal or coronal.")
 
     resampled_image_size = (512, 512)
     original_slice_shape = image.shape
@@ -590,15 +575,15 @@ def allen_histology_cerebellum_mask(image,
     number_of_slices = 1
     if image.dimension > 2:
         number_of_slices = image.shape[which_axis]
-    
+
     image_channels = list()
     if number_of_channels == 1:
         image_channels.append(image)
     else:
         image_channels = ants.split_channels(image)
-     
+
     batch_X = np.zeros((number_of_channels * number_of_slices, *resampled_image_size, 1))
-    
+
     count = 0
     for i in range(number_of_channels):
         image_channel_array = image_channels[i].numpy()
@@ -628,7 +613,7 @@ def allen_histology_cerebellum_mask(image,
     if number_of_channels > 1:
         if verbose:
             print("Averaging across channels.")
-        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0) 
+        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0)
         predicted_data = np.zeros((number_of_slices, *resampled_image_size, 1))
         for i in range(number_of_channels):
             predicted_data = (predicted_data * i + predicted_data_temp[i]) / (i + 1)
@@ -640,7 +625,7 @@ def allen_histology_cerebellum_mask(image,
     for j in range(number_of_slices):
         slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:,0]))
         slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
-        if image.dimension == 2: 
+        if image.dimension == 2:
             foreground_probability_array[:,:] = slice.numpy()
         else:
             if which_axis == 0:
@@ -700,7 +685,7 @@ def allen_histology_super_resolution(image,
 
     lr_image_size = (256, 256)
     sr_image_size = (512, 512)
-    
+
     image_lr_list = list()
     for i in range(len(image_list)):
 
@@ -708,7 +693,7 @@ def allen_histology_super_resolution(image,
             raise ValueError("Number of image channels should be 3 (rgb).")
         if image_list[i].dimension != 2:
             raise ValueError("Input image should be 2-D.")
-                
+
         do_resample = False
         if image_list[i].shape != lr_image_size:
             warnings.warn("Resampling input image to (256, 256).")
@@ -718,15 +703,12 @@ def allen_histology_super_resolution(image,
         image_lr_channels = ants.split_channels(image_lr)
         for c in range(len(image_lr_channels)):
             if do_resample:
-                image_lr_channels[c] = ants.resample_image(image_lr_channels[c], resample_params=lr_image_size, 
+                image_lr_channels[c] = ants.resample_image(image_lr_channels[c], resample_params=lr_image_size,
                                                            use_voxels=True, interp_type=0)
-            image_lr_channels[c] = ((image_lr_channels[c] - image_lr_channels[c].min()) / 
+            image_lr_channels[c] = ((image_lr_channels[c] - image_lr_channels[c].min()) /
                                     (image_lr_channels[c].max() - image_lr_channels[c].min()))
         image_lr = ants.merge_channels(image_lr_channels)
         image_lr_list.append(image_lr)
-
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
 
     weights_file_name = get_pretrained_network("allen_sr_weights",
         antsxnet_cache_directory=antsxnet_cache_directory)
@@ -738,28 +720,28 @@ def allen_histology_super_resolution(image,
     batch_X = np.zeros((len(image_lr_list), *lr_image_size, 3))
     for i in range(len(image_lr_list)):
         batch_X[i,:,:,:] = image_lr_list[i].numpy()
-    
+
     if verbose:
         print("Prediction: ")
 
     predicted_data = sr_model.predict(batch_X, verbose=int(verbose))
-    
+
     if verbose:
         print("Regression match output image.")
 
     spacing_factor = (lr_image_size[0] - 1) / (sr_image_size[0] - 1)
-    
+
     image_sr_list = list()
     for i in range(len(image_lr_list)):
         image_sr = ants.from_numpy(predicted_data[i,:,:,:], origin=image_list[i].origin,
-                                   direction=image_list[i].direction, 
-                                   spacing=(spacing_factor * image_list[i].spacing[0], 
+                                   direction=image_list[i].direction,
+                                   spacing=(spacing_factor * image_list[i].spacing[0],
                                             spacing_factor * image_list[i].spacing[1]),
                                    has_components=True)
         image_channels = ants.split_channels(image_list[i])
         image_sr_channels = ants.split_channels(image_sr)
         for c in range(len(image_sr_channels)):
-            image_lr_channel_resampled = ants.resample_image(image_channels[c], resample_params=sr_image_size, 
+            image_lr_channel_resampled = ants.resample_image(image_channels[c], resample_params=sr_image_size,
                                                              use_voxels=True, interp_type=0)
             image_sr_channels[c] = regression_match_image(image_sr_channels[c], image_lr_channel_resampled)
         image_sr_list.append(ants.merge_channels(image_sr_channels))

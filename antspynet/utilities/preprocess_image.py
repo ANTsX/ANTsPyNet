@@ -92,9 +92,6 @@ def preprocess_brain_image(image,
 
     preprocessed_image = ants.image_clone(image)
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     # Truncate intensity
     if truncate_intensity is not None:
         quantiles = (image.quantile(truncate_intensity[0]), image.quantile(truncate_intensity[1]))
@@ -132,7 +129,7 @@ def preprocess_brain_image(image,
             transforms = dict(fwdtransforms=registration['fwdtransforms'],
                               invtransforms=registration['invtransforms'])
         else:
-            template_probability_mask = brain_extraction(template_image, modality=brain_extraction_modality, 
+            template_probability_mask = brain_extraction(template_image, modality=brain_extraction_modality,
                 antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
             template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)
             template_brain_image = template_mask * template_image
