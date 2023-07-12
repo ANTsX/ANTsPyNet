@@ -38,9 +38,6 @@ def ukbb(image,
     if image.dimension != 2:
         raise ValueError( "Image dimension must be 2." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     channel_size = 1
 
     weights_file_name = get_pretrained_network("arterialLesionWeibinShi",
@@ -126,14 +123,11 @@ def e13x5_brain_extraction(image,
     from ..architectures import create_unet_model_2d
     from ..utilities import get_pretrained_network
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if which_axis < 0 or which_axis > 2:
         raise ValueError("Chosen axis not supported.")
 
     weights_file_name = ""
-    if view.lower() == "coronal":  
+    if view.lower() == "coronal":
         weights_file_name = get_pretrained_network("e13x5_coronal_weights",
             antsxnet_cache_directory=antsxnet_cache_directory)
     elif view.lower() == "sagittal":
@@ -162,15 +156,15 @@ def e13x5_brain_extraction(image,
     number_of_slices = 1
     if image.dimension > 2:
         number_of_slices = image.shape[which_axis]
-    
+
     image_channels = list()
     if number_of_channels == 1:
         image_channels.append(image)
     else:
         image_channels = ants.split_channels(image)
-     
+
     batch_X = np.zeros((number_of_channels * number_of_slices, *resampled_image_size, 1))
-    
+
     count = 0
     for i in range(number_of_channels):
         image_channel_array = image_channels[i].numpy()
@@ -200,7 +194,7 @@ def e13x5_brain_extraction(image,
     if number_of_channels > 1:
         if verbose:
             print("Averaging across channels.")
-        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0) 
+        predicted_data_temp = np.split(predicted_data, number_of_channels, axis=0)
         predicted_data = np.zeros((number_of_slices, *resampled_image_size, 1))
         for i in range(number_of_channels):
             predicted_data = (predicted_data * i + predicted_data_temp[i]) / (i + 1)
@@ -212,7 +206,7 @@ def e13x5_brain_extraction(image,
     for j in range(number_of_slices):
         slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:,1]))
         slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
-        if image.dimension == 2: 
+        if image.dimension == 2:
             foreground_probability_array[:,:] = slice.numpy()
         else:
             if which_axis == 0:

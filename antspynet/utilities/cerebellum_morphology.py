@@ -96,9 +96,6 @@ def cerebellum_morphology(t1,
     if t1.dimension != 3:
         raise ValueError("Image dimension must be 3.")
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     transform_type = "antsRegistrationSyNQuick[s]"
     whichtoinvert=[True, False, True]
     # transform_type = "antsRegistrationSyNQuick[a]"
@@ -114,7 +111,7 @@ def cerebellum_morphology(t1,
     t1_template_brain_mask = ants.image_read(get_antsxnet_data("magetTemplateBrainMask"))
     t1_template_brain = t1_template * t1_template_brain_mask
     t1_cerebellum_template = ants.image_read(get_antsxnet_data("magetCerebellumTemplate"))
-    t1_cerebellum_template = ((t1_cerebellum_template - t1_cerebellum_template.min()) / 
+    t1_cerebellum_template = ((t1_cerebellum_template - t1_cerebellum_template.min()) /
                               (t1_cerebellum_template.max() - t1_cerebellum_template.min()))
     cerebellum_x_template_xfrm = get_antsxnet_data("magetCerebellumxTemplate0GenericAffine")
 

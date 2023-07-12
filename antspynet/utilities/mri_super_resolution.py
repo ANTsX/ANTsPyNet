@@ -38,9 +38,6 @@ def mri_super_resolution(image, antsxnet_cache_directory=None, verbose=False):
     if image.dimension != 3:
         raise ValueError("Image dimension must be 3.")
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     model_and_weights_file_name = get_pretrained_network("mriSuperResolution", antsxnet_cache_directory=antsxnet_cache_directory)
     model_sr = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
 

@@ -65,9 +65,6 @@ def brain_extraction(image,
     if isinstance(image, list):
         channel_size = len(image)
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     input_images = list()
     if channel_size == 1:
         input_images.append(image)

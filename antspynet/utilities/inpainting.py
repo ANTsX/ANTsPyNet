@@ -58,9 +58,6 @@ def whole_head_inpainting(image,
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if slicewise:
 
         image_size = (256, 256)

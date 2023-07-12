@@ -29,7 +29,7 @@ def mri_modality_classification(image,
 
     Returns
     -------
-    
+
     Data frame with prediction values for each modality type.
 
     Example
@@ -45,9 +45,6 @@ def mri_modality_classification(image,
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
-
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
 
     ################################
     #
@@ -72,7 +69,7 @@ def mri_modality_classification(image,
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.asarray(center_of_mass_template), translation=translation)
     image = ants.apply_ants_transform_to_image(xfrm, image, template)
-    
+
     image = (image - image.min()) / (image.max() - image.min())
 
     ################################
@@ -81,7 +78,7 @@ def mri_modality_classification(image,
     #
     ################################
 
-    weights_file_name = get_pretrained_network("mriModalityClassification", 
+    weights_file_name = get_pretrained_network("mriModalityClassification",
                                                antsxnet_cache_directory=antsxnet_cache_directory)
 
     modality_types = ["T1", "T2", "FLAIR", "T2Star", "Mean DWI", "Mean Bold", "ASL Perfusion"]
@@ -90,21 +87,21 @@ def mri_modality_classification(image,
     channel_size = 1
 
     model = create_resnet_model_3d((None, None, None, channel_size),
-                                   number_of_classification_labels=number_of_classification_labels, 
+                                   number_of_classification_labels=number_of_classification_labels,
                                    mode="classification",
                                    layers=(1, 2, 3, 4),
-                                   residual_block_schedule=(3, 4, 6, 3), 
+                                   residual_block_schedule=(3, 4, 6, 3),
                                    lowest_resolution=64,
-                                   cardinality=1, 
+                                   cardinality=1,
                                    squeeze_and_excite=False)
     model.load_weights(weights_file_name)
-    
+
     batchX = np.expand_dims(image.numpy(), 0)
     batchX = np.expand_dims(batchX, -1)
 
-    batchY = model.predict(batchX, verbose=verbose)    
-    
+    batchY = model.predict(batchX, verbose=verbose)
+
     modality_df = pd.DataFrame(batchY, columns = modality_types)
-    
+
     return modality_df
 

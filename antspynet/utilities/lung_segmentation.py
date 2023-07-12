@@ -54,9 +54,6 @@ def el_bicho(ventilation_image,
     if ventilation_image.shape != mask.shape:
         raise ValueError("Ventilation image and mask size are not the same size.")
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     ################################
     #
     # Preprocess image

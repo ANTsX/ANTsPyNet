@@ -160,9 +160,6 @@ def tid_neural_image_assessment(image,
     if not which_model in valid_models:
         raise ValueError("Please pass valid model")
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     if verbose == True:
         print("Neural QA:  retreiving model and weights.")
 

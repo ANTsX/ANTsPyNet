@@ -20,7 +20,7 @@ def lung_extraction(image,
         input image
 
     modality : string
-        Modality image type.  Options include "ct", "proton", "protonLobes", 
+        Modality image type.  Options include "ct", "proton", "protonLobes",
         "maskLobes", and "ventilation".
 
     antsxnet_cache_directory : string
@@ -48,9 +48,6 @@ def lung_extraction(image,
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
-
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
 
     image_mods = [modality]
     channel_size = len(image_mods)
@@ -135,7 +132,7 @@ def lung_extraction(image,
         number_of_classification_labels = 1 + len(priors_image_list)
 
         unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
-            number_of_outputs=number_of_classification_labels, mode="classification", 
+            number_of_outputs=number_of_classification_labels, mode="classification",
             number_of_filters_at_base_layer=16, number_of_layers=4,
             convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
             dropout_rate=0.0, weight_decay=0, additional_options=("attentionGating",))
@@ -169,7 +166,7 @@ def lung_extraction(image,
             warped_array = (warped_array - warped_array.mean()) / warped_array.std()
         else:
             warped_array[warped_array != 0] = 1
-       
+
         batchX = np.zeros((1, *warped_array.shape, channel_size))
         batchX[0,:,:,:,0] = warped_array
         for i in range(len(priors_image_list)):

@@ -250,10 +250,6 @@ def desikan_killiany_tourville_labeling(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
-
     template_transform_type = "antsRegistrationSyNQuickRepro[a]"
     ################################
     #

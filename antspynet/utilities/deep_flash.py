@@ -86,9 +86,6 @@ def deep_flash(t1,
     if t1.dimension != 3:
         raise ValueError("Image dimension must be 3.")
 
-    if antsxnet_cache_directory == None:
-        antsxnet_cache_directory = "ANTsXNet"
-
     ################################
     #
     # Options temporarily taken from the user
@@ -102,7 +99,7 @@ def deep_flash(t1,
     #
     # use_contralaterality : boolean
     #     Use both hemispherical models to also predict the corresponding contralateral
-    #     segmentation and use both sets of priors to produce the results.  
+    #     segmentation and use both sets of priors to produce the results.
 
     use_hierarchical_parcellation = True
     use_contralaterality = True
