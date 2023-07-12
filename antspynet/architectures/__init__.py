@@ -37,3 +37,5 @@ from .create_cycle_gan_model import CycleGanModel
 from .create_super_resolution_gan_model import SuperResolutionGanModel
 
 from .create_dense_model import create_dense_model
+
+from .create_transformer_model import create_vision_transformer_model_2d, create_vision_transformer_model_3d

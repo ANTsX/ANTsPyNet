@@ -1,0 +1,194 @@
+import tensorflow as tf
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Add, Dense, Dropout, Flatten, Input, LayerNormalization, MultiHeadAttention
+from antspynet.utilities import ExtractPatches2D, ExtractPatches3D, EncodePatches
+
+
+def multilayer_perceptron(x, hidden_units, dropout_rate=0.0):
+    for units in hidden_units:
+        x = Dense(units, activation=tf.nn.gelu)(x)
+        if dropout_rate > 0.0:
+            x = Dropout(dropout_rate)(x)
+    return x
+
+def create_vision_transformer_model_2d(input_image_size,
+                                       number_of_classification_labels,
+                                       patch_size=8,
+                                       number_of_transformer_layers=8,
+                                       transformer_units=[128, 64],
+                                       projection_dimension=64,
+                                       number_of_attention_heads=4,
+                                       mlp_head_units=[2048, 1024],
+                                       dropout_rate=0.5):
+    """
+    Implementation of the Vision transformer architecture.
+
+       https://keras.io/examples/vision/image_classification_with_vision_transformer/
+
+
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_classification_labels : int
+        Number of classification labels.
+
+    patch_size : int
+        Size of a single patch dimension.
+
+    number_of_transformer_layers : int
+        Number of transformer layers.
+
+    transformer_units : tuple or list
+        Size of the hidden units in the layers of the MLP.
+
+    projection_dimension : int
+        Multi-head attention layer parameter
+
+    mlp_head_units : tuple or list
+        Size of the dense layers of the final classifier.
+
+    dropout_rate : float between 0 and 1
+        Dropout rate of the multilayer perceptron and the previous dropout layer.
+
+    Returns
+    -------
+    Keras model
+        A 2-D keras model.
+
+    Example
+    -------
+    >>> model = create_vision_transformer_model_2d((224, 224, 1))
+    >>> model.summary()
+    """
+
+    inputs = Input(shape=input_image_size)
+
+    patches = ExtractPatches2D(patch_size)(inputs)
+    number_of_patches = ((input_image_size[1] * input_image_size[2]) // (patch_size ** 2))
+    encoded_patches = EncodePatches(number_of_patches,
+                                    projection_dimension)(patches)
+
+    for _ in range(number_of_transformer_layers):
+
+        x1 = LayerNormalization(epsilon=1e-6)(encoded_patches)
+
+        attention_output = MultiHeadAttention(num_heads=number_of_attention_heads,
+                                              key_dim=projection_dimension,
+                                              dropout=dropout_rate/5.0)(x1, x1)
+        x2 = Add()([attention_output, encoded_patches])
+        x3 = LayerNormalization(epsilon=1e-6)(x2)
+        x3 = multilayer_perceptron(x3,
+                                   hidden_units=transformer_units,
+                                   dropout_rate=dropout_rate/5.0)
+        encoded_patches = Add()([x3, x2])
+
+    representation = LayerNormalization(epsilon=1e-6)(encoded_patches)
+    representation = Flatten()(representation)
+    representation = Dropout(dropout_rate)(representation)
+
+    features = multilayer_perceptron(representation,
+                                     hidden_units=mlp_head_units,
+                                     dropout_rate=dropout_rate)
+
+    outputs = Dense(number_of_classification_labels)(features)
+
+    model = Model(inputs=inputs, outputs=outputs)
+
+    return model
+
+
+def create_vision_transformer_model_3d(input_image_size,
+                                       number_of_classification_labels,
+                                       patch_size=8,
+                                       number_of_transformer_layers=8,
+                                       transformer_units=[128, 64],
+                                       projection_dimension=64,
+                                       number_of_attention_heads=4,
+                                       mlp_head_units=[2048, 1024],
+                                       dropout_rate=0.5):
+    """
+    Implementation of the Vision transformer architecture.
+
+       https://keras.io/examples/vision/image_classification_with_vision_transformer/
+
+
+    Arguments
+    ---------
+    input_image_size : tuple of length 4
+        Used for specifying the input tensor shape.  The shape (or dimension) of
+        that tensor is the image dimensions followed by the number of channels
+        (e.g., red, green, and blue).
+
+    number_of_classification_labels : int
+        Number of classification labels.
+
+    patch_size : int
+        Size of a single patch dimension.
+
+    number_of_transformer_layers : int
+        Number of transformer layers.
+
+    transformer_units : tuple or list
+        Size of the hidden units in the layers of the MLP.
+
+    projection_dimension : int
+        Multi-head attention layer parameter
+
+    mlp_head_units : tuple or list
+        Size of the dense layers of the final classifier.
+
+    dropout_rate : float between 0 and 1
+        Dropout rate of the multilayer perceptron and the previous dropout layer.
+
+    Returns
+    -------
+    Keras model
+        A 3-D keras model.
+
+    Example
+    -------
+    >>> model = create_vision_transformer_model_3d(((224, 224, 224, 1))
+    >>> model.summary()
+    """
+
+    inputs = Input(shape=input_image_size)
+
+    patches = ExtractPatches3D(patch_size)(inputs)
+    number_of_patches = ((input_image_size[1] * input_image_size[2]) // (patch_size ** 2))
+    encoded_patches = EncodePatches(number_of_patches,
+                                    projection_dimension)(patches)
+
+    for _ in range(number_of_transformer_layers):
+
+        x1 = LayerNormalization(epsilon=1e-6)(encoded_patches)
+
+        attention_output = MultiHeadAttention(num_heads=number_of_attention_heads,
+                                              key_dim=projection_dimension,
+                                              dropout=dropout_rate/5.0)(x1, x1)
+        x2 = Add()([attention_output, encoded_patches])
+        x3 = LayerNormalization(epsilon=1e-6)(x2)
+        x3 = multilayer_perceptron(x3,
+                                   hidden_units=transformer_units,
+                                   dropout_rate=dropout_rate/5.0)
+        encoded_patches = Add()([x3, x2])
+
+    representation = LayerNormalization(epsilon=1e-6)(encoded_patches)
+    representation = Flatten()(representation)
+    representation = Dropout(dropout_rate)(representation)
+
+    features = multilayer_perceptron(representation,
+                                     hidden_units=mlp_head_units,
+                                     dropout_rate=dropout_rate)
+
+    outputs = Dense(number_of_classification_labels)(features)
+
+    model = Model(inputs=inputs, outputs=outputs)
+
+    return model
+
+
