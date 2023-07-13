@@ -73,7 +73,7 @@ def create_vision_transformer_model_2d(input_image_size,
     inputs = Input(shape=input_image_size)
 
     patches = ExtractPatches2D(patch_size)(inputs)
-    number_of_patches = ((input_image_size[1] * input_image_size[2]) // (patch_size ** 2))
+    number_of_patches = ((input_image_size[0] * input_image_size[1]) // (patch_size ** 2))
     encoded_patches = EncodePatches(number_of_patches,
                                     projection_dimension)(patches)
 
@@ -175,7 +175,7 @@ def create_vision_transformer_model_3d(input_image_size,
     inputs = Input(shape=input_image_size)
 
     patches = ExtractPatches3D(patch_size)(inputs)
-    number_of_patches = ((input_image_size[1] * input_image_size[2]) // (patch_size ** 2))
+    number_of_patches = ((input_image_size[0] * input_image_size[1] * input_image_size[2]) // (patch_size ** 3))
     encoded_patches = EncodePatches(number_of_patches,
                                     projection_dimension)(patches)
 
