@@ -17,6 +17,7 @@ def multilayer_perceptron(x, hidden_units, dropout_rate=0.0):
 
 def create_vision_transformer_model_2d(input_image_size,
                                        number_of_classification_labels=1000,
+                                       mode='classification',
                                        patch_size=6,
                                        number_of_transformer_layers=8,
                                        transformer_units=[128, 64],
@@ -98,7 +99,18 @@ def create_vision_transformer_model_2d(input_image_size,
                                      hidden_units=mlp_head_units,
                                      dropout_rate=dropout_rate)
 
-    outputs = Dense(number_of_classification_labels)(features)
+    layer_activation = ''
+    if mode == 'classification':
+        layer_activation = 'softmax'
+    elif mode == 'regression':
+        layer_activation = 'linear'
+    elif mode == 'sigmoid':
+        layer_activation = 'sigmoid'
+    else:
+        raise ValueError('mode must be either `classification` or `regression`.')
+
+    outputs = Dense(number_of_classification_labels,
+                    activation=layer_activation)(features)
 
     model = Model(inputs=inputs, outputs=outputs)
 
@@ -107,6 +119,7 @@ def create_vision_transformer_model_2d(input_image_size,
 
 def create_vision_transformer_model_3d(input_image_size,
                                        number_of_classification_labels=1000,
+                                       mode="classification",
                                        patch_size=6,
                                        number_of_transformer_layers=8,
                                        transformer_units=[128, 64],
@@ -188,7 +201,18 @@ def create_vision_transformer_model_3d(input_image_size,
                                      hidden_units=mlp_head_units,
                                      dropout_rate=dropout_rate)
 
-    outputs = Dense(number_of_classification_labels)(features)
+    layer_activation = ''
+    if mode == 'classification':
+        layer_activation = 'softmax'
+    elif mode == 'regression':
+        layer_activation = 'linear'
+    elif mode == 'sigmoid':
+        layer_activation = 'sigmoid'
+    else:
+        raise ValueError('mode must be either `classification` or `regression`.')
+
+    outputs = Dense(number_of_classification_labels,
+                    activation=layer_activation)(features)
 
     model = Model(inputs=inputs, outputs=outputs)
 
@@ -197,6 +221,7 @@ def create_vision_transformer_model_3d(input_image_size,
 
 def create_compact_convolutional_transformer_model_2d(input_image_size,
                                                       number_of_classification_labels=1000,
+                                                      mode="classification",
                                                       number_of_transformer_layers=8,
                                                       transformer_units=[128, 128],
                                                       projection_dimension=64,
@@ -286,7 +311,18 @@ def create_compact_convolutional_transformer_model_2d(input_image_size,
     weighted_representation = tf.matmul(attention_weights, representation, transpose_a=True)
     weighted_representation = tf.squeeze(weighted_representation, -2)
 
-    outputs = Dense(number_of_classification_labels)(weighted_representation)
+    layer_activation = ''
+    if mode == 'classification':
+        layer_activation = 'softmax'
+    elif mode == 'regression':
+        layer_activation = 'linear'
+    elif mode == 'sigmoid':
+        layer_activation = 'sigmoid'
+    else:
+        raise ValueError('mode must be either `classification` or `regression`.')
+
+    outputs = Dense(number_of_classification_labels,
+                    activation=layer_activation)(weighted_representation)
 
     model = Model(inputs=inputs, outputs=outputs)
 
@@ -295,6 +331,7 @@ def create_compact_convolutional_transformer_model_2d(input_image_size,
 
 def create_compact_convolutional_transformer_model_3d(input_image_size,
                                                       number_of_classification_labels=1000,
+                                                      mode="classification",
                                                       number_of_transformer_layers=8,
                                                       transformer_units=[128, 128],
                                                       projection_dimension=64,
@@ -384,7 +421,18 @@ def create_compact_convolutional_transformer_model_3d(input_image_size,
     weighted_representation = tf.matmul(attention_weights, representation, transpose_a=True)
     weighted_representation = tf.squeeze(weighted_representation, -2)
 
-    outputs = Dense(number_of_classification_labels)(weighted_representation)
+    layer_activation = ''
+    if mode == 'classification':
+        layer_activation = 'softmax'
+    elif mode == 'regression':
+        layer_activation = 'linear'
+    elif mode == 'sigmoid':
+        layer_activation = 'sigmoid'
+    else:
+        raise ValueError('mode must be either `classification` or `regression`.')
+
+    outputs = Dense(number_of_classification_labels,
+                    activation=layer_activation)(weighted_representation)
 
     model = Model(inputs=inputs, outputs=outputs)
 
