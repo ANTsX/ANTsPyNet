@@ -17,7 +17,7 @@ def ukbb(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -105,7 +105,7 @@ def e13x5_brain_extraction(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean

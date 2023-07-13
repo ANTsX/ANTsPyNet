@@ -44,7 +44,7 @@ def sysu_media_wmh_segmentation(flair,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -295,7 +295,7 @@ def hypermapp3r_segmentation(t1,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -475,7 +475,7 @@ def ew_david(flair,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean

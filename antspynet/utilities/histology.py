@@ -16,7 +16,7 @@ def arterial_lesion_segmentation(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -104,7 +104,7 @@ def allen_ex5_brain_extraction(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -242,7 +242,7 @@ def allen_histology_brain_mask(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -375,7 +375,7 @@ def allen_histology_hemispherical_coronal_mask(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -524,7 +524,7 @@ def allen_histology_cerebellum_mask(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -658,7 +658,7 @@ def allen_histology_super_resolution(image,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
