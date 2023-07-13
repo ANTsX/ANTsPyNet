@@ -55,7 +55,7 @@ def cerebellum_morphology(t1,
     Arguments
     ---------
     t1 : ANTsImage
-        raw or preprocessed 3-D T1-weighted brain image.
+        raw or preprocessed 3-D T1-weighted whole head ( not brain extracted ) image.
 
     cerebellum_mask : ANTsImage
         Option for initialization.  If not specified, the cerebellum ROI is
@@ -70,7 +70,7 @@ def cerebellum_morphology(t1,
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
-        Since these can be resused, if is None, these data will be downloaded to a
+        Since these can be reused, if is None, these data will be downloaded to a
         ~/.keras/ANTsXNet/.
 
     verbose : boolean
@@ -130,7 +130,7 @@ def cerebellum_morphology(t1,
     #
     ################################
 
-    t1_preprocessed = t1
+    t1_preprocessed = ants.image_clone( t1 )
     t1_mask = None
 
     template_transforms = None
