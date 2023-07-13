@@ -222,7 +222,7 @@ def create_vision_transformer_model_3d(input_image_size,
 def create_compact_convolutional_transformer_model_2d(input_image_size,
                                                       number_of_classification_labels=1000,
                                                       mode="classification",
-                                                      number_of_transformer_layers=8,
+                                                      number_of_transformer_layers=2,
                                                       transformer_units=[128, 128],
                                                       projection_dimension=64,
                                                       number_of_attention_heads=4,
@@ -304,6 +304,7 @@ def create_compact_convolutional_transformer_model_2d(input_image_size,
         x3 = multilayer_perceptron(x3,
                                    hidden_units=transformer_units,
                                    dropout_rate=0.1)
+        x3 = StochasticDepth(dpr[i])(x3)
         encoded_patches = Add()([x3, x2])
 
     representation = LayerNormalization(epsilon=1e-5)(encoded_patches)
@@ -332,7 +333,7 @@ def create_compact_convolutional_transformer_model_2d(input_image_size,
 def create_compact_convolutional_transformer_model_3d(input_image_size,
                                                       number_of_classification_labels=1000,
                                                       mode="classification",
-                                                      number_of_transformer_layers=8,
+                                                      number_of_transformer_layers=2,
                                                       transformer_units=[128, 128],
                                                       projection_dimension=64,
                                                       number_of_attention_heads=4,
@@ -414,6 +415,7 @@ def create_compact_convolutional_transformer_model_3d(input_image_size,
         x3 = multilayer_perceptron(x3,
                                    hidden_units=transformer_units,
                                    dropout_rate=0.1)
+        x3 = StochasticDepth(dpr[i])(x3)
         encoded_patches = Add()([x3, x2])
 
     representation = LayerNormalization(epsilon=1e-5)(encoded_patches)
