@@ -48,10 +48,6 @@ def cerebellum_morphology(t1,
     Label 111 : R_IX
     Label 112 : R_X
 
-    Preprocessing on the training data consisted of:
-       * n4 bias correction,
-    which is performed on the input images if do_preprocessing = True.
-
     Arguments
     ---------
     t1 : ANTsImage
@@ -66,7 +62,7 @@ def cerebellum_morphology(t1,
         Compute KellyKapowski thickness image of the gray matter.
 
     do_preprocessing : boolean
-        See description above.
+        Perform N4 bias correction and spatiall normalize to template space.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -130,7 +126,7 @@ def cerebellum_morphology(t1,
     #
     ################################
 
-    t1_preprocessed = ants.image_clone( t1 )
+    t1_preprocessed = ants.image_clone(t1)
     t1_mask = None
 
     template_transforms = None
