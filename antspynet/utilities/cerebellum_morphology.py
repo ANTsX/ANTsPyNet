@@ -15,6 +15,9 @@ def cerebellum_morphology(t1,
     Perform cerebellum segmentation using a modification of the set of
     MaGET cerebellum atlases --- https://www.cobralab.ca/cerebellum-lobules
 
+    Current citation:
+    https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4
+
     The tissue labeling is as follows:
 
     Label 1 : CSF
