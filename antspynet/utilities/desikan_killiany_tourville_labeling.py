@@ -26,6 +26,7 @@ def desikan_killiany_tourville_labeling(t1,
     Label 11: left caudate
     Label 12: left putamen
     Label 13: left pallidium
+    Label 14: 3rd ventricle
     Label 15: 4th ventricle
     Label 16: brain stem
     Label 17: left hippocampus
