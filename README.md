@@ -62,19 +62,17 @@ pip install antspynet
 * [Deep embedded clustering (DEC)](https://arxiv.org/abs/1511.06335)
 * [Deep convolutional embedded clustering (DCEC)](https://xifengguo.github.io/papers/ICONIP17-DCEC.pdf)
 
-## Applications
-
-* MRI super-resolution
-* Multi-modal brain extraction
-    * T1
+* [MRI super-resolution](https://www.medrxiv.org/content/10.1101/2023.02.02.23285376v1)
+* [Multi-modal brain extraction](https://pubmed.ncbi.nlm.nih.gov/33907199/)
+    * T1 
     * T1 ["no brainer"](https://github.com/neuronets/nobrainer)
     * FLAIR
     * T2
     * FA
     * BOLD
     * [T1/T2 infant](https://www.med.unc.edu/psych/research/psychiatry-department-research-programs/early-brain-development-research/)
-* Six-tissue Atropos brain segmentation
-* [Cortical thickness](https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1.full)
+* [Six-tissue Atropos brain segmentation](https://pubmed.ncbi.nlm.nih.gov/33907199/)
+* [Cortical thickness](https://pubmed.ncbi.nlm.nih.gov/33907199/)
 * [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
 * [HippMapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
 * [Sysu white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
@@ -82,13 +80,13 @@ pip install antspynet
 * [Hypothalamus segmentation](https://pubmed.ncbi.nlm.nih.gov/32853816/)
 * [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
 * [Deep Flash](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4)
-* Desikan-Killiany-Tourville cortical labeling
+* [Desikan-Killiany-Tourville cortical labeling](https://pubmed.ncbi.nlm.nih.gov/33907199/)
 * [Cerebellum segmentation, parcellation, and thickness](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4)
 * MRI modality classification
 * Lung extraction
-    * [Proton](https://www.ncbi.nlm.nih.gov/pubmed/30195415)
+    * [Proton](https://pubmed.ncbi.nlm.nih.gov/34227163/)
     * CT
-* [Functional lung segmentation](https://www.medrxiv.org/content/10.1101/2021.03.04.21252588v2)
+* [Functional lung segmentation](https://pubmed.ncbi.nlm.nih.gov/34227163/)
 * [Neural style transfer](https://arxiv.org/abs/1508.06576)
 * Image quality assessment
     * [TID2013](https://www.sciencedirect.com/science/article/pii/S0923596514001490)
