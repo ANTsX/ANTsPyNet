@@ -1,9 +1,7 @@
 import tensorflow as tf
-from tensorflow import keras
-from keras import backend as K
-# from keras.utils import conv_utils
+import tensorflow.keras.backend as K
 import tensorflow.keras.utils as conv_utils
-from keras.layers import InputSpec, Conv2D, Conv3D
+from tensorflow.keras.layers import InputSpec, Conv2D, Conv3D
 
 class PartialConv2D(Conv2D):
 
