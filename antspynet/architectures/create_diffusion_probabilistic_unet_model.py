@@ -4,11 +4,12 @@ import math
 
 from tensorflow import keras
 
-from keras.layers import (Add, Concatenate, Conv2D, Conv3D, Dense, GroupNormalization,
-                          Input, Layer, UpSampling2D, UpSampling3D)
-from keras.initializers import VarianceScaling
-from keras.activations import swish
-from keras import Model
+from tensorflow.keras.layers import (Add, Concatenate, Conv2D, Conv3D,
+                                     Dense, GroupNormalization,
+                                     Input, Layer, UpSampling2D, UpSampling3D)
+from tensorflow.keras.initializers import VarianceScaling
+from tensorflow.keras.activations import swish
+from tensorflow.keras import Model
 
 
 def kernel_init(scale):
