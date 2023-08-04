@@ -24,13 +24,18 @@ def mri_modality_classification(image,
     image : ANTsImage
         raw 3-D MRI whole head image.
 
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+        
     verbose : boolean
         Print progress to the screen.
 
     Returns
     -------
 
-    Data frame with prediction values for each modality type.
+    Data frame with prediction probability values for each modality type.
 
     Example
     -------
@@ -101,7 +106,7 @@ def mri_modality_classification(image,
 
     batchY = model.predict(batchX, verbose=verbose)
 
-    modality_df = pd.DataFrame(batchY, columns = modality_types)
+    modality_df = pd.DataFrame(batchY, columns=modality_types)
 
     return modality_df
 

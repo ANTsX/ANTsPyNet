@@ -90,5 +90,5 @@ from .quality_assessment import random_mask
 from .lung_segmentation import el_bicho
 
 from .mri_modality_classification import mri_modality_classification
-
+from .chexnet import chexnet
 from .neural_style_transfer import neural_style_transfer
