@@ -65,7 +65,6 @@ def chexnet(image,
     """
 
     from ..utilities import get_pretrained_network
-    from ..utilities import get_antsxnet_data
     from ..architectures import create_resnet_model_2d
 
     if image.dimension != 2:
