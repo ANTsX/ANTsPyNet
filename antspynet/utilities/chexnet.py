@@ -102,8 +102,6 @@ def chexnet(image,
                                                    antsxnet_cache_directory=antsxnet_cache_directory)
         model.load_weights(weights_file_name)
 
-        ants.image_write(image, "~/Desktop/image_before.nii.gz")
-
         image_min = image.min()
         image_max = image.max()
         image = (image - image_min) / (image_max - image_min)
@@ -143,7 +141,6 @@ def chexnet(image,
                 image = image_both
             
         image = image * (image_max - image_min) + image_min
-        ants.image_write(image, "~/Desktop/image_after.nii.gz")
         
     ################################
     #
