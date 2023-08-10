@@ -91,4 +91,5 @@ from .lung_segmentation import el_bicho
 
 from .mri_modality_classification import mri_modality_classification
 from .chexnet import chexnet
+from .chexnet import check_xray_lung_orientation
 from .neural_style_transfer import neural_style_transfer

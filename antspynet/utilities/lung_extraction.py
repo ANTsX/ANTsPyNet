@@ -12,7 +12,7 @@ def lung_extraction(image,
                     verbose=False):
 
     """
-    Perform proton or ct lung extraction using U-net.
+    Perform lung extraction.
 
     Arguments
     ---------
@@ -21,7 +21,7 @@ def lung_extraction(image,
 
     modality : string
         Modality image type.  Options include "ct", "proton", "protonLobes",
-        "maskLobes", and "ventilation".
+        "maskLobes", "ventilation", and "xray".
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -46,8 +46,10 @@ def lung_extraction(image,
     from ..utilities import get_antsxnet_data
     from ..utilities import pad_or_crop_image_to_size
 
-    if image.dimension != 3:
+    if image.dimension != 3 and modality != "xray":
         raise ValueError( "Image dimension must be 3." )
+    elif image.dimension != 2 and modality == "xray":
+        raise ValueError( "Image dimension must be 2." )
 
     image_mods = [modality]
     channel_size = len(image_mods)
@@ -74,7 +76,7 @@ def lung_extraction(image,
             convolution_kernel_size=(7, 7, 5), deconvolution_kernel_size=(7, 7, 5))
         unet_model.load_weights(weights_file_name)
 
-        if verbose == True:
+        if verbose:
             print("Lung extraction:  normalizing image to the template.")
 
         center_of_mass_template = ants.get_center_of_mass(reorient_template * 0 + 1)
@@ -100,7 +102,7 @@ def lung_extraction(image,
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
                 origin=origin, spacing=spacing, direction=direction))
 
-        if verbose == True:
+        if verbose:
             print("Lung extraction:  renormalize probability mask to native space.")
 
         for i in range(number_of_classification_labels):
@@ -152,7 +154,7 @@ def lung_extraction(image,
 
         unet_model.load_weights(weights_file_name)
 
-        if verbose == True:
+        if verbose:
             print("Lung extraction:  normalizing image to the template.")
 
         center_of_mass_template = ants.get_center_of_mass(reorient_template * 0 + 1)
@@ -189,7 +191,7 @@ def lung_extraction(image,
                     ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
                     origin=origin, spacing=spacing, direction=direction))
 
-        if verbose == True:
+        if verbose:
             print("Lung extraction:  renormalize probability images to native space.")
 
         for i in range(number_of_classification_labels):
@@ -225,7 +227,7 @@ def lung_extraction(image,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Preprocess CT image.")
 
         def closest_simplified_direction_matrix(direction):
@@ -273,7 +275,7 @@ def lung_extraction(image,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Build model and load weights.")
 
         weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights",
@@ -300,7 +302,7 @@ def lung_extraction(image,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Prediction.")
 
         batchX = np.zeros((1, *reference_image_size, channel_size))
@@ -313,7 +315,7 @@ def lung_extraction(image,
 
         probability_images = list()
         for i in range(number_of_classification_labels):
-            if verbose == True:
+            if verbose:
                 print("Reconstructing image", classes[i])
             probability_image = ants.from_numpy(np.squeeze(predicted_data[:,:,:,:,i]),
                 origin=ct_preprocessed_warped.origin, spacing=ct_preprocessed_warped.spacing,
@@ -342,7 +344,7 @@ def lung_extraction(image,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Preprocess ventilation image.")
 
         template_size = (256, 256)
@@ -365,7 +367,7 @@ def lung_extraction(image,
             convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
             weight_decay=0)
 
-        if verbose == True:
+        if verbose:
             print("Whole lung mask: retrieving model weights.")
 
         weights_file_name = get_pretrained_network("wholeLungMaskFromVentilation",
@@ -391,7 +393,7 @@ def lung_extraction(image,
         for d in range(len(dimensions_to_predict)):
             number_of_slices = preprocessed_image.shape[dimensions_to_predict[d]]
 
-            if verbose == True:
+            if verbose:
                 print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
             for i in range(number_of_slices):
@@ -405,7 +407,7 @@ def lung_extraction(image,
         #
         ################################
 
-        if verbose == True:
+        if verbose:
             print("Prediction.")
 
         prediction = unet_model.predict(batchX, verbose=verbose)
@@ -432,6 +434,62 @@ def lung_extraction(image,
             current_start_slice = current_end_slice + 1
 
         return(probability_image)
+
+    elif modality == "xray":
+        
+        weights_file_name = get_pretrained_network("xrayLungExtraction",
+            antsxnet_cache_directory=antsxnet_cache_directory)
+
+        classes = ("background", "left_lung", "right_lung")
+        number_of_classification_labels = len(classes)
+        resampled_image_size = (256, 256)
+        channel_size = 3
+        
+        resampled_image = ants.resample_image(image, resampled_image_size, use_voxels=True, interp_type=0)
+        xray_lung_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("xrayLungPriors")))
+
+        unet_model = create_unet_model_2d((*resampled_image_size, channel_size),
+            number_of_outputs=number_of_classification_labels, mode="classification",
+            number_of_filters_at_base_layer=32, number_of_layers=4,
+            convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
+            dropout_rate=0.0, weight_decay=0,
+            additional_options=None)
+        unet_model.load_weights(weights_file_name)
+
+        batchX = np.zeros((1, *resampled_image_size, channel_size))
+        resampled_array = resampled_image.numpy()        
+        batchX[0,:,:,0] = (resampled_array - resampled_array.min()) / (resampled_array.max() - resampled_array.min())
+        batchX[0,:,:,1] = xray_lung_priors[0].numpy()
+        batchX[0,:,:,2] = xray_lung_priors[1].numpy()
+
+        predicted_data = unet_model.predict(batchX, verbose=int(verbose))
+
+        origin = resampled_image.origin
+        spacing = resampled_image.spacing
+        direction = resampled_image.direction
+
+        probability_images_array = list()
+        for i in range(number_of_classification_labels):
+            probability_images_array.append(
+            ants.from_numpy(np.squeeze(predicted_data[0,:,:,i]),
+                origin=origin, spacing=spacing, direction=direction))
+
+        if verbose:
+            print("Lung extraction:  renormalize probability mask to native space.")
+
+        for i in range(number_of_classification_labels):
+            probability_images_array[i] = ants.resample_image(probability_images_array[i],
+                image.shape, use_voxels=True, interp_type=0)                                                               
+            probability_images_array[i] = ants.copy_image_info(image, probability_images_array[i])
+
+        image_matrix = ants.image_list_to_matrix(probability_images_array, image * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
+
+        return_dict = {'segmentation_image' : segmentation_image,
+                       'probability_images' : probability_images_array}
+        return(return_dict)
 
     else:
         return ValueError("Unrecognized modality.")
