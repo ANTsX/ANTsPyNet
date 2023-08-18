@@ -41,7 +41,7 @@ def create_dense_model(input_vector_size,
     output = input
 
     number_of_filters = number_of_filters_at_base_layer
-    for i in range(number_of_layers):
+    for _ in range(number_of_layers):
 
         output = Dense(units=number_of_filters)(output)
         output = LeakyReLU(alpha=0.2)(output)
