@@ -102,7 +102,7 @@ def create_unet_model_2d(input_image_size,
         specific configuration add-ons/tweaks:
             * "attentionGating" -- attention-unet variant in https://pubmed.ncbi.nlm.nih.gov/33288961/
             * "nnUnetActivationStyle" -- U-net activation explained in https://pubmed.ncbi.nlm.nih.gov/33288961/
-            * "initialConvolutionalKernelSize[X]" -- Set the first two convolutional layer kernel sizes to X.
+            * "initialConvolutionKernelSize[X]" -- Set the first two convolutional layer kernel sizes to X.
 
     Returns
     -------
