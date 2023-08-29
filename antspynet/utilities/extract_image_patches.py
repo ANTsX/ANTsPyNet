@@ -185,7 +185,7 @@ def extract_image_patches(image,
 
             if randomize:
                 random_indices = mask_indices[
-                  random.sample(range(mask_indices.shape[0] + 1), number_of_extracted_patches), :]
+                  random.sample(range(mask_indices.shape[0]), number_of_extracted_patches), :]
             else:
                 random_indices = mask_indices
 
