@@ -169,9 +169,43 @@ def weighted_categorical_crossentropy(weights):
 
     return(weighted_categorical_crossentropy_fixed)
 
-def multilabel_surface_loss(dimensionality=3):
+def binary_surface_loss():
 
-    def multilabel_surface_loss_fixed(y_true, y_pred):
+    """
+    Binary surface loss
+
+    https://pubmed.ncbi.nlm.nih.gov/33080507/
+
+    ported from this implementation:
+    
+    https://github.com/LIVIAETS/boundary-loss/blob/master/keras_loss.py
+    
+    Returns
+    -------
+    Loss value.
+
+    Example
+    -------
+    >>> import ants
+    >>> import antspynet
+    >>> import tensorflow as tf
+    >>> import numpy as np
+    >>>
+    >>> r16 = ants.image_read(ants.get_ants_data("r16"))
+    >>> r16_seg = ants.threshold_image(r16, 0, 0, 0, 1)
+    >>> r16_array = np.expand_dims(r16_seg.numpy(), axis=0)
+    >>> r16_tensor = tf.convert_to_tensor(r16_array)
+    >>>
+    >>> r64 = ants.image_read(ants.get_ants_data("r64"))
+    >>> r64_seg = ants.threshold_image(r64, 0, 0, 0, 1)
+    >>> r64_array = np.expand_dims(r64_seg.numpy(), axis=0)
+    >>> r64_tensor = tf.convert_to_tensor(r64_array)
+    >>>
+    >>> loss = antspynet.binary_surface_loss()
+    >>> loss_value = loss(r16_tensor, r64_tensor).numpy()
+    """
+
+    def binary_surface_loss_fixed(y_true, y_pred):
         def calculate_residual_distance_map(segmentation):
             residual_distance = np.zeros_like(segmentation)
 
@@ -194,10 +228,10 @@ def multilabel_surface_loss(dimensionality=3):
             inp=[y_true],
             Tout=tf.float32)
 
-        product = y_pred * y_true_distance_map
+        product = tf.cast(y_pred, tf.float32) * tf.cast(y_true_distance_map, tf.float32)
         return(K.mean(product))
 
-    return(multilabel_surface_loss_fixed)
+    return(binary_surface_loss_fixed)
 
 
 def maximum_mean_discrepancy(sigma=1.0):
