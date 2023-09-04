@@ -124,6 +124,7 @@ def check_xray_lung_orientation(image,
 
 
 def chexnet(image,
+            lung_mask=None,
             check_image_orientation=False,
             antsxnet_cache_directory=None,
             verbose=False):
@@ -157,8 +158,11 @@ def chexnet(image,
     Arguments
     ---------
     image : ANTsImage
-        raw 3-D MRI whole head image.
+        chest x-ray
 
+    lung_mask : ANTsImage
+        Lung mask.  If None is specified, one is estimated.
+        
     check_image_orientation : boolean
         Check the correctness of image orientation, i.e., flipped left-right, up-down, 
         or both.  If True, attempts to correct before prediction.
@@ -180,8 +184,10 @@ def chexnet(image,
     -------
     """
 
-    from ..utilities import get_pretrained_network
     from ..architectures import create_resnet_model_2d
+    from ..utilities import lung_extraction
+    from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
 
     if image.dimension != 2:
         raise ValueError( "Image dimension must be 2." )
@@ -201,7 +207,24 @@ def chexnet(image,
 
     if check_image_orientation:
         image = check_xray_lung_orientation(image)
-            
+
+    if lung_mask is None:
+        if verbose:
+            print("No lung mask provided.  Estimating using antsxnet.")
+        lung_extract = lung_extraction(image, modality="xray", 
+                                       antsxnet_cache_directory=antsxnet_cache_directory, 
+                                       verbose=verbose)
+        lung_mask = lung_extract['segmentation_image']
+        if lung_mask.shape != image_size:
+            lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
+    lung_mask = ants.threshold_image(lung_mask, 0, 0, 0, 1)
+    
+    xray_lung_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("xrayLungPriors")))
+    population_lung_prior = xray_lung_priors[0] + xray_lung_priors[1]
+    population_lung_prior[population_lung_prior > 1.0] = 1.0
+    if population_lung_prior.shape != image_size:
+        population_lung_prior = ants.resample_image(population_lung_prior, image_size, use_voxels=True, interp_type=0)
+    
     ################################
     #
     # Load model and weights
@@ -215,7 +238,7 @@ def chexnet(image,
                           'Emphysema', 'Fibrosis', 'Hernia', 'Infiltration', 'Mass', 'NoFinding', 
                           'Nodule', 'PleuralThickening', 'Pneumonia', 'Pneumothorax']
     number_of_classification_labels = len(disease_categories)
-    channel_size = 1
+    channel_size = 3
 
     model = create_resnet_model_2d((None, None, channel_size),
                                    number_of_classification_labels=number_of_classification_labels,
@@ -227,10 +250,12 @@ def chexnet(image,
                                    squeeze_and_excite=False)
     model.load_weights(weights_file_name)
 
-    image = (image - image.mean()) / image.std()
-    batchX = np.expand_dims(image.numpy(), 0)
-    batchX = np.expand_dims(batchX, -1)
-
+    batchX = np.zeros((1, *image_size, channel_size))
+    image_array = ((image - image.min()) / (image.max() - image.min())).numpy()
+    batchX[0,:,:,0] = image_array
+    batchX[0,:,:,1] = lung_mask.numpy()
+    batchX[0,:,:,2] = population_lung_prior.numpy()
+    
     batchY = (tf.nn.sigmoid(model.predict(batchX, verbose=verbose))).numpy()
 
     disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
