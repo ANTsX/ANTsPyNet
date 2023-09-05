@@ -416,7 +416,7 @@ def hypermapp3r_segmentation(t1,
 
 def wmh_segmentation(flair,
                      t1,
-                     white_matter_mask = None,  
+                     white_matter_mask=None,
                      do_preprocessing=True,
                      antsxnet_cache_directory=None,
                      verbose=False):
@@ -424,7 +424,7 @@ def wmh_segmentation(flair,
     """
     Perform White matter hyperintensity probabilistic segmentation
     given a pre-aligned FLAIR and T2 images.  Note that the underlying
-    model is 3-D and requires images to be of > 64 voxels in each 
+    model is 3-D and requires images to be of > 64 voxels in each
     dimension.
 
     Preprocessing on the training data consisted of:
@@ -442,9 +442,10 @@ def wmh_segmentation(flair,
 
     t1 : ANTsImage
         input 3-D T1 brain image (not skull-stripped).
-        
+
     white_matter_mask : ANTsImage
-        input white matter mask. If None, deep_atropos is performed.    
+        input white matter mask for patch extraction. If None, the brain mask is used.
+        Not a significant difference in performance.
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
@@ -465,7 +466,7 @@ def wmh_segmentation(flair,
     -------
     >>> flair = ants.image_read("flair.nii.gz")
     >>> t1 = ants.image_read("t1.nii.gz")
-    >>> probability_mask = wmh_segmentation(flair, t1) 
+    >>> probability_mask = wmh_segmentation(flair, t1)
     """
 
     from ..architectures import create_sysu_media_unet_model_3d
@@ -480,7 +481,7 @@ def wmh_segmentation(flair,
         raise ValueError("T1/FLAIR images must be pre-aligned.")
 
     if t1.shape < (64, 64, 64):
-        raise ValueError("Images must be > 64 voxels per dimension.")    
+        raise ValueError("Images must be > 64 voxels per dimension.")
 
     ################################
     #
@@ -493,7 +494,7 @@ def wmh_segmentation(flair,
             print("Calculate white matter mask.")
         atropos = deep_atropos(t1, do_preprocessing=True, verbose=verbose)
         white_matter_mask = ants.threshold_image(atropos['segmentation_image'], 3, 4, 1, 0)
-        
+
     t1_preprocessed = None
     flair_preprocessed = None
 
@@ -510,7 +511,7 @@ def wmh_segmentation(flair,
             verbose=verbose)
         brain_mask = ants.threshold_image(t1_preprocessing["brain_mask"], 0.5, 1, 1, 0)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
-        
+
         flair_preprocessing = preprocess_brain_image(flair,
             truncate_intensity=None,
             brain_extraction_modality=None,
@@ -519,9 +520,9 @@ def wmh_segmentation(flair,
             antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
-        
+
     else:
-        t1_preprocessed = ants.image_clone(t1) 
+        t1_preprocessed = ants.image_clone(t1)
         flair_preprocessed = ants.image_clone(flair)
 
     white_matter_indices = white_matter_mask > 0
@@ -529,10 +530,10 @@ def wmh_segmentation(flair,
     t1_preprocessed_max = t1_preprocessed[white_matter_indices].max()
     flair_preprocessed_min = flair_preprocessed[white_matter_indices].min()
     flair_preprocessed_max = flair_preprocessed[white_matter_indices].max()
-    
+
     t1_preprocessed = (t1_preprocessed - t1_preprocessed_min) / (t1_preprocessed_max - t1_preprocessed_min)
     flair_preprocessed = (flair_preprocessed - flair_preprocessed_min) / (flair_preprocessed_max - flair_preprocessed_min)
-     
+
     ################################
     #
     # Build model and load weights
@@ -562,14 +563,14 @@ def wmh_segmentation(flair,
     if verbose:
         print("Extract patches.")
 
-    t1_patches = extract_image_patches(t1_preprocessed, 
+    t1_patches = extract_image_patches(t1_preprocessed,
                                        patch_size=patch_size,
                                        max_number_of_patches="all",
                                        stride_length=stride_length,
                                        mask_image=white_matter_mask,
                                        random_seed=None,
                                        return_as_array=True)
-    flair_patches = extract_image_patches(flair_preprocessed, 
+    flair_patches = extract_image_patches(flair_preprocessed,
                                           patch_size=patch_size,
                                           max_number_of_patches="all",
                                           stride_length=stride_length,
@@ -592,7 +593,7 @@ def wmh_segmentation(flair,
 
     prediction = model.predict(batchX, verbose=verbose)
 
-    wmh_probability_image = reconstruct_image_from_patches(np.squeeze(prediction), 
+    wmh_probability_image = reconstruct_image_from_patches(np.squeeze(prediction),
                                                            stride_length=stride_length,
                                                            domain_image=white_matter_mask,
                                                            domain_image_is_mask=True)
