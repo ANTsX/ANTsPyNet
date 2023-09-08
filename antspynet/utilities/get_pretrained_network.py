@@ -34,7 +34,8 @@ def get_pretrained_network(file_id=None,
 
     def switch_networks(argument):
         switcher = {
-            "antsxnetWmh": "https://figshare.com/ndownloader/files/42256287",
+            "antsxnetWmh": "https://figshare.com/ndownloader/files/42301059",
+            "antsxnetWmhOr": "https://figshare.com/ndownloader/files/42301056",
             "arterialLesionWeibinShi": "https://figshare.com/ndownloader/files/31624922",
             "brainAgeGender": "https://ndownloader.figshare.com/files/22179948",
             "brainAgeDeepBrainNet": "https://ndownloader.figshare.com/files/23573402",
@@ -138,6 +139,7 @@ def get_pretrained_network(file_id=None,
         raise ValueError("Missing file id.")
 
     valid_list = ("antsxnetWmh",
+                  "antsxnetWmhOr",
                   "arterialLesionWeibinShi",
                   "brainAgeGender",
                   "brainAgeDeepBrainNet",

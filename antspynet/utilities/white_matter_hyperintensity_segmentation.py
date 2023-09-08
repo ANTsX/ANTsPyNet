@@ -416,7 +416,8 @@ def hypermapp3r_segmentation(t1,
 
 def wmh_segmentation(flair,
                      t1,
-                     white_matter_mask = None,  
+                     white_matter_mask=None,  
+                     use_combined_model=False,
                      do_preprocessing=True,
                      antsxnet_cache_directory=None,
                      verbose=False):
@@ -445,6 +446,9 @@ def wmh_segmentation(flair,
         
     white_matter_mask : ANTsImage
         input white matter mask. If None, deep_atropos is performed.    
+
+    use_combined_model : boolean
+        Original or combined.
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
@@ -549,8 +553,11 @@ def wmh_segmentation(flair,
 
     model = create_sysu_media_unet_model_3d((*patch_size, channel_size),
                                              number_of_filters=number_of_filters)
-
-    weights_file_name = get_pretrained_network("antsxnetWmh", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = None
+    if use_combined_model:
+        weights_file_name = get_pretrained_network("antsxnetWmhOr", antsxnet_cache_directory=antsxnet_cache_directory)
+    else:        
+        weights_file_name = get_pretrained_network("antsxnetWmh", antsxnet_cache_directory=antsxnet_cache_directory)
     model.load_weights(weights_file_name)
 
     ################################
