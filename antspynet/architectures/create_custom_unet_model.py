@@ -587,8 +587,8 @@ def create_sysu_media_unet_model_3d(input_image_size,
 
     Arguments
     ---------
-    input_image_size : tuple 
-        Tuple of length 4, (width, height, depth, channels).  
+    input_image_size : tuple
+        Tuple of length 4, (width, height, depth, channels).
 
     anatomy : string
         "wmh" or "claustrum"

@@ -1,7 +1,6 @@
 
 import ants
 import numpy as np
-import tensorflow as tf
 from tensorflow import keras
 
 def sysu_media_wmh_segmentation(flair,
@@ -416,8 +415,8 @@ def hypermapp3r_segmentation(t1,
 
 def wmh_segmentation(flair,
                      t1,
-                     white_matter_mask=None,  
-                     use_combined_model=False,
+                     white_matter_mask=None,
+                     use_combined_model=True,
                      do_preprocessing=True,
                      antsxnet_cache_directory=None,
                      verbose=False):
@@ -445,8 +444,8 @@ def wmh_segmentation(flair,
         input 3-D T1 brain image (not skull-stripped).
 
     white_matter_mask : ANTsImage
-        input white matter mask for patch extraction. If None, the brain mask is used.
-        Not a significant difference in performance.
+        input white matter mask for patch extraction. If None, calculated using
+        deep_atropos (labels 3 and 4).
 
     use_combined_model : boolean
         Original or combined.
@@ -480,11 +479,7 @@ def wmh_segmentation(flair,
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
 
-    # Simple check for pre-alignment
-    if t1.shape != flair.shape or t1.origin != flair.origin or t1.spacing != flair.spacing:
-        raise ValueError("T1/FLAIR images must be pre-aligned.")
-
-    if t1.shape < (64, 64, 64):
+    if np.any(t1.shape < np.array((64, 64, 64))):
         raise ValueError("Images must be > 64 voxels per dimension.")
 
     ################################
@@ -557,7 +552,7 @@ def wmh_segmentation(flair,
     weights_file_name = None
     if use_combined_model:
         weights_file_name = get_pretrained_network("antsxnetWmhOr", antsxnet_cache_directory=antsxnet_cache_directory)
-    else:        
+    else:
         weights_file_name = get_pretrained_network("antsxnetWmh", antsxnet_cache_directory=antsxnet_cache_directory)
     model.load_weights(weights_file_name)
 
@@ -591,7 +586,7 @@ def wmh_segmentation(flair,
     #
     ################################
 
-    batchX = np.zeros((*t1_patches.shape, 2))
+    batchX = np.zeros((*t1_patches.shape, channel_size ))
     batchX[:,:,:,:,0] = flair_patches[:,:,:,:]
     batchX[:,:,:,:,1] = t1_patches[:,:,:,:]
 
