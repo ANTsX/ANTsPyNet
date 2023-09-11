@@ -417,6 +417,7 @@ def wmh_segmentation(flair,
                      t1,
                      white_matter_mask=None,
                      use_combined_model=True,
+                     prediction_batch_size=16,
                      do_preprocessing=True,
                      antsxnet_cache_directory=None,
                      verbose=False):
@@ -449,6 +450,9 @@ def wmh_segmentation(flair,
 
     use_combined_model : boolean
         Original or combined.
+
+    prediction_batch_size : int
+        Control memory usage for prediction.  More consequential for GPU-usage.
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
@@ -580,20 +584,40 @@ def wmh_segmentation(flair,
                                           random_seed=None,
                                           return_as_array=True)
 
+    total_number_of_patches = t1_patches.shape[0]
+
     ################################
     #
     # Do prediction and then restack into the image
     #
     ################################
 
-    batchX = np.zeros((*t1_patches.shape, channel_size ))
-    batchX[:,:,:,:,0] = flair_patches[:,:,:,:]
-    batchX[:,:,:,:,1] = t1_patches[:,:,:,:]
+    number_of_full_batches = total_number_of_patches // prediction_batch_size
+    if verbose:
+        print("Total number of patches: ", str(total_number_of_patches))
+        print("Prediction batch size: ", str(prediction_batch_size))
+        print("Number of batches: ", str(number_of_full_batches + 1))
+     
+    prediction = np.zeros((total_number_of_patches, *patch_size, 1))
+    for b in range(number_of_full_batches + 1):
+        batchX = None
+        if b < number_of_full_batches:
+            batchX = np.zeros((prediction_batch_size, *patch_size, channel_size))
+        else:
+            residual_number_of_patches = total_number_of_patches - number_of_full_batches * prediction_batch_size
+            batchX = np.zeros((residual_number_of_patches, *patch_size, channel_size))
+
+        indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
+        batchX[:,:,:,:,0] = flair_patches[indices,:,:,:]
+        batchX[:,:,:,:,1] = t1_patches[indices,:,:,:]
+        
+        if verbose:
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_full_batches + 1))  
+        prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:
         print("Predict patches and reconstruct.")
 
-    prediction = model.predict(batchX, verbose=verbose)
 
     wmh_probability_image = reconstruct_image_from_patches(np.squeeze(prediction),
                                                            stride_length=stride_length,
