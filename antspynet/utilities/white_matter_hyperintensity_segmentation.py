@@ -418,6 +418,7 @@ def wmh_segmentation(flair,
                      white_matter_mask=None,
                      use_combined_model=True,
                      prediction_batch_size=16,
+                     patch_stride_length=32,
                      do_preprocessing=True,
                      antsxnet_cache_directory=None,
                      verbose=False):
@@ -453,6 +454,9 @@ def wmh_segmentation(flair,
 
     prediction_batch_size : int
         Control memory usage for prediction.  More consequential for GPU-usage.
+
+    patch_stride_length : 3-D tuple or int
+        Dictates the stride length for accumulating predicting patches.    
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
@@ -547,7 +551,8 @@ def wmh_segmentation(flair,
         print("Load model and weights.")
 
     patch_size = (64, 64, 64)
-    stride_length = (32, 32, 32)
+    if isinstance(patch_stride_length, int):
+        patch_stride_length = (patch_stride_length,) * 3
     number_of_filters = (64, 96, 128, 256, 512)
     channel_size = 2
 
@@ -572,14 +577,14 @@ def wmh_segmentation(flair,
     t1_patches = extract_image_patches(t1_preprocessed,
                                        patch_size=patch_size,
                                        max_number_of_patches="all",
-                                       stride_length=stride_length,
+                                       stride_length=patch_stride_length,
                                        mask_image=white_matter_mask,
                                        random_seed=None,
                                        return_as_array=True)
     flair_patches = extract_image_patches(flair_preprocessed,
                                           patch_size=patch_size,
                                           max_number_of_patches="all",
-                                          stride_length=stride_length,
+                                          stride_length=patch_stride_length,
                                           mask_image=white_matter_mask,
                                           random_seed=None,
                                           return_as_array=True)
@@ -592,19 +597,22 @@ def wmh_segmentation(flair,
     #
     ################################
 
-    number_of_full_batches = total_number_of_patches // prediction_batch_size
+    number_of_batches = total_number_of_patches // prediction_batch_size
+    residual_number_of_patches = total_number_of_patches - number_of_batches * prediction_batch_size
+    if residual_number_of_patches > 0:
+        number_of_batches = number_of_batches + 1
+
     if verbose:
         print("Total number of patches: ", str(total_number_of_patches))
         print("Prediction batch size: ", str(prediction_batch_size))
-        print("Number of batches: ", str(number_of_full_batches + 1))
+        print("Number of batches: ", str(number_of_batches + 1))
      
     prediction = np.zeros((total_number_of_patches, *patch_size, 1))
-    for b in range(number_of_full_batches + 1):
+    for b in range(number_of_batches):
         batchX = None
-        if b < number_of_full_batches:
+        if b < number_of_batches - 1 or residual_number_of_patches == 0:
             batchX = np.zeros((prediction_batch_size, *patch_size, channel_size))
         else:
-            residual_number_of_patches = total_number_of_patches - number_of_full_batches * prediction_batch_size
             batchX = np.zeros((residual_number_of_patches, *patch_size, channel_size))
 
         indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
@@ -612,7 +620,7 @@ def wmh_segmentation(flair,
         batchX[:,:,:,:,1] = t1_patches[indices,:,:,:]
         
         if verbose:
-            print("Predicting batch ", str(b + 1), " of ", str(number_of_full_batches + 1))  
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
         prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:
@@ -620,7 +628,7 @@ def wmh_segmentation(flair,
 
 
     wmh_probability_image = reconstruct_image_from_patches(np.squeeze(prediction),
-                                                           stride_length=stride_length,
+                                                           stride_length=patch_stride_length,
                                                            domain_image=white_matter_mask,
                                                            domain_image_is_mask=True)
 
