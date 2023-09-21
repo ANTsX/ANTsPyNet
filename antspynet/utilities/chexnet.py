@@ -295,8 +295,8 @@ def chexnet(image,
         image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
 
         batchX[0,:,:,0] = (image_array - imagenet_mean) / (imagenet_std)
-        batchX[0,:,:,1] = ants.threshold_image(lung_mask, 1, 1, 1, 0)
-        batchX[0,:,:,2] = ants.threshold_image(lung_mask, 2, 2, 1, 0)
+        batchX[0,:,:,1] = ants.threshold_image(lung_mask, 1, 1, 1, 0).numpy()
+        batchX[0,:,:,2] = ants.threshold_image(lung_mask, 2, 2, 1, 0).numpy()
 
         batchY = model.predict(batchX, verbose=verbose)
 
