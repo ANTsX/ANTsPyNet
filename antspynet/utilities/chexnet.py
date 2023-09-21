@@ -126,6 +126,7 @@ def check_xray_lung_orientation(image,
 def chexnet(image,
             lung_mask=None,
             check_image_orientation=False,
+            use_antsxnet_variant=True,
             antsxnet_cache_directory=None,
             verbose=False):
 
@@ -184,13 +185,29 @@ def chexnet(image,
     -------
     """
 
-    from ..architectures import create_resnet_model_2d
     from ..utilities import lung_extraction
     from ..utilities import get_pretrained_network
-    from ..utilities import get_antsxnet_data
 
     if image.dimension != 2:
         raise ValueError( "Image dimension must be 2." )
+
+    if check_image_orientation:
+        image = check_xray_lung_orientation(image)
+
+    disease_categories = ['Atelectasis',
+                        'Cardiomegaly',
+                        'Effusion',
+                        'Infiltration',
+                        'Mass',
+                        'Nodule',
+                        'Pneumonia',
+                        'Pneumothorax',
+                        'Consolidation',
+                        'Edema',
+                        'Emphysema',
+                        'Fibrosis',
+                        'Pleural_Thickening',
+                        'Hernia']
 
     ################################
     #
@@ -204,61 +221,86 @@ def chexnet(image,
         if verbose:
             print("Resampling image to", image_size)
         image = ants.resample_image(image, image_size, use_voxels=True)        
+  
+    if not use_antsxnet_variant:
 
-    if check_image_orientation:
-        image = check_xray_lung_orientation(image)
+        model = tf.keras.applications.DenseNet121(include_top=False, 
+                                                weights="imagenet", 
+                                                input_tensor=None, 
+                                                input_shape=(224, 224, 3), 
+                                                pooling='avg')
+        x = tf.keras.layers.Dense(units=len(disease_categories),
+                                  activation='sigmoid')(model.output)                                           
+        model = tf.keras.Model(inputs=model.input, outputs=x)
 
-    if lung_mask is None:
-        if verbose:
-            print("No lung mask provided.  Estimating using antsxnet.")
-        lung_extract = lung_extraction(image, modality="xray", 
-                                       antsxnet_cache_directory=antsxnet_cache_directory, 
-                                       verbose=verbose)
-        lung_mask = lung_extract['segmentation_image']
-        if lung_mask.shape != image_size:
-            lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
-    lung_mask = ants.threshold_image(lung_mask, 0, 0, 0, 1)
-    
-    xray_lung_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("xrayLungPriors")))
-    population_lung_prior = xray_lung_priors[0] + xray_lung_priors[1]
-    population_lung_prior[population_lung_prior > 1.0] = 1.0
-    if population_lung_prior.shape != image_size:
-        population_lung_prior = ants.resample_image(population_lung_prior, image_size, use_voxels=True, interp_type=0)
-    
-    ################################
-    #
-    # Load model and weights
-    #
-    ################################
+        weights_file_name = get_pretrained_network("chexnetClassification",
+                                                   antsxnet_cache_directory=antsxnet_cache_directory)
 
-    weights_file_name = get_pretrained_network("chexnetClassification",
-                                               antsxnet_cache_directory=antsxnet_cache_directory)
+        model.load_weights(weights_file_name)
 
-    disease_categories = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema', 'Effusion', 
-                          'Emphysema', 'Fibrosis', 'Hernia', 'Infiltration', 'Mass', 'NoFinding', 
-                          'Nodule', 'PleuralThickening', 'Pneumonia', 'Pneumothorax']
-    number_of_classification_labels = len(disease_categories)
-    channel_size = 3
 
-    model = create_resnet_model_2d((None, None, channel_size),
-                                   number_of_classification_labels=number_of_classification_labels,
-                                   mode="regression",
-                                   layers=(1, 2, 3, 4),
-                                   residual_block_schedule=(2, 2, 2, 2),
-                                   lowest_resolution=64,
-                                   cardinality=1,
-                                   squeeze_and_excite=False)
-    model.load_weights(weights_file_name)
+        # use imagenet mean,std for normalization
+        imagenet_mean = [0.485, 0.456, 0.406]
+        imagenet_std = [0.229, 0.224, 0.225]
 
-    batchX = np.zeros((1, *image_size, channel_size))
-    image_array = ((image - image.min()) / (image.max() - image.min())).numpy()
-    batchX[0,:,:,0] = image_array
-    batchX[0,:,:,1] = lung_mask.numpy()
-    batchX[0,:,:,2] = population_lung_prior.numpy()
-    
-    batchY = (tf.nn.sigmoid(model.predict(batchX, verbose=verbose))).numpy()
+        number_of_channels = 3
 
-    disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
+        batchX = np.zeros((1, *image_size, number_of_channels))
+        image_array = image.numpy()
+        image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
+        for c in range(number_of_channels):
+            batchX[0,:,:,c] = (image_array - imagenet_mean[c]) / (imagenet_std[c])
 
-    return disease_category_df
+        batchY = model.predict(batchX, verbose=verbose)
+
+        disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
+
+        return disease_category_df
+
+    else:
+
+        if lung_mask is None:
+            if verbose:
+                print("No lung mask provided.  Estimating using antsxnet.")
+            lung_extract = lung_extraction(image, modality="xray", 
+                                        antsxnet_cache_directory=antsxnet_cache_directory, 
+                                        verbose=verbose)
+            lung_mask = lung_extract['segmentation_image']
+            if lung_mask.shape != image_size:
+                lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
+
+        model = tf.keras.applications.DenseNet121(include_top=False, 
+                                                weights="imagenet", 
+                                                input_tensor=None, 
+                                                input_shape=(224, 224, 3), 
+                                                pooling='avg')
+        x = tf.keras.layers.Dense(units=len(disease_categories),
+                                  activation='sigmoid')(model.output)                                           
+        model = tf.keras.Model(inputs=model.input, outputs=x)
+
+        weights_file_name = get_pretrained_network("chexnetANTsXNetClassification",
+                                                   antsxnet_cache_directory=antsxnet_cache_directory)
+
+        model.load_weights(weights_file_name)
+
+
+        # use imagenet mean,std for normalization
+        imagenet_mean = np.array([0.485, 0.456, 0.406]).mean()
+        imagenet_std = np.array([0.229, 0.224, 0.225]).mean()
+
+        number_of_channels = 3
+
+        batchX = np.zeros((1, *image_size, number_of_channels))
+        image_array = image.numpy()
+        image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
+
+        batchX[0,:,:,0] = (image_array - imagenet_mean) / (imagenet_std)
+        batchX[0,:,:,1] = ants.threshold_image(lung_mask, 1, 1, 1, 0)
+        batchX[0,:,:,2] = ants.threshold_image(lung_mask, 2, 2, 1, 0)
+
+        batchY = model.predict(batchX, verbose=verbose)
+
+        disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
+
+        return disease_category_df
 
