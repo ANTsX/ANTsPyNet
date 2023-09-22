@@ -285,8 +285,8 @@ def chexnet(image,
 
 
         # use imagenet mean,std for normalization
-        imagenet_mean = np.array([0.485, 0.456, 0.406]).mean()
-        imagenet_std = np.array([0.229, 0.224, 0.225]).mean()
+        imagenet_mean = [0.485, 0.456, 0.406]
+        imagenet_std = [0.229, 0.224, 0.225]
 
         number_of_channels = 3
 
@@ -294,10 +294,12 @@ def chexnet(image,
         image_array = image.numpy()
         image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
 
-        batchX[0,:,:,0] = (image_array - imagenet_mean) / (imagenet_std)
-        batchX[0,:,:,1] = ants.threshold_image(lung_mask, 1, 1, 1, 0).numpy()
-        batchX[0,:,:,2] = ants.threshold_image(lung_mask, 2, 2, 1, 0).numpy()
-
+        batchX[0,:,:,0] = (image_array - imagenet_mean[0]) / (imagenet_std[0])
+        batchX[0,:,:,1] = (image_array - imagenet_mean[1]) / (imagenet_std[1])
+        batchX[0,:,:,1] *= (ants.threshold_image(lung_mask, 1, 1, 1, 0)).numpy() 
+        batchX[0,:,:,2] = (image_array - imagenet_mean[2]) / (imagenet_std[2])
+        batchX[0,:,:,2] *= (ants.threshold_image(lung_mask, 2, 2, 1, 0)).numpy() 
+        
         batchY = model.predict(batchX, verbose=verbose)
 
         disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
