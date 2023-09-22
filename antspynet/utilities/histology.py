@@ -83,7 +83,7 @@ def arterial_lesion_segmentation(image,
 
 
 def allen_ex5_brain_extraction(image,
-                               view = "sagittal",
+                               view="sagittal",
                                which_axis=2,
                                antsxnet_cache_directory=None,
                                verbose=False):
@@ -507,7 +507,7 @@ def allen_histology_hemispherical_coronal_mask(image,
 
 def allen_histology_cerebellum_mask(image,
                                     which_axis=2,
-                                    view = 'sagittal',
+                                    view='sagittal',
                                     antsxnet_cache_directory=None,
                                     verbose=False):
 
