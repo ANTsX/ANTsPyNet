@@ -266,8 +266,9 @@ def chexnet(image,
                                         antsxnet_cache_directory=antsxnet_cache_directory, 
                                         verbose=verbose)
             lung_mask = lung_extract['segmentation_image']
-            if lung_mask.shape != image_size:
-                lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
+
+        if lung_mask.shape != image_size:
+            lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
 
         model = tf.keras.applications.DenseNet121(include_top=False, 
                                                 weights="imagenet", 
