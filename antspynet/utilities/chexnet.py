@@ -274,7 +274,7 @@ def chexnet(image,
                                         verbose=verbose)
             resampled_lung_mask = lung_extract['segmentation_image']
         else:
-            resampled_lung_mask = ants.image_clone( lung_mask )
+            resampled_lung_mask = ants.image_clone(lung_mask)
 
         if resampled_lung_mask.shape != image_size:
             resampled_lung_mask = ants.resample_image(resampled_lung_mask, image_size, use_voxels=True, interp_type=1)
