@@ -273,10 +273,11 @@ def chexnet(image,
                                         antsxnet_cache_directory=antsxnet_cache_directory, 
                                         verbose=verbose)
             resampled_lung_mask = lung_extract['segmentation_image']
+        else:
+            resampled_lung_mask = ants.image_clone( lung_mask )
 
-        if lung_mask.shape != image_size:
-            resampled_lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
-
+        if resampled_lung_mask.shape != image_size:
+            resampled_lung_mask = ants.resample_image(resampled_lung_mask, image_size, use_voxels=True, interp_type=1)
 
         batchX = np.zeros((1, *image_size, number_of_channels))
         image_array = resampled_image.numpy()
