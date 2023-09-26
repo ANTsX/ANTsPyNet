@@ -10,7 +10,6 @@ def check_xray_lung_orientation(image,
                                 verbose=False):
 
     """
-
     Check the correctness of image orientation, i.e., flipped left-right, up-down, 
     or both.  If True, attempts to correct before returning corrected image.  Otherwise
     it returns None.
@@ -18,7 +17,7 @@ def check_xray_lung_orientation(image,
     Arguments
     ---------
     image : ANTsImage
-        raw 3-D MRI whole head image.
+        2-D X-ray image.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -43,13 +42,15 @@ def check_xray_lung_orientation(image,
     from ..architectures import create_resnet_model_2d
 
     if image.dimension != 2:
-        raise ValueError( "Image dimension must be 2." )
+        raise ValueError("Image dimension must be 2.")
 
     resampled_image_size = (224, 224)
     if image.shape != resampled_image_size:
         if verbose:
             print("Resampling image to", resampled_image_size)
         resampled_image = ants.resample_image(image, resampled_image_size, use_voxels=True)        
+    else:
+        resampled_image = ants.image_clone(image)    
 
     model = create_resnet_model_2d((None, None, 1),
                                     number_of_classification_labels=3,
@@ -65,6 +66,7 @@ def check_xray_lung_orientation(image,
     image_max = resampled_image.max()
     normalized_image = ants.image_clone(resampled_image)
     normalized_image = (normalized_image - image_min) / (image_max - image_min)
+    
     batchX = np.expand_dims(normalized_image.numpy(), 0)
     batchX = np.expand_dims(batchX, -1)
     batchY = model.predict(batchX, verbose=verbose)
@@ -217,36 +219,35 @@ def chexnet(image,
 
     image_size = (224, 224)
 
+    resampled_image = ants.image_clone(image)
     if image.shape != image_size:
         if verbose:
             print("Resampling image to", image_size)
-        image = ants.resample_image(image, image_size, use_voxels=True)        
+        resampled_image = ants.resample_image(image, image_size, use_voxels=True)        
   
-    if not use_antsxnet_variant:
+    model = tf.keras.applications.DenseNet121(include_top=False, 
+                                            weights="imagenet", 
+                                            input_tensor=None, 
+                                            input_shape=(224, 224, 3), 
+                                            pooling='avg')
+    x = tf.keras.layers.Dense(units=len(disease_categories),
+                                activation='sigmoid')(model.output)                                           
+    model = tf.keras.Model(inputs=model.input, outputs=x)
 
-        model = tf.keras.applications.DenseNet121(include_top=False, 
-                                                weights="imagenet", 
-                                                input_tensor=None, 
-                                                input_shape=(224, 224, 3), 
-                                                pooling='avg')
-        x = tf.keras.layers.Dense(units=len(disease_categories),
-                                  activation='sigmoid')(model.output)                                           
-        model = tf.keras.Model(inputs=model.input, outputs=x)
+    # use imagenet mean,std for normalization
+    imagenet_mean = [0.485, 0.456, 0.406]
+    imagenet_std = [0.229, 0.224, 0.225]
+
+    number_of_channels = 3
+
+    if not use_antsxnet_variant:
 
         weights_file_name = get_pretrained_network("chexnetClassification",
                                                    antsxnet_cache_directory=antsxnet_cache_directory)
-
         model.load_weights(weights_file_name)
 
-
-        # use imagenet mean,std for normalization
-        imagenet_mean = [0.485, 0.456, 0.406]
-        imagenet_std = [0.229, 0.224, 0.225]
-
-        number_of_channels = 3
-
         batchX = np.zeros((1, *image_size, number_of_channels))
-        image_array = image.numpy()
+        image_array = resampled_image.numpy()
         image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
         for c in range(number_of_channels):
             batchX[0,:,:,c] = (image_array - imagenet_mean[c]) / (imagenet_std[c])
@@ -259,47 +260,33 @@ def chexnet(image,
 
     else:
 
+        weights_file_name = get_pretrained_network("chexnetANTsXNetClassification",
+                                                   antsxnet_cache_directory=antsxnet_cache_directory)
+
+        model.load_weights(weights_file_name)
+
+        resampled_lung_mask = None
         if lung_mask is None:
             if verbose:
                 print("No lung mask provided.  Estimating using antsxnet.")
             lung_extract = lung_extraction(image, modality="xray", 
                                         antsxnet_cache_directory=antsxnet_cache_directory, 
                                         verbose=verbose)
-            lung_mask = lung_extract['segmentation_image']
+            resampled_lung_mask = lung_extract['segmentation_image']
 
         if lung_mask.shape != image_size:
-            lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
+            resampled_lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
 
-        model = tf.keras.applications.DenseNet121(include_top=False, 
-                                                weights="imagenet", 
-                                                input_tensor=None, 
-                                                input_shape=(224, 224, 3), 
-                                                pooling='avg')
-        x = tf.keras.layers.Dense(units=len(disease_categories),
-                                  activation='sigmoid')(model.output)                                           
-        model = tf.keras.Model(inputs=model.input, outputs=x)
-
-        weights_file_name = get_pretrained_network("chexnetANTsXNetClassification",
-                                                   antsxnet_cache_directory=antsxnet_cache_directory)
-
-        model.load_weights(weights_file_name)
-
-
-        # use imagenet mean,std for normalization
-        imagenet_mean = [0.485, 0.456, 0.406]
-        imagenet_std = [0.229, 0.224, 0.225]
-
-        number_of_channels = 3
 
         batchX = np.zeros((1, *image_size, number_of_channels))
-        image_array = image.numpy()
+        image_array = resampled_image.numpy()
         image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
 
         batchX[0,:,:,0] = (image_array - imagenet_mean[0]) / (imagenet_std[0])
         batchX[0,:,:,1] = (image_array - imagenet_mean[1]) / (imagenet_std[1])
-        batchX[0,:,:,1] *= (ants.threshold_image(lung_mask, 1, 1, 1, 0)).numpy() 
+        batchX[0,:,:,1] *= (ants.threshold_image(resampled_lung_mask, 1, 1, 1, 0)).numpy() 
         batchX[0,:,:,2] = (image_array - imagenet_mean[2]) / (imagenet_std[2])
-        batchX[0,:,:,2] *= (ants.threshold_image(lung_mask, 2, 2, 1, 0)).numpy() 
+        batchX[0,:,:,2] *= (ants.threshold_image(resampled_lung_mask, 2, 2, 1, 0)).numpy() 
         
         batchY = model.predict(batchX, verbose=verbose)
 
