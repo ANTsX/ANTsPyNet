@@ -41,7 +41,7 @@ def cortical_thickness(t1,
         raise ValueError("Image dimension must be 3.")
 
     atropos = deep_atropos(t1, do_preprocessing=True,
-        antsxnet_cache_directory=antsxnet_cache_directory, verbose=True)
+        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
 
     # Kelly Kapowski cortical thickness
 
