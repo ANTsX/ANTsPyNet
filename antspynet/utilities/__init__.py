@@ -66,13 +66,18 @@ from .brain_tumor_segmentation import brain_tumor_segmentation
 from .inpainting import whole_head_inpainting
 from .cortical_thickness import cortical_thickness
 from .cortical_thickness import longitudinal_cortical_thickness
+
 from .histology import arterial_lesion_segmentation
 from .histology import allen_ex5_brain_extraction
 from .histology import allen_histology_brain_mask
 from .histology import allen_histology_cerebellum_mask
 from .histology import allen_histology_hemispherical_coronal_mask
 from .histology import allen_histology_super_resolution
+from .histology import mouse_mri_brain_extraction
+
 from .lung_extraction import lung_extraction
+from .lung_segmentation import lung_pulmonary_artery_segmentation
+
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import hypermapp3r_segmentation
 from .white_matter_hyperintensity_segmentation import wmh_segmentation

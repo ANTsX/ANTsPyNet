@@ -750,3 +750,130 @@ def allen_histology_super_resolution(image,
         return(image_sr_list)
     else:
         return(image_sr_list[0])
+
+
+def mouse_mri_brain_extraction(image,
+                               view="coronal",
+                               which_axis=2,
+                               antsxnet_cache_directory=None,
+                               verbose=False):
+
+    """
+    Perform brain extraction of mouse MRI
+
+    Arguments
+    ---------
+    image : ANTsImage
+        input image
+
+    view : string
+        Two trained networks are available:  "coronal" or "sagittal" (sagittal currently not available).
+
+    which_axis : integer
+        If 3-D image, which_axis specifies the direction of the "view".
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    Foreground probability image.
+
+    Example
+    -------
+    >>> output = mouse_mri_brain_extraction(mri_image)
+    """
+
+    from ..architectures import create_unet_model_2d
+    from ..utilities import get_pretrained_network
+
+    if which_axis < 0 or which_axis > 2:
+        raise ValueError("Chosen axis not supported.")
+
+    weights_file_name = ""
+    if view.lower() == "coronal":
+        weights_file_name = get_pretrained_network("mouseMriBrainExtraction",
+            antsxnet_cache_directory=antsxnet_cache_directory)
+    elif view.lower() == "sagittal":
+        raise ValueError("Sagittal view currently not available.")
+    else:
+        raise ValueError("Valid view options are coronal and sagittal.")
+
+    resampled_image_size = (256, 256)
+    original_slice_shape = image.shape
+    if image.dimension > 2:
+        original_slice_shape = tuple(np.delete(np.array(image.shape), which_axis))
+
+    unet_model = create_unet_model_2d((*resampled_image_size, 1),
+        number_of_outputs=1, mode="sigmoid",
+        number_of_filters=(32, 64, 128, 256),
+        convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
+        dropout_rate=0.0, weight_decay=0,
+        additional_options=("initialConvolutionKernelSize[5]", "attentionGating"))
+    unet_model.load_weights(weights_file_name)
+
+    if verbose:
+        print("Preprocessing:  Resampling.")
+
+    number_of_slices = 1
+    if image.dimension > 2:
+        number_of_slices = image.shape[which_axis]
+
+    batch_X = np.zeros((number_of_slices, *resampled_image_size, 1))
+
+    count = 0
+    image_array = image.numpy()
+    for j in range(number_of_slices):
+        slice = None
+        if image.dimension > 2:
+            if which_axis == 0:
+                image_slice_array = np.squeeze(image_array[j,:,:])
+            elif which_axis == 1:
+                image_slice_array = np.squeeze(image_array[:,j,:])
+            else:
+                image_slice_array = np.squeeze(image_array[:,:,j])
+            slice = ants.from_numpy(image_slice_array)
+        else:
+            slice = image
+        if slice.max() > slice.min():
+            slice_resampled = ants.resample_image(slice, resampled_image_size, use_voxels=True, interp_type=0)
+            slice_array = slice_resampled.numpy()
+            slice_array = (slice_array - slice_array.min()) / (slice_array.max() - slice_array.min())
+            batch_X[count,:,:,0] = slice_array
+        count = count + 1
+
+    if verbose:
+        print("Prediction: ")
+
+    predicted_data = unet_model.predict(batch_X, verbose=int(verbose))
+
+    if verbose:
+        print("Post-processing:  resampling to original space.")
+
+    foreground_probability_array = np.zeros(image.shape)
+    for j in range(number_of_slices):
+        slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:]))
+        slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
+        if image.dimension == 2:
+            foreground_probability_array[:,:] = slice.numpy()
+        else:
+            if which_axis == 0:
+                foreground_probability_array[j,:,:] = slice.numpy()
+            elif which_axis == 1:
+                foreground_probability_array[:,j,:] = slice.numpy()
+            else:
+                foreground_probability_array[:,:,j] = slice.numpy()
+
+    origin = image.origin
+    spacing = image.spacing
+    direction = image.direction
+
+    foreground_probability_image = ants.from_numpy(foreground_probability_array,
+        origin=origin, spacing=spacing, direction=direction)
+
+    return(foreground_probability_image)
