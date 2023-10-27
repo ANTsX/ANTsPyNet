@@ -240,7 +240,8 @@ def lung_pulmonary_artery_segmentation(ct,
     ################################
 
     if lung_mask is None:
-        lung_mask = ants.threshold_image(lung_extraction(ct, modality="ct", verbose=verbose), 1, 3, 1, 0)
+        lung_ex = lung_extraction(ct, modality="ct", verbose=verbose)
+        lung_mask = ants.threshold_image(lung_ex['segmentation_image'], 1, 3, 1, 0)
     ct_preprocessed = ants.image_clone(ct)
     ct_preprocessed = (ct_preprocessed + 800) / (500 + 800)
     ct_preprocessed[ct_preprocessed > 1.0] = 1.0
