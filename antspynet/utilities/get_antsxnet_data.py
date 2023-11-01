@@ -119,6 +119,7 @@ def get_antsxnet_data(file_id=None,
 
     if antsxnet_cache_directory is None:
         antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), ".keras/ANTsXNet")
+
     target_file_name_path = os.path.join(antsxnet_cache_directory, target_file_name)
 
     # keras get_file does not work on read-only file systems. It will attempt to download the file even
@@ -126,6 +127,10 @@ def get_antsxnet_data(file_id=None,
     #
     # Check if the file exists here, and if so, return it. Else let keras handle the download
     if not os.path.exists(target_file_name_path):
+        if not url:
+            err_msg = 'The requested data "' + file_id + '" is not available'
+            raise NotImplementedError(err_msg)
+
         target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
                                                         cache_subdir=antsxnet_cache_directory)
 
