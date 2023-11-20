@@ -68,12 +68,19 @@ from .cortical_thickness import cortical_thickness
 from .cortical_thickness import longitudinal_cortical_thickness
 
 from .histology import arterial_lesion_segmentation
-from .histology import allen_ex5_brain_extraction
-from .histology import allen_histology_brain_mask
-from .histology import allen_histology_cerebellum_mask
-from .histology import allen_histology_hemispherical_coronal_mask
-from .histology import allen_histology_super_resolution
-from .histology import mouse_mri_brain_extraction
+
+# from .histology import allen_ex5_brain_extraction
+# from .histology import allen_histology_brain_mask
+# from .histology import allen_histology_cerebellum_mask
+# from .histology import allen_histology_hemispherical_coronal_mask
+# from .histology import allen_histology_super_resolution
+# from .histology import mouse_mri_brain_extraction
+
+from .mouse import mouse_brain_extraction
+from .mouse import mouse_histology_brain_mask
+from .mouse import mouse_histology_cerebellum_mask
+from .mouse import mouse_histology_hemispherical_coronal_mask
+from .mouse import mouse_histology_super_resolution
 
 from .lung_extraction import lung_extraction
 from .lung_segmentation import lung_pulmonary_artery_segmentation
