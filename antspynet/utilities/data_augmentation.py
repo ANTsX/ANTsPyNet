@@ -14,6 +14,7 @@ def data_augmentation(input_image_list,
                       sd_simulated_bias_field=1.0,
                       sd_histogram_warping=0.05,
                       sd_affine=0.05,
+                      sd_deformation=0.2,
                       output_numpy_file_prefix=None,
                       verbose=False
                      ):
@@ -80,7 +81,10 @@ def data_augmentation(input_image_list,
         Determines the strength of the bias field.
 
     sd_affine : float
-        Determines the amount of transformation based change.
+        Determines the amount of affine transformation.
+
+    sd_deformation : float
+        Determines the amount of deformable transformation.
 
     output_numpy_file_prefix : string
         Filename of output numpy array containing all the simulated images and segmentations.
@@ -152,7 +156,7 @@ def data_augmentation(input_image_list,
         sd_affine=sd_affine,
         deformation_transform_type="bspline",
         number_of_random_points=1000,
-        sd_noise=2.0,
+        sd_noise=sd_deformation,
         number_of_fitting_levels=4,
         mesh_size=1,
         sd_smoothing=4.0,
