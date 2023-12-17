@@ -62,6 +62,8 @@ pip install antspynet
 * [Deep embedded clustering (DEC)](https://arxiv.org/abs/1511.06335)
 * [Deep convolutional embedded clustering (DCEC)](https://xifengguo.github.io/papers/ICONIP17-DCEC.pdf)
 
+### Applications
+
 * [MRI super-resolution](https://www.medrxiv.org/content/10.1101/2023.02.02.23285376v1)
 * [Multi-modal brain extraction](https://pubmed.ncbi.nlm.nih.gov/33907199/)
     * T1 
