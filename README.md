@@ -4,7 +4,7 @@
 
 # ANTsPyNet
 
-A collection of deep learning architectures and applications ported to the python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
+A collection of deep learning architectures and applications ported to the Python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
 
 [Documentation page](https://antsx.github.io/ANTsPyNet/)
 
