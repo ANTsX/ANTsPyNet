@@ -6,7 +6,9 @@
 
 A collection of deep learning architectures and applications ported to the python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
 
-Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/ANTsPyNet/).
+[Documentation page](https://antsx.github.io/ANTsPyNet/)
+
+[ANTsXNet tutorial](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
 
 <p align="middle">
   <img src="docs/figures/coreANTsXNetTools.png" width="600" />
@@ -89,6 +91,7 @@ Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/
 * Lung extraction
     * [Proton](https://pubmed.ncbi.nlm.nih.gov/34227163/)
     * CT
+* Lung pulmonary vessel segmentation
 * [Functional lung segmentation](https://pubmed.ncbi.nlm.nih.gov/34227163/)
 * [Neural style transfer](https://arxiv.org/abs/1508.06576)
 * Image quality assessment
