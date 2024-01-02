@@ -1,6 +1,6 @@
-
 import ants
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
 
 
@@ -338,3 +338,4 @@ def brain_tumor_segmentation(flair,
     return_dict = {'segmentation_image' : segmentation_image,
                    'probability_images' : probability_images}
     return(return_dict)
+
