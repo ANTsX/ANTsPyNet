@@ -4,18 +4,18 @@
 
 # ANTsPyNet
 
-A collection of deep learning architectures and applications ported to the python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
+A collection of deep learning architectures and applications ported to the Python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/).
 
-Documentation page [https://antsx.github.io/ANTsPyNet/](https://antsx.github.io/ANTsPyNet/).
+[Documentation page](https://antsx.github.io/ANTsPyNet/)
 
-![ANTsXNetTools](docs/figures/coreANTsXNetTools.png)
+[ANTsXNet tutorial](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
 
-For MacOS and Linux, may install with:
-```bash
-pip install antspynet
-```
+<p align="middle">
+  <img src="docs/figures/coreANTsXNetTools.png" width="600" />
+</p>
 
-## Architectures
+<details>
+<summary>Architectures</summary>
 
 ### Image voxelwise segmentation/regression
 
@@ -62,6 +62,11 @@ pip install antspynet
 * [Deep embedded clustering (DEC)](https://arxiv.org/abs/1511.06335)
 * [Deep convolutional embedded clustering (DCEC)](https://xifengguo.github.io/papers/ICONIP17-DCEC.pdf)
 
+</details>
+
+<details>
+<summary>Applications</summary>
+
 * [MRI super-resolution](https://www.medrxiv.org/content/10.1101/2023.02.02.23285376v1)
 * [Multi-modal brain extraction](https://pubmed.ncbi.nlm.nih.gov/33907199/)
     * T1 
@@ -86,6 +91,7 @@ pip install antspynet
 * Lung extraction
     * [Proton](https://pubmed.ncbi.nlm.nih.gov/34227163/)
     * CT
+* Lung pulmonary vessel segmentation
 * [Functional lung segmentation](https://pubmed.ncbi.nlm.nih.gov/34227163/)
 * [Neural style transfer](https://arxiv.org/abs/1508.06576)
 * Image quality assessment
@@ -93,23 +99,12 @@ pip install antspynet
     * [KonIQ-10k](https://ieeexplore.ieee.org/document/8968750)
 * [Mixture density networks (MDN)](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
 
-## Related
-
 * [Training scripts](https://github.com/ntustison/ANTsXNetTraining)
 
---------------------------------------
+</details>
 
-## Installation
-
-* ANTsPyNet Installation:
-    * Option 1:
-       ```
-       $ git clone https://github.com/ANTsX/ANTsPyNet
-       $ cd ANTsPyNet
-       $ python setup.py install
-       ```
-
-## Publications
+<details>
+<summary>Publications</summary>
 
 * Nicholas J. Tustison, Michael A. Yassa, Batool Rizvi, Philip A. Cook, Andrew J. Holbrook, Mithra Sathishkumar, Mia G. Tustison, James C. Gee, James R. Stone, and Brian B. Avants. ANTsX neuroimaging-derived structural phenotypes of UK Biobank.  [(medrxiv)](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4)
 
@@ -127,8 +122,14 @@ pip install antspynet
 
 * Cullen N.C., Avants B.B. (2018) Convolutional Neural Networks for Rapid and Simultaneous Brain Extraction and Tissue Segmentation. In: Spalletta G., Piras F., Gili T. (eds) Brain Morphometry. Neuromethods, vol 136. Humana Press, New York, NY [doi](https://doi.org/10.1007/978-1-4939-7647-8_2)
 
-## Acknowledgments
+</details>
+
+<details>
+<summary>Acknowledgements</summary>
 
 * We gratefully acknowledge the support of the NVIDIA Corporation with the donation of two Titan Xp GPUs used for this research.
 
 * We gratefully acknowledge the grant support of the [Office of Naval Research](https://www.onr.navy.mil) and [Cohen Veterans Bioscience](https://www.cohenveteransbioscience.org).
+
+</details>
+
