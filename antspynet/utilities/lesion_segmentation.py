@@ -87,9 +87,6 @@ def lesion_segmentation(t1,
         t1_preprocessed = ants.image_clone(t1)
         brain_mask = ants.threshold_image(t1_preprocessed, 0, 0, 0, 1)
 
-    image = t1_preprocessed
-    image = (image - image.min()) / (image.max() - image.min())
-
     if do_patch_based_prediction: 
 
         ################################
@@ -121,6 +118,9 @@ def lesion_segmentation(t1,
 
         if verbose:
             print("Extract patches.")
+
+        image = t1_preprocessed
+        image = (image - image.min()) / (image.max() - image.min())
 
         image_patches = extract_image_patches(image,
                                         patch_size=patch_size,
@@ -199,7 +199,7 @@ def lesion_segmentation(t1,
         if verbose:
             print("Alignment to template.")
 
-        registration = ants.registration(template, image, type_of_transform="antsRegistrationSyNQuick[r]",
+        registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[r]",
                                          verbose=verbose)  
         image = registration['warpedmovout']
         image = (image - image.min()) / (image.max() - image.min())
@@ -210,8 +210,8 @@ def lesion_segmentation(t1,
         lesion_mask_array = np.squeeze(unet_model.predict(image_array, verbose=verbose))
         lesion_mask = ants.copy_image_info(template, ants.from_numpy(lesion_mask_array))
        
-        probability_image = ants.apply_transforms(t1, lesion_mask, registration['invtransforms'], 
-                                                  which_to_invert=[True], verbose=verbose)
+        probability_image = ants.apply_transforms(t1_preprocessed, lesion_mask, registration['invtransforms'], 
+                                                  whichtoinvert=[True], verbose=verbose)
 
         return(probability_image)
         
