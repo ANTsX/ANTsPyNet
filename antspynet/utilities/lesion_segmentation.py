@@ -1,7 +1,6 @@
 import ants
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
 
 def lesion_segmentation(t1,
                         do_preprocessing=True,
@@ -42,9 +41,6 @@ def lesion_segmentation(t1,
     from ..utilities import preprocess_brain_image
     from ..utilities import pad_or_crop_image_to_size
     from ..utilities import brain_extraction
-
-    if which_model == 0 and np.any(t1.shape < np.array((64, 64, 64))):
-        raise ValueError("Images must be > 64 voxels per dimension.")
 
     ################################
     #
