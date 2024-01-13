@@ -64,6 +64,7 @@ from .preprocess_image import preprocess_brain_image
 from .brain_extraction import brain_extraction
 from .brain_tumor_segmentation import brain_tumor_segmentation
 from .lesion_segmentation import lesion_segmentation
+from .lesion_segmentation import lesion_segmentation_experimental
 from .inpainting import whole_head_inpainting
 from .cortical_thickness import cortical_thickness
 from .cortical_thickness import longitudinal_cortical_thickness

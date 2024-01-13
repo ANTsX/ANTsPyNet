@@ -4,12 +4,123 @@ import tensorflow as tf
 from tensorflow import keras
 
 def lesion_segmentation(t1,
-                        which_model=0,
-                        prediction_batch_size=16,
-                        patch_stride_length=32,
                         do_preprocessing=True,
                         antsxnet_cache_directory=None,
                         verbose=False):
+
+    """
+    Lesion segmentation from T1-w images.
+
+    Arguments
+    ---------
+    t1 : ANTsImage
+        input 3-D T1 brain image (not skull-stripped).
+
+    do_preprocessing : boolean
+        perform n4 bias correction, intensity truncation, brain extraction.
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    WMH segmentation probability image
+
+    Example
+    -------
+    >>> t1 = ants.image_read("t1.nii.gz")
+    """
+
+    from ..architectures import create_unet_model_3d
+    from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
+    from ..utilities import preprocess_brain_image
+    from ..utilities import pad_or_crop_image_to_size
+    from ..utilities import brain_extraction
+
+    if which_model == 0 and np.any(t1.shape < np.array((64, 64, 64))):
+        raise ValueError("Images must be > 64 voxels per dimension.")
+
+    ################################
+    #
+    # Preprocess images
+    #
+    ################################
+
+    t1_preprocessed = None
+    brain_mask = None
+
+    if do_preprocessing:
+        if verbose:
+            print("Preprocess T1 images.")
+
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=None,
+            brain_extraction_modality="t1",
+            do_bias_correction=True,
+            do_denoising=False,
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        brain_mask = t1_preprocessing["brain_mask"]
+        t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
+    else:
+        t1_preprocessed = ants.image_clone(t1)
+        brain_mask = ants.threshold_image(t1_preprocessed, 0, 0, 0, 1)
+
+    template_size = (192, 208, 192)
+    template = ants.image_read(get_antsxnet_data('mni152'))
+    template = pad_or_crop_image_to_size(template, template_size)
+    template_mask = brain_extraction(template, modality="t1", verbose=True)
+    template = template * template_mask
+    
+    if verbose:
+        print("Load u-net models and weights.")
+
+    number_of_classification_labels = 1
+    channel_size = 1
+    unet_weights_file_name = get_pretrained_network("lesion_whole_brain", 
+                                                    antsxnet_cache_directory=antsxnet_cache_directory)
+
+    unet_model = create_unet_model_3d((*template_size, channel_size),
+        number_of_outputs=number_of_classification_labels,
+        mode='sigmoid',
+        number_of_filters=(16, 32, 64, 128, 256), dropout_rate=0.0,
+        convolution_kernel_size=3, deconvolution_kernel_size=2,
+        weight_decay=1e-5, additional_options=("attentionGating",))
+    unet_model.load_weights(unet_weights_file_name)
+
+    if verbose:
+        print("Alignment to template.")
+
+    registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[a]",
+                                     verbose=verbose)  
+    image = registration['warpedmovout']
+    image = (image - image.min()) / (image.max() - image.min())
+                
+    batchX = np.zeros((1, *image.shape, channel_size))
+    batchX[0,:,:,:,0] = image.numpy()
+
+    lesion_mask_array = np.squeeze(unet_model.predict(batchX, verbose=verbose))
+    lesion_mask = ants.copy_image_info(template, ants.from_numpy(lesion_mask_array))
+   
+    probability_image = ants.apply_transforms(t1_preprocessed, lesion_mask, registration['invtransforms'], 
+                                              whichtoinvert=[True], verbose=verbose)
+
+    return(probability_image)
+        
+
+def lesion_segmentation_experimental(t1,
+                                     which_model=0,
+                                     prediction_batch_size=16,
+                                     patch_stride_length=32,
+                                     do_preprocessing=True,
+                                     antsxnet_cache_directory=None,
+                                     verbose=False):
 
     """
     Emily lesion segmentation.
