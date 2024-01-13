@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 def lesion_segmentation(t1,
-                        do_patch_based_prediction=True,
+                        which_model=0,
                         prediction_batch_size=16,
                         patch_stride_length=32,
                         do_preprocessing=True,
@@ -19,7 +19,7 @@ def lesion_segmentation(t1,
     t1 : ANTsImage
         input 3-D T1 brain image (not skull-stripped).
 
-    do_patch_based_prediction : boolean
+    which_model : int
         type of prediction (otherwise do whole-brain prediction).
             
     prediction_batch_size : int
@@ -58,7 +58,7 @@ def lesion_segmentation(t1,
     from ..utilities import pad_or_crop_image_to_size
     from ..utilities import brain_extraction
 
-    if do_patch_based_prediction and np.any(t1.shape < np.array((64, 64, 64))):
+    if which_model == 0 and np.any(t1.shape < np.array((64, 64, 64))):
         raise ValueError("Images must be > 64 voxels per dimension.")
 
     ################################
@@ -87,7 +87,7 @@ def lesion_segmentation(t1,
         t1_preprocessed = ants.image_clone(t1)
         brain_mask = ants.threshold_image(t1_preprocessed, 0, 0, 0, 1)
 
-    if do_patch_based_prediction: 
+    if which_model == 0: 
 
         ################################
         #
@@ -171,7 +171,7 @@ def lesion_segmentation(t1,
                                                             domain_image_is_mask=True)
         return(probability_image)
 
-    else:
+    elif which_model == 1: 
         
         template_size = (192, 208, 192)
         template = ants.image_read(get_antsxnet_data('mni152'))
@@ -184,6 +184,8 @@ def lesion_segmentation(t1,
 
         number_of_classification_labels = 1
         channel_size = 1
+        unet_weights_file_name = get_pretrained_network("lesion_whole_brain", 
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
 
         unet_model = create_unet_model_3d((*template_size, channel_size),
             number_of_outputs=number_of_classification_labels,
@@ -191,23 +193,109 @@ def lesion_segmentation(t1,
             number_of_filters=(16, 32, 64, 128, 256), dropout_rate=0.0,
             convolution_kernel_size=3, deconvolution_kernel_size=2,
             weight_decay=1e-5, additional_options=("attentionGating",))
-
-        unet_weights_file_name = get_pretrained_network("lesion_whole_brain", 
-                                                        antsxnet_cache_directory=antsxnet_cache_directory)
         unet_model.load_weights(unet_weights_file_name)
 
         if verbose:
             print("Alignment to template.")
 
-        registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[r]",
+        registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[a]",
                                          verbose=verbose)  
         image = registration['warpedmovout']
         image = (image - image.min()) / (image.max() - image.min())
                     
-        image_array = np.expand_dims(image.numpy(), axis=0)
-        image_array = np.expand_dims(image_array, axis=-1)
+        batchX = np.zeros((1, *image.shape, channel_size))
+        batchX[0,:,:,:,0] = image.numpy()
+
+        lesion_mask_array = np.squeeze(unet_model.predict(batchX, verbose=verbose))
+        lesion_mask = ants.copy_image_info(template, ants.from_numpy(lesion_mask_array))
+       
+        probability_image = ants.apply_transforms(t1_preprocessed, lesion_mask, registration['invtransforms'], 
+                                                  whichtoinvert=[True], verbose=verbose)
+
+        return(probability_image)
         
-        lesion_mask_array = np.squeeze(unet_model.predict(image_array, verbose=verbose))
+    elif which_model == 2: 
+        
+        template_size = (192, 208, 192)
+        template = ants.image_read(get_antsxnet_data('mni152'))
+        template = pad_or_crop_image_to_size(template, template_size)
+        template_mask = brain_extraction(template, modality="t1", verbose=True)
+        template = template * template_mask
+        
+        if verbose:
+            print("Load u-net models and weights.")
+
+        number_of_classification_labels = 1
+        channel_size = 2
+        unet_weights_file_name = get_pretrained_network("lesion_flip_brain", 
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
+
+        unet_model = create_unet_model_3d((*template_size, channel_size),
+            number_of_outputs=number_of_classification_labels,
+            mode='sigmoid',
+            number_of_filters=(16, 32, 64, 128, 256), dropout_rate=0.0,
+            convolution_kernel_size=3, deconvolution_kernel_size=2,
+            weight_decay=1e-5, additional_options=("attentionGating",))
+        unet_model.load_weights(unet_weights_file_name)
+
+        if verbose:
+            print("Alignment to template.")
+
+        registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[a]",
+                                         verbose=verbose)  
+        image = registration['warpedmovout']
+        image = (image - image.min()) / (image.max() - image.min())
+                    
+        batchX = np.zeros((1, *image.shape, channel_size))
+        batchX[0,:,:,:,0] = image.numpy()
+        batchX[0,:,:,:,1] = np.flip(batchX[0,:,:,:,0], axis=0)
+
+        lesion_mask_array = np.squeeze(unet_model.predict(batchX, verbose=verbose))
+        lesion_mask = ants.copy_image_info(template, ants.from_numpy(lesion_mask_array))
+       
+        probability_image = ants.apply_transforms(t1_preprocessed, lesion_mask, registration['invtransforms'], 
+                                                  whichtoinvert=[True], verbose=verbose)
+
+        return(probability_image)
+        
+    elif which_model == 3: 
+        
+        template_size = (192, 208, 192)
+        template = ants.image_read(get_antsxnet_data('mni152'))
+        template = pad_or_crop_image_to_size(template, template_size)
+        template_mask = brain_extraction(template, modality="t1", verbose=True)
+        template = template * template_mask
+        
+        if verbose:
+            print("Load u-net models and weights.")
+
+        number_of_classification_labels = 1
+        channel_size = 3
+        unet_weights_file_name = get_pretrained_network("lesion_flip_template_brain", 
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
+
+        unet_model = create_unet_model_3d((*template_size, channel_size),
+            number_of_outputs=number_of_classification_labels,
+            mode='sigmoid',
+            number_of_filters=(16, 32, 64, 128, 256), dropout_rate=0.0,
+            convolution_kernel_size=3, deconvolution_kernel_size=2,
+            weight_decay=1e-5, additional_options=("attentionGating",))
+        unet_model.load_weights(unet_weights_file_name)
+
+        if verbose:
+            print("Alignment to template.")
+
+        registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[a]",
+                                         verbose=verbose)  
+        image = registration['warpedmovout']
+        image = (image - image.min()) / (image.max() - image.min())
+                    
+        batchX = np.zeros((1, *image.shape, channel_size))
+        batchX[0,:,:,:,0] = image.numpy()
+        batchX[0,:,:,:,1] = np.flip(batchX[0,:,:,:,0], axis=0)
+        batchX[0,:,:,:,2] = (ants.histogram_match_image(template, image)).numpy()
+
+        lesion_mask_array = np.squeeze(unet_model.predict(batchX, verbose=verbose))
         lesion_mask = ants.copy_image_info(template, ants.from_numpy(lesion_mask_array))
        
         probability_image = ants.apply_transforms(t1_preprocessed, lesion_mask, registration['invtransforms'], 
