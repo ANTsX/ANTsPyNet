@@ -28,6 +28,7 @@ from .create_partial_convolution_unet_model import create_partial_convolution_un
 # from .create_diffusion_probabilistic_unet_model import create_diffusion_probabilistic_unet_model_2d, create_diffusion_probabilistic_unet_model_3d
 
 from .create_custom_model import create_simple_fully_convolutional_network_model_3d
+from .create_custom_model import create_rmnet_generator
 
 from .create_vanilla_gan_model import VanillaGanModel
 from .create_deep_convolutional_gan_model import DeepConvolutionalGanModel

@@ -93,10 +93,13 @@ def lesion_segmentation(t1,
     if verbose:
         print("Alignment to template.")
 
+    image_min = t1_preprocessed[brain_mask != 0].min()
+    image_max = t1_preprocessed[brain_mask != 0].max()
+
     registration = ants.registration(template, t1_preprocessed, type_of_transform="antsRegistrationSyNQuick[a]",
                                      verbose=verbose)  
-    image = registration['warpedmovout']
-    image = (image - image.min()) / (image.max() - image.min())
+    image = registration['warpedmovout']    
+    image = (image - image_min) / (image_max - image_min)
                 
     batchX = np.zeros((1, *image.shape, channel_size))
     batchX[0,:,:,:,0] = image.numpy()

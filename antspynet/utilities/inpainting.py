@@ -4,7 +4,7 @@ import numpy as np
 def whole_head_inpainting(image,
                           roi_mask,
                           modality="t1",
-                          slicewise=True,
+                          mode="meg",
                           antsxnet_cache_directory=None,
                           verbose=False):
 
@@ -22,12 +22,14 @@ def whole_head_inpainting(image,
     modality : string
         Modality image type.  Options include:
             * "t1": T1-weighted MRI.
-            * "flair": FLAIR MRI.
-
-    slicewise : boolean
-        Two models per modality are available for processing the data.  One model
-        is based on training/prediction using 2-D axial slice data whereas the
-        other uses 64x64x64 patches.
+            
+    mode : string
+        Options include:
+            * "sagittal": sagittal view network
+            * "coronal": coronal view network
+            * "axial": axial view network
+            * "average": average of all canonical views
+            * "meg": morphological erosion, greedy, iterative                
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -46,30 +48,24 @@ def whole_head_inpainting(image,
     >>>
     """
 
-    from ..architectures import create_partial_convolution_unet_model_2d
-    from ..architectures import create_partial_convolution_unet_model_3d
+    from ..architectures import create_rmnet_generator
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import pad_or_crop_image_to_size
-    from ..utilities import regression_match_image
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
-    if slicewise:
-
-        image_size = (256, 256)
-        channel_size = 1
+    if mode == "sagittal" or mode == "coronal" or mode == "axial":
 
         if verbose:
             print("Preprocessing:  Reorientation.")
 
-        reorient_template = ants.image_read(get_antsxnet_data("oasis"))
+        reorient_template = ants.image_read(get_antsxnet_data("nki"))
+        reorient_template = pad_or_crop_image_to_size(reorient_template, (256, 256, 256))
 
-        center_of_mass_template = np.asarray(ants.get_center_of_mass(reorient_template))
-        center_of_mass_image = np.asarray(ants.get_center_of_mass(image))
+        center_of_mass_template = np.round(np.asarray(ants.get_center_of_mass(reorient_template)))
+        center_of_mass_image = np.round(np.asarray(ants.get_center_of_mass(image)))
         translation = center_of_mass_image - center_of_mass_template
         xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
             center=np.asarray(center_of_mass_template), translation=translation)
@@ -77,173 +73,115 @@ def whole_head_inpainting(image,
         image_reoriented = xfrm.apply_to_image(image, reorient_template, interpolation="linear")
         roi_mask_reoriented = xfrm.apply_to_image(roi_mask, reorient_template, interpolation="nearestneighbor")
         roi_mask_reoriented = ants.threshold_image(roi_mask_reoriented, 0, 0, 0, 1)
-        roi_inverted_mask_reoriented = ants.threshold_image(roi_mask_reoriented, 0, 0, 1, 0)
 
         geoms = ants.label_geometry_measures(roi_mask_reoriented)
         if geoms.shape[0] != 1:
             raise ValueError("ROI is not specified correctly.")
-        lower_slice = int(geoms['BoundingBoxLower_y'])
-        upper_slice = int(geoms['BoundingBoxUpper_y'])
+
+        lower_slice = None
+        upper_slice = None
+        weights_file = None
+        direction = -1
+        if mode == "sagittal":
+            lower_slice = int(geoms['BoundingBoxLower_x'])
+            upper_slice = int(geoms['BoundingBoxUpper_x'])
+            weights_file = get_pretrained_network("inpainting_sagittal_rmnet_weights", 
+                                                  antsxnet_cache_directory=antsxnet_cache_directory)
+            direction = 0
+        elif mode == "coronal":
+            lower_slice = int(geoms['BoundingBoxLower_y'])
+            upper_slice = int(geoms['BoundingBoxUpper_y'])
+            weights_file = get_pretrained_network("inpainting_coronal_rmnet_weights", 
+                                                  antsxnet_cache_directory=antsxnet_cache_directory)
+            direction = 1
+        elif mode == "axial":
+            lower_slice = int(geoms['BoundingBoxLower_z'])
+            upper_slice = int(geoms['BoundingBoxUpper_z'])
+            weights_file = get_pretrained_network("inpainting_axial_rmnet_weights", 
+                                                  antsxnet_cache_directory=antsxnet_cache_directory)
+            direction = 2 
+
+        model = create_rmnet_generator()
+        model.load_weights(weights_file)
+
         number_of_slices = upper_slice - lower_slice + 1
 
-        inpainting_unet = create_partial_convolution_unet_model_2d((*image_size, channel_size),
-                                                                    number_of_priors=0,
-                                                                    number_of_filters=(32, 64, 128, 256, 512, 512),
-                                                                    kernel_size=3)
-
-        weights_name = ''
-        if modality == "T1" or modality == "t1":
-            weights_name = "wholeHeadInpaintingT1"
-        elif modality == "FLAIR" or modality == "flair":
-            weights_name = "wholeHeadInpaintingFLAIR"
-        else:
-            raise ValueError("Unavailable modality given: " + modality)
-
-        weights_file_name = get_pretrained_network(weights_name,
-            antsxnet_cache_directory=antsxnet_cache_directory)
-        inpainting_unet.load_weights(weights_file_name)
-
-        if verbose:
-            print("Preprocessing:  Slicing data.")
-
+        image_size = (256, 256)
+        channel_size = 3
         batchX = np.zeros((number_of_slices, *image_size, channel_size))
-        batchXMask = np.zeros((number_of_slices, *image_size, channel_size))
+        batchXMask = np.zeros((number_of_slices, *image_size, 1))
+        batchX_max_values = np.zeros((number_of_slices,))         
 
         for i in range(number_of_slices):
-            index = lower_slice + i
-
-            mask_slice = ants.slice_image(roi_inverted_mask_reoriented, axis=1, idx=index, collapse_strategy=1)
-            mask_slice = pad_or_crop_image_to_size(mask_slice, image_size)
-            mask_slice_array = mask_slice.numpy()
-
-            slice = ants.slice_image(image_reoriented, axis=1, idx=index, collapse_strategy=1)
-            slice = pad_or_crop_image_to_size(slice, image_size)
-            slice = mask_slice * (slice - slice.min()) / (slice.max() - slice.min())
-
-            slice[mask_slice == 0] = 1
-            slice_array = slice.numpy()
-
-            for j in range(channel_size):
-                batchX[i,:,:,j] = slice_array
-                batchXMask[i,:,:,j] = mask_slice_array
-
-        if verbose:
-            print("Prediction.")
-
-        predicted_data = inpainting_unet.predict([batchX, batchXMask], verbose=int(verbose))
-        predicted_data[batchXMask == 1] = batchX[batchXMask == 1]
-
-        if verbose:
-            print("Post-processing:  Slicing data.")
-
-        image_reoriented_array = image_reoriented.numpy()
+            slice_index = i + lower_slice
+            t1_slice = ants.slice_image(image_reoriented, axis=direction, 
+                                        idx=slice_index, collapse_strategy=1)  
+            batchX[i,:,:,0] = t1_slice.numpy()
+            batchX_max_values[i] = batchX[i,:,:,0].max()
+            batchX[i,:,:,0] = batchX[i,:,:,0] / (0.5 * batchX_max_values[i] ) - 1.
+            for j in range(1, channel_size):
+                batchX[i,:,:,j] = batchX[i,:,:,0]
+            roi_mask_slice = ants.slice_image(roi_mask_reoriented, axis=direction,
+                                              idx=slice_index, collapse_strategy=1)
+            batchXMask[i,:,:,0] = roi_mask_slice.numpy()
+                            
+        batchY = model.predict([batchX, batchXMask], verbose=True)[:,:,:,0:3]
+        
+        inpainted_image_reoriented_array = image_reoriented.numpy()
         for i in range(number_of_slices):
-            index = lower_slice + i
-
-            slice = ants.slice_image(image_reoriented, axis=1, idx=index, collapse_strategy=1)
-            mask_slice = ants.slice_image(roi_inverted_mask_reoriented, axis=1, idx=index, collapse_strategy=1)
-            predicted_slice = ants.from_numpy(np.squeeze(predicted_data[i,:,:,0]), origin=slice.origin,
-                spacing=slice.spacing, direction=slice.direction)
-            predicted_slice = pad_or_crop_image_to_size(predicted_slice, slice.shape)
-            predicted_slice = regression_match_image(predicted_slice, slice, mask=mask_slice)
-            image_reoriented_array[:,index,:] = predicted_slice.numpy()
-
-        inpainted_image = ants.from_numpy(np.squeeze(image_reoriented_array),
-           origin=image_reoriented.origin, spacing=image_reoriented.spacing,
-           direction=image_reoriented.direction)
-
-        if verbose:
-            print("Post-processing:  reorienting to original space.")
-
+            slice_idx = i + lower_slice
+            inpainted_values = (np.mean(batchY[i,:,:,:], axis=-1) + 1) * (0.5 * batchX_max_values[i])
+            if direction == 0:
+                inpainted_image_reoriented_array[slice_idx,:,:] = inpainted_values
+            elif direction == 1:
+                inpainted_image_reoriented_array[:,slice_idx,:] = inpainted_values
+            elif direction == 2:
+                inpainted_image_reoriented_array[:,:,slice_idx] = inpainted_values
+        inpainted_image_reoriented = ants.from_numpy(inpainted_image_reoriented_array) 
+        inpainted_image_reoriented = ants.copy_image_info(image_reoriented, inpainted_image_reoriented)
+                
         xfrm_inv = xfrm.invert()
-        inpainted_image = xfrm_inv.apply_to_image(inpainted_image, image, interpolation="linear")
+        inpainted_image = xfrm_inv.apply_to_image(inpainted_image_reoriented, image, interpolation="linear")
         inpainted_image = ants.copy_image_info(image, inpainted_image)
         inpainted_image[roi_mask == 0] = image[roi_mask == 0]
 
         return(inpainted_image)
+    
+    elif mode == "average":
+        
+        sagittal = whole_head_inpainting(image, roi_mask=roi_mask, 
+                                         modality=modality, mode="sagittal", 
+                                         verbose=verbose) 
+        coronal = whole_head_inpainting(image, roi_mask=roi_mask, 
+                                        modality=modality, mode="coronal", 
+                                        verbose=verbose) 
+        axial = whole_head_inpainting(image, roi_mask=roi_mask, 
+                                      modality=modality, mode="axial", 
+                                      verbose=verbose) 
+        
+        return ((sagittal + coronal + axial)/3)
 
-    else:
+    elif mode == "meg":
+        
+        current_image = ants.image_clone(image)
+        current_roi_mask = ants.threshold_image(roi_mask, 0, 0, 0, 1)
+        roi_mask_volume = current_roi_mask.sum()
 
-        image_size = (256, 256, 256)
-        patch_size = (64, 64, 64)
-        stride_length = (32, 32, 32)
-        channel_size = 1
+        iteration = 0
+        while roi_mask_volume > 0:
+            if verbose:
+                print("roi_mask_volume (" + str(iteration) + "): " + str(roi_mask_volume)) 
+                
+            current_image = whole_head_inpainting(current_image, roi_mask=current_roi_mask, 
+                                                  modality=modality, mode="average", 
+                                                  verbose=verbose) 
+            current_roi_mask = ants.iMath_ME(current_roi_mask, radius=1)
+            roi_mask_volume = current_roi_mask.sum()
+            iteration += 1
+            
+        return(current_image)
+        
+        
 
-        reorient_template = ants.image_read(get_antsxnet_data("oasis"))
-        reorient_template = pad_or_crop_image_to_size( reorient_template, image_size)
 
-        center_of_mass_template = np.asarray(ants.get_center_of_mass(reorient_template))
-        center_of_mass_image = np.asarray(ants.get_center_of_mass(image))
-        translation = center_of_mass_image - center_of_mass_template
-        xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
-            center=np.asarray(center_of_mass_template), translation=translation)
 
-        image_reoriented = xfrm.apply_to_image(image, reorient_template, interpolation="linear")
-        roi_mask_reoriented = xfrm.apply_to_image(roi_mask, reorient_template, interpolation="nearestneighbor")
-        roi_mask_reoriented = ants.threshold_image(roi_mask_reoriented, 0, 0, 0, 1)
-        roi_inverted_mask_reoriented = ants.threshold_image(roi_mask_reoriented, 0, 0, 1, 0)
-
-        inpainting_unet = create_partial_convolution_unet_model_3d((*patch_size, channel_size),
-                                                                    number_of_priors=0,
-                                                                    number_of_filters=(32, 64, 128, 256, 256),
-                                                                    kernel_size=3)
-
-        weights_name = ''
-        if modality == "T1" or modality == "t1":
-            weights_name = "wholeHeadInpaintingPatchBasedT1"
-        elif modality == "FLAIR" or modality == "flair":
-            weights_name = "wholeHeadInpaintingPatchBasedFLAIR"
-        else:
-            raise ValueError("Unavailable modality given: " + modality)
-
-        weights_file_name = get_pretrained_network(weights_name,
-            antsxnet_cache_directory=antsxnet_cache_directory)
-        inpainting_unet.load_weights(weights_file_name)
-
-        if verbose:
-            print("Preprocessing:  Extracting patches.")
-
-        image_patches = extract_image_patches(image_reoriented, patch_size, max_number_of_patches="all",
-            stride_length=stride_length, random_seed=None, return_as_array=True)
-
-        min_image_val = image_reoriented[roi_inverted_mask_reoriented == 1].min()
-        max_image_val = image_reoriented[roi_inverted_mask_reoriented == 1].max()
-        image_reoriented = (image_reoriented - min_image_val) / (max_image_val - min_image_val)
-
-        image_patches_rescaled = extract_image_patches(image_reoriented, patch_size, max_number_of_patches="all",
-            stride_length=stride_length, random_seed=None, return_as_array=True)
-        mask_patches = extract_image_patches(roi_inverted_mask_reoriented, patch_size, max_number_of_patches="all",
-            stride_length=stride_length, random_seed=None, return_as_array=True)
-
-        batchX = np.expand_dims(image_patches_rescaled, axis=-1)
-        batchXMask = np.expand_dims(mask_patches, axis=-1)
-
-        batchX[batchXMask == 0] = 1
-
-        predicted_data = np.zeros_like(batchX)
-
-        for i in range(batchX.shape[0]):
-            if np.any(batchXMask[i,:,:,:,:] == 0):
-                if verbose:
-                    print("  Predicting patch " + str(i) + " (of " + str(batchX.shape[0]) + ")")
-                predicted_patch = inpainting_unet.predict([batchX[[i],:,:,:,:], batchXMask[[i],:,:,:,:]], verbose=verbose)
-                predicted_patch_image = regression_match_image(ants.from_numpy(np.squeeze(predicted_patch)),
-                                                               ants.from_numpy(np.squeeze(image_patches[i,:,:,:])),
-                                                               mask=ants.from_numpy(np.squeeze(batchXMask[i,:,:,:,:]))
-                                                               )
-                predicted_data[i,:,:,:,0] = predicted_patch_image.numpy()
-            else:
-                predicted_data[i,:,:,:,:] = batchX[i,:,:,:,:]
-
-        inpainted_image = reconstruct_image_from_patches(np.squeeze(predicted_data),
-            image_reoriented, stride_length=stride_length)
-
-        if verbose:
-            print("Post-processing:  reorienting to original space.")
-
-        xfrm_inv = xfrm.invert()
-        inpainted_image = xfrm_inv.apply_to_image(inpainted_image, image, interpolation="linear")
-        inpainted_image = ants.copy_image_info(image, inpainted_image)
-        inpainted_image[roi_mask == 0] = image[roi_mask == 0]
-
-        return(inpainted_image)
