@@ -4,7 +4,7 @@ import numpy as np
 def whole_head_inpainting(image,
                           roi_mask,
                           modality="t1",
-                          mode="meg",
+                          mode="axial",
                           antsxnet_cache_directory=None,
                           verbose=False):
 
@@ -85,12 +85,18 @@ def whole_head_inpainting(image,
         if mode == "sagittal":
             lower_slice = int(geoms['BoundingBoxLower_x'])
             upper_slice = int(geoms['BoundingBoxUpper_x'])
+
+            raise ValueError("Weights not available yet.")
+
             weights_file = get_pretrained_network("inpainting_sagittal_rmnet_weights", 
                                                   antsxnet_cache_directory=antsxnet_cache_directory)
             direction = 0
         elif mode == "coronal":
             lower_slice = int(geoms['BoundingBoxLower_y'])
             upper_slice = int(geoms['BoundingBoxUpper_y'])
+            
+            raise ValueError("Weights not available yet.")
+
             weights_file = get_pretrained_network("inpainting_coronal_rmnet_weights", 
                                                   antsxnet_cache_directory=antsxnet_cache_directory)
             direction = 1
