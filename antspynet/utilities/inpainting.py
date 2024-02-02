@@ -114,18 +114,18 @@ def whole_head_inpainting(image,
 
         for i in range(number_of_slices):
             slice_index = i + lower_slice
-            t1_slice = ants.slice_image(image_reoriented, axis=direction, 
-                                        idx=slice_index, collapse_strategy=1)  
-            batchX[i,:,:,0] = t1_slice.numpy()
+            slice = ants.slice_image(image_reoriented, axis=direction, 
+                                     idx=slice_index, collapse_strategy=1)  
+            batchX[i,:,:,0] = slice.numpy()
             batchX_max_values[i] = batchX[i,:,:,0].max()
-            batchX[i,:,:,0] = batchX[i,:,:,0] / (0.5 * batchX_max_values[i] ) - 1.
+            batchX[i,:,:,0] = batchX[i,:,:,0] / (0.5 * batchX_max_values[i]) - 1.
             for j in range(1, channel_size):
                 batchX[i,:,:,j] = batchX[i,:,:,0]
             roi_mask_slice = ants.slice_image(roi_mask_reoriented, axis=direction,
                                               idx=slice_index, collapse_strategy=1)
             batchXMask[i,:,:,0] = roi_mask_slice.numpy()
                             
-        batchY = model.predict([batchX, batchXMask], verbose=True)[:,:,:,0:3]
+        batchY = model.predict([batchX, batchXMask], verbose=verbose)[:,:,:,0:3]
         
         inpainted_image_reoriented_array = image_reoriented.numpy()
         for i in range(number_of_slices):
