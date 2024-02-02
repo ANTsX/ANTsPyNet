@@ -85,9 +85,6 @@ def whole_head_inpainting(image,
         if mode == "sagittal":
             lower_slice = int(geoms['BoundingBoxLower_x'])
             upper_slice = int(geoms['BoundingBoxUpper_x'])
-
-            raise ValueError("Weights not available yet.")
-
             weights_file = get_pretrained_network("inpainting_sagittal_rmnet_weights", 
                                                   antsxnet_cache_directory=antsxnet_cache_directory)
             direction = 0
