@@ -28,7 +28,7 @@ def lesion_segmentation(t1,
 
     Returns
     -------
-    WMH segmentation probability image
+    lesion segmentation probability image
 
     Example
     -------
@@ -71,7 +71,7 @@ def lesion_segmentation(t1,
     template_size = (192, 208, 192)
     template = ants.image_read(get_antsxnet_data('mni152'))
     template = pad_or_crop_image_to_size(template, template_size)
-    template_mask = brain_extraction(template, modality="t1", verbose=True)
+    template_mask = brain_extraction(template, modality="t1", verbose=verbose)
     template = template * template_mask
     
     if verbose:
