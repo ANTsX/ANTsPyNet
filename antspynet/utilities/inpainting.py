@@ -85,20 +85,38 @@ def whole_head_inpainting(image,
         if mode == "sagittal":
             lower_slice = int(geoms['BoundingBoxLower_x'])
             upper_slice = int(geoms['BoundingBoxUpper_x'])
-            weights_file = get_pretrained_network("inpainting_sagittal_rmnet_weights", 
-                                                  antsxnet_cache_directory=antsxnet_cache_directory)
+            if modality == "t1":
+                weights_file = get_pretrained_network("inpainting_sagittal_rmnet_weights", 
+                                                      antsxnet_cache_directory=antsxnet_cache_directory)
+            # elif modality == "flair":
+            #     weights_file = get_pretrained_network("inpainting_sagittal_rmnet_flair_weights", 
+            #                                           antsxnet_cache_directory=antsxnet_cache_directory)
+            else:  
+                raise ValueError("Unrecognized modality.")
             direction = 0
         elif mode == "coronal":
             lower_slice = int(geoms['BoundingBoxLower_y'])
             upper_slice = int(geoms['BoundingBoxUpper_y'])
-            weights_file = get_pretrained_network("inpainting_coronal_rmnet_weights", 
-                                                  antsxnet_cache_directory=antsxnet_cache_directory)
+            if modality == "t1":
+                weights_file = get_pretrained_network("inpainting_coronal_rmnet_weights", 
+                                                      antsxnet_cache_directory=antsxnet_cache_directory)
+            # elif modality == "flair":
+            #     weights_file = get_pretrained_network("inpainting_coronal_rmnet_flair_weights", 
+            #                                           antsxnet_cache_directory=antsxnet_cache_directory)
+            else:  
+                raise ValueError("Unrecognized modality.")
             direction = 1
         elif mode == "axial":
             lower_slice = int(geoms['BoundingBoxLower_z'])
             upper_slice = int(geoms['BoundingBoxUpper_z'])
-            weights_file = get_pretrained_network("inpainting_axial_rmnet_weights", 
-                                                  antsxnet_cache_directory=antsxnet_cache_directory)
+            if modality == "t1":
+                weights_file = get_pretrained_network("inpainting_axial_rmnet_weights", 
+                                                      antsxnet_cache_directory=antsxnet_cache_directory)
+            elif modality == "flair":
+                weights_file = get_pretrained_network("inpainting_axial_rmnet_flair_weights", 
+                                                      antsxnet_cache_directory=antsxnet_cache_directory)
+            else:  
+                raise ValueError("Unrecognized modality.")
             direction = 2 
 
         model = create_rmnet_generator()

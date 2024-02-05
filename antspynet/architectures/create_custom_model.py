@@ -96,7 +96,7 @@ def create_rmnet_generator():
     Returns
     -------
     Keras model
-        A 3-D keras model.
+        A keras model.
 
     Example
     -------
@@ -114,10 +114,10 @@ def create_rmnet_generator():
 
     #compute inputs
     input_img = Input(shape=img_shape, dtype='float32', name='image_input')
-    input_mask = Input(shape=img_shape_mask, dtype='float32',name='mask_input')  
+    input_mask = Input(shape=img_shape_mask, dtype='float32', name='mask_input')  
     
-    reversed_mask = Lambda(reverse_mask,output_shape=(img_shape_mask))(input_mask)
-    masked_image = Multiply()([input_img,reversed_mask])
+    reversed_mask = Lambda(reverse_mask, output_shape=(img_shape_mask))(input_mask)
+    masked_image = Multiply()([input_img, reversed_mask])
     
     #encoder
     x =(Conv2D(gf,(5, 5), dilation_rate=2, input_shape=img_shape, padding="same",name="enc_conv_1"))(masked_image)
@@ -174,7 +174,7 @@ def create_rmnet_generator():
     x =(BatchNormalization(momentum=0.8))(x)
     
     x = (Conv2DTranspose(channels, (3, 3),  padding="same",name="final_output"))(x)
-    x =(Activation('tanh'))(x)
+    x = (Activation('tanh'))(x)
 
     decoded_output = x
     reversed_mask_image = Multiply()([decoded_output, input_mask])
