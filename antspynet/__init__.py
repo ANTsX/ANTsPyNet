@@ -1,6 +1,6 @@
 
 __version__='0.2.3'
 
-from . import architectures
-from . import pretrained
-from . import utilities
+from .architectures import *
+from .pretrained import *
+from .utilities import *
