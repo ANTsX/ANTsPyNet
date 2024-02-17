@@ -193,4 +193,4 @@ If you encounter an issue, have questions about using ANTsPyNet, or want to requ
 
 ## License
 
-The ANTsPyNet is released under an [https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md](Apache License).
+The ANTsPyNet is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md).
