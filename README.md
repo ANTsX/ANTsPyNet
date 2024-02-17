@@ -6,9 +6,9 @@
 
 A collection of deep learning architectures and applications ported to the Python language and tools for basic medical image processing. Based on `keras` and `tensorflow` with cross-compatibility with our R analog [ANTsRNet](https://github.com/ANTsX/ANTsRNet/). ANTsPyNet provides three high-level features:
 
-- Ability to initialize of deep learning models based on our large collection of common architectures
-- Use of a small collection of pre-trained deep learning models for key medical imaging tasks
-- Numerous utility functions to improve training and evaluating of deep learning models on medical images
+- A large collection of common deep learning architectures for medical imaging that can be initialized
+- Various pre-trained deep learning models to perform key medical imaging tasks
+- Utility functions to improve training and evaluating of deep learning models on medical images
 
 <p align="middle">
   <img src="docs/figures/coreANTsXNetTools.png" width="600" />
@@ -60,7 +60,7 @@ ants.plot(t1, overlay=seg, overlay_alpha=0.5)
 
 ## Resources
 
-[ANTsPyNet ReadTheDocs](https://antsx.github.io/ANTsPyNet/)
+[ANTsPyNet Documentation](https://antsx.github.io/ANTsPyNet/)
 
 [ANTsPyNet Tutorials](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
 
@@ -193,4 +193,4 @@ If you encounter an issue, have questions about using ANTsPyNet, or want to requ
 
 ## License
 
-The ANTsPyNet is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md).
+The ANTsPyNet package is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md).
