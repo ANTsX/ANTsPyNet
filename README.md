@@ -61,6 +61,7 @@ ants.plot(t1, overlay=seg, overlay_alpha=0.5)
 ## Resources
 
 [ANTsPyNet ReadTheDocs](https://antsx.github.io/ANTsPyNet/)
+
 [ANTsPyNet Tutorials](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
 
 ## Collection Overview
@@ -189,3 +190,7 @@ The following is an overview of the available model architectures and pre-traine
 ## Contributing
 
 If you encounter an issue, have questions about using ANTsPyNet, or want to request a feature, please feel free to [file an issue](https://github.com/ANTsX/ANTsPyNet/issues). If you plan to contribute new code to ANTsPyNet, we would be very appreciative. The best place to start is again by opening an issue and discussing the potential feature with us.
+
+## License
+
+The ANTsPyNet is released under an [https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md](Apache License).
