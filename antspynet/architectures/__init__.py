@@ -1,4 +1,6 @@
 
+from .fetch_architecture import fetch_architecture, list_architectures
+
 from .create_autoencoder_model import create_autoencoder_model
 from .create_convolutional_autoencoder_model import create_convolutional_autoencoder_model_2d, create_convolutional_autoencoder_model_3d
 
