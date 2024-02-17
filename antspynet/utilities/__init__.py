@@ -1,6 +1,4 @@
-from .get_pretrained_network import get_pretrained_network
 from .get_antsxnet_data import get_antsxnet_data
-
 from .unet_utilities import encode_unet
 from .unet_utilities import decode_unet
 from .denseunet_utilities import Scale
@@ -61,15 +59,15 @@ from .randomly_transform_image_data import randomly_transform_image_data
 from .data_augmentation import data_augmentation
 
 from .preprocess_image import preprocess_brain_image
-from .brain_extraction import brain_extraction
-from .brain_tumor_segmentation import brain_tumor_segmentation
-from .lesion_segmentation import lesion_segmentation
-from .lesion_segmentation import lesion_segmentation_experimental
-from .inpainting import whole_head_inpainting
-from .cortical_thickness import cortical_thickness
-from .cortical_thickness import longitudinal_cortical_thickness
+from ..pretrained.brain_extraction import brain_extraction
+from ..pretrained.brain_tumor_segmentation import brain_tumor_segmentation
+from ..pretrained.lesion_segmentation import lesion_segmentation
+from ..pretrained.lesion_segmentation import lesion_segmentation_experimental
+from ..pretrained.inpainting import whole_head_inpainting
+from ..pretrained.cortical_thickness import cortical_thickness
+from ..pretrained.cortical_thickness import longitudinal_cortical_thickness
 
-from .histology import arterial_lesion_segmentation
+from ..pretrained.histology import arterial_lesion_segmentation
 
 # from .histology import allen_ex5_brain_extraction
 # from .histology import allen_histology_brain_mask
@@ -78,33 +76,33 @@ from .histology import arterial_lesion_segmentation
 # from .histology import allen_histology_super_resolution
 # from .histology import mouse_mri_brain_extraction
 
-from .mouse import mouse_brain_extraction
-from .mouse import mouse_histology_brain_mask
-from .mouse import mouse_histology_cerebellum_mask
-from .mouse import mouse_histology_hemispherical_coronal_mask
-from .mouse import mouse_histology_super_resolution
+from ..pretrained.mouse import mouse_brain_extraction
+from ..pretrained.mouse import mouse_histology_brain_mask
+from ..pretrained.mouse import mouse_histology_cerebellum_mask
+from ..pretrained.mouse import mouse_histology_hemispherical_coronal_mask
+from ..pretrained.mouse import mouse_histology_super_resolution
 
-from .lung_extraction import lung_extraction
-from .lung_segmentation import lung_pulmonary_artery_segmentation
+from ..pretrained.lung_extraction import lung_extraction
+from ..pretrained.lung_segmentation import lung_pulmonary_artery_segmentation
 
-from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
-from .white_matter_hyperintensity_segmentation import hypermapp3r_segmentation
-from .white_matter_hyperintensity_segmentation import wmh_segmentation
-from .claustrum_segmentation import claustrum_segmentation
-from .hypothalamus_segmentation import hypothalamus_segmentation
-from .hippmapp3r_segmentation import hippmapp3r_segmentation
-from .deep_flash import deep_flash
-from .deep_flash import deep_flash_deprecated
-from .deep_atropos import deep_atropos
-from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
-from .cerebellum_morphology import cerebellum_morphology
-from .brain_age import brain_age
-from .mri_super_resolution import mri_super_resolution
+from ..pretrained.white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
+from ..pretrained.white_matter_hyperintensity_segmentation import hypermapp3r_segmentation
+from ..pretrained.white_matter_hyperintensity_segmentation import wmh_segmentation
+from ..pretrained.claustrum_segmentation import claustrum_segmentation
+from ..pretrained.hypothalamus_segmentation import hypothalamus_segmentation
+from ..pretrained.hippmapp3r_segmentation import hippmapp3r_segmentation
+from ..pretrained.deep_flash import deep_flash
+from ..pretrained.deep_flash import deep_flash_deprecated
+from ..pretrained.deep_atropos import deep_atropos
+from ..pretrained.desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
+from ..pretrained.cerebellum_morphology import cerebellum_morphology
+from ..pretrained.brain_age import brain_age
+from ..pretrained.mri_super_resolution import mri_super_resolution
 from .quality_assessment import tid_neural_image_assessment
 from .quality_assessment import random_mask
-from .lung_segmentation import el_bicho
+from ..pretrained.lung_segmentation import el_bicho
 
-from .mri_modality_classification import mri_modality_classification
-from .chexnet import chexnet
-from .chexnet import check_xray_lung_orientation
+from ..pretrained.mri_modality_classification import mri_modality_classification
+from ..pretrained.chexnet import chexnet
+from ..pretrained.chexnet import check_xray_lung_orientation
 from .neural_style_transfer import neural_style_transfer
