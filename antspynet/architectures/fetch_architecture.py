@@ -54,8 +54,10 @@ def list_architectures():
     
     Returns
     -------
-    A list of strings where each string-item is the name of an 
-    architecture that can be created with `create_{name}_model`.
+    A list of 2-item string list where each item is the name of an 
+    architecture and an associated image dimension ('' for None, '2d', or '3d').
+    So a result of ['alexnet', '2d'] means that you can create an architecture
+    function via 'create_{alexnet}_model_{2d}'
     
     Example
     -------
