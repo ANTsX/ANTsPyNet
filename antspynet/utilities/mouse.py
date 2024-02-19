@@ -79,26 +79,32 @@ def mouse_brain_extraction(image,
             number_of_slices = image.shape[which_axis]
 
         batch_X = np.zeros((number_of_slices, *resampled_image_size, 1))
+        
+        # Spacing is based on training data
+        template = ants.from_numpy(np.zeros(resampled_image_size),
+                                   origin=(0, 0), spacing=(0.08, 0.08), direction=np.eye(2))
 
         count = 0
-        image_array = image.numpy()
+        xfrms = list()
         for j in range(number_of_slices):
             slice = None
             if image.dimension > 2:
-                if which_axis == 0:
-                    image_slice_array = np.squeeze(image_array[j,:,:])
-                elif which_axis == 1:
-                    image_slice_array = np.squeeze(image_array[:,j,:])
-                else:
-                    image_slice_array = np.squeeze(image_array[:,:,j])
-                slice = ants.from_numpy(image_slice_array)
+                slice = ants.slice_image(image, axis=which_axis, idx=j, collapse_strategy=1)                
             else:
                 slice = image
             if slice.max() > slice.min():
-                slice_resampled = ants.resample_image(slice, resampled_image_size, use_voxels=True, interp_type=0)
+                center_of_mass_reference = np.floor(ants.get_center_of_mass(template * 0 + 1))
+                center_of_mass_image = np.floor(ants.get_center_of_mass(slice))
+                translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
+                xfrm = ants.create_ants_transform(transform_type="Euler2DTransform",
+                    center=np.asarray(center_of_mass_reference), translation=translation)
+                xfrms.append(xfrm)
+                slice_resampled = ants.apply_ants_transform_to_image(xfrm, slice, template, interpolation="linear")
                 slice_array = slice_resampled.numpy()
                 slice_array = (slice_array - slice_array.min()) / (slice_array.max() - slice_array.min())
                 batch_X[count,:,:,0] = slice_array
+            else:
+                xfrms.append(None)    
             count = count + 1
 
         if verbose:
@@ -111,8 +117,14 @@ def mouse_brain_extraction(image,
 
         foreground_probability_array = np.zeros(image.shape)
         for j in range(number_of_slices):
-            slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:]))
-            slice = ants.resample_image(slice_resampled, original_slice_shape, use_voxels=True, interp_type=0)
+            if xfrms[j] is None:
+                continue
+            reference_slice = ants.slice_image(image, axis=which_axis, idx=j, collapse_strategy=1) 
+            slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:]),
+                                              origin=template.origin, spacing=template.spacing,
+                                              direction=template.direction)
+            xfrm_inv = ants.invert_ants_transform(xfrms[j])
+            slice = ants.apply_ants_transform_to_image(xfrm_inv, slice_resampled, reference_slice, interpolation="linear")                         
             if image.dimension == 2:
                 foreground_probability_array[:,:] = slice.numpy()
             else:
