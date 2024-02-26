@@ -392,13 +392,10 @@ def mouse_brain_parcellation(image,
             print("Preprocessing:  Warping to DevCCF P56 T2w mouse template.")
 
         reg = ants.registration(template, image_brain, type_of_transform="antsRegistrationSyNQuick[a]", verbose=int(verbose))
-         
+
         image_warped = ants.rank_intensity(reg['warpedmovout'])
         image_warped = ants.histogram_match_image(image_warped, template_ri)
         image_warped = (image_warped - image_warped.min()) / (image_warped.max() - image_warped.min())
-
-        ants.image_write(template, "~/Desktop/template.nii.gz")
-        ants.image_write(image_warped, "~/Desktop/image_warped.nii.gz")
 
         number_of_filters = (16, 32, 64, 128, 256)
         number_of_classification_labels = number_of_nonzero_labels + 1
