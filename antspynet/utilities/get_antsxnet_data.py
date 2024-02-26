@@ -64,7 +64,11 @@ def get_antsxnet_data(file_id=None,
             "magetTemplateBrainMask": "https://figshare.com/ndownloader/files/41052569",
             "magetCerebellumTemplate": "https://figshare.com/ndownloader/files/41052581",
             "magetCerebellumTemplatePriors": "https://figshare.com/ndownloader/files/41052578",
-            "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575"
+            "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575",
+            "bsplineT2MouseTemplate": "",
+            "bsplineT2MouseTemplateBrainMask": "",
+            "DevCCF_P56_MRI-T2_50um": "",
+            "DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask": ""
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -101,6 +105,10 @@ def get_antsxnet_data(file_id=None,
                   "magetCerebellumTemplate",
                   "magetCerebellumTemplatePriors",
                   "magetCerebellumxTemplate0GenericAffine",
+                  "bsplineT2MouseTemplate",
+                  "bsplineT2MouseTemplateBrainMask",
+                  "DevCCF_P56_MRI-T2_50um",
+                  "DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask",
                   "show")
 
     if not file_id in valid_list:

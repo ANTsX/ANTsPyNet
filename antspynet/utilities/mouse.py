@@ -3,8 +3,7 @@ import ants
 import warnings
 
 def mouse_brain_extraction(image,
-                           modality="t2",
-                           view="coronal",
+                           modality="t2coronal",
                            which_axis=2,
                            antsxnet_cache_directory=None,
                            verbose=False):
@@ -17,13 +16,12 @@ def mouse_brain_extraction(image,
     image : ANTsImage
         input image
 
-    modality : "t2" or "ex5".  The latter is E13.5 and E15.5 mouse embroyonic histology data.    
-
-    view : string
-        Two trained networks are available:  "coronal" or "sagittal" (sagittal currently not available).
+    modality : "t2coronal", "t2", "ex5coronal", "ex5sagittal".  The latter is E13.5 
+    and E15.5 mouse embroyonic histology data.
 
     which_axis : integer
-        If 3-D image, which_axis specifies the direction of the "view".
+        For 2-D networks, if input is a 3-D image, which_axis specifies the direction of 
+        the 2-D "modality".
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -43,20 +41,70 @@ def mouse_brain_extraction(image,
     """
 
     from ..architectures import create_unet_model_2d
+    from ..architectures import create_unet_model_3d    
     from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
 
     if which_axis < 0 or which_axis > 2:
         raise ValueError("Chosen axis not supported.")
 
-    if modality == "t2":
-        weights_file_name = ""
-        if view.lower() == "coronal":
-            weights_file_name = get_pretrained_network("mouseMriBrainExtraction",
-                antsxnet_cache_directory=antsxnet_cache_directory)
-        elif view.lower() == "sagittal":
-            raise ValueError("Sagittal view currently not available.")
-        else:
-            raise ValueError("Valid view options are coronal and sagittal.")
+    if modality == "t2": 
+
+        template_shape = (176, 176, 176) 
+
+        template = ants.image_read(get_antsxnet_data("bsplineT2MouseTemplate"))
+        template = ants.resample_image(template, template_shape, use_voxels=True, interp_type=0)
+        template_mask = ants.image_read(get_antsxnet_data("bsplineT2MouseTemplateBrainMask"))
+        template_mask = ants.resample_image(template_mask, (176, 176, 176), use_voxels=True, interp_type=1)
+        
+        new_template_spacing = tuple(1.0 / (min(template.spacing)) * np.array(template.spacing))
+        ants.set_spacing(template, new_template_spacing)
+        ants.set_spacing(template_mask, new_template_spacing)
+
+        new_image_spacing = tuple(1.0 / (min(image.spacing)) * np.array(image.spacing))
+        image_respaced = ants.image_clone(image)
+        ants.set_spacing(image_respaced, new_image_spacing)
+
+        if verbose:
+            print("Preprocessing:  Warping to B-spline T2w mouse template.")
+
+        center_of_mass_reference = ants.get_center_of_mass(template_mask)
+        center_of_mass_image = ants.get_center_of_mass(image_respaced)
+        translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
+        xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
+            center=np.asarray(center_of_mass_reference), translation=translation)
+        xfrm_inv = ants.invert_ants_transform(xfrm)
+        
+        image_warped = ants.apply_ants_transform_to_image(xfrm, image_respaced, template_mask, interpolation="linear")
+        image_warped = (image_warped - image_warped.min()) / (image_warped.max() - image_warped.min())
+        
+        unet_model = create_unet_model_3d((*template_shape, 1),
+                                           number_of_outputs=1, mode="sigmoid", 
+                                           number_of_filters=(16, 32, 64, 128),
+                                           convolution_kernel_size=(3, 3, 3), 
+                                           deconvolution_kernel_size=(2, 2, 2))
+        weights_file_name = get_pretrained_network("mouseT2wBrainExtraction3D")
+        unet_model.load_weights(weights_file_name)
+        
+        batchX = np.zeros((1, *template_shape, 1))
+        batchX[0,:,:,:,0] = image_warped.numpy()
+
+        if verbose:
+            print("Prediction.")
+        batchY = unet_model.predict(batchX, verbose=verbose)
+        
+        probability_mask = ants.from_numpy(np.squeeze(batchY), origin=image_warped.origin,
+                                           spacing=image_warped.spacing, direction=image_warped.direction)
+        probability_mask =  ants.apply_ants_transform_to_image(xfrm_inv, probability_mask, 
+                                                               image_respaced, interpolation="linear")
+        ants.set_spacing(probability_mask, image.spacing)
+
+        return probability_mask
+
+    elif modality == "t2coronal":
+        
+        weights_file_name = get_pretrained_network("mouseMriBrainExtraction",
+            antsxnet_cache_directory=antsxnet_cache_directory)
 
         resampled_image_size = (256, 256)
         original_slice_shape = image.shape
@@ -65,7 +113,7 @@ def mouse_brain_extraction(image,
 
         unet_model = create_unet_model_2d((*resampled_image_size, 1),
             number_of_outputs=1, mode="sigmoid",
-            number_of_filters=(32, 64, 128, 256),
+            number_of_filters=(32, 64, 128, 256, 512),
             convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
             dropout_rate=0.0, weight_decay=0,
             additional_options=("initialConvolutionKernelSize[5]", "attentionGating"))
@@ -93,8 +141,8 @@ def mouse_brain_extraction(image,
             else:
                 slice = image
             if slice.max() > slice.min():
-                center_of_mass_reference = np.floor(ants.get_center_of_mass(template * 0 + 1))
-                center_of_mass_image = np.floor(ants.get_center_of_mass(slice))
+                center_of_mass_reference = ants.get_center_of_mass(template * 0 + 1)
+                center_of_mass_image = ants.get_center_of_mass(slice)
                 translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
                 xfrm = ants.create_ants_transform(transform_type="Euler2DTransform",
                     center=np.asarray(center_of_mass_reference), translation=translation)
@@ -144,17 +192,17 @@ def mouse_brain_extraction(image,
 
         return(foreground_probability_image)
     
-    elif modality == "ex5":
+    elif "ex5" in modality:
 
         weights_file_name = ""
-        if view.lower() == "coronal":
+        if "coronal" in modality.lower():
             weights_file_name = get_pretrained_network("ex5_coronal_weights",
                 antsxnet_cache_directory=antsxnet_cache_directory)
-        elif view.lower() == "sagittal":
+        elif "sagittal" in modality.lower():
             weights_file_name = get_pretrained_network("ex5_sagittal_weights",
                 antsxnet_cache_directory=antsxnet_cache_directory)
         else:
-            raise ValueError("Valid view options are coronal and sagittal.")
+            raise ValueError("Valid axis view  options are coronal and sagittal.")
 
         resampled_image_size = (512, 512)
         original_slice_shape = image.shape
@@ -244,6 +292,217 @@ def mouse_brain_extraction(image,
             origin=origin, spacing=spacing, direction=direction)
 
         return(foreground_probability_image)
+    
+    else:  
+        raise ValueError("Unrecognized type")
+
+def mouse_brain_parcellation(image,
+                             which_parcellation="nick",
+                             do_preprocessing=True,
+                             antsxnet_cache_directory=None,
+                             verbose=False):
+    
+    """
+    Determine brain parcellation
+
+    Arguments
+    ---------
+    image : ANTsImage
+        input image based on "which" parcellation chosen.
+
+    which_parcellation : string
+        Brain parcellation type:
+            * "nick" - t2w with labels:
+                - 1: cerebral cortex
+                - 2: cerebral nuclei
+                - 3: brain stem
+                - 4: cerebellum
+                - 5: main olfactory bulb
+                - 6: hippocampal formation
+                
+    do_processing : boolean
+        Perform bias correction and brain extraction            
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    Segmentation image and corresponding probability images.
+
+    Example
+    -------
+    >>> output = mouse_brain_parcellation(image, type="nick")
+    """
+      
+    from ..architectures import create_unet_model_3d    
+    from ..utilities import get_pretrained_network
+    from ..utilities import get_antsxnet_data
+    from ..utilities import pad_or_crop_image_to_size
+
+    if which_parcellation == "nick": 
+
+        template_spacing = (75, 75, 75)
+        template_crop_size = (176, 128, 240)
+        
+        template = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um"))
+        template = ants.resample_image(template, template_spacing, use_voxels=False, interp_type=4)
+        template = pad_or_crop_image_to_size(template, template_crop_size)
+        template_ri = ants.rank_intensity(template)
+
+        template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask"))
+        template_mask = ants.resample_image(template_mask, template_spacing, use_voxels=False, interp_type=1)
+        template_mask = pad_or_crop_image_to_size(template_mask, template_crop_size)
+
+        ants.set_spacing(template, (1, 1, 1))
+        ants.set_spacing(template_mask, (1, 1, 1))
+        
+        new_image_spacing = tuple(1.0 / (min(image.spacing)) * np.array(image.spacing))
+        image_respaced = ants.image_clone(image)
+        ants.set_spacing(image_respaced, new_image_spacing)
+
+        number_of_nonzero_labels = len(np.unique(template_mask.numpy())) - 1
+
+        template_priors = list()
+        for i in range(number_of_nonzero_labels):
+            single_label = ants.threshold_image(template_mask, i+1, i+1)
+            prior = ants.smooth_image(single_label, sigma=3, sigma_in_physical_coordinates=True)
+            template_priors.append(prior)
+
+        image_brain = ants.image_clone(image_respaced)
+        if do_preprocessing:
+            if verbose:
+                print("Preprocessing:  Bias field correction and brain extraction.")
+
+            image_n4 = ants.n4_bias_field_correction(image_respaced, rescale_intensities=True,
+                                                     shrink_factor=2, 
+                                                     convergence={'iters': [50, 50, 50, 50], 'tol': 0.0}, 
+                                                     spline_param=None, verbose=verbose)
+            brain_mask = mouse_brain_extraction(image_n4, modality="t2", 
+                                                antsxnet_cache_directory=antsxnet_cache_directory, 
+                                                verbose=verbose)
+            image_brain = image_n4 * brain_mask
+
+        if verbose:
+            print("Preprocessing:  Warping to DevCCF P56 T2w mouse template.")
+
+        reg = ants.registration(template, image_brain, type_of_transform="antsRegistrationSyNQuick[a]", verbose=int(verbose))
+         
+        image_warped = ants.rank_intensity(reg['warpedmovout'])
+        image_warped = ants.histogram_match_image(image_warped, template_ri)
+        image_warped = (image_warped - image_warped.min()) / (image_warped.max() - image_warped.min())
+
+        ants.image_write(template, "~/Desktop/template.nii.gz")
+        ants.image_write(image_warped, "~/Desktop/image_warped.nii.gz")
+
+        number_of_filters = (16, 32, 64, 128, 256)
+        number_of_classification_labels = number_of_nonzero_labels + 1
+        channel_size = 1 + number_of_nonzero_labels
+         
+        unet_model = create_unet_model_3d((*template.shape, channel_size),
+                        number_of_outputs=number_of_classification_labels, 
+                        mode="classification", 
+                        number_of_filters=number_of_filters,
+                        convolution_kernel_size=(3, 3, 3), 
+                        deconvolution_kernel_size=(2, 2, 2))
+        weights_file_name = get_pretrained_network("mouseT2wBrainParcellation3DNick")
+        unet_model.load_weights(weights_file_name)
+        
+        batchX = np.zeros((1, *template.shape, channel_size))
+        batchX[0,:,:,:,0] = image_warped.numpy()
+        for i in range(len(template_priors)):
+            batchX[0,:,:,:,i+1] = template_priors[i].numpy()
+            
+        if verbose:
+            print("Prediction.")
+        batchY = unet_model.predict(batchX, verbose=verbose)
+        
+        probability_images = list()
+        for i in range(number_of_classification_labels):
+            if verbose:
+                print("Reconstructing image ", str(i))
+            probability_image = ants.from_numpy(np.squeeze(batchY[0,:,:,:,i]), origin=template.origin,
+                                                spacing=template.spacing, direction=template.direction)    
+            probability_images.append(ants.apply_transforms(fixed=image_brain,
+                moving=probability_image, transformlist=reg['invtransforms'],
+                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+            ants.set_spacing(probability_images[i], image.spacing)
+
+        image_matrix = ants.image_list_to_matrix(probability_images, image * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
+
+        return_dict = {'segmentation_image' : segmentation_image,
+                       'probability_images' : probability_images}
+        return(return_dict)
+    
+    else:  
+        raise ValueError("Unrecognized parcellation.")
+
+
+def mouse_cortical_thickness(t2,
+                       antsxnet_cache_directory=None,
+                       verbose=False):
+
+    """
+    Perform KellyKapowski cortical thickness using mouse_brain_parcellation 
+    for segmentation.  Description concerning implementaiton and evaluation:
+
+    https://www.medrxiv.org/content/10.1101/2020.10.19.20215392v1
+
+    Arguments
+    ---------
+    t2 : ANTsImage
+        input 3-D unprocessed T2-weighted whole mouse brain image.
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    Cortical thickness image and segmentation probability images.
+
+    Example
+    -------
+    >>> image = ants.image_read("t2w_image.nii.gz")
+    >>> kk = mouse_cortical_thickness(image)
+    """
+
+    if t2.dimension != 3:
+        raise ValueError("Image dimension must be 3.")
+
+    parcellation = mouse_brain_parcellation(t2, do_preprocessing=True,
+        which_parcellation="nick",                                           
+        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+
+    # Kelly Kapowski cortical thickness
+
+    kk_segmentation = ants.image_clone(parcellation['segmentation_image'])
+    kk_segmentation[kk_segmentation == 2] = 3
+    kk_segmentation[kk_segmentation == 1] = 2
+    kk_segmentation[kk_segmentation == 6] = 2
+    cortical_matter = parcellation['probability_images'][1] + parcellation['probability_images'][6]
+    other_matter = parcellation['probability_images'][2] + parcellation['probability_images'][3]
+
+    kk = ants.kelly_kapowski(s=kk_segmentation, g=cortical_matter, w=other_matter,
+                            its=45, r=0.025, m=1.5, x=0, verbose=int(verbose))
+
+    return_dict = {'thickness_image' : kk,
+                   'parcellation' : parcellation
+                  }
+    return(return_dict)
+
 
 def mouse_histology_brain_mask(image,
                                which_axis=2,
