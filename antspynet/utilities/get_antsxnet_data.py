@@ -66,7 +66,7 @@ def get_antsxnet_data(file_id=None,
             "magetCerebellumTemplatePriors": "https://figshare.com/ndownloader/files/41052578",
             "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575",
             "bsplineT2MouseTemplate": "https://figshare.com/ndownloader/files/44706247",
-            "bsplineT2MouseTemplateBrainMask": "https://figshare.com/ndownloader/files/44867020",
+            "bsplineT2MouseTemplateBrainMask": "https://figshare.com/ndownloader/files/44869285",
             "DevCCF_P56_MRI-T2_50um": "https://figshare.com/ndownloader/files/44706244",
             "DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask": "https://figshare.com/ndownloader/files/44706238"
         }
