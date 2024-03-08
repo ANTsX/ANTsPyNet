@@ -55,27 +55,19 @@ def mouse_brain_extraction(image,
         template = ants.image_read(get_antsxnet_data("bsplineT2MouseTemplate"))
         template = ants.resample_image(template, template_shape, use_voxels=True, interp_type=0)
         template_mask = ants.image_read(get_antsxnet_data("bsplineT2MouseTemplateBrainMask"))
-        template_mask = ants.resample_image(template_mask, (176, 176, 176), use_voxels=True, interp_type=1)
-        
-        new_template_spacing = tuple(1.0 / (min(template.spacing)) * np.array(template.spacing))
-        ants.set_spacing(template, new_template_spacing)
-        ants.set_spacing(template_mask, new_template_spacing)
-
-        new_image_spacing = tuple(1.0 / (min(image.spacing)) * np.array(image.spacing))
-        image_respaced = ants.image_clone(image)
-        ants.set_spacing(image_respaced, new_image_spacing)
-
+        template_mask = ants.resample_image(template_mask, template_shape, use_voxels=True, interp_type=1)
+    
         if verbose:
             print("Preprocessing:  Warping to B-spline T2w mouse template.")
 
         center_of_mass_reference = ants.get_center_of_mass(template_mask)
-        center_of_mass_image = ants.get_center_of_mass(image_respaced)
+        center_of_mass_image = ants.get_center_of_mass(image)
         translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
         xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
             center=np.asarray(center_of_mass_reference), translation=translation)
         xfrm_inv = ants.invert_ants_transform(xfrm)
         
-        image_warped = ants.apply_ants_transform_to_image(xfrm, image_respaced, template_mask, interpolation="linear")
+        image_warped = ants.apply_ants_transform_to_image(xfrm, image, template_mask, interpolation="linear")
         image_warped = (image_warped - image_warped.min()) / (image_warped.max() - image_warped.min())
         
         unet_model = create_unet_model_3d((*template_shape, 1),
@@ -91,13 +83,12 @@ def mouse_brain_extraction(image,
 
         if verbose:
             print("Prediction.")
-        batchY = unet_model.predict(batchX, verbose=verbose)
+        batchY = np.squeeze(unet_model.predict(batchX, verbose=verbose))
         
-        probability_mask = ants.from_numpy(np.squeeze(batchY), origin=image_warped.origin,
+        probability_mask = ants.from_numpy(batchY, origin=image_warped.origin,
                                            spacing=image_warped.spacing, direction=image_warped.direction)
         probability_mask =  ants.apply_ants_transform_to_image(xfrm_inv, probability_mask, 
-                                                               image_respaced, interpolation="linear")
-        ants.set_spacing(probability_mask, image.spacing)
+                                                               image, interpolation="linear")
 
         return probability_mask
 
@@ -297,8 +288,8 @@ def mouse_brain_extraction(image,
         raise ValueError("Unrecognized type")
 
 def mouse_brain_parcellation(image,
+                             mask=None,
                              which_parcellation="nick",
-                             do_preprocessing=True,
                              antsxnet_cache_directory=None,
                              verbose=False):
     
@@ -310,6 +301,10 @@ def mouse_brain_parcellation(image,
     image : ANTsImage
         input image based on "which" parcellation chosen.
 
+    mask : ANTsImage
+        Brain mask.  If not specified, one is estimated using ANTsXNet mouse brain 
+        extraction.
+
     which_parcellation : string
         Brain parcellation type:
             * "nick" - t2w with labels:
@@ -320,9 +315,6 @@ def mouse_brain_parcellation(image,
                 - 5: main olfactory bulb
                 - 6: hippocampal formation
                 
-    do_processing : boolean
-        Perform bias correction and brain extraction            
-
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be reused, if is None, these data will be downloaded to a
@@ -347,46 +339,40 @@ def mouse_brain_parcellation(image,
 
     if which_parcellation == "nick": 
 
-        template_spacing = (75, 75, 75)
+        template_spacing = (0.075, 0.075, 0.075)
         template_crop_size = (176, 128, 240)
         
         template = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um"))
+        ants.set_spacing(template, (0.05, 0.05, 0.05))
         template = ants.resample_image(template, template_spacing, use_voxels=False, interp_type=4)
         template = pad_or_crop_image_to_size(template, template_crop_size)
         template_ri = ants.rank_intensity(template)
 
         template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask"))
+        ants.set_spacing(template_mask, (0.05, 0.05, 0.05))
         template_mask = ants.resample_image(template_mask, template_spacing, use_voxels=False, interp_type=1)
         template_mask = pad_or_crop_image_to_size(template_mask, template_crop_size)
-
-        ants.set_spacing(template, (1, 1, 1))
-        ants.set_spacing(template_mask, (1, 1, 1))
-        
-        new_image_spacing = tuple(1.0 / (min(image.spacing)) * np.array(image.spacing))
-        image_respaced = ants.image_clone(image)
-        ants.set_spacing(image_respaced, new_image_spacing)
 
         number_of_nonzero_labels = len(np.unique(template_mask.numpy())) - 1
 
         template_priors = list()
         for i in range(number_of_nonzero_labels):
             single_label = ants.threshold_image(template_mask, i+1, i+1)
-            prior = ants.smooth_image(single_label, sigma=3, sigma_in_physical_coordinates=True)
+            prior = ants.smooth_image(single_label, sigma=0.003, sigma_in_physical_coordinates=True)
             template_priors.append(prior)
 
-        image_brain = ants.image_clone(image_respaced)
-        if do_preprocessing:
+        if mask is None:
             if verbose:
                 print("Preprocessing:  Bias field correction and brain extraction.")
 
-            image_n4 = ants.n4_bias_field_correction(image_respaced, rescale_intensities=True,
-                                                     shrink_factor=2, 
-                                                     convergence={'iters': [50, 50, 50, 50], 'tol': 0.0}, 
-                                                     spline_param=None, verbose=verbose)
-            brain_mask = mouse_brain_extraction(image_n4, modality="t2", 
-                                                antsxnet_cache_directory=antsxnet_cache_directory, 
-                                                verbose=verbose)
-            image_brain = image_n4 * brain_mask
+            mask = mouse_brain_extraction(image, modality="t2", 
+                                          antsxnet_cache_directory=antsxnet_cache_directory, 
+                                          verbose=verbose)   
+            mask = ants.threshold_image(mask, 0.5, 1.1, 1, 0)
+            mask = ants.label_clusters(mask, fully_connected=True)
+            mask = ants.threshold_image(mask, 0, 0, 0, 1)
+            
+        image_brain = image * mask    
 
         if verbose:
             print("Preprocessing:  Warping to DevCCF P56 T2w mouse template.")
@@ -428,7 +414,6 @@ def mouse_brain_parcellation(image,
             probability_images.append(ants.apply_transforms(fixed=image_brain,
                 moving=probability_image, transformlist=reg['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
-            ants.set_spacing(probability_images[i], image.spacing)
 
         image_matrix = ants.image_list_to_matrix(probability_images, image * 0 + 1)
         segmentation_matrix = np.argmax(image_matrix, axis=0)
@@ -444,8 +429,9 @@ def mouse_brain_parcellation(image,
 
 
 def mouse_cortical_thickness(t2,
-                       antsxnet_cache_directory=None,
-                       verbose=False):
+                             mask=None,
+                             antsxnet_cache_directory=None,
+                             verbose=False):
 
     """
     Perform KellyKapowski cortical thickness using mouse_brain_parcellation 
@@ -457,6 +443,10 @@ def mouse_cortical_thickness(t2,
     ---------
     t2 : ANTsImage
         input 3-D unprocessed T2-weighted whole mouse brain image.
+
+    mask : ANTsImage
+        Brain mask.  If not specified, one is estimated using ANTsXNet mouse brain 
+        extraction.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -479,9 +469,10 @@ def mouse_cortical_thickness(t2,
     if t2.dimension != 3:
         raise ValueError("Image dimension must be 3.")
 
-    parcellation = mouse_brain_parcellation(t2, do_preprocessing=True,
-        which_parcellation="nick",                                           
-        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+    parcellation = mouse_brain_parcellation(t2, mask=mask,
+                                            which_parcellation="nick",                                           
+                                            antsxnet_cache_directory=antsxnet_cache_directory, 
+                                            verbose=verbose)
 
     # Kelly Kapowski cortical thickness
 
