@@ -3,7 +3,8 @@ import ants
 import warnings
 
 def mouse_brain_extraction(image,
-                           modality="t2coronal",
+                           modality="t2",
+                           return_isotropic_output=False,
                            which_axis=2,
                            antsxnet_cache_directory=None,
                            verbose=False):
@@ -16,12 +17,17 @@ def mouse_brain_extraction(image,
     image : ANTsImage
         input image
 
-    modality : "t2coronal", "t2", "ex5coronal", "ex5sagittal".  The latter is E13.5 
-    and E15.5 mouse embroyonic histology data.
+    modality : string
+        "t2", "ex5coronal", "ex5sagittal".  The latter are E13.5 and E15.5 mouse 
+        embroyonic histology data.
+        
+    return_isotropic_output : boolean
+        The network actually learns an interpolating function specific to the 
+        mouse brain.  Setting this to true, the output images are returned 
+        isotropically resampled.
 
     which_axis : integer
-        For 2-D networks, if input is a 3-D image, which_axis specifies the direction of 
-        the 2-D "modality".
+        Specify direction for ex5 modalities.
 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -87,101 +93,106 @@ def mouse_brain_extraction(image,
         
         probability_mask = ants.from_numpy(batchY, origin=image_warped.origin,
                                            spacing=image_warped.spacing, direction=image_warped.direction)
+        reference_image = image
+        if return_isotropic_output:
+            new_spacing = [np.array(image.spacing).min()] * len(image.spacing)
+            reference_image = ants.resample_image(image, new_spacing, use_voxels=False, interp_type=0)
+
         probability_mask =  ants.apply_ants_transform_to_image(xfrm_inv, probability_mask, 
-                                                               image, interpolation="linear")
+                                                               reference_image, interpolation="linear")
 
         return probability_mask
 
-    elif modality == "t2coronal":
+    # elif modality == "t2coronal":
         
-        weights_file_name = get_pretrained_network("mouseMriBrainExtraction",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+    #     weights_file_name = get_pretrained_network("mouseMriBrainExtraction",
+    #         antsxnet_cache_directory=antsxnet_cache_directory)
 
-        resampled_image_size = (256, 256)
-        original_slice_shape = image.shape
-        if image.dimension > 2:
-            original_slice_shape = tuple(np.delete(np.array(image.shape), which_axis))
+    #     resampled_image_size = (256, 256)
+    #     original_slice_shape = image.shape
+    #     if image.dimension > 2:
+    #         original_slice_shape = tuple(np.delete(np.array(image.shape), which_axis))
 
-        unet_model = create_unet_model_2d((*resampled_image_size, 1),
-            number_of_outputs=1, mode="sigmoid",
-            number_of_filters=(32, 64, 128, 256, 512),
-            convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
-            dropout_rate=0.0, weight_decay=0,
-            additional_options=("initialConvolutionKernelSize[5]", "attentionGating"))
-        unet_model.load_weights(weights_file_name)
+    #     unet_model = create_unet_model_2d((*resampled_image_size, 1),
+    #         number_of_outputs=1, mode="sigmoid",
+    #         number_of_filters=(32, 64, 128, 256, 512),
+    #         convolution_kernel_size=(3, 3), deconvolution_kernel_size=(2, 2),
+    #         dropout_rate=0.0, weight_decay=0,
+    #         additional_options=("initialConvolutionKernelSize[5]", "attentionGating"))
+    #     unet_model.load_weights(weights_file_name)
 
-        if verbose:
-            print("Preprocessing:  Resampling.")
+    #     if verbose:
+    #         print("Preprocessing:  Resampling.")
 
-        number_of_slices = 1
-        if image.dimension > 2:
-            number_of_slices = image.shape[which_axis]
+    #     number_of_slices = 1
+    #     if image.dimension > 2:
+    #         number_of_slices = image.shape[which_axis]
 
-        batch_X = np.zeros((number_of_slices, *resampled_image_size, 1))
+    #     batch_X = np.zeros((number_of_slices, *resampled_image_size, 1))
         
-        # Spacing is based on training data
-        template = ants.from_numpy(np.zeros(resampled_image_size),
-                                   origin=(0, 0), spacing=(0.08, 0.08), direction=np.eye(2))
+    #     # Spacing is based on training data
+    #     template = ants.from_numpy(np.zeros(resampled_image_size),
+    #                                origin=(0, 0), spacing=(0.08, 0.08), direction=np.eye(2))
 
-        count = 0
-        xfrms = list()
-        for j in range(number_of_slices):
-            slice = None
-            if image.dimension > 2:
-                slice = ants.slice_image(image, axis=which_axis, idx=j, collapse_strategy=1)                
-            else:
-                slice = image
-            if slice.max() > slice.min():
-                center_of_mass_reference = ants.get_center_of_mass(template * 0 + 1)
-                center_of_mass_image = ants.get_center_of_mass(slice)
-                translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
-                xfrm = ants.create_ants_transform(transform_type="Euler2DTransform",
-                    center=np.asarray(center_of_mass_reference), translation=translation)
-                xfrms.append(xfrm)
-                slice_resampled = ants.apply_ants_transform_to_image(xfrm, slice, template, interpolation="linear")
-                slice_array = slice_resampled.numpy()
-                slice_array = (slice_array - slice_array.min()) / (slice_array.max() - slice_array.min())
-                batch_X[count,:,:,0] = slice_array
-            else:
-                xfrms.append(None)    
-            count = count + 1
+    #     count = 0
+    #     xfrms = list()
+    #     for j in range(number_of_slices):
+    #         slice = None
+    #         if image.dimension > 2:
+    #             slice = ants.slice_image(image, axis=which_axis, idx=j, collapse_strategy=1)                
+    #         else:
+    #             slice = image
+    #         if slice.max() > slice.min():
+    #             center_of_mass_reference = ants.get_center_of_mass(template * 0 + 1)
+    #             center_of_mass_image = ants.get_center_of_mass(slice)
+    #             translation = np.asarray(center_of_mass_image) - np.asarray(center_of_mass_reference)
+    #             xfrm = ants.create_ants_transform(transform_type="Euler2DTransform",
+    #                 center=np.asarray(center_of_mass_reference), translation=translation)
+    #             xfrms.append(xfrm)
+    #             slice_resampled = ants.apply_ants_transform_to_image(xfrm, slice, template, interpolation="linear")
+    #             slice_array = slice_resampled.numpy()
+    #             slice_array = (slice_array - slice_array.min()) / (slice_array.max() - slice_array.min())
+    #             batch_X[count,:,:,0] = slice_array
+    #         else:
+    #             xfrms.append(None)    
+    #         count = count + 1
 
-        if verbose:
-            print("Prediction: ")
+    #     if verbose:
+    #         print("Prediction: ")
 
-        predicted_data = unet_model.predict(batch_X, verbose=int(verbose))
+    #     predicted_data = unet_model.predict(batch_X, verbose=int(verbose))
 
-        if verbose:
-            print("Post-processing:  resampling to original space.")
+    #     if verbose:
+    #         print("Post-processing:  resampling to original space.")
 
-        foreground_probability_array = np.zeros(image.shape)
-        for j in range(number_of_slices):
-            if xfrms[j] is None:
-                continue
-            reference_slice = ants.slice_image(image, axis=which_axis, idx=j, collapse_strategy=1) 
-            slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:]),
-                                              origin=template.origin, spacing=template.spacing,
-                                              direction=template.direction)
-            xfrm_inv = ants.invert_ants_transform(xfrms[j])
-            slice = ants.apply_ants_transform_to_image(xfrm_inv, slice_resampled, reference_slice, interpolation="linear")                         
-            if image.dimension == 2:
-                foreground_probability_array[:,:] = slice.numpy()
-            else:
-                if which_axis == 0:
-                    foreground_probability_array[j,:,:] = slice.numpy()
-                elif which_axis == 1:
-                    foreground_probability_array[:,j,:] = slice.numpy()
-                else:
-                    foreground_probability_array[:,:,j] = slice.numpy()
+    #     foreground_probability_array = np.zeros(image.shape)
+    #     for j in range(number_of_slices):
+    #         if xfrms[j] is None:
+    #             continue
+    #         reference_slice = ants.slice_image(image, axis=which_axis, idx=j, collapse_strategy=1) 
+    #         slice_resampled = ants.from_numpy(np.squeeze(predicted_data[j,:,:]),
+    #                                           origin=template.origin, spacing=template.spacing,
+    #                                           direction=template.direction)
+    #         xfrm_inv = ants.invert_ants_transform(xfrms[j])
+    #         slice = ants.apply_ants_transform_to_image(xfrm_inv, slice_resampled, reference_slice, interpolation="linear")                         
+    #         if image.dimension == 2:
+    #             foreground_probability_array[:,:] = slice.numpy()
+    #         else:
+    #             if which_axis == 0:
+    #                 foreground_probability_array[j,:,:] = slice.numpy()
+    #             elif which_axis == 1:
+    #                 foreground_probability_array[:,j,:] = slice.numpy()
+    #             else:
+    #                 foreground_probability_array[:,:,j] = slice.numpy()
 
-        origin = image.origin
-        spacing = image.spacing
-        direction = image.direction
+    #     origin = image.origin
+    #     spacing = image.spacing
+    #     direction = image.direction
 
-        foreground_probability_image = ants.from_numpy(foreground_probability_array,
-            origin=origin, spacing=spacing, direction=direction)
+    #     foreground_probability_image = ants.from_numpy(foreground_probability_array,
+    #         origin=origin, spacing=spacing, direction=direction)
 
-        return(foreground_probability_image)
+    #     return(foreground_probability_image)
     
     elif "ex5" in modality:
 
@@ -289,6 +300,7 @@ def mouse_brain_extraction(image,
 
 def mouse_brain_parcellation(image,
                              mask=None,
+                             return_isotropic_output=False,
                              which_parcellation="nick",
                              antsxnet_cache_directory=None,
                              verbose=False):
@@ -304,6 +316,11 @@ def mouse_brain_parcellation(image,
     mask : ANTsImage
         Brain mask.  If not specified, one is estimated using ANTsXNet mouse brain 
         extraction.
+
+    return_isotropic_output : boolean
+        The network actually learns an interpolating function specific to the 
+        mouse brain.  Setting this to true, the output images are returned 
+        isotropically resampled.
 
     which_parcellation : string
         Brain parcellation type:
@@ -404,21 +421,26 @@ def mouse_brain_parcellation(image,
         if verbose:
             print("Prediction.")
         batchY = unet_model.predict(batchX, verbose=verbose)
-        
+
+        reference_image = image
+        if return_isotropic_output:
+            new_spacing = [np.array(image.spacing).min()] * len(image.spacing)
+            reference_image = ants.resample_image(image, new_spacing, use_voxels=False, interp_type=0)
+
         probability_images = list()
         for i in range(number_of_classification_labels):
             if verbose:
                 print("Reconstructing image ", str(i))
             probability_image = ants.from_numpy(np.squeeze(batchY[0,:,:,:,i]), origin=template.origin,
                                                 spacing=template.spacing, direction=template.direction)    
-            probability_images.append(ants.apply_transforms(fixed=image_brain,
+            probability_images.append(ants.apply_transforms(fixed=reference_image,
                 moving=probability_image, transformlist=reg['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
 
-        image_matrix = ants.image_list_to_matrix(probability_images, image * 0 + 1)
+        image_matrix = ants.image_list_to_matrix(probability_images, reference_image * 0 + 1)
         segmentation_matrix = np.argmax(image_matrix, axis=0)
         segmentation_image = ants.matrix_to_images(
-            np.expand_dims(segmentation_matrix, axis=0), image * 0 + 1)[0]
+            np.expand_dims(segmentation_matrix, axis=0), reference_image * 0 + 1)[0]
 
         return_dict = {'segmentation_image' : segmentation_image,
                        'probability_images' : probability_images}
@@ -430,6 +452,7 @@ def mouse_brain_parcellation(image,
 
 def mouse_cortical_thickness(t2,
                              mask=None,
+                             return_isotropic_output=False,
                              antsxnet_cache_directory=None,
                              verbose=False):
 
@@ -448,6 +471,12 @@ def mouse_cortical_thickness(t2,
         Brain mask.  If not specified, one is estimated using ANTsXNet mouse brain 
         extraction.
 
+    return_isotropic_output : boolean
+        The underling parcellation network actually learns an interpolating function 
+        specific to the mouse brain which is used for computing the cortical thickness 
+        image.  Setting this to true, the returned output images are in this isotropically 
+        resampled space.  Otherwise, they are in the sampled space of the input image.
+        
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
         Since these can be reused, if is None, these data will be downloaded to a
@@ -470,7 +499,8 @@ def mouse_cortical_thickness(t2,
         raise ValueError("Image dimension must be 3.")
 
     parcellation = mouse_brain_parcellation(t2, mask=mask,
-                                            which_parcellation="nick",                                           
+                                            which_parcellation="nick",      
+                                            return_isotropic_output=True,                                    
                                             antsxnet_cache_directory=antsxnet_cache_directory, 
                                             verbose=verbose)
 
@@ -486,6 +516,14 @@ def mouse_cortical_thickness(t2,
     kk = ants.kelly_kapowski(s=kk_segmentation, g=cortical_matter, w=other_matter,
                             its=45, r=0.0025, m=1.5, x=0, t=1.5,
                             verbose=int(verbose))
+
+    if not return_isotropic_output:
+        kk = ants.resample_image(kk, t2.spacing, use_voxels=False, interp_type=0)
+        parcellation['segmentation_image'] = ants.resample_image(parcellation['segmentation_image'], 
+                                                                 t2.spacing, use_voxels=False, interp_type=1)
+        for i in range(len(parcellation['probability_images'])):
+            parcellation['probability_images'][i] = ants.resample_image(parcellation['probability_images'][i], 
+                                                                    t2.spacing, use_voxels=False, interp_type=0)
 
     return_dict = {'thickness_image' : kk,
                    'parcellation' : parcellation
