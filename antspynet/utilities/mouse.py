@@ -514,7 +514,7 @@ def mouse_cortical_thickness(t2,
     other_matter = parcellation['probability_images'][2] + parcellation['probability_images'][3]
 
     kk = ants.kelly_kapowski(s=kk_segmentation, g=cortical_matter, w=other_matter,
-                            its=45, r=0.0025, m=1.5, x=0, t=1.5,
+                            its=45, r=0.0025, m=1.5, x=0, t=5,
                             verbose=int(verbose))
 
     if not return_isotropic_output:
