@@ -8,7 +8,8 @@ from tensorflow.keras.layers import (Input, Lambda, Concatenate, Flatten, Dense,
                                     Conv2D, Conv2DTranspose, MaxPooling2D,
                                     ZeroPadding2D,
                                     Conv3D, Conv3DTranspose, MaxPooling3D,
-                                    ZeroPadding3D)
+                                    ZeroPadding3D,
+                                    Dropout)
 
 def create_alexnet_model_2d(input_image_size,
                             number_of_classification_labels=1000,
@@ -195,7 +196,7 @@ def create_alexnet_model_2d(input_image_size,
     if mode == 'classification':
         layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('unrecognized mode.')
 
@@ -394,7 +395,7 @@ def create_alexnet_model_3d(input_image_size,
     if mode == 'classification':
         layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('unrecognized mode.')
 
