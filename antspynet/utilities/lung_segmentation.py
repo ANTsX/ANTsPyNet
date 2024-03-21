@@ -215,7 +215,7 @@ def lung_pulmonary_artery_segmentation(ct,
 
     Returns
     -------
-    WMH segmentation probability image
+    Segmentation probability image
 
     Example
     -------
@@ -327,4 +327,158 @@ def lung_pulmonary_artery_segmentation(ct,
                                                        stride_length=patch_stride_length,
                                                        domain_image=lung_mask,
                                                        domain_image_is_mask=True)
+    return(probability_image)
+
+
+def lung_airway_segmentation(ct,
+                             lung_mask=None,
+                             prediction_batch_size=16,
+                             patch_stride_length=32,
+                             antsxnet_cache_directory=None,
+                             verbose=False):
+
+    """
+    Perform pulmonary airway segmentation from CT images.  Training data taken 
+    from the EXACT09 challenge.
+
+    Arguments
+    ---------
+    ct : ANTsImage
+        input ct image
+
+    lung_mask : ANTsImage
+        input binary lung mask which defines the patch extraction (label 1 = left lung,
+        label 2 = right lung, label 3 = main airway).  If not supplied, one is estimated.
+
+    prediction_batch_size : int
+        Control memory usage for prediction.  More consequential for GPU-usage.
+
+    patch_stride_length : 3-D tuple or int
+        Dictates the stride length for accumulating predicting patches.    
+
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    Segmentation probability image
+
+    Example
+    -------
+    >>> ct = ants.image_read("ct.nii.gz")
+    """
+
+    from ..architectures import create_unet_model_3d
+    from ..utilities import extract_image_patches
+    from ..utilities import reconstruct_image_from_patches
+    from ..utilities import get_pretrained_network
+    from ..utilities import lung_extraction
+
+    patch_size = (160, 160, 160)
+
+    if np.any(ct.shape < np.array(patch_size)):
+        raise ValueError("Images must be > 160 voxels per dimension.")
+
+    ################################
+    #
+    # Preprocess images
+    #
+    ################################
+
+    if lung_mask is None:
+        lung_ex = lung_extraction(ct, modality="ct", verbose=verbose)
+        lung_mask = ants.iMath_MD(lung_ex['segmentation_image'], 2, 3)
+        lung_mask = ants.threshold_image(lung_mask, 1, 3, 1, 0)
+        
+    ct_preprocessed = ants.image_clone(ct)
+    ct_preprocessed = (ct_preprocessed + 800) / (500 + 800)
+    ct_preprocessed[ct_preprocessed > 1.0] = 1.0
+    ct_preprocessed[ct_preprocessed < 0.0] = 0.0
+
+    ################################
+    #
+    # Build model and load weights
+    #
+    ################################
+
+    if verbose:
+        print("Load model and weights.")
+
+    if isinstance(patch_stride_length, int):
+        patch_stride_length = (patch_stride_length,) * 3
+
+    number_of_classification_labels = 2
+    channel_size = 1  
+
+    model = create_unet_model_3d((*patch_size, channel_size),
+                number_of_outputs=number_of_classification_labels, mode="classification", 
+                number_of_filters=(32, 64, 128, 256, 512),
+                convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+                dropout_rate=0.0, weight_decay=0)
+
+    weights_file_name = get_pretrained_network("pulmonaryAirwayWeights", antsxnet_cache_directory=antsxnet_cache_directory)
+    model.load_weights(weights_file_name)
+
+    ################################
+    #
+    # Extract patches
+    #
+    ################################
+
+    if verbose:
+        print("Extract patches.")
+    
+    ct_masked = ct_preprocessed * lung_mask
+    ct_patches = extract_image_patches(ct_masked,
+                                       patch_size=patch_size,
+                                       max_number_of_patches="all",
+                                       stride_length=patch_stride_length,
+                                       mask_image=lung_mask,
+                                       random_seed=None,
+                                       return_as_array=True)
+    total_number_of_patches = ct_patches.shape[0]
+
+    ################################
+    #
+    # Do prediction and then restack into the image
+    #
+    ################################
+
+    number_of_batches = total_number_of_patches // prediction_batch_size
+    residual_number_of_patches = total_number_of_patches - number_of_batches * prediction_batch_size
+    if residual_number_of_patches > 0:
+        number_of_batches = number_of_batches + 1
+
+    if verbose:
+        print("  Total number of patches: ", str(total_number_of_patches))
+        print("  Prediction batch size: ", str(prediction_batch_size))
+        print("  Number of batches: ", str(number_of_batches))
+     
+    prediction = np.zeros((total_number_of_patches, *patch_size, 2))
+    for b in range(number_of_batches):
+        batchX = None
+        if b < number_of_batches - 1 or residual_number_of_patches == 0:
+            batchX = np.zeros((prediction_batch_size, *patch_size, channel_size))
+        else:
+            batchX = np.zeros((residual_number_of_patches, *patch_size, channel_size))
+
+        indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
+        batchX[:,:,:,:,0] = ct_patches[indices,:,:,:]
+        
+        if verbose:
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
+        prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
+
+    if verbose:
+        print("Predict patches and reconstruct.")
+
+    probability_image = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,1]),
+                                                       stride_length=patch_stride_length,
+                                                       domain_image=lung_mask,
+                                                       domain_image_is_mask=True) 
     return(probability_image)

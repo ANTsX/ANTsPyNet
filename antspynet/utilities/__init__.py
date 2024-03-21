@@ -88,6 +88,7 @@ from .mouse import mouse_cortical_thickness
 
 from .lung_extraction import lung_extraction
 from .lung_segmentation import lung_pulmonary_artery_segmentation
+from .lung_segmentation import lung_airway_segmentation
 
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import hypermapp3r_segmentation
