@@ -10,7 +10,7 @@ from tensorflow.keras.layers import (Input, Dropout, BatchNormalization, Add,
                                      Conv3D, Conv3DTranspose, AveragePooling3D)
 
 def create_wide_resnet_model_2d(input_image_size,
-                                number_of_classification_labels=1000,
+                                number_of_outputs=1000,
                                 depth=2,
                                 width=1,
                                 residual_block_schedule=(16, 32, 64),
@@ -39,8 +39,8 @@ def create_wide_resnet_model_2d(input_image_size,
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
 
-    number_of_classification_labels : integer
-        Number of classification labels.
+    number_of_outputs : integer
+        Number of units in the final dense layer.
 
     depth : integer
         Determines the depth of the network.  Related to the actual number of
@@ -190,7 +190,7 @@ def create_wide_resnet_model_2d(input_image_size,
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation,
                     kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 
@@ -200,7 +200,7 @@ def create_wide_resnet_model_2d(input_image_size,
 
 
 def create_wide_resnet_model_3d(input_image_size,
-                                number_of_classification_labels=1000,
+                                number_of_outputs=1000,
                                 depth=2,
                                 width=1,
                                 residual_block_schedule=(16, 32, 64),
@@ -229,8 +229,8 @@ def create_wide_resnet_model_3d(input_image_size,
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
 
-    number_of_classification_labels : integer
-        Number of classification labels.
+    number_of_outputs : integer
+        Number of units in the final dense layer.
 
     depth : integer
         Determines the depth of the network.  Related to the actual number of
@@ -376,11 +376,11 @@ def create_wide_resnet_model_3d(input_image_size,
     if mode == 'classification':
         layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation,
                     kernel_regularizer=regularizers.l2(weight_decay))(outputs)
 

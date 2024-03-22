@@ -14,7 +14,7 @@ from tensorflow.keras import initializers
 from tensorflow.keras import regularizers
 
 def create_densenet_model_2d(input_image_size,
-                             number_of_classification_labels=1000,
+                             number_of_outputs=1000,
                              number_of_filters=16,
                              depth=7,
                              number_of_dense_blocks=1,
@@ -48,7 +48,7 @@ def create_densenet_model_2d(input_image_size,
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
 
-    number_of_classification_labels : integer
+    number_of_outputs : integer
         Number of classification labels.
 
     number_of_filters : integer
@@ -174,7 +174,7 @@ def create_densenet_model_2d(input_image_size,
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation,
                     kernel_regularizer=regularizers.l2(weight_decay),
                     bias_regularizer=regularizers.l2(weight_decay))(outputs)
@@ -184,7 +184,7 @@ def create_densenet_model_2d(input_image_size,
     return(densenet_model)
 
 def create_densenet_model_3d(input_image_size,
-                             number_of_classification_labels=1000,
+                             number_of_outputs=1000,
                              number_of_filters=16,
                              depth=7,
                              number_of_dense_blocks=1,
@@ -218,7 +218,7 @@ def create_densenet_model_3d(input_image_size,
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
 
-    number_of_classification_labels : integer
+    number_of_outputs : integer
         Number of classification labels.
 
     number_of_filters : integer
@@ -344,7 +344,7 @@ def create_densenet_model_3d(input_image_size,
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation,
                     kernel_regularizer=regularizers.l2(weight_decay),
                     bias_regularizer=regularizers.l2(weight_decay))(outputs)
