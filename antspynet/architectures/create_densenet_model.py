@@ -340,7 +340,7 @@ def create_densenet_model_3d(input_image_size,
     if mode == 'classification':
         layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('mode must be either `classification` or `regression`.')
 
