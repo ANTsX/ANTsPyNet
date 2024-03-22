@@ -11,7 +11,7 @@ import tensorflow as tf
 
 def create_simple_classification_with_spatial_transformer_network_model_2d(input_image_size,
                                                                            resampled_size=(30, 30),
-                                                                           number_of_classification_labels=10):
+                                                                           number_of_outputs=10):
     """
     2-D implementation of the spatial transformer network.
 
@@ -40,8 +40,8 @@ def create_simple_classification_with_spatial_transformer_network_model_2d(input
     resampled_size : tuple of length 2
         Resampled size of the transformed input images.
 
-    number_of_classification_labels : integer
-        Number of units in the final dense layer.
+    number_of_outputs : integer
+        Number of units in final layer.
 
     Returns
     -------
@@ -97,7 +97,7 @@ def create_simple_classification_with_spatial_transformer_network_model_2d(input
     outputs = Flatten()(outputs)
     outputs = Dense(units=256)(outputs)
     outputs = Activation('relu')(outputs)
-    outputs = Dense(units=number_of_classification_labels)(outputs)
+    outputs = Dense(units=number_of_outputs)(outputs)
 
     outputs = Activation('softmax')(outputs)
 
@@ -107,7 +107,7 @@ def create_simple_classification_with_spatial_transformer_network_model_2d(input
 
 def create_simple_classification_with_spatial_transformer_network_model_3d(input_image_size,
                                                                            resampled_size=(30, 30, 30),
-                                                                           number_of_classification_labels=10):
+                                                                           number_of_outputs=10):
     """
     3-D implementation of the spatial transformer network.
 
@@ -136,8 +136,8 @@ def create_simple_classification_with_spatial_transformer_network_model_3d(input
     resampled_size : tuple of length 3
         Resampled size of the transformed input images.
 
-    number_of_classification_labels : integer
-        Number of units in the final dense layer.
+    number_of_outputs : integer
+        Number of units in final layer.
 
     Returns
     -------
@@ -194,7 +194,7 @@ def create_simple_classification_with_spatial_transformer_network_model_3d(input
     outputs = Flatten()(outputs)
     outputs = Dense(units=256)(outputs)
     outputs = Activation('relu')(outputs)
-    outputs = Dense(units=number_of_classification_labels)(outputs)
+    outputs = Dense(units=number_of_outputs)(outputs)
 
     outputs = Activation('softmax')(outputs)
 

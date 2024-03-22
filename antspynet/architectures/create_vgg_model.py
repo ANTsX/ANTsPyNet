@@ -7,7 +7,7 @@ from tensorflow.keras.layers import (Input, Flatten, Dense,
                           ZeroPadding3D)
 
 def create_vgg_model_2d(input_image_size,
-                        number_of_classification_labels=1000,
+                        number_of_outputs=1000,
                         layers=(1, 2, 3, 4, 4),
                         lowest_resolution=64,
                         convolution_kernel_size=(3, 3),
@@ -43,8 +43,8 @@ def create_vgg_model_2d(input_image_size,
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
 
-    number_of_classification_labels : integer
-        Number of classification labels.
+    number_of_outputs : integer
+        Number of units in the final dense layer.
 
     layers : tuple
         A tuple determining the number of 'filters' defined at for each layer.
@@ -151,7 +151,7 @@ def create_vgg_model_2d(input_image_size,
     else:
         raise ValueError('unrecognized mode.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation)(outputs)
 
     vgg_model = Model(inputs=inputs, outputs=outputs)
@@ -159,7 +159,7 @@ def create_vgg_model_2d(input_image_size,
     return(vgg_model)
 
 def create_vgg_model_3d(input_image_size,
-                        number_of_classification_labels=1000,
+                        number_of_outputs=1000,
                         layers=(1, 2, 3, 4, 4),
                         lowest_resolution=64,
                         convolution_kernel_size=(3, 3, 3),
@@ -195,8 +195,8 @@ def create_vgg_model_3d(input_image_size,
         that tensor is the image dimensions followed by the number of channels
         (e.g., red, green, and blue).
 
-    number_of_classification_labels : integer
-        Number of classification labels.
+    number_of_outputs : integer
+        Number of units in the final dense layer.
 
     layers : tuple
         A tuple determining the number of 'filters' defined at for each layer.
@@ -205,7 +205,7 @@ def create_vgg_model_3d(input_image_size,
         Number of filters at the beginning.
 
     convolution_kernel_size : tuple
-        3-d vector definining the kernel size during the encoding path
+        3-d vector defining the kernel size during the encoding path
 
     pool_size : tuple
         3-d vector defining the region for each pooling layer.
@@ -299,11 +299,11 @@ def create_vgg_model_3d(input_image_size,
     if mode == 'classification':
         layer_activation = 'softmax'
     elif mode == 'regression':
-        layerActivation = 'linear'
+        layer_activation = 'linear'
     else:
         raise ValueError('unrecognized mode.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation =layer_activation)(outputs)
 
     vgg_model = Model(inputs=inputs, outputs=outputs)

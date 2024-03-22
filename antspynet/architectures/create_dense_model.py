@@ -5,7 +5,7 @@ def create_dense_model(input_vector_size,
                        number_of_filters_at_base_layer=512,
                        number_of_layers=2,
                        mode='classification',
-                       number_of_classification_labels=1000
+                       number_of_outputs=1000
                       ):
     """
 
@@ -26,8 +26,8 @@ def create_dense_model(input_vector_size,
     mode : string
         "regression" or "classification".
 
-    number_of_classification_labels : integer
-        Specifies output for "classification" networks.
+    number_of_outputs : integer
+        Specifies output for networks.
 
     Returns
     -------
@@ -48,9 +48,9 @@ def create_dense_model(input_vector_size,
         number_of_filters = int(number_of_filters / 2)
 
     if mode == "classification":
-        output = Dense(units=number_of_classification_labels, activation='softmax')(output)
+        output = Dense(units=number_of_outputs, activation='softmax')(output)
     elif mode == "regression":
-        output = Dense(units=1, activation='linear')(output)
+        output = Dense(units=number_of_outputs, activation='linear')(output)
     else:
         raise ValueError("Unrecognized activation.")
 

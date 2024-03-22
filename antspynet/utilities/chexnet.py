@@ -53,7 +53,7 @@ def check_xray_lung_orientation(image,
         resampled_image = ants.image_clone(image)    
 
     model = create_resnet_model_2d((None, None, 1),
-                                    number_of_classification_labels=3,
+                                    number_of_outputs=3,
                                     mode="classification",
                                     layers=(1, 2, 3, 4),
                                     residual_block_schedule=(2, 2, 2, 2), lowest_resolution=64,

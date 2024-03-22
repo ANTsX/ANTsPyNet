@@ -12,7 +12,7 @@ from tensorflow.keras.layers import (Input, Lambda, Concatenate, Flatten, Dense,
                                     Dropout)
 
 def create_alexnet_model_2d(input_image_size,
-                            number_of_classification_labels=1000,
+                            number_of_outputs=1000,
                             number_of_dense_units=4096,
                             dropout_rate=0.0,
                             mode='classification'):
@@ -42,8 +42,8 @@ def create_alexnet_model_2d(input_image_size,
         the number of channels (e.g., red, green, and blue).  The batch size
         (i.e., number of training images) is not specified a priori.
 
-    number_of_classification_labels : integer
-        Number of segmentation labels.
+    number_of_outputs : integer
+        Number of output units in the final layer.
 
     number_of_dense_units : integer
        Number of dense units.
@@ -200,7 +200,7 @@ def create_alexnet_model_2d(input_image_size,
     else:
         raise ValueError('unrecognized mode.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation)(outputs)
 
     alexnet_model = Model(inputs=inputs, outputs=outputs)
@@ -209,7 +209,7 @@ def create_alexnet_model_2d(input_image_size,
 
 
 def create_alexnet_model_3d(input_image_size,
-                            number_of_classification_labels=1000,
+                            number_of_outputs=1000,
                             number_of_dense_units=4096,
                             dropout_rate=0.0,
                             mode='classification'):
@@ -239,11 +239,11 @@ def create_alexnet_model_3d(input_image_size,
         the number of channels (e.g., red, green, and blue).  The batch size
         (i.e., number of training images) is not specified a priori.
 
-    number_of_classification_labels : integer
-        Number of segmentation labels.
+    number_of_outputs : integer
+        Number of output units in the final layer.
 
     number_of_dense_units : integer
-       Number of dense units.
+        Number of dense units.
 
     dropout_rate : scalar
        Optional regularization parameter between [0, 1]. Default = 0.0.
@@ -399,7 +399,7 @@ def create_alexnet_model_3d(input_image_size,
     else:
         raise ValueError('unrecognized mode.')
 
-    outputs = Dense(units=number_of_classification_labels,
+    outputs = Dense(units=number_of_outputs,
                     activation=layer_activation)(outputs)
 
     alexnet_model = Model(inputs=inputs, outputs=outputs)

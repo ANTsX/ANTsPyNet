@@ -92,7 +92,7 @@ def mri_modality_classification(image,
     channel_size = 1
 
     model = create_resnet_model_3d((None, None, None, channel_size),
-                                   number_of_classification_labels=number_of_classification_labels,
+                                   number_of_outputs=number_of_classification_labels,
                                    mode="classification",
                                    layers=(1, 2, 3, 4),
                                    residual_block_schedule=(3, 4, 6, 3),

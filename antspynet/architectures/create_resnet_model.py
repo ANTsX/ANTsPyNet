@@ -12,7 +12,7 @@ from tensorflow.keras.layers import (Input, BatchNormalization, Add,
 
 def create_resnet_model_2d(input_image_size,
                            input_scalars_size=0,
-                           number_of_classification_labels=1000,
+                           number_of_outputs=1000,
                            layers=(1, 2, 3, 4),
                            residual_block_schedule=(3, 4, 6, 3),
                            lowest_resolution=64,
@@ -44,8 +44,8 @@ def create_resnet_model_2d(input_image_size,
         Optional integer specifying the size of the input vector for scalars that
         get concatenated to the fully connected layer at the end of the network.
 
-    number_of_classification_labels : integer
-        Number of classification labels.
+    number_of_outputs : integer
+        Number of units in final layer.
 
     layers : tuple
         A tuple determining the number of 'filters' defined at for each layer.
@@ -222,11 +222,11 @@ def create_resnet_model_2d(input_image_size,
     if input_scalars_size > 0:
         input_scalars = Input( shape = (input_scalars_size,) )
         concatenated_layer = Concatenate()([outputs, input_scalars])
-        outputs = Dense(units=number_of_classification_labels,
+        outputs = Dense(units=number_of_outputs,
                         activation=layer_activation)(concatenated_layer)
         resnet_model = Model(inputs=[input_image, input_scalars], outputs = outputs)
     else:
-        outputs = Dense(units=number_of_classification_labels,
+        outputs = Dense(units=number_of_outputs,
                         activation=layer_activation)(outputs)
         resnet_model = Model(inputs=input_image, outputs=outputs)
 
@@ -234,7 +234,7 @@ def create_resnet_model_2d(input_image_size,
 
 def create_resnet_model_3d(input_image_size,
                            input_scalars_size=0,
-                           number_of_classification_labels=1000,
+                           number_of_outputs=1000,
                            layers=(1, 2, 3, 4),
                            residual_block_schedule=(3, 4, 6, 3),
                            lowest_resolution=64,
@@ -266,8 +266,8 @@ def create_resnet_model_3d(input_image_size,
         Optional integer specifying the size of the input vector for scalars that
         get concatenated to the fully connected layer at the end of the network.
 
-    number_of_classification_labels : integer
-        Number of classification labels.
+    number_of_outputs : integer
+        Number of units in final layer.
 
     layers : tuple
         A tuple determining the number of 'filters' defined at for each layer.
@@ -445,11 +445,11 @@ def create_resnet_model_3d(input_image_size,
     if input_scalars_size > 0:
         input_scalars = Input( shape = (input_scalars_size,) )
         concatenated_layer = Concatenate()([outputs, input_scalars])
-        outputs = Dense(units=number_of_classification_labels,
+        outputs = Dense(units=number_of_outputs,
                         activation=layer_activation)(concatenated_layer)
         resnet_model = Model(inputs=[input_image, input_scalars], outputs = outputs)
     else:
-        outputs = Dense(units=number_of_classification_labels,
+        outputs = Dense(units=number_of_outputs,
                         activation=layer_activation)(outputs)
         resnet_model = Model(inputs=input_image, outputs=outputs)
 
