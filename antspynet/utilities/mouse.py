@@ -380,14 +380,14 @@ def mouse_brain_parcellation(image,
 
         if mask is None:
             if verbose:
-                print("Preprocessing:  Bias field correction and brain extraction.")
+                print("Preprocessing:  brain extraction.")
 
             mask = mouse_brain_extraction(image, modality="t2", 
                                           antsxnet_cache_directory=antsxnet_cache_directory, 
                                           verbose=verbose)   
             mask = ants.threshold_image(mask, 0.5, 1.1, 1, 0)
             mask = ants.label_clusters(mask, fully_connected=True)
-            mask = ants.threshold_image(mask, 0, 0, 0, 1)
+            mask = ants.threshold_image(mask, 1, 1, 1, 0)
             
         image_brain = image * mask    
 
