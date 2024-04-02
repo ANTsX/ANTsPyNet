@@ -1,4 +1,4 @@
-antspyx
-tensorflow
-keras
+antspyx>=0.4.2
+tensorflow>=2.11,<=2.13
+keras<3
 requests
