@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antspynet"
+description = "A collection of deep learning architectures ported to the python language and tools for basic medical image processing."
+readme = "README.md"
+authors = [
+    {name = "Nicholas J. Tustison", email = "ntustison@gmail.com"},
+    {name = "Brian B. Avants"},
+    {name = "Nick Cullen"}
+]
+license = {text = "MIT License"}  # Update this according to your actual license
+keywords = ["ANTsPyNet", "deep learning", "medical image processing"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy<1.23",
+    "tensorflow>=2.11,<=2.13",
+    "keras<3",
+    "antspyx>=0.4.2",
+    "scikit-learn",
+    "requests",
+    "statsmodels",
+    "matplotlib"
+]
+dynamic = ["version"]
+
+
+[tool.setuptools_scm]
+tag_regex = '^v(.+)$'
+
