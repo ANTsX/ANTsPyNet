@@ -19,7 +19,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "numpy<1.23",
+    "numpy<=1.24.3",
     "tensorflow>=2.11,<=2.13",
     "keras<3",
     "antspyx>=0.4.2",
