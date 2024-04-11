@@ -259,7 +259,7 @@ def desikan_killiany_tourville_labeling(t1,
     ################################
 
     t1_preprocessed = t1
-    if do_preprocessing == True:
+    if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
             brain_extraction_modality="t1",
@@ -310,7 +310,7 @@ def desikan_killiany_tourville_labeling(t1,
     #
     ################################
 
-    if verbose == True:
+    if verbose:
         print("Outer model Prediction.")
 
     downsampled_image = ants.resample_image(t1_preprocessed, template_size, use_voxels=True, interp_type=0)
@@ -330,21 +330,21 @@ def desikan_killiany_tourville_labeling(t1,
     spacing = downsampled_image.spacing
     direction = downsampled_image.direction
 
-    inner_probability_images = list()
+    outer_probability_images = list()
     for i in range(len(labels)):
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
             origin=origin, spacing=spacing, direction=direction)
         resampled_image = ants.resample_image( probability_image, t1_preprocessed.shape, use_voxels=True, interp_type=0)
-        if do_preprocessing == True:
-            inner_probability_images.append(ants.apply_transforms(fixed=t1,
+        if do_preprocessing:
+            outer_probability_images.append(ants.apply_transforms(fixed=t1,
                 moving=resampled_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
         else:
-            inner_probability_images.append(resampled_image)
+            outer_probability_images.append(resampled_image)
 
-    image_matrix = ants.image_list_to_matrix(inner_probability_images, t1 * 0 + 1)
+    image_matrix = ants.image_list_to_matrix(outer_probability_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
@@ -378,7 +378,7 @@ def desikan_killiany_tourville_labeling(t1,
     #
     ################################
 
-    if verbose == True:
+    if verbose:
         print("Prediction.")
 
     cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (172, 206, 160))
@@ -393,7 +393,7 @@ def desikan_killiany_tourville_labeling(t1,
     spacing = cropped_image.spacing
     direction = cropped_image.direction
 
-    outer_probability_images = list()
+    inner_probability_images = list()
     for i in range(len(labels)):
         probability_image = \
             ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
@@ -403,15 +403,15 @@ def desikan_killiany_tourville_labeling(t1,
         else:
             decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
 
-        if do_preprocessing == True:
-            outer_probability_images.append(ants.apply_transforms(fixed=t1,
+        if do_preprocessing:
+            inner_probability_images.append(ants.apply_transforms(fixed=t1,
                 moving=decropped_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="linear", verbose=verbose))
         else:
-            outer_probability_images.append(decropped_image)
+            inner_probability_images.append(decropped_image)
 
-    image_matrix = ants.image_list_to_matrix(outer_probability_images, t1 * 0 + 1)
+    image_matrix = ants.image_list_to_matrix(inner_probability_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
@@ -429,7 +429,7 @@ def desikan_killiany_tourville_labeling(t1,
 
     if do_lobar_parcellation:
 
-        if verbose == True:
+        if verbose:
             print("Doing lobar parcellation.")
 
         ################################
@@ -440,7 +440,7 @@ def desikan_killiany_tourville_labeling(t1,
 
         # Consolidate lobar cortical labels
 
-        if verbose == True:
+        if verbose:
             print("   Consolidating cortical labels.")
 
         frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1024, 1026, 1027, 1028,
@@ -470,7 +470,7 @@ def desikan_killiany_tourville_labeling(t1,
         six_tissue = deep_atropos(t1_preprocessed, do_preprocessing=False,
             antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
         atropos_seg = six_tissue['segmentation_image']
-        if do_preprocessing == True:
+        if do_preprocessing:
             atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                 whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
@@ -486,7 +486,7 @@ def desikan_killiany_tourville_labeling(t1,
 
         # Do left/right
 
-        if verbose == True:
+        if verbose:
             print("   Doing left/right hemispheres.")
 
 
@@ -523,18 +523,18 @@ def desikan_killiany_tourville_labeling(t1,
         hemisphere_parcellation *= 6
         lobar_parcellation += hemisphere_parcellation
 
-    if return_probability_images == True and do_lobar_parcellation == True:
+    if return_probability_images and do_lobar_parcellation:
         return_dict = {'segmentation_image' : dkt_label_image,
                        'lobar_parcellation' : lobar_parcellation,
                        'inner_probability_images' : inner_probability_images,
                        'outer_probability_images' : outer_probability_images }
         return(return_dict)
-    elif return_probability_images == True and do_lobar_parcellation == False:
+    elif return_probability_images and not do_lobar_parcellation:
         return_dict = {'segmentation_image' : dkt_label_image,
                        'inner_probability_images' : inner_probability_images,
                        'outer_probability_images' : outer_probability_images }
         return(return_dict)
-    elif return_probability_images == False and do_lobar_parcellation == True:
+    elif not return_probability_images and do_lobar_parcellation:
         return_dict = {'segmentation_image' : dkt_label_image,
                        'lobar_parcellation' : lobar_parcellation }
         return(return_dict)
