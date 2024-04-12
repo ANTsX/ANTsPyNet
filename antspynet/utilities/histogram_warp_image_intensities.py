@@ -93,7 +93,7 @@ def histogram_warp_image_intensities(image,
     transform_domain_origin = 0
     transform_domain_spacing = (1.0 - transform_domain_origin) / (transform_domain_size - 1)
 
-    bspline_histogram_transform = ants.fit_bspline_object_to_scattered_data( scattered_data,
+    bspline_histogram_transform = ants.fit_bspline_object_to_scattered_data(scattered_data,
         parametric_data, [transform_domain_origin], [transform_domain_spacing], [transform_domain_size],
         data_weights=weights, is_parametric_dimension_closed=None, number_of_fitting_levels=4, 
         mesh_size=1, spline_order=3)
