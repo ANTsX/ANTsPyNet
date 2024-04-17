@@ -138,9 +138,9 @@ The following is an overview of the available model architectures and pre-traine
 - [HyperMapp3r white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/35088930/)
 - [Hypothalamus segmentation](https://pubmed.ncbi.nlm.nih.gov/32853816/)
 - [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
-- [Deep Flash](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4)
+- [Deep Flash](https://www.nature.com/articles/s41598-024-59440-6)
 - [Desikan-Killiany-Tourville cortical labeling](https://pubmed.ncbi.nlm.nih.gov/33907199/)
-- [Cerebellum segmentation, parcellation, and thickness](https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4)
+- [Cerebellum segmentation, parcellation, and thickness](https://www.nature.com/articles/s41598-024-59440-6)
 - MRI modality classification
 - Lung extraction
   - [Proton](https://pubmed.ncbi.nlm.nih.gov/34227163/)
