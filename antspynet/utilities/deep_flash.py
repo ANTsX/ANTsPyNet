@@ -19,8 +19,7 @@ def deep_flash(t1,
     Perform hippocampal/entorhinal segmentation in T1 and T1/T2 images using
     labels from Mike Yassa's lab---https://faculty.sites.uci.edu/myassa/
 
-    Current citation:
-    https://www.medrxiv.org/content/10.1101/2023.01.17.23284693v4
+    https://www.nature.com/articles/s41598-024-59440-6
 
     The labeling is as follows:
     Label 0 :  background
