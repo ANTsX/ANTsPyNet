@@ -316,9 +316,9 @@ def cerebellum_morphology(t1,
             # region labels
 
             for i in range(1, 13):
-                tmp_array = predicted_data[1,:,:,:,i]
+                tmp_array = np.copy(predicted_data[1,:,:,:,i])
                 predicted_data[1,:,:,:,i] = predicted_data[1,:,:,:,i+12]
-                predicted_data[1,:,:,:,i+12] = tmp_array
+                predicted_data[1,:,:,:,i+12] = np.copy(tmp_array)
 
             for i in range(len(region_labels)):
                 probability_image = ants.from_numpy(0.5 * (np.squeeze(predicted_data[0,:,:,:,i]) +
@@ -329,7 +329,6 @@ def cerebellum_morphology(t1,
                     transformlist=template_transforms['invtransforms'],
                     whichtoinvert=whichtoinvert, interpolator="linear", verbose=verbose)
                 region_probability_images.append(probability_image)
-
 
     ################################
     #
