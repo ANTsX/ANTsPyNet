@@ -144,6 +144,7 @@ def get_pretrained_network(file_id=None,
             "xrayLungOrientation": "https://figshare.com/ndownloader/files/41965821",
             "chexnetClassification": "https://figshare.com/ndownloader/files/42423522",
             "chexnetANTsXNetClassification": "https://figshare.com/ndownloader/files/42428943",
+            "tb_antsxnet": "https://figshare.com/ndownloader/files/45820599",
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
             "wholeLungMaskFromVentilation": "https://ndownloader.figshare.com/files/28914441"
         }
@@ -263,6 +264,7 @@ def get_pretrained_network(file_id=None,
                   "xrayLungOrientation",
                   "chexnetClassification",
                   "chexnetANTsXNetClassification",
+                  "tb_antsxnet",
                   "wholeTumorSegmentationT2Flair",
                   "wholeLungMaskFromVentilation",
                   "show")

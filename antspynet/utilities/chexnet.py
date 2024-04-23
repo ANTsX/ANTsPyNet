@@ -129,6 +129,7 @@ def chexnet(image,
             lung_mask=None,
             check_image_orientation=False,
             use_antsxnet_variant=True,
+            include_tuberculosis_diagnosis=False,
             antsxnet_cache_directory=None,
             verbose=False):
 
@@ -169,6 +170,15 @@ def chexnet(image,
     check_image_orientation : boolean
         Check the correctness of image orientation, i.e., flipped left-right, up-down, 
         or both.  If True, attempts to correct before prediction.
+        
+    use_antsxnet_variant : boolean
+        Use an extension of the original chexnet approach by adding a left/right
+        lung masking and including those two masked regions in the red and green
+        channels, respectively. 
+
+    include_tuberculosis_diagnosis : boolean
+        Include the output of an additional network trained on TB data but using
+        the ANTsXNet variant chexnet data as the initial weights.
          
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -223,8 +233,21 @@ def chexnet(image,
     if image.shape != image_size:
         if verbose:
             print("Resampling image to", image_size)
-        resampled_image = ants.resample_image(image, image_size, use_voxels=True)        
-  
+        resampled_image = ants.resample_image(image, image_size, use_voxels=True)      
+         
+    if lung_mask is None:
+        if verbose:
+            print("No lung mask provided.  Estimating using antsxnet.")
+        lung_extract = lung_extraction(image, modality="xray", 
+                                       antsxnet_cache_directory=antsxnet_cache_directory, 
+                                       verbose=verbose)
+        lung_mask = lung_extract['segmentation_image']
+
+    if lung_mask.shape != image_size:
+        resampled_lung_mask = ants.resample_image(lung_mask, image_size, use_voxels=True, interp_type=1)
+    else:
+        resampled_lung_mask = ants.image_clone(lung_mask)    
+          
     model = tf.keras.applications.DenseNet121(include_top=False, 
                                             weights="imagenet", 
                                             input_tensor=None, 
@@ -240,6 +263,29 @@ def chexnet(image,
 
     number_of_channels = 3
 
+    tb_prediction = None
+    if include_tuberculosis_diagnosis:
+
+        x = tf.keras.layers.Dense(units=1,
+                                  activation='sigmoid')(model.output)
+        tb_model = tf.keras.Model(inputs=model.input, outputs=x)
+        weights_file_name = get_pretrained_network("tb_antsxnet",
+                                                   antsxnet_cache_directory=antsxnet_cache_directory)
+        tb_model.load_weights(weights_file_name)
+
+        batchX = np.zeros((1, *image_size, number_of_channels))
+        image_array = resampled_image.numpy()
+        image_array = (image_array - image_array.min()) / (image_array.max() - image_array.min())
+
+        batchX[0,:,:,0] = (image_array - imagenet_mean[0]) / (imagenet_std[0])
+        batchX[0,:,:,1] = (image_array - imagenet_mean[1]) / (imagenet_std[1])
+        batchX[0,:,:,1] *= (ants.threshold_image(resampled_lung_mask, 1, 1, 1, 0)).numpy() 
+        batchX[0,:,:,2] = (image_array - imagenet_mean[2]) / (imagenet_std[2])
+        batchX[0,:,:,2] *= (ants.threshold_image(resampled_lung_mask, 2, 2, 1, 0)).numpy() 
+        
+        batchY = tb_model.predict(batchX, verbose=verbose)
+        tb_prediction = batchY[0]
+
     if not use_antsxnet_variant:
 
         weights_file_name = get_pretrained_network("chexnetClassification",
@@ -253,9 +299,10 @@ def chexnet(image,
             batchX[0,:,:,c] = (image_array - imagenet_mean[c]) / (imagenet_std[c])
 
         batchY = model.predict(batchX, verbose=verbose)
-
         disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
-
+        
+        if include_tuberculosis_diagnosis:
+            disease_category_df['Tuberculosis'] = tb_prediction
         return disease_category_df
 
     else:
@@ -264,20 +311,6 @@ def chexnet(image,
                                                    antsxnet_cache_directory=antsxnet_cache_directory)
 
         model.load_weights(weights_file_name)
-
-        resampled_lung_mask = None
-        if lung_mask is None:
-            if verbose:
-                print("No lung mask provided.  Estimating using antsxnet.")
-            lung_extract = lung_extraction(image, modality="xray", 
-                                        antsxnet_cache_directory=antsxnet_cache_directory, 
-                                        verbose=verbose)
-            resampled_lung_mask = lung_extract['segmentation_image']
-        else:
-            resampled_lung_mask = ants.image_clone(lung_mask)
-
-        if resampled_lung_mask.shape != image_size:
-            resampled_lung_mask = ants.resample_image(resampled_lung_mask, image_size, use_voxels=True, interp_type=1)
 
         batchX = np.zeros((1, *image_size, number_of_channels))
         image_array = resampled_image.numpy()
@@ -290,8 +323,9 @@ def chexnet(image,
         batchX[0,:,:,2] *= (ants.threshold_image(resampled_lung_mask, 2, 2, 1, 0)).numpy() 
         
         batchY = model.predict(batchX, verbose=verbose)
-
         disease_category_df = pd.DataFrame(batchY, columns=disease_categories)
 
+        if include_tuberculosis_diagnosis:
+            disease_category_df['Tuberculosis'] = tb_prediction
         return disease_category_df
 
