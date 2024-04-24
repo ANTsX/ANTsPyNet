@@ -22,6 +22,7 @@ def whole_head_inpainting(image,
     modality : string
         Modality image type.  Options include:
             * "t1": T1-weighted MRI.
+            * "flair": FLAIR-weighted MRI.
             
     mode : string
         Options include:
