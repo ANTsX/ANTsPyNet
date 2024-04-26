@@ -31,7 +31,7 @@ Alternatively, you can download and install from source.
 ```
 git clone https://github.com/ANTsX/ANTsPyNet
 cd ANTsPyNet
-python -m pip install . # or python setup.py install
+python -m pip install .
 ```
 
 ## Quickstart
