@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy<=1.24.3",
-    "tensorflow>=2.11,<=2.13",
+    "tensorflow>=2.11,<2.16",
     "keras<3",
     "antspyx>=0.4.2",
     "scikit-learn",
