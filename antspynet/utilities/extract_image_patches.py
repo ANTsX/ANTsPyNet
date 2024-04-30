@@ -169,10 +169,10 @@ def extract_image_patches(image,
             for d in range(dimensionality):
                 shifted_mask_indices = np.subtract(mask_indices[:, d], mid_patch_index[d])
                 outside_indices = np.where(shifted_mask_indices < 0)
-                mask_indices = np.delete(mask_indices, outside_indices, axis = 0)
+                mask_indices = np.delete(mask_indices, outside_indices, axis=0)
                 shifted_mask_indices = np.add(mask_indices[:, d], mid_patch_index[d])
                 outside_indices = np.where(shifted_mask_indices >= image_size[d] - 1)
-                mask_indices = np.delete(mask_indices, outside_indices, axis = 0)
+                mask_indices = np.delete(mask_indices, outside_indices, axis=0)
 
             # After pruning the mask indices, which were originally defined in terms of the
             # mid_patch_index, we subtract the midPatchIndex so that it's now defined at the
