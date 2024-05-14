@@ -31,6 +31,7 @@ def brain_extraction(image,
             * "t2star": T2Star MRI.
             * "bold": 3-D mean BOLD MRI.  Previous versions are specified as "bold.v0".
             * "fa": fractional anisotropy.  Previous versions are specified as "fa.v0".
+            * "mra": MRA h/t Tyler Hanson "mmbop".
             * "t1t2infant": Combined T1-w/T2-w infant MRI h/t Martin Styner.
             * "t1infant": T1-w infant MRI h/t Martin Styner.
             * "t2infant": T2-w infant MRI h/t Martin Styner.
@@ -72,7 +73,7 @@ def brain_extraction(image,
         input_images = image
 
     if input_images[0].dimension != 3:
-        raise ValueError( "Image dimension must be 3." )
+        raise ValueError("Image dimension must be 3.")
 
     if "t1combined" in modality:
         # Need to change with voxel resolution
@@ -137,6 +138,9 @@ def brain_extraction(image,
         elif modality == "fa":
             weights_file_name_prefix = "brainExtractionRobustFA"
             is_standard_network = True
+        elif modality == "mra":
+            weights_file_name_prefix = "brainExtractionMra"
+            is_standard_network = True
         elif modality == "t1t2infant":
             weights_file_name_prefix = "brainExtractionInfantT1T2"
         elif modality == "t1infant":
@@ -146,19 +150,19 @@ def brain_extraction(image,
         else:
             raise ValueError("Unknown modality type.")
 
-        if verbose == True:
+        if verbose:
             print("Brain extraction:  retrieving model weights.")
 
         weights_file_name = get_pretrained_network(weights_file_name_prefix,
           antsxnet_cache_directory=antsxnet_cache_directory)
 
-        if verbose == True:
+        if verbose:
             print("Brain extraction:  retrieving template.")
 
         reorient_template_file_name_path = get_antsxnet_data("S_template3",
           antsxnet_cache_directory=antsxnet_cache_directory)
         reorient_template = ants.image_read(reorient_template_file_name_path)
-        if is_standard_network and modality != "t1.v1":
+        if is_standard_network and (modality != "t1.v1" and modality != "mra"):
             ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
         resampled_image_size = reorient_template.shape
 
@@ -177,7 +181,7 @@ def brain_extraction(image,
 
         unet_model.load_weights(weights_file_name)
 
-        if verbose == True:
+        if verbose:
             print("Brain extraction:  normalizing image to the template.")
 
         center_of_mass_template = ants.get_center_of_mass(reorient_template)
@@ -196,13 +200,13 @@ def brain_extraction(image,
                 warped_array = warped_image.numpy()
                 batchX[0,:,:,:,i] = (warped_array - warped_array.mean()) / warped_array.std()
 
-        if verbose == True:
+        if verbose:
             print("Brain extraction:  prediction and decoding.")
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
         probability_images_array = decode_unet(predicted_data, reorient_template)
 
-        if verbose == True:
+        if verbose:
             print("Brain extraction:  renormalize probability mask to native space.")
 
         xfrm_inv = xfrm.invert()
