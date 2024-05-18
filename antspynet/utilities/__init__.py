@@ -63,6 +63,7 @@ from .data_augmentation import data_augmentation
 from .preprocess_image import preprocess_brain_image
 from .brain_extraction import brain_extraction
 from .brain_tumor_segmentation import brain_tumor_segmentation
+from .brain_mra_vessel_segmentation import brain_mra_vessel_segmentation
 from .lesion_segmentation import lesion_segmentation
 from .lesion_segmentation import lesion_segmentation_experimental
 from .inpainting import whole_head_inpainting

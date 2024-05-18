@@ -240,7 +240,8 @@ def lung_pulmonary_artery_segmentation(ct,
     ################################
 
     if lung_mask is None:
-        lung_ex = lung_extraction(ct, modality="ct", verbose=verbose)
+        lung_ex = lung_extraction(ct, modality="ct", verbose=verbose,
+                                  antsxnet_cache_directory=antsxnet_cache_directory)
         lung_mask = ants.threshold_image(lung_ex['segmentation_image'], 1, 3, 1, 0)
     ct_preprocessed = ants.image_clone(ct)
     ct_preprocessed = (ct_preprocessed + 800) / (500 + 800)
@@ -259,7 +260,7 @@ def lung_pulmonary_artery_segmentation(ct,
     if isinstance(patch_stride_length, int):
         patch_stride_length = (patch_stride_length,) * 3
 
-    number_of_classification_labels = 2
+    number_of_classification_labels = 1
     channel_size = 1  
 
     model = create_unet_model_3d((*patch_size, channel_size),
@@ -268,7 +269,8 @@ def lung_pulmonary_artery_segmentation(ct,
                 convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
                 dropout_rate=0.0, weight_decay=0)
 
-    weights_file_name = get_pretrained_network("pulmonaryArteryWeights", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("pulmonaryArteryWeights", 
+                                               antsxnet_cache_directory=antsxnet_cache_directory)
     model.load_weights(weights_file_name)
 
     ################################
@@ -305,7 +307,7 @@ def lung_pulmonary_artery_segmentation(ct,
         print("  Prediction batch size: ", str(prediction_batch_size))
         print("  Number of batches: ", str(number_of_batches))
      
-    prediction = np.zeros((total_number_of_patches, *patch_size, 2))
+    prediction = np.zeros((total_number_of_patches, *patch_size, 1))
     for b in range(number_of_batches):
         batchX = None
         if b < number_of_batches - 1 or residual_number_of_patches == 0:
@@ -323,7 +325,7 @@ def lung_pulmonary_artery_segmentation(ct,
     if verbose:
         print("Predict patches and reconstruct.")
 
-    probability_image = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,1]),
+    probability_image = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,0]),
                                                        stride_length=patch_stride_length,
                                                        domain_image=lung_mask,
                                                        domain_image_is_mask=True)

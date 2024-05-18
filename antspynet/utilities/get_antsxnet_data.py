@@ -65,6 +65,8 @@ def get_antsxnet_data(file_id=None,
             "magetCerebellumTemplate": "https://figshare.com/ndownloader/files/41052581",
             "magetCerebellumTemplatePriors": "https://figshare.com/ndownloader/files/41052578",
             "magetCerebellumxTemplate0GenericAffine": "https://figshare.com/ndownloader/files/41052575",
+            "mraTemplate": "",
+            "mraTemplateVesselPrior": "",
             "bsplineT2MouseTemplate": "https://figshare.com/ndownloader/files/44706247",
             "bsplineT2MouseTemplateBrainMask": "https://figshare.com/ndownloader/files/44869285",
             "DevCCF_P56_MRI-T2_50um": "https://figshare.com/ndownloader/files/44706244",
@@ -72,7 +74,7 @@ def get_antsxnet_data(file_id=None,
         }
         return(switcher.get(argument, "Invalid argument."))
 
-    if file_id == None:
+    if file_id is None:
         raise ValueError("Missing file id.")
 
     valid_list = ("biobank",
@@ -105,6 +107,8 @@ def get_antsxnet_data(file_id=None,
                   "magetCerebellumTemplate",
                   "magetCerebellumTemplatePriors",
                   "magetCerebellumxTemplate0GenericAffine",
+                  "mraTemplate",
+                  "mraTemplateVesselPrior",
                   "bsplineT2MouseTemplate",
                   "bsplineT2MouseTemplateBrainMask",
                   "DevCCF_P56_MRI-T2_50um",
