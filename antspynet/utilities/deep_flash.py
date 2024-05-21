@@ -892,10 +892,7 @@ def deep_flash(t1,
         batchX[0,:,:,:,0] = t1_cropped.numpy()
         if use_contralaterality:
             t1_cropped = ants.crop_indices(t1_preprocessed_flipped, lower_bound_right, upper_bound_right)
-            if use_rank_intensity:
-                t1_cropped = ants.rank_intensity(t1_cropped)
-            else:
-                t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)
+            t1_cropped = ants.histogram_match_image(t1_cropped, t1_template_roi_right, 255, 64, False)
             batchX[1,:,:,:,0] = t1_cropped.numpy()
 
         for i in range(len(priors_image_right_list)):
