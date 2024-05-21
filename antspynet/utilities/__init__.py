@@ -98,7 +98,6 @@ from .claustrum_segmentation import claustrum_segmentation
 from .hypothalamus_segmentation import hypothalamus_segmentation
 from .hippmapp3r_segmentation import hippmapp3r_segmentation
 from .deep_flash import deep_flash
-from .deep_flash import deep_flash_deprecated
 from .deep_atropos import deep_atropos
 from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
 from .cerebellum_morphology import cerebellum_morphology
