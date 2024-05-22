@@ -199,8 +199,11 @@ The ANTsPyNet package is released under an [Apache License](https://github.com/A
 
 ## to publish a release
 
+before doing this - make sure you have a recent run of `pip-compile pyproject.toml`
+
 ```
 rm -r -f build/ antspynet.egg-info/ dist/
 python3 -m  build .
-twine upload --repository antspynet dist/*
+python3 -m pip install --upgrade twine
+python3 -m twine upload --repository antspynet dist/*
 ```
