@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "antspynet"
-version = "0.2.4"
+version = "0.2.5"
 description = "A collection of deep learning architectures ported to the python language and tools for basic medical image processing."
 readme = "README.md"
 authors = [
@@ -29,13 +29,9 @@ dependencies = [
     "statsmodels",
     "matplotlib"
 ]
-dynamic = ["version"]
 
 [project.urls]
 homepage = "https://github.com/ANTsX/ANTsPyNet"
-
-[tool.setuptools_scm]
-tag_regex = '^v(.+)$'
 
 [tool.setuptools.packages]
 find = { include = ["antspynet"] }
