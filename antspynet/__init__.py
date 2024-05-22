@@ -1,7 +1,7 @@
 import importlib
 import pkgutil
 
-modules = ['antspynet.architectures', 'antspynet.utilities']
+modules = ['architectures', 'utilities']
 
 # Initialize an empty list to hold all functions
 __all__ = []
