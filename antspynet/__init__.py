@@ -1,8 +1,6 @@
 import importlib
 import pkgutil
 
-modules = ['architectures', 'utilities']
-
 # Initialize an empty list to hold all functions
 __all__ = []
 
@@ -17,5 +15,4 @@ def import_submodules(package_name):
                 __all__.append(attribute_name)
 
 # Import all submodules and their functions
-for x in range(len(modules)):
-    import_submodules(modules[x])
+import_submodules(__name__)
