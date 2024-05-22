@@ -12,11 +12,11 @@ authors = [
     {name = "Brian B. Avants"},
     {name = "Nick Cullen"}
 ]
-license = {text = "MIT License"}
+license = {text = "Apache License 2.0"}
 keywords = ["ANTsPyNet", "deep learning", "medical image processing"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
