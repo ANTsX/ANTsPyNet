@@ -1,5 +1,3 @@
-# mypackage/__init__.py
-
 import importlib
 import pkgutil
 import sys
@@ -26,5 +24,4 @@ def import_submodules(package_name):
                 __all__.append(attribute_name)
 
 # Import all submodules and their functions
-import_submodules('antspynet.architectures')
-import_submodules('antspynet.utilities')
+import_submodules('antspynet')
