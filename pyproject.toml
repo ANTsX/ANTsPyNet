@@ -34,4 +34,4 @@ dependencies = [
 homepage = "https://github.com/ANTsX/ANTsPyNet"
 
 [tool.setuptools.packages]
-find = { include = ["antspynet"] }
+find = { include = ["antspynet","antspynet.*"] }
