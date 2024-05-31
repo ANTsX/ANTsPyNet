@@ -151,7 +151,8 @@ def get_pretrained_network(file_id=None,
             "chexnetANTsXNetClassification": "https://figshare.com/ndownloader/files/42428943",
             "tb_antsxnet": "https://figshare.com/ndownloader/files/45820599",
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
-            "wholeLungMaskFromVentilation": "https://ndownloader.figshare.com/files/28914441"
+            "wholeLungMaskFromVentilation": "https://ndownloader.figshare.com/files/28914441",
+            "test_hcpya_da": "https://figshare.com/ndownloader/files/46746397"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -276,6 +277,7 @@ def get_pretrained_network(file_id=None,
                   "tb_antsxnet",
                   "wholeTumorSegmentationT2Flair",
                   "wholeLungMaskFromVentilation",
+                  "test_hcpya_da",
                   "show")
 
     if not file_id in valid_list:
