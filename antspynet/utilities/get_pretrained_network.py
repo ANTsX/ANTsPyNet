@@ -152,7 +152,7 @@ def get_pretrained_network(file_id=None,
             "tb_antsxnet": "https://figshare.com/ndownloader/files/45820599",
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
             "wholeLungMaskFromVentilation": "https://ndownloader.figshare.com/files/28914441",
-            "test_hcpya_da": "https://figshare.com/ndownloader/files/46746397"
+            "test_hcpya_da": "https://figshare.com/ndownloader/files/47033923"
         }
         return(switcher.get(argument, "Invalid argument."))
 
