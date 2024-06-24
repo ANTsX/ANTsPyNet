@@ -332,13 +332,13 @@ def mouse_brain_parcellation(image,
                 - 5: main olfactory bulb
                 - 6: hippocampal formation
             * "tct" - t2w with labels:
-                - 1: 
-                - 2: 
-                - 3: 
-                - 4: 
-                - 5: 
-                - 6: 
-                - 7: 
+                - 1: background
+                - 2: Prelimbic area
+                - 3: Infralimbic area
+                - 4: Medial group of the dorsal thalamus
+                - 5: Reticular nucleus of the thalamus
+                - 6: Hippocampal formation
+                - 7: Cerebellum            
             * "jay" - stpt with labels:
                 - 1: 
                 - 2: 
