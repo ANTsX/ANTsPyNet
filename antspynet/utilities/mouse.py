@@ -331,6 +331,14 @@ def mouse_brain_parcellation(image,
                 - 4: cerebellum
                 - 5: main olfactory bulb
                 - 6: hippocampal formation
+            * "tct" - t2w with labels:
+                - 1: 
+                - 2: 
+                - 3: 
+                - 4: 
+                - 5: 
+                - 6: 
+                - 7: 
             * "jay" - stpt with labels:
                 - 1: 
                 - 2: 
@@ -359,7 +367,9 @@ def mouse_brain_parcellation(image,
     from ..utilities import get_antsxnet_data
     from ..utilities import pad_or_crop_image_to_size
 
-    if which_parcellation == "nick" or which_parcellation == "jay": 
+    if (which_parcellation == "nick" or 
+        which_parcellation == "jay" or 
+        which_parcellation == "tct"): 
 
         template_spacing = (0.075, 0.075, 0.075)
         template_crop_size = (176, 128, 240)
@@ -370,6 +380,12 @@ def mouse_brain_parcellation(image,
             template_match = ants.rank_intensity(template)
             template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask"))
             weights_file_name = get_pretrained_network("mouseT2wBrainParcellation3DNick")
+        elif which_parcellation == "tct":
+            template_string = "DevCCF P56 T2w"
+            template = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um"))
+            template_match = ants.rank_intensity(template)
+            template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationTctMask"))
+            weights_file_name = get_pretrained_network("mouseT2wBrainParcellation3DTct")
         elif which_parcellation == "jay":
             template_string = "DevCCF P04 STPT"
             template = ants.image_read(get_antsxnet_data("DevCCF_P04_STPT_50um"))
@@ -416,7 +432,7 @@ def mouse_brain_parcellation(image,
                                 verbose=int(verbose))
 
         image_warped = None
-        if which_parcellation == "nick":
+        if which_parcellation == "nick" or which_parcellation == "tct":
             image_warped = ants.rank_intensity(reg['warpedmovout'])
         else:
             image_warped = ants.image_clone(reg['warpedmovout'])    
