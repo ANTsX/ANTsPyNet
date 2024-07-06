@@ -13,7 +13,7 @@ antspyx==0.4.2
     # via antspynet (pyproject.toml)
 astunparse==1.6.3
     # via tensorflow
-certifi==2024.2.2
+certifi==2024.7.4
     # via requests
 charset-normalizer==3.3.2
     # via requests
