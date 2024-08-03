@@ -212,18 +212,18 @@ def deep_atropos(t1,
                                            antsxnet_cache_directory=antsxnet_cache_directory, 
                                            verbose=verbose)
                 n4 = n4 * t1_mask
-                n4 = ants.histogram_match_image2(n4, hcp_templates[i],
-                                                 source_mask=t1_mask,
-                                                 reference_mask=hcp_template_brain_mask)
+                # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
+                #                                  source_mask=t1_mask,
+                #                                  reference_mask=hcp_template_brain_mask)
                 reg = ants.registration(hcp_templates[i], n4, 
-                                        type_of_transform="antsRegistrationSyNQuickRepro[a]",
+                                        type_of_transform="antsRegistrationSyNQuick[a]",
                                         verbose=verbose)
                 preprocessed_images.append(reg['warpedmovout'])
             else:
                 n4 = n4 * t1_mask
-                n4 = ants.histogram_match_image2(n4, hcp_templates[i],
-                                                 source_mask=t1_mask,
-                                                 reference_mask=hcp_template_brain_mask)
+                # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
+                #                                  source_mask=t1_mask,
+                #                                  reference_mask=hcp_template_brain_mask)
                 n4 = ants.apply_transforms(hcp_templates[i], n4, 
                                            transformlist=reg['fwdtransforms'],
                                            verbose=verbose)
