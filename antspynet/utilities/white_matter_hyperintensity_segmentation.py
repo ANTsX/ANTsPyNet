@@ -703,7 +703,7 @@ def shiva_pvs_segmentation(t1,
 
     if do_preprocessing:
         if verbose:
-            print("Preprocess T1 and FLAIR images.")
+            print("Preprocess image(s).")
 
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.0, 0.99),
