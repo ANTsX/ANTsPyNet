@@ -1,6 +1,7 @@
 
 import ants
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
 
 def sysu_media_wmh_segmentation(flair,
@@ -633,3 +634,171 @@ def wmh_segmentation(flair,
                                                            domain_image_is_mask=True)
 
     return(wmh_probability_image)
+
+
+def shiva_pvs_segmentation(t1,
+                           flair=None,
+                           which_model="all",
+                           do_preprocessing=True,
+                           antsxnet_cache_directory=None,
+                           verbose=False):
+
+    """
+    Perform segmentation of perivascular (PVS) or Vircho-Robin spaces (VRS).
+    
+    https://pubmed.ncbi.nlm.nih.gov/34262443/
+
+    with the original implementation available here:
+
+    https://github.com/pboutinaud/SHIVA_PVS
+
+    Arguments
+    ---------
+    t1 : ANTsImage
+        input 3-D T1 brain image (not skull-stripped).
+
+    flair : ANTsImage
+        (Optional) input 3-D FLAIR brain image (not skull-stripped) aligned to the T1 image.
+
+    which_model : integer or string
+        Several models were trained for the case of T1-only or T1/FLAIR image
+        pairs.  One can use a specific single trained model or the average of 
+        the entire ensemble.  I.e., options are:
+            * For T1-only:  0, 1, 2, 3, 4, 5.
+            * For T1/FLAIR: 0, 1, 2, 3, 4.
+            * Or "all" for using the entire ensemble.
+
+    do_preprocessing : boolean
+        perform n4 bias correction, intensity truncation, brain extraction.
+            
+    antsxnet_cache_directory : string
+        Destination directory for storing the downloaded template and model weights.
+        Since these can be reused, if is None, these data will be downloaded to a
+        ~/.keras/ANTsXNet/.
+
+    verbose : boolean
+        Print progress to the screen.
+
+    Returns
+    -------
+    PVS or VRS segmentation probability image
+
+    Example
+    -------
+    >>> image = ants.image_read("flair.nii.gz")
+    >>> probability_mask = shiva_pvs_segmentation(image)
+    """
+
+    from ..utilities import get_pretrained_network
+    from ..utilities import preprocess_brain_image
+
+    ################################
+    #
+    # Preprocess images
+    #
+    ################################
+
+    t1_preprocessed = None
+    flair_preprocessed = None
+
+    if do_preprocessing:
+        if verbose:
+            print("Preprocess T1 and FLAIR images.")
+
+        t1_preprocessing = preprocess_brain_image(t1,
+            truncate_intensity=(0.0, 0.99),
+            brain_extraction_modality="t1",
+            do_bias_correction=True,
+            do_denoising=False,
+            intensity_normalization_type="01",
+            antsxnet_cache_directory=antsxnet_cache_directory,
+            verbose=verbose)
+        brain_mask = ants.threshold_image(t1_preprocessing["brain_mask"], 0.5, 1, 1, 0)
+        t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
+
+        if flair is not None:
+            flair_preprocessing = preprocess_brain_image(flair,
+                truncate_intensity=(0.0, 0.99),
+                brain_extraction_modality=None,
+                do_bias_correction=True,
+                do_denoising=False,
+                intensity_normalization_type="01",
+                antsxnet_cache_directory=antsxnet_cache_directory,
+                verbose=verbose)
+            flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
+
+    else:
+        t1_preprocessed = ants.image_clone(t1)
+        if flair is not None:
+            flair_preprocessed = ants.image_clone(flair)
+
+    image_shape = (160, 214, 176)
+    reorient_template = ants.from_numpy(np.ones(image_shape), origin=(0, 0, 0),
+                                        spacing=(1, 1, 1), direction=np.eye(3))
+        
+    center_of_mass_template = ants.get_center_of_mass(reorient_template)
+    center_of_mass_image = ants.get_center_of_mass(t1_preprocessed * 0 + 1)
+    translation = np.round(np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template))
+    xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
+        center=np.asarray(center_of_mass_template), translation=translation)
+    
+    t1_preprocessed = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reorient_template)
+    if flair is not None:
+        flair_preprocessed = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reorient_template)
+
+    ################################
+    #
+    # Load models and predict
+    #
+    ################################
+
+    batchY = None
+    if flair is None:
+        batchX = np.zeros((1, *image_shape, 1))
+        batchX[0,:,:,:,0] = t1_preprocessed.numpy()
+
+        model_ids = [which_model,]
+        if which_model == "all":
+            model_ids = [0, 1, 2, 3, 4, 5]
+
+        for i in range(len(model_ids)):
+            model_file = get_pretrained_network("pvs_shiva_t1_" + str(model_ids[i]), 
+                                                antsxnet_cache_directory=antsxnet_cache_directory)
+            if verbose:
+                print("Loading", model_file)
+            model = tf.keras.models.load_model(model_file, compile=False, custom_objects={"tf": tf})
+            if i == 0:
+                batchY = model.predict(batchX, verbose=verbose)
+            else:
+                batchY += model.predict(batchX, verbose=verbose)
+
+        batchY /= len(model_ids) 
+        
+    else:    
+        batchX = np.zeros((1, *image_shape, 2))
+        batchX[0,:,:,:,0] = t1_preprocessed.numpy()
+        batchX[0,:,:,:,1] = flair_preprocessed.numpy()
+
+        model_ids = [which_model,]
+        if which_model == "all":
+            model_ids = [0, 1, 2, 3, 4]
+
+        for i in range(len(model_ids)):
+            model_file = get_pretrained_network("pvs_shiva_t1_flair_" + str(model_ids[i]),
+                                                antsxnet_cache_directory=antsxnet_cache_directory)
+            if verbose:
+                print("Loading", model_file)
+            model = tf.keras.models.load_model(model_file, compile=False, custom_objects={"tf": tf})
+            if i == 0:
+                batchY = model.predict(batchX, verbose=verbose)
+            else:
+                batchY += model.predict(batchX, verbose=verbose)
+
+        batchY /= len(model_ids)            
+            
+    pvs = ants.from_numpy(np.squeeze(batchY), origin=reorient_template.origin,
+                          spacing=reorient_template.spacing,
+                          direction=reorient_template.direction)
+    pvs = ants.apply_ants_transform_to_image(xfrm.invert(), pvs, t1)
+    return pvs
+        
