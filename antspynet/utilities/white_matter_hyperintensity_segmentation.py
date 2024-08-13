@@ -700,6 +700,7 @@ def shiva_pvs_segmentation(t1,
 
     t1_preprocessed = None
     flair_preprocessed = None
+    brain_mask = None
 
     if do_preprocessing:
         if verbose:
@@ -737,10 +738,10 @@ def shiva_pvs_segmentation(t1,
                                         spacing=(1, 1, 1), direction=np.eye(3))
         
     center_of_mass_template = ants.get_center_of_mass(reorient_template)
-    center_of_mass_image = ants.get_center_of_mass(t1_preprocessed * 0 + 1)
+    center_of_mass_image = ants.get_center_of_mass(brain_mask)
     translation = np.round(np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template))
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
-        center=np.asarray(center_of_mass_template), translation=translation)
+        center=np.round(np.asarray(center_of_mass_template)), translation=translation)
     
     t1_preprocessed = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reorient_template)
     if flair is not None:
