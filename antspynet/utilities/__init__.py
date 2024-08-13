@@ -94,6 +94,8 @@ from .lung_segmentation import lung_airway_segmentation
 from .white_matter_hyperintensity_segmentation import sysu_media_wmh_segmentation
 from .white_matter_hyperintensity_segmentation import hypermapp3r_segmentation
 from .white_matter_hyperintensity_segmentation import wmh_segmentation
+from .white_matter_hyperintensity_segmentation import shiva_pvs_segmentation
+
 from .claustrum_segmentation import claustrum_segmentation
 from .hypothalamus_segmentation import hypothalamus_segmentation
 from .hippmapp3r_segmentation import hippmapp3r_segmentation
