@@ -732,6 +732,7 @@ def shiva_pvs_segmentation(t1,
         t1_preprocessed = ants.image_clone(t1)
         if flair is not None:
             flair_preprocessed = ants.image_clone(flair)
+        brain_mask = ants.threshold_image(t1, 0, 0, 0, 1)
 
     image_shape = (160, 214, 176)
     reorient_template = ants.from_numpy(np.ones(image_shape), origin=(0, 0, 0),
