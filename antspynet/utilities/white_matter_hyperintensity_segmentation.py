@@ -834,7 +834,7 @@ def shiva_wmh_segmentation(flair,
         Several models were trained for the case of T1-only or T1/FLAIR image
         pairs.  One can use a specific single trained model or the average of 
         the entire ensemble.  I.e., options are:
-            * For T1-only:  0, 1, 2, 3, 4, 5.
+            * For T1-only:  0, 1, 2, 3, 4.
             * For T1/FLAIR: 0, 1, 2, 3, 4.
             * Or "all" for using the entire ensemble.
 

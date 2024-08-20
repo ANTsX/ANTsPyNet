@@ -441,31 +441,31 @@ def create_shiva_unet_model_3d(number_of_modalities=1):
 
     # final
 
-    outputs = Conv3D(filters=number_of_filters[i],
-                    kernel_size=3,
-                    padding='same',
-                    use_bias=False)(outputs)
+    outputs = Conv3D(filters=10,
+                     kernel_size=3,
+                     padding='same',
+                     use_bias=False)(outputs)
     outputs = BatchNormalization()(outputs)
     outputs = Activation('swish')(outputs)
     
-    outputs = Conv3D(filters=number_of_filters[i],
-                    kernel_size=3,
-                    padding='same',
-                    use_bias=False)(outputs)
+    outputs = Conv3D(filters=10,
+                     kernel_size=3,
+                     padding='same',
+                     use_bias=False)(outputs)
     outputs = BatchNormalization()(outputs)
     outputs = Activation('swish')(outputs)
     
     outputs = Conv3D(filters=1,
-                    kernel_size=1,
-                    activation='sigmoid',
-                    padding='same')(outputs)
+                     kernel_size=1,
+                     activation='sigmoid',
+                     padding='same')(outputs)
 
     unet_model = Model(inputs=inputs, outputs=outputs)
 
     return(unet_model)
 
 def create_hypermapp3r_unet_model_3d(input_image_size,
-                                      data_format="channels_last"):
+                                     data_format="channels_last"):
     """
     Implementation of the "HyperMapp3r" U-net architecture
 
