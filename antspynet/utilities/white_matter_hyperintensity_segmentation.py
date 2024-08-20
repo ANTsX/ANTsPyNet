@@ -690,6 +690,7 @@ def shiva_pvs_segmentation(t1,
 
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
+    from ..architectures import create_shiva_unet_model_3d
 
     ################################
     #
@@ -763,11 +764,12 @@ def shiva_pvs_segmentation(t1,
             model_ids = [0, 1, 2, 3, 4, 5]
 
         for i in range(len(model_ids)):
-            model_file = get_pretrained_network("pvs_shiva_t1_" + str(model_ids[i]), 
-                                                antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("pvs_shiva_t1_" + str(model_ids[i]), 
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
             if verbose:
-                print("Loading", model_file)
-            model = tf.keras.models.load_model(model_file, compile=False, custom_objects={"tf": tf})
+                print("Loading", model_weights_file)
+            model = create_shiva_unet_model_3d(number_of_modalities=1)
+            model.load_weights(model_weights_file)
             if i == 0:
                 batchY = model.predict(batchX, verbose=verbose)
             else:
@@ -785,11 +787,12 @@ def shiva_pvs_segmentation(t1,
             model_ids = [0, 1, 2, 3, 4]
 
         for i in range(len(model_ids)):
-            model_file = get_pretrained_network("pvs_shiva_t1_flair_" + str(model_ids[i]),
-                                                antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("pvs_shiva_t1_flair_" + str(model_ids[i]),
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
             if verbose:
-                print("Loading", model_file)
-            model = tf.keras.models.load_model(model_file, compile=False, custom_objects={"tf": tf})
+                print("Loading", model_weights_file)
+            model = create_shiva_unet_model_3d(number_of_modalities=2)
+            model.load_weights(model_weights_file)
             if i == 0:
                 batchY = model.predict(batchX, verbose=verbose)
             else:
@@ -858,6 +861,7 @@ def shiva_wmh_segmentation(flair,
 
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
+    from ..architectures import create_shiva_unet_model_3d
 
     ################################
     #
@@ -931,11 +935,12 @@ def shiva_wmh_segmentation(flair,
             model_ids = [0, 1, 2, 3, 4]
 
         for i in range(len(model_ids)):
-            model_file = get_pretrained_network("wmh_shiva_flair_" + str(model_ids[i]), 
-                                                antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("wmh_shiva_flair_" + str(model_ids[i]), 
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
             if verbose:
-                print("Loading", model_file)
-            model = tf.keras.models.load_model(model_file, compile=False, custom_objects={"tf": tf})
+                print("Loading", model_weights_file)
+            model = create_shiva_unet_model_3d(number_of_modalities=1)
+            model.load_weights(model_weights_file)
             if i == 0:
                 batchY = model.predict(batchX, verbose=verbose)
             else:
@@ -945,19 +950,20 @@ def shiva_wmh_segmentation(flair,
         
     else:    
         batchX = np.zeros((1, *image_shape, 2))
-        batchX[0,:,:,:,0] = flair_preprocessed.numpy()
-        batchX[0,:,:,:,1] = t1_preprocessed.numpy()
+        batchX[0,:,:,:,0] = t1_preprocessed.numpy()
+        batchX[0,:,:,:,1] = flair_preprocessed.numpy()
 
         model_ids = [which_model,]
         if which_model == "all":
             model_ids = [0, 1, 2, 3, 4]
 
         for i in range(len(model_ids)):
-            model_file = get_pretrained_network("wmh_shiva_t1_flair" + str(model_ids[i]),
-                                                antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("wmh_shiva_t1_flair_" + str(model_ids[i]),
+                                                        antsxnet_cache_directory=antsxnet_cache_directory)
             if verbose:
-                print("Loading", model_file)
-            model = tf.keras.models.load_model(model_file, compile=False, custom_objects={"tf": tf})
+                print("Loading", model_weights_file)
+            model = create_shiva_unet_model_3d(number_of_modalities=2)
+            model.load_weights(model_weights_file)
             if i == 0:
                 batchY = model.predict(batchX, verbose=verbose)
             else:
@@ -968,6 +974,6 @@ def shiva_wmh_segmentation(flair,
     wmh = ants.from_numpy(np.squeeze(batchY), origin=reorient_template.origin,
                           spacing=reorient_template.spacing,
                           direction=reorient_template.direction)
-    wmh = ants.apply_ants_transform_to_image(xfrm.invert(), wmh, wmh)
+    wmh = ants.apply_ants_transform_to_image(xfrm.invert(), wmh, flair)
     return wmh
         

@@ -358,7 +358,6 @@ def create_shiva_unet_model_3d(number_of_modalities=1):
     def get_pad_shape(target_layer, reference_layer):
 
         delta = K.int_shape(target_layer)[1] - K.int_shape(reference_layer)[1]
-
         if delta % 2 != 0:
             pad_shape_0 = (int(delta/2), int(delta/2) + 1)
         else:
