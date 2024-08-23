@@ -685,13 +685,13 @@ def deep_flash(t1,
         priors_image_left_list = list()
         for i in range(len(labels_left)):
             prior_image = ants.threshold_image(prior_labels, labels_left[i], labels_left[i], 1, 0)
-            prior_image = ants.copy_image_info(t1_preprocessed, ants.smooth_image(prior_image, 1.0))
+            prior_image = ants.copy_image_info(t1_preprocessed, prior_image)
             priors_image_left_list.append(ants.smooth_image(prior_image, 1.0))
 
         priors_image_right_list = list()
         for i in range(len(labels_right)):
             prior_image = ants.threshold_image(prior_labels, labels_right[i], labels_right[i], 1, 0)
-            prior_image = ants.copy_image_info(t1_preprocessed, ants.smooth_image(prior_image, 1.0))
+            prior_image = ants.copy_image_info(t1_preprocessed, prior_image)
             priors_image_right_list.append(ants.smooth_image(prior_image, 1.0))
 
         probability_images_left = list()
@@ -831,7 +831,7 @@ def deep_flash(t1,
 
         ################################
         #
-        # Left:  do prediction of mtl, hippocampal, and ec regions and normalize to native space
+        # Left:  do prediction of whole, hippocampal, and amygdala regions and normalize to native space
         #
         ################################
 
@@ -935,7 +935,7 @@ def deep_flash(t1,
 
         ################################
         #
-        # Right:  do prediction of mtl, hippocampal, and ec regions and normalize to native space
+        # Right:  do prediction of whole, hippocampal, and amygdala regions and normalize to native space
         #
         ################################
 
