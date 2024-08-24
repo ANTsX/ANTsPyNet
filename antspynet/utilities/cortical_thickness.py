@@ -2,9 +2,7 @@ import numpy as np
 import tensorflow as tf
 import ants
 
-def cortical_thickness(t1,
-                       antsxnet_cache_directory=None,
-                       verbose=False):
+def cortical_thickness(t1, verbose=False):
 
     """
     Perform KellyKapowski cortical thickness using deep_atropos for
@@ -16,11 +14,6 @@ def cortical_thickness(t1,
     ---------
     t1 : ANTsImage
         input 3-D unprocessed T1-weighted brain image.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -40,8 +33,7 @@ def cortical_thickness(t1,
     if t1.dimension != 3:
         raise ValueError("Image dimension must be 3.")
 
-    atropos = deep_atropos(t1, do_preprocessing=True,
-        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+    atropos = deep_atropos(t1, do_preprocessing=True, verbose=verbose)
 
     # Kelly Kapowski cortical thickness
 
@@ -68,7 +60,6 @@ def longitudinal_cortical_thickness(t1s,
                                     initial_template="oasis",
                                     number_of_iterations=1,
                                     refinement_transform="antsRegistrationSyNQuick[a]",
-                                    antsxnet_cache_directory=None,
                                     verbose=False):
 
     """
@@ -94,11 +85,6 @@ def longitudinal_cortical_thickness(t1s,
     refinement_transform : string
        Transform for defining the refinement registration transform. See options in
        ants.registration.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -126,7 +112,7 @@ def longitudinal_cortical_thickness(t1s,
 
     sst = None
     if isinstance(initial_template, str):
-        template_file_name_path = get_antsxnet_data(initial_template, antsxnet_cache_directory=antsxnet_cache_directory)
+        template_file_name_path = get_antsxnet_data(initial_template)
         sst = ants.image_read(template_file_name_path)
     else:
         sst = initial_template
@@ -152,7 +138,6 @@ def longitudinal_cortical_thickness(t1s,
                 do_bias_correction=False,
                 do_denoising=False,
                 intensity_normalization_type="01",
-                antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             sst_tmp += t1_preprocessed['preprocessed_image']
 
@@ -178,7 +163,6 @@ def longitudinal_cortical_thickness(t1s,
             do_bias_correction=True,
             do_denoising=True,
             intensity_normalization_type="01",
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1s_preprocessed.append(t1_preprocessed)
 
@@ -188,8 +172,7 @@ def longitudinal_cortical_thickness(t1s,
     #
     ##################
 
-    sst_atropos = deep_atropos(sst, do_preprocessing=True,
-        antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+    sst_atropos = deep_atropos(sst, do_preprocessing=True, verbose=verbose)
 
     ###################
     #

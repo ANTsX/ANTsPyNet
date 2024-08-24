@@ -6,7 +6,6 @@ def desikan_killiany_tourville_labeling(t1,
                                         do_preprocessing=True,
                                         return_probability_images=False,
                                         do_lobar_parcellation=False,
-                                        antsxnet_cache_directory=None,
                                         verbose=False):
 
     """
@@ -223,11 +222,6 @@ def desikan_killiany_tourville_labeling(t1,
     do_lobar_parcellation : boolean
         Perform lobar parcellation (also divided by hemisphere).
 
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
-
     verbose : boolean
         Print progress to the screen.
 
@@ -267,7 +261,6 @@ def desikan_killiany_tourville_labeling(t1,
             template_transform_type=template_transform_type,
             do_bias_correction=True,
             do_denoising=True,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
@@ -277,8 +270,7 @@ def desikan_killiany_tourville_labeling(t1,
     #
     ################################
 
-    spatial_priors_file_name_path = get_antsxnet_data("priorDktLabels",
-      antsxnet_cache_directory=antsxnet_cache_directory)
+    spatial_priors_file_name_path = get_antsxnet_data("priorDktLabels")
     spatial_priors = ants.image_read(spatial_priors_file_name_path)
     priors_image_list = ants.ndimage_to_list(spatial_priors)
 
@@ -300,8 +292,7 @@ def desikan_killiany_tourville_labeling(t1,
         weight_decay = 1e-5, additional_options=("attentionGating"))
 
     weights_file_name = None
-    weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors",
-                                               antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors")
     unet_model.load_weights(weights_file_name)
 
     ################################
@@ -369,7 +360,7 @@ def desikan_killiany_tourville_labeling(t1,
         convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
         weight_decay = 1e-5, additional_options=("attentionGating"))
 
-    weights_file_name = get_pretrained_network("dktInner", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("dktInner")
     unet_model.load_weights(weights_file_name)
 
     ################################
@@ -467,8 +458,7 @@ def desikan_killiany_tourville_labeling(t1,
 
         dkt_lobes[dkt_lobes > len(lobar_labels)] = 0
 
-        six_tissue = deep_atropos(t1_preprocessed, do_preprocessing=False,
-            antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        six_tissue = deep_atropos(t1_preprocessed, do_preprocessing=False, verbose=verbose)
         atropos_seg = six_tissue['segmentation_image']
         if do_preprocessing:
             atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,

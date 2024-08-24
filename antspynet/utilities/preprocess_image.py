@@ -13,7 +13,6 @@ def preprocess_brain_image(image,
                            intensity_matching_type=None,
                            reference_image=None,
                            intensity_normalization_type=None,
-                           antsxnet_cache_directory=None,
                            verbose=True):
 
     """
@@ -66,11 +65,6 @@ def preprocess_brain_image(image,
         Either rescale the intensities to [0,1] (i.e., "01") or zero-mean, unit variance
         (i.e., "0mean").  If None normalization is not performed.
 
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
-
     verbose : boolean
         Print progress to the screen.
 
@@ -107,8 +101,7 @@ def preprocess_brain_image(image,
         if verbose == True:
             print("Preprocessing:  brain extraction.")
 
-        probability_mask = brain_extraction(preprocessed_image, modality=brain_extraction_modality,
-            antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        probability_mask = brain_extraction(preprocessed_image, modality=brain_extraction_modality, verbose=verbose)
         mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
         mask = ants.morphology(mask,"close",6).iMath_fill_holes()
 
@@ -117,7 +110,7 @@ def preprocess_brain_image(image,
     if template_transform_type is not None:
         template_image = None
         if isinstance(template, str):
-            template_file_name_path = get_antsxnet_data(template, antsxnet_cache_directory=antsxnet_cache_directory)
+            template_file_name_path = get_antsxnet_data(template)
             template_image = ants.image_read(template_file_name_path)
         else:
             template_image = template
@@ -129,8 +122,7 @@ def preprocess_brain_image(image,
             transforms = dict(fwdtransforms=registration['fwdtransforms'],
                               invtransforms=registration['invtransforms'])
         else:
-            template_probability_mask = brain_extraction(template_image, modality=brain_extraction_modality,
-                antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+            template_probability_mask = brain_extraction(template_image, modality=brain_extraction_modality, verbose=verbose)
             template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)
             template_brain_image = template_mask * template_image
 

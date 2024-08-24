@@ -4,7 +4,6 @@ import ants
 def deep_atropos(t1,
                  do_preprocessing=True,
                  use_spatial_priors=1,
-                 antsxnet_cache_directory=None,
                  verbose=False):
 
     """
@@ -41,11 +40,6 @@ def deep_atropos(t1,
     use_spatial_priors : integer
         Use MNI spatial tissue priors (0 or 1).  Currently, only '0' (no priors) and '1'
         (cerebellar prior only) are the only two options.  Default is 1.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -89,7 +83,6 @@ def deep_atropos(t1,
                 template_transform_type="antsRegistrationSyNQuickRepro[a]",
                 do_bias_correction=True,
                 do_denoising=True,
-                antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
@@ -110,7 +103,7 @@ def deep_atropos(t1,
         mni_priors = None
         channel_size = 1
         if use_spatial_priors != 0:
-            mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors", antsxnet_cache_directory=antsxnet_cache_directory)))
+            mni_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("croppedMni152Priors")))
             for i in range(len(mni_priors)):
                 mni_priors[i] = ants.copy_image_info(t1_preprocessed, mni_priors[i])
             channel_size = 2
@@ -126,9 +119,9 @@ def deep_atropos(t1,
 
         weights_file_name = ''
         if use_spatial_priors == 0:
-            weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation", antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentation")
         elif use_spatial_priors == 1:
-            weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentationWithPriors1", antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("sixTissueOctantBrainSegmentationWithPriors1")
         else:
             raise ValueError("use_spatial_priors must be a 0 or 1")
         unet_model.load_weights(weights_file_name)
@@ -203,19 +196,17 @@ def deep_atropos(t1,
         t1_mask = None
         preprocessed_images = list()
         for i in range(len(t1)):
-            n4 = ants.n4_bias_field_correction(t1[i], mask=t1[i]*0+1, 
+            n4 = ants.n4_bias_field_correction(t1[i], mask=t1[i]*0+1,
                                                convergence={'iters': [50, 50, 50, 50], 'tol': 0.0},
-                                               rescale_intensities=True, 
+                                               rescale_intensities=True,
                                                verbose=verbose)
-            if i == 0:            
-                t1_mask = brain_extraction(t1[0], modality="t1", 
-                                           antsxnet_cache_directory=antsxnet_cache_directory, 
-                                           verbose=verbose)
+            if i == 0:
+                t1_mask = brain_extraction(t1[0], modality="t1", verbose=verbose)
                 n4 = n4 * t1_mask
                 # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
                 #                                  source_mask=t1_mask,
                 #                                  reference_mask=hcp_template_brain_mask)
-                reg = ants.registration(hcp_templates[i], n4, 
+                reg = ants.registration(hcp_templates[i], n4,
                                         type_of_transform="antsRegistrationSyNQuick[a]",
                                         verbose=verbose)
                 preprocessed_images.append(reg['warpedmovout'])
@@ -224,13 +215,13 @@ def deep_atropos(t1,
                 # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
                 #                                  source_mask=t1_mask,
                 #                                  reference_mask=hcp_template_brain_mask)
-                n4 = ants.apply_transforms(hcp_templates[i], n4, 
+                n4 = ants.apply_transforms(hcp_templates[i], n4,
                                            transformlist=reg['fwdtransforms'],
                                            verbose=verbose)
                 preprocessed_images.append(n4)
-                
+
             preprocessed_images[i] = ants.iMath_normalize(preprocessed_images[i])
-        
+
 
         ################################
         #
@@ -264,8 +255,7 @@ def deep_atropos(t1,
         if verbose:
             print("DeepAtropos:  retrieving model weights.")
 
-        weights_file_name = get_pretrained_network("test_hcpya_da", 
-                                                   antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("test_hcpya_da")
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -278,12 +268,12 @@ def deep_atropos(t1,
             print("Prediction.")
 
         batchX = np.zeros((8, *patch_size, channel_size))
-        
+
         image_patches_list = list()
         for i in range(len(preprocessed_images)):
-            image_patches = extract_image_patches(preprocessed_images[i], 
+            image_patches = extract_image_patches(preprocessed_images[i],
                                                   patch_size=patch_size,
-                                                  max_number_of_patches="all", 
+                                                  max_number_of_patches="all",
                                                   stride_length=stride_length,
                                                   return_as_array=True)
             image_patches_list.append(image_patches)
@@ -294,9 +284,9 @@ def deep_atropos(t1,
 
         priors_patches_list = list()
         for i in range(len(hcp_template_priors)):
-            prior_patches = extract_image_patches(hcp_template_priors[i], 
+            prior_patches = extract_image_patches(hcp_template_priors[i],
                                                   patch_size=patch_size,
-                                                  max_number_of_patches="all", 
+                                                  max_number_of_patches="all",
                                                   stride_length=stride_length,
                                                   return_as_array=True)
             priors_patches_list.append(prior_patches)
@@ -330,7 +320,6 @@ def deep_atropos(t1,
         return_dict = {'segmentation_image' : segmentation_image,
                        'probability_images' : probability_images}
         return(return_dict)
-        
-            
-        
-        
+
+
+

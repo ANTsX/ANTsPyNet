@@ -42,7 +42,6 @@ def tid_neural_image_assessment(image,
                                 stride_length=None,
                                 padding_size=0,
                                 dimensions_to_predict=0,
-                                antsxnet_cache_directory=None,
                                 which_model="tidsQualityAssessment",
                                 image_scaling = [255,127.5],
                                 do_patch_scaling=False,
@@ -89,11 +88,6 @@ def tid_neural_image_assessment(image,
     dimensions_to_predict : integer or vector
         if image dimension is 3, this parameter specifies which dimensions should be used for
         prediction.  If more than one dimension is specified, the results are averaged.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to
-        ~/.keras/ANTsXNet/.
 
     which_model : string or tf/keras model
         model type e.g. string tidsQualityAssessment, koniqMS, koniqMS2 or koniqMS3 where
@@ -165,7 +159,7 @@ def tid_neural_image_assessment(image,
 
     is_koniq = "koniq" in which_model
     if which_model != "user_defined":
-        model_and_weights_file_name = get_pretrained_network(which_model, antsxnet_cache_directory=antsxnet_cache_directory)
+        model_and_weights_file_name = get_pretrained_network(which_model)
         tid_model = tf.keras.models.load_model(model_and_weights_file_name, compile=False)
 
     padding_size_vector = padding_size

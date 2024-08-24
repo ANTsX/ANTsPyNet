@@ -7,15 +7,14 @@ from tensorflow import keras
 def brain_tumor_segmentation(flair,
                      t1,
                      t1_contrast,
-                     t2,                     
+                     t2,
                      prediction_batch_size=16,
                      patch_stride_length=32,
                      do_preprocessing=True,
-                     antsxnet_cache_directory=None,
                      verbose=False):
 
     """
-    Perform brain tumor probabilistic segmentation given pre-aligned 
+    Perform brain tumor probabilistic segmentation given pre-aligned
     FLAIR, T1, T1 contrast, and T2 images.  Note that the underlying
     model is 3-D and requires images to be of > 64 voxels in each
     dimension.
@@ -46,15 +45,10 @@ def brain_tumor_segmentation(flair,
         Control memory usage for prediction.  More consequential for GPU-usage.
 
     patch_stride_length : 3-D tuple or int
-        Dictates the stride length for accumulating predicting patches.    
+        Dictates the stride length for accumulating predicting patches.
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -102,7 +96,6 @@ def brain_tumor_segmentation(flair,
             brain_extraction_modality="t1",
             do_bias_correction=do_bias_correction,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         brain_mask = ants.threshold_image(t1_preprocessing["brain_mask"], 0.5, 1, 1, 0)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
@@ -112,7 +105,6 @@ def brain_tumor_segmentation(flair,
             brain_extraction_modality=None,
             do_bias_correction=do_bias_correction,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
 
@@ -121,7 +113,6 @@ def brain_tumor_segmentation(flair,
             brain_extraction_modality=None,
             do_bias_correction=do_bias_correction,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_contrast_preprocessed = t1_contrast_preprocessing["preprocessed_image"] * brain_mask
 
@@ -130,7 +121,6 @@ def brain_tumor_segmentation(flair,
             brain_extraction_modality=None,
             do_bias_correction=do_bias_correction,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t2_preprocessed = t2_preprocessing["preprocessed_image"] * brain_mask
 
@@ -138,11 +128,11 @@ def brain_tumor_segmentation(flair,
         flair_preprocessed = ants.image_clone(flair)
         t1_preprocessed = ants.image_clone(t1)
         t1_contrast_preprocessed = ants.image_clone(t1_contrast)
-        t2_preprocessed = ants.image_clone(t2)        
+        t2_preprocessed = ants.image_clone(t2)
         brain_mask = ants.threshold_image(flair_preprocessed, 0, 0, 0, 1)
 
     images = [flair_preprocessed, t1_preprocessed, t1_contrast_preprocessed, t2_preprocessed]
-    
+
     indices = brain_mask > 0
     for i in range(len(images)):
         images[i] = (images[i] - images[i][indices].min()) / (images[i][indices].max() - images[i][indices].min())
@@ -171,7 +161,7 @@ def brain_tumor_segmentation(flair,
 
     model = create_sysu_media_unet_model_3d((*patch_size, channel_size),
                                              number_of_filters=number_of_filters)
-    weights_file_name = get_pretrained_network("bratsStage1", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("bratsStage1")
     model.load_weights(weights_file_name)
 
     ################################
@@ -209,7 +199,7 @@ def brain_tumor_segmentation(flair,
         print("  Total number of patches: ", str(total_number_of_patches))
         print("  Prediction batch size: ", str(prediction_batch_size))
         print("  Number of batches: ", str(number_of_batches))
-     
+
     prediction = np.zeros((total_number_of_patches, *patch_size, 1))
     for b in range(number_of_batches):
         batchX = None
@@ -221,9 +211,9 @@ def brain_tumor_segmentation(flair,
         indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
         for i in range(len(images)):
             batchX[:,:,:,:,i] = image_patches[i][indices,:,:,:]
-        
+
         if verbose:
-            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))
         prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:
@@ -233,7 +223,7 @@ def brain_tumor_segmentation(flair,
                                                            stride_length=patch_stride_length,
                                                            domain_image=brain_mask,
                                                            domain_image_is_mask=True)
-    
+
     tumor_mask = ants.threshold_image(tumor_probability_image, 0.5, 1.0, 1, 0)
 
     ################################################################################################
@@ -263,7 +253,7 @@ def brain_tumor_segmentation(flair,
         convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
         dropout_rate=0.0, weight_decay=0)
 
-    weights_file_name = get_pretrained_network("bratsStage2", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("bratsStage2")
     model.load_weights(weights_file_name)
 
     ################################
@@ -303,7 +293,7 @@ def brain_tumor_segmentation(flair,
         print("  Total number of patches: ", str(total_number_of_patches))
         print("  Prediction batch size: ", str(prediction_batch_size))
         print("  Number of batches: ", str(number_of_batches))
-     
+
     prediction = np.zeros((total_number_of_patches, *patch_size, channel_size))
     for b in range(number_of_batches):
         batchX = None
@@ -315,9 +305,9 @@ def brain_tumor_segmentation(flair,
         indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
         for i in range(len(images)):
             batchX[:,:,:,:,i] = image_patches[i][indices,:,:,:]
-        
+
         if verbose:
-            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))
         prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:

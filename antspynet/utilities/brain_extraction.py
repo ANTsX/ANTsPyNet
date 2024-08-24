@@ -5,7 +5,6 @@ import ants
 
 def brain_extraction(image,
                      modality,
-                     antsxnet_cache_directory=None,
                      verbose=False):
 
     """
@@ -35,11 +34,6 @@ def brain_extraction(image,
             * "t1t2infant": Combined T1-w/T2-w infant MRI h/t Martin Styner.
             * "t1infant": T1-w infant MRI h/t Martin Styner.
             * "t2infant": T2-w infant MRI h/t Martin Styner.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -81,14 +75,13 @@ def brain_extraction(image,
         if '[' in modality and ']' in modality:
             morphological_radius = int(modality.split("[")[1].split("]")[0])
 
-        brain_extraction_t1 = brain_extraction(image, modality="t1",
-          antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        brain_extraction_t1 = brain_extraction(image, modality="t1", verbose=verbose)
         brain_mask = ants.iMath_get_largest_component(
           ants.threshold_image(brain_extraction_t1, 0.5, 10000))
         brain_mask = ants.morphology(brain_mask,"close",morphological_radius).iMath_fill_holes()
 
         brain_extraction_t1nobrainer = brain_extraction(image * ants.iMath_MD(brain_mask, radius=morphological_radius),
-          modality = "t1nobrainer", antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+          modality = "t1nobrainer", verbose=verbose)
         brain_extraction_combined = ants.iMath_fill_holes(
           ants.iMath_get_largest_component(brain_extraction_t1nobrainer * brain_mask))
 
@@ -153,14 +146,12 @@ def brain_extraction(image,
         if verbose:
             print("Brain extraction:  retrieving model weights.")
 
-        weights_file_name = get_pretrained_network(weights_file_name_prefix,
-          antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(weights_file_name_prefix)
 
         if verbose:
             print("Brain extraction:  retrieving template.")
 
-        reorient_template_file_name_path = get_antsxnet_data("S_template3",
-          antsxnet_cache_directory=antsxnet_cache_directory)
+        reorient_template_file_name_path = get_antsxnet_data("S_template3")
         reorient_template = ants.image_read(reorient_template_file_name_path)
         if is_standard_network and (modality != "t1.v1" and modality != "mra"):
             ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
@@ -227,8 +218,7 @@ def brain_extraction(image,
 
         model = create_nobrainer_unet_model_3d((None, None, None, 1))
 
-        weights_file_name = get_pretrained_network("brainExtractionNoBrainer",
-          antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("brainExtractionNoBrainer")
         model.load_weights(weights_file_name)
 
         if verbose == True:

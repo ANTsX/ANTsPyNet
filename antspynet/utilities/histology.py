@@ -3,7 +3,6 @@ import ants
 import warnings
 
 def arterial_lesion_segmentation(image,
-                                 antsxnet_cache_directory=None,
                                  verbose=False):
 
     """
@@ -13,11 +12,6 @@ def arterial_lesion_segmentation(image,
     ---------
     image : ANTsImage
         input image
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -39,8 +33,7 @@ def arterial_lesion_segmentation(image,
 
     channel_size = 1
 
-    weights_file_name = get_pretrained_network("arterialLesionWeibinShi",
-        antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("arterialLesionWeibinShi")
 
     resampled_image_size = (512, 512)
 
