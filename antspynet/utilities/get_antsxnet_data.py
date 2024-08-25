@@ -29,7 +29,7 @@ def set_antsxnet_cache_directory(antsxnet_cache_dir):
         The directory to store ANTsXNet data. It will be created if it does not exist.
     """
     global _antsxnet_cache_directory
-    _antsxnet_cache_directory = antsxnet_cache_dir
+    _antsxnet_cache_directory = os.path.abspath(antsxnet_cache_dir)
 
     if not os.path.exists(_antsxnet_cache_directory):
         os.makedirs(_antsxnet_cache_directory)
