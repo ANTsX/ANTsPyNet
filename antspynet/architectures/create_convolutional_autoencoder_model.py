@@ -1,6 +1,6 @@
 
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose, Dense, Flatten, Reshape
+from tensorflow.keras.layers import Input, Conv2D, Conv2DTranspose, Conv3D, Conv3DTranspose, Dense, Flatten, Reshape
 
 import numpy as np
 import math

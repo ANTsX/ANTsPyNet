@@ -4,7 +4,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concatenate, ReLU, LeakyReLU,
+from tensorflow.keras.layers import (Add, Activation, BatchNormalization, Concatenate, Dropout, ReLU, LeakyReLU,
                                      Conv3D, Cropping3D, Conv3DTranspose, Input, Lambda, MaxPooling3D,
                                      ReLU, SpatialDropout3D, UpSampling3D, ZeroPadding3D,
                                      Cropping2D, Conv2D, Conv2DTranspose, MaxPooling2D, UpSampling2D, ZeroPadding2D)
@@ -325,8 +325,147 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
 
     return(unet_model)
 
+def create_shiva_unet_model_3d(number_of_modalities=1):
+    """
+    Implementation of the "shiva" U-net architecture used for PVS and WMH
+    segmentation.
+    
+    Publications:
+    
+    * PVS:  https://pubmed.ncbi.nlm.nih.gov/34262443/
+    * WMH:  https://pubmed.ncbi.nlm.nih.gov/38050769/
+
+    with respective GitHub repositories:
+    
+    * PVS:  https://github.com/pboutinaud/SHIVA_PVS
+    * WMH:  https://github.com/pboutinaud/SHIVA_WMH
+    
+    Arguments
+    ---------
+    number_of_modalities : integer
+        Specifies number of channels in the architecture.
+
+    Returns
+    -------
+    Keras model
+        A 3-D keras model defining the U-net network.
+
+    Example
+    -------
+    >>> model = antspynet.create_shiva_unet_model_3d()
+    """
+
+    def get_pad_shape(target_layer, reference_layer):
+
+        delta = K.int_shape(target_layer)[1] - K.int_shape(reference_layer)[1]
+        if delta % 2 != 0:
+            pad_shape_0 = (int(delta/2), int(delta/2) + 1)
+        else:
+            pad_shape_0 = (int(delta/2), int(delta/2))
+        delta = K.int_shape(target_layer)[2] - K.int_shape(reference_layer)[2]
+        if delta % 2 != 0:
+            pad_shape_1 = (int(delta/2), int(delta/2) + 1)
+        else:
+            pad_shape_1 = (int(delta/2), int(delta/2))
+        delta = K.int_shape(target_layer)[3] - K.int_shape(reference_layer)[3]
+        if delta % 2 != 0:
+            pad_shape_2 = (int(delta/2), int(delta/2) + 1)
+        else:
+            pad_shape_2 = (int(delta/2), int(delta/2))
+
+        if pad_shape_0 == (0, 0) and pad_shape_1 == (0, 0) and pad_shape_2 == (0, 0):
+            return None
+        else:
+            return((pad_shape_0, pad_shape_1, pad_shape_2))
+
+
+    input_image_size=(160, 214, 176, number_of_modalities)
+    number_of_filters = (10, 18, 32, 58, 104, 187, 337) 
+
+    inputs = Input(shape=input_image_size)
+    
+    # encoding layers
+
+    encoding_layers = list()
+
+    outputs = inputs
+    for i in range(len(number_of_filters)):
+
+        outputs = Conv3D(filters=number_of_filters[i],
+                        kernel_size=3,
+                        padding='same',
+                        use_bias=False)(outputs)
+        outputs = BatchNormalization()(outputs)
+        outputs = Activation('swish')(outputs)
+
+        outputs = Conv3D(filters=number_of_filters[i],
+                        kernel_size=3,
+                        padding='same',
+                        use_bias=False)(outputs)
+        outputs = BatchNormalization()(outputs)
+        outputs = Activation('swish')(outputs)
+
+        encoding_layers.append(outputs)    
+        outputs = MaxPooling3D(pool_size=2)(outputs)
+        dropout_rate = 0.05
+        if i > 0:
+            dropout_rate = 0.5
+        outputs = Dropout(rate=dropout_rate)(outputs)
+
+    # decoding layers
+
+    for i in range(len(encoding_layers)-1, -1, -1):
+
+        upsample_layer = UpSampling3D(size=2)(outputs)
+        pad_shape = get_pad_shape(encoding_layers[i], upsample_layer)
+        if i > 0 and pad_shape is not None:
+            zero_layer = ZeroPadding3D(padding=pad_shape)(upsample_layer)
+            outputs = Concatenate(axis=-1)([zero_layer, encoding_layers[i]])
+        else:
+            outputs = Concatenate(axis=-1)([upsample_layer, encoding_layers[i]])
+
+        outputs = Conv3D(filters=K.int_shape(outputs)[-1],
+                         kernel_size=3,
+                         padding='same',
+                         use_bias=False)(outputs)
+        outputs = BatchNormalization()(outputs)
+        outputs = Activation('swish')(outputs)
+
+        outputs = Conv3D(filters=number_of_filters[i],
+                         kernel_size=3,
+                         padding='same',
+                         use_bias=False)(outputs)
+        outputs = BatchNormalization()(outputs)
+        outputs = Activation('swish')(outputs)
+        outputs = Dropout(rate=0.5)(outputs)
+
+    # final
+
+    outputs = Conv3D(filters=10,
+                     kernel_size=3,
+                     padding='same',
+                     use_bias=False)(outputs)
+    outputs = BatchNormalization()(outputs)
+    outputs = Activation('swish')(outputs)
+    
+    outputs = Conv3D(filters=10,
+                     kernel_size=3,
+                     padding='same',
+                     use_bias=False)(outputs)
+    outputs = BatchNormalization()(outputs)
+    outputs = Activation('swish')(outputs)
+    
+    outputs = Conv3D(filters=1,
+                     kernel_size=1,
+                     activation='sigmoid',
+                     padding='same')(outputs)
+
+    unet_model = Model(inputs=inputs, outputs=outputs)
+
+    return(unet_model)
+
 def create_hypermapp3r_unet_model_3d(input_image_size,
-                                      data_format="channels_last"):
+                                     data_format="channels_last"):
     """
     Implementation of the "HyperMapp3r" U-net architecture
 

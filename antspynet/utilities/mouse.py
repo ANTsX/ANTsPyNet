@@ -331,6 +331,19 @@ def mouse_brain_parcellation(image,
                 - 4: cerebellum
                 - 5: main olfactory bulb
                 - 6: hippocampal formation
+            * "tct" - t2w with labels:
+                - 1: background
+                - 2: Prelimbic area
+                - 3: Infralimbic area
+                - 4: Medial group of the dorsal thalamus
+                - 5: Reticular nucleus of the thalamus
+                - 6: Hippocampal formation
+                - 7: Cerebellum            
+            * "jay" - stpt with labels:
+                - 1: 
+                - 2: 
+                - 3: 
+                - 4: 
                 
     antsxnet_cache_directory : string
         Destination directory for storing the downloaded template and model weights.
@@ -354,22 +367,42 @@ def mouse_brain_parcellation(image,
     from ..utilities import get_antsxnet_data
     from ..utilities import pad_or_crop_image_to_size
 
-    if which_parcellation == "nick": 
+    if (which_parcellation == "nick" or 
+        which_parcellation == "jay" or 
+        which_parcellation == "tct"): 
 
         template_spacing = (0.075, 0.075, 0.075)
         template_crop_size = (176, 128, 240)
         
-        template = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um"))
+        if which_parcellation == "nick":
+            template_string = "DevCCF P56 T2w"
+            template = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um"))
+            template_match = ants.rank_intensity(template)
+            template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask"))
+            weights_file_name = get_pretrained_network("mouseT2wBrainParcellation3DNick")
+        elif which_parcellation == "tct":
+            template_string = "DevCCF P56 T2w"
+            template = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um"))
+            template_match = ants.rank_intensity(template)
+            template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationTctMask"))
+            weights_file_name = get_pretrained_network("mouseT2wBrainParcellation3DTct")
+        elif which_parcellation == "jay":
+            template_string = "DevCCF P04 STPT"
+            template = ants.image_read(get_antsxnet_data("DevCCF_P04_STPT_50um"))
+            template_match = ants.histogram_equalize_image(template)
+            template_mask = ants.image_read(get_antsxnet_data("DevCCF_P04_STPT_50um_BrainParcellationJayMask"))
+            weights_file_name = get_pretrained_network("mouseSTPTBrainParcellation3DJay")
+        template_match = ((template_match - template_match.min()) / 
+                          (template_match.max() - template_match.min()))
+       
         ants.set_spacing(template, (0.05, 0.05, 0.05))
         template = ants.resample_image(template, template_spacing, use_voxels=False, interp_type=4)
         template = pad_or_crop_image_to_size(template, template_crop_size)
-        template_ri = ants.rank_intensity(template)
 
-        template_mask = ants.image_read(get_antsxnet_data("DevCCF_P56_MRI-T2_50um_BrainParcellationNickMask"))
         ants.set_spacing(template_mask, (0.05, 0.05, 0.05))
         template_mask = ants.resample_image(template_mask, template_spacing, use_voxels=False, interp_type=1)
         template_mask = pad_or_crop_image_to_size(template_mask, template_crop_size)
-
+    
         number_of_nonzero_labels = len(np.unique(template_mask.numpy())) - 1
 
         template_priors = list()
@@ -381,7 +414,7 @@ def mouse_brain_parcellation(image,
         if mask is None:
             if verbose:
                 print("Preprocessing:  brain extraction.")
-
+                
             mask = mouse_brain_extraction(image, modality="t2", 
                                           antsxnet_cache_directory=antsxnet_cache_directory, 
                                           verbose=verbose)   
@@ -392,12 +425,18 @@ def mouse_brain_parcellation(image,
         image_brain = image * mask    
 
         if verbose:
-            print("Preprocessing:  Warping to DevCCF P56 T2w mouse template.")
+            print("Preprocessing:  Warping to " + template_string + " mouse template.")
 
-        reg = ants.registration(template, image_brain, type_of_transform="antsRegistrationSyNQuick[a]", verbose=int(verbose))
+        reg = ants.registration(template, image_brain, 
+                                type_of_transform="antsRegistrationSyNQuickRepro[a]", 
+                                verbose=int(verbose))
 
-        image_warped = ants.rank_intensity(reg['warpedmovout'])
-        image_warped = ants.histogram_match_image(image_warped, template_ri)
+        image_warped = None
+        if which_parcellation == "nick" or which_parcellation == "tct":
+            image_warped = ants.rank_intensity(reg['warpedmovout'])
+        else:
+            image_warped = ants.image_clone(reg['warpedmovout'])    
+        image_warped = ants.histogram_match_image(image_warped, template_match)
         image_warped = (image_warped - image_warped.min()) / (image_warped.max() - image_warped.min())
 
         number_of_filters = (16, 32, 64, 128, 256)
@@ -410,7 +449,6 @@ def mouse_brain_parcellation(image,
                         number_of_filters=number_of_filters,
                         convolution_kernel_size=(3, 3, 3), 
                         deconvolution_kernel_size=(2, 2, 2))
-        weights_file_name = get_pretrained_network("mouseT2wBrainParcellation3DNick")
         unet_model.load_weights(weights_file_name)
         
         batchX = np.zeros((1, *template.shape, channel_size))
