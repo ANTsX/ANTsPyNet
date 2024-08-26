@@ -97,26 +97,26 @@ def multilabel_dice_coefficient(dimensionality=3, smoothing_factor=0.0):
         y_true_label = K.gather(y_true_permuted, indices = (1))
         y_pred_label = K.gather(y_pred_permuted, indices = (1))
 
-        y_true_label_f = K.flatten(y_true_label)
-        y_pred_label_f = K.flatten(y_pred_label)
+        y_true_label_f = tf.dtypes.cast(K.flatten(y_true_label), tf.float32)
+        y_pred_label_f = tf.dtypes.cast(K.flatten(y_pred_label), tf.float32)
         intersection = y_true_label_f * y_pred_label_f
         union = y_true_label_f + y_pred_label_f - intersection
 
-        numerator = K.sum(intersection)
-        denominator = K.sum(union)
+        numerator = tf.dtypes.cast(K.sum(intersection), tf.float32)
+        denominator = tf.dtypes.cast(K.sum(union), tf.float32)
 
         if number_of_labels > 2:
             for j in range(2, number_of_labels):
-                y_true_label = K.gather(y_true_permuted, indices = (j))
-                y_pred_label = K.gather(y_pred_permuted, indices = (j))
-                y_true_label_f = K.flatten(y_true_label)
-                y_pred_label_f = K.flatten(y_pred_label)
+                y_true_label = tf.dtypes.cast(K.gather(y_true_permuted, indices = (j)), tf.float32)
+                y_pred_label = tf.dtypes.cast(K.gather(y_pred_permuted, indices = (j)), tf.float32)
+                y_true_label_f = tf.dtypes.cast(K.flatten(y_true_label), tf.float32)
+                y_pred_label_f = tf.dtypes.cast(K.flatten(y_pred_label), tf.float32)
 
-                intersection = y_true_label_f * y_pred_label_f
+                intersection = tf.dtypes.cast(y_true_label_f, tf.float32) * tf.dtypes.cast(y_pred_label_f, tf.float32)
                 union = y_true_label_f + y_pred_label_f - intersection
 
-                numerator = numerator + K.sum(intersection)
-                denominator = denominator + K.sum(union)
+                numerator = numerator + tf.dtypes.cast(K.sum(intersection), tf.float32)
+                denominator = denominator + tf.dtypes.cast(K.sum(union), tf.float32)
 
         unionOverlap = numerator / denominator
 
@@ -209,7 +209,7 @@ def binary_surface_loss():
         def calculate_residual_distance_map(segmentation):
             residual_distance = np.zeros_like(segmentation)
 
-            positive_mask = segmentation.astype(np.bool)
+            positive_mask = segmentation.astype(bool)
             if positive_mask.any():
                 negative_mask = ~positive_mask
                 residual_distance = \
