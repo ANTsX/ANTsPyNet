@@ -47,8 +47,8 @@ def randomly_transform_image_data(reference_image,
         Number of simulated output image sets.
 
     transform_type : string
-        One of the following options: "translation", "rigid", "scaleShear", "affine",
-        "deformation", "affineAndDeformation".
+        One of the following options: "translation", "rotation", "rigid", "scaleShear", 
+        "affine", "deformation", "affineAndDeformation".
 
     sd_affine : float
         Parameter dictating deviation amount from identity for random linear
@@ -123,6 +123,8 @@ def randomly_transform_image_data(reference_image,
 
         if transform_type == 'translation':
             random_epsilon[:(len(identity_parameters) - image.dimension)] = 0
+        elif transform_type == "rotation": 
+            random_epsilon[(len(identity_parameters) - image.dimension):] = 0
 
         random_parameters = identity_parameters + random_epsilon
         random_matrix = np.reshape(
@@ -130,7 +132,7 @@ def randomly_transform_image_data(reference_image,
             newshape=(image.dimension, image.dimension))
         decomposition = polar_decomposition(random_matrix)
 
-        if transform_type == "rigid":
+        if transform_type == "rotation" or transform_type == "rigid":
             random_matrix = decomposition['Z']
         elif transform_type == "affine":
             random_matrix = decomposition['Xtilde']
@@ -156,7 +158,7 @@ def randomly_transform_image_data(reference_image,
             sd_smoothing=sd_smoothing)
         return(ants.transform_from_displacement_field(displacement_field))
 
-    admissible_transforms = ("translation", "rigid", "scaleShear", "affine",
+    admissible_transforms = ("translation", "rotation", "rigid", "scaleShear", "affine",
         "affineAndDeformation", "deformation")
     if not transform_type in admissible_transforms:
         raise ValueError("The specified transform is not a possible option.  Please see help menu.")
