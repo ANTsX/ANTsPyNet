@@ -2,7 +2,7 @@ import tensorflow as tf
 import ants
 import os.path
 
-_antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), ".keras/ANTsXNet")
+_antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), '.keras', 'ANTsXNet')
 
 def get_antsxnet_cache_directory():
     """Get the cache directory for ANTsXNet data. Data and pre-trained models will be
