@@ -407,7 +407,7 @@ def wmh_segmentation(flair,
 
     """
     Perform White matter hyperintensity probabilistic segmentation
-    given a pre-aligned FLAIR and T2 images.  Note that the underlying
+    given a pre-aligned FLAIR and T1 images.  Note that the underlying
     model is 3-D and requires images to be of > 64 voxels in each
     dimension.
 
