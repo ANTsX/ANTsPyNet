@@ -4,7 +4,6 @@ import tarfile
 def ukbb(image,
          pipeline="All",
          target="Age",
-         antsxnet_cache_directory=None,
          verbose=False):
 
     """
@@ -14,11 +13,6 @@ def ukbb(image,
     ---------
     image : ANTsImage
         input image
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -40,8 +34,7 @@ def ukbb(image,
 
     channel_size = 1
 
-    weights_file_name = get_pretrained_network("arterialLesionWeibinShi",
-        antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("arterialLesionWeibinShi")
 
     resampled_image_size = (512, 512)
 
@@ -86,7 +79,6 @@ def ukbb(image,
 def e13x5_brain_extraction(image,
                            view = "sagittal",
                            which_axis=2,
-                           antsxnet_cache_directory=None,
                            verbose=False):
 
     """
@@ -102,11 +94,6 @@ def e13x5_brain_extraction(image,
 
     which_axis : integer
         If 3-D image, which_axis specifies the direction of the "view".
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -128,11 +115,9 @@ def e13x5_brain_extraction(image,
 
     weights_file_name = ""
     if view.lower() == "coronal":
-        weights_file_name = get_pretrained_network("e13x5_coronal_weights",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("e13x5_coronal_weights")
     elif view.lower() == "sagittal":
-        weights_file_name = get_pretrained_network("e13x5_sagittal_weights",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("e13x5_sagittal_weights")
     else:
         raise ValueError("Valid view options are coronal and sagittal.")
 

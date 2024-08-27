@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 
 def mri_modality_classification(image,
-                                antsxnet_cache_directory=None,
                                 verbose=False):
 
     """
@@ -24,11 +23,7 @@ def mri_modality_classification(image,
     image : ANTsImage
         raw 3-D MRI whole head image.
 
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
-        
+
     verbose : boolean
         Print progress to the screen.
 
@@ -83,8 +78,7 @@ def mri_modality_classification(image,
     #
     ################################
 
-    weights_file_name = get_pretrained_network("mriModalityClassification",
-                                               antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("mriModalityClassification")
 
     modality_types = ["T1", "T2", "FLAIR", "T2Star", "Mean DWI", "Mean Bold", "ASL Perfusion"]
 

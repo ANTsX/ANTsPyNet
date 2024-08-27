@@ -2,9 +2,41 @@ import tensorflow as tf
 import ants
 import os.path
 
+_antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), '.keras', 'ANTsXNet')
+
+def get_antsxnet_cache_directory():
+    """Get the cache directory for ANTsXNet data. Data and pre-trained models will be
+    downloaded here.
+
+    The default directory is ~/.keras/ANTsXNet.
+
+    Returns
+    -------
+    antsxnet_cache_directory string
+        The directory to store ANTsXNet data.
+
+    """
+    return(_antsxnet_cache_directory)
+
+
+def set_antsxnet_cache_directory(antsxnet_cache_dir):
+    """Set the cache directory for ANTsXNet data. Data and pre-trained models will be
+    downloaded here.
+
+    Arguments
+    ---------
+    antsxnet_cache_dir string
+        The directory to store ANTsXNet data. It will be created if it does not exist.
+    """
+    global _antsxnet_cache_directory
+    _antsxnet_cache_directory = os.path.abspath(antsxnet_cache_dir)
+
+    if not os.path.exists(_antsxnet_cache_directory):
+        os.makedirs(_antsxnet_cache_directory)
+
+
 def get_antsxnet_data(file_id=None,
-                      target_file_name=None,
-                      antsxnet_cache_directory=None):
+                      target_file_name=None):
 
     """
     Download data such as prefabricated templates and spatial priors.
@@ -19,10 +51,6 @@ def get_antsxnet_data(file_id=None,
 
     target_file_name string
        Optional target filename.
-
-    antsxnet_cache_directory string
-       Optional target output.  If not specified these data will be downloaded
-       to the subdirectory ~/.keras/ANTsXNet/.
 
     Returns
     -------
@@ -151,10 +179,7 @@ def get_antsxnet_data(file_id=None,
         else:
             target_file_name = file_id + ".nii.gz"
 
-    if antsxnet_cache_directory is None:
-        antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), ".keras/ANTsXNet")
-
-    target_file_name_path = os.path.join(antsxnet_cache_directory, target_file_name)
+    target_file_name_path = os.path.join(get_antsxnet_cache_directory(), target_file_name)
 
     # keras get_file does not work on read-only file systems. It will attempt to download the file even
     # if it exists. This is a problem for shared cache directories and read-only containers.
@@ -166,6 +191,6 @@ def get_antsxnet_data(file_id=None,
             raise NotImplementedError(err_msg)
 
         target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
-                                                        cache_subdir=antsxnet_cache_directory)
+                                                        cache_subdir=get_antsxnet_cache_directory())
 
     return(target_file_name_path)

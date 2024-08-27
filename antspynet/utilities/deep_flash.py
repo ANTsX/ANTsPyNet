@@ -10,7 +10,6 @@ def deep_flash(t1,
                which_parcellation="yassa",
                do_preprocessing=True,
                use_rank_intensity=True,
-               antsxnet_cache_directory=None,
                verbose=False
                ):
 
@@ -38,7 +37,7 @@ def deep_flash(t1,
     Label 16:  right CA1
     Label 17:  left subiculum
     Label 18:  right subiculum
-        
+
     Preprocessing on the training data consisted of:
        * n4 bias correction,
        * affine registration to the "deep flash" template.
@@ -50,9 +49,9 @@ def deep_flash(t1,
         raw or preprocessed 3-D T1-weighted brain image.
 
     t2 : ANTsImage
-        Optional 3-D T2-weighted brain image for yassa parcellation.  If 
+        Optional 3-D T2-weighted brain image for yassa parcellation.  If
         specified, it is assumed to be pre-aligned to the t1.
-        
+
     which_parcellation : string --- "yassa"
         See above label descriptions.
 
@@ -63,11 +62,6 @@ def deep_flash(t1,
         If false, use histogram matching with cropped template ROI.  Otherwise,
         use a rank intensity transform on the cropped ROI.  Only for "yassa"
         parcellation.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -128,8 +122,7 @@ def deep_flash(t1,
                 print("Preprocessing T1.")
 
             # Brain extraction
-            probability_mask = brain_extraction(t1_preprocessed, modality="t1",
-                antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+            probability_mask = brain_extraction(t1_preprocessed, modality="t1", verbose=verbose)
             t1_mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
             t1_preprocessed = t1_preprocessed * t1_mask
 
@@ -197,8 +190,7 @@ def deep_flash(t1,
         #
         ################################
 
-        spatial_priors_file_name_path = get_antsxnet_data("deepFlashPriors",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        spatial_priors_file_name_path = get_antsxnet_data("deepFlashPriors")
         spatial_priors = ants.image_read(spatial_priors_file_name_path)
         priors_image_list = ants.ndimage_to_list(spatial_priors)
         for i in range(len(priors_image_list)):
@@ -302,7 +294,7 @@ def deep_flash(t1,
 
         if verbose:
             print("DeepFlash: retrieving model weights (left).")
-        weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(network_name)
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -431,7 +423,7 @@ def deep_flash(t1,
 
         if verbose:
             print("DeepFlash: retrieving model weights (right).")
-        weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(network_name)
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -629,8 +621,7 @@ def deep_flash(t1,
                 print("Preprocessing T1.")
 
             # Brain extraction
-            probability_mask = brain_extraction(t1_preprocessed, modality="t1",
-                antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+            probability_mask = brain_extraction(t1_preprocessed, modality="t1", verbose=verbose)
             t1_mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
             t1_preprocessed = t1_preprocessed * t1_mask
 
@@ -657,9 +648,9 @@ def deep_flash(t1,
         labels_left = list((104, 105, 106, 108, 109, 110, 114, 115, 126, 6001, 6003, 6008, 6009, 6010))
         labels_right = list((204, 205, 206, 208, 209, 210, 214, 215, 226, 7001, 7003, 7008, 7009, 7010))
 
-        # labels_left = list((103, 104, 105, 106, 108, 109, 110, 111, 112, 114, 115, 126, 
+        # labels_left = list((103, 104, 105, 106, 108, 109, 110, 111, 112, 114, 115, 126,
         #                     6001, 6003, 6005, 6006, 6007, 6008, 6009, 6010, 6015))
-        # labels_right = list((203, 204, 205, 206, 208, 209, 210, 211, 212, 214, 215, 226, 
+        # labels_right = list((203, 204, 205, 206, 208, 209, 210, 211, 212, 214, 215, 226,
         #                     7001, 7003, 7005, 7006, 7007, 7008, 7009, 7010, 7015))
         labels = np.array(np.repeat(0, 1 + len(labels_left) + len(labels_right)))
         labels[1::2] = labels_left
@@ -678,8 +669,7 @@ def deep_flash(t1,
         #
         ################################
 
-        prior_labels_file_name_path = get_antsxnet_data("deepFlashTemplate2Labels",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        prior_labels_file_name_path = get_antsxnet_data("deepFlashTemplate2Labels")
         prior_labels = ants.image_read(prior_labels_file_name_path)
 
         priors_image_left_list = list()
@@ -705,7 +695,7 @@ def deep_flash(t1,
         direction = tmp_cropped.direction
 
         t1_template_roi_left = ants.crop_indices(t1_template, lower_bound_left, upper_bound_left)
-        t1_template_roi_left = ((t1_template_roi_left - t1_template_roi_left.min()) / 
+        t1_template_roi_left = ((t1_template_roi_left - t1_template_roi_left.min()) /
                                 (t1_template_roi_left.max() - t1_template_roi_left.min()) * 2.0 - 1.0)
 
         probability_images_right = list()
@@ -716,7 +706,7 @@ def deep_flash(t1,
         origin_right = tmp_cropped.origin
 
         t1_template_roi_right = ants.crop_indices(t1_template, lower_bound_right, upper_bound_right)
-        t1_template_roi_right = ((t1_template_roi_right - t1_template_roi_right.min()) / 
+        t1_template_roi_right = ((t1_template_roi_right - t1_template_roi_right.min()) /
                                  (t1_template_roi_right.max() - t1_template_roi_right.min()) * 2.0 - 1.0)
 
         ################################
@@ -767,7 +757,7 @@ def deep_flash(t1,
 
         if verbose:
             print("DeepFlash: retrieving model weights (left).")
-        weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(network_name)
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -869,7 +859,7 @@ def deep_flash(t1,
 
         if verbose:
             print("DeepFlash: retrieving model weights (right).")
-        weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(network_name)
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -1018,5 +1008,5 @@ def deep_flash(t1,
                         }
         return(return_dict)
 
-    else: 
+    else:
         raise ValueError("Unrecognized parcellation.")

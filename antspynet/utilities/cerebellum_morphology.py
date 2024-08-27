@@ -5,7 +5,6 @@ def cerebellum_morphology(t1,
                           cerebellum_mask=None,
                           compute_thickness_image=False,
                           do_preprocessing=True,
-                          antsxnet_cache_directory=None,
                           verbose=False
                           ):
 
@@ -66,11 +65,6 @@ def cerebellum_morphology(t1,
     do_preprocessing : boolean
         Perform N4 bias correction and spatiall normalize to template space.
 
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
-
     verbose : boolean
         Print progress to the screen.
 
@@ -115,8 +109,7 @@ def cerebellum_morphology(t1,
 
     # spatial priors are in the space of the cerebellar template.  First three are
     # csf, gm, and wm followed by the regions.
-    spatial_priors_file_name_path = get_antsxnet_data("magetCerebellumTemplatePriors",
-        antsxnet_cache_directory=antsxnet_cache_directory)
+    spatial_priors_file_name_path = get_antsxnet_data("magetCerebellumTemplatePriors")
     spatial_priors = ants.image_read(spatial_priors_file_name_path)
     priors_image_list = ants.ndimage_to_list(spatial_priors)
     for i in range(len(priors_image_list)):
@@ -142,8 +135,7 @@ def cerebellum_morphology(t1,
 
     if cerebellum_mask is None:
         # Brain extraction
-        probability_mask = brain_extraction(t1_preprocessed, modality="t1",
-            antsxnet_cache_directory=antsxnet_cache_directory, verbose=verbose)
+        probability_mask = brain_extraction(t1_preprocessed, modality="t1", verbose=verbose)
         t1_mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
         t1_brain_preprocessed = t1_preprocessed * t1_mask
 
@@ -242,7 +234,7 @@ def cerebellum_morphology(t1,
         if verbose:
             print("Retrieving model weights.")
 
-        weights_file_name = get_pretrained_network(network_name, antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network(network_name)
         unet_model.load_weights(weights_file_name)
 
         ################################

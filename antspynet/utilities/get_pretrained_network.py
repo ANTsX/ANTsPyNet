@@ -1,9 +1,10 @@
 import os.path
 import tensorflow as tf
 
+from antspynet.utilities.get_antsxnet_data import get_antsxnet_cache_directory
+
 def get_pretrained_network(file_id=None,
-                           target_file_name=None,
-                           antsxnet_cache_directory=None):
+                           target_file_name=None):
 
     """
     Download pretrained network/weights.
@@ -18,10 +19,6 @@ def get_pretrained_network(file_id=None,
 
     target_file_name string
        Optional target filename.
-
-    antsxnet_cache_directory string
-       Optional target output.  If not specified these data will be downloaded
-       to the subdirectory ~/.keras/ANTsXNet/.
 
     Returns
     -------
@@ -335,10 +332,7 @@ def get_pretrained_network(file_id=None,
     if target_file_name is None:
         target_file_name = file_id + ".h5"
 
-    if antsxnet_cache_directory is None:
-        antsxnet_cache_directory = os.path.join(os.path.expanduser('~'), ".keras/ANTsXNet")
-
-    target_file_name_path = os.path.join(antsxnet_cache_directory, target_file_name)
+    target_file_name_path = os.path.join(get_antsxnet_cache_directory(), target_file_name)
 
     # keras get_file does not work on read-only file systems. It will attempt to download the file even
     # if it exists. This is a problem for shared cache directories and read-only containers.
@@ -350,6 +344,6 @@ def get_pretrained_network(file_id=None,
             raise NotImplementedError(err_msg)
 
         target_file_name_path = tf.keras.utils.get_file(target_file_name, url,
-                                                        cache_subdir=antsxnet_cache_directory)
+                                                        cache_subdir=get_antsxnet_cache_directory())
 
     return(target_file_name_path)

@@ -5,7 +5,6 @@ import ants
 def claustrum_segmentation(t1,
                            do_preprocessing=True,
                            use_ensemble=True,
-                           antsxnet_cache_directory=None,
                            verbose=False):
 
     """
@@ -30,11 +29,6 @@ def claustrum_segmentation(t1,
 
     use_ensemble : boolean
         check whether to use all 3 sets of weights.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -75,7 +69,6 @@ def claustrum_segmentation(t1,
             brain_extraction_modality="t1",
             do_bias_correction=True,
             do_denoising=True,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"]
         brain_mask = t1_preprocessing["brain_mask"]
@@ -121,7 +114,7 @@ def claustrum_segmentation(t1,
 
     unet_axial_models = list()
     for i in range(number_of_models):
-        weights_file_name = get_pretrained_network("claustrum_axial_" + str(i), antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("claustrum_axial_" + str(i))
         unet_axial_models.append(create_sysu_media_unet_model_2d((*image_size, number_of_channels), anatomy="claustrum"))
         unet_axial_models[i].load_weights(weights_file_name)
 
@@ -130,7 +123,7 @@ def claustrum_segmentation(t1,
 
     unet_coronal_models = list()
     for i in range(number_of_models):
-        weights_file_name = get_pretrained_network("claustrum_coronal_" + str(i), antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("claustrum_coronal_" + str(i))
         unet_coronal_models.append(create_sysu_media_unet_model_2d((*image_size, number_of_channels), anatomy="claustrum"))
         unet_coronal_models[i].load_weights(weights_file_name)
 

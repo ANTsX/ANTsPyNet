@@ -8,7 +8,6 @@ def brain_age(t1,
               do_preprocessing=True,
               number_of_simulations=0,
               sd_affine=0.01,
-              antsxnet_cache_directory=None,
               verbose=False):
 
     """
@@ -42,11 +41,6 @@ def brain_age(t1,
 
     sd_affine : float
         Define the standard deviation of the affine transformation parameter.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -85,7 +79,6 @@ def brain_age(t1,
             template_transform_type="antsRegistrationSyNQuickRepro[a]",
             do_bias_correction=True,
             do_denoising=True,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
@@ -97,7 +90,7 @@ def brain_age(t1,
     #
     ################################
 
-    model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet", antsxnet_cache_directory=antsxnet_cache_directory)
+    model_weights_file_name = get_pretrained_network("brainAgeDeepBrainNet")
     model = keras.models.load_model(model_weights_file_name)
 
     # The paper only specifies that 80 slices are used for prediction.  I just picked

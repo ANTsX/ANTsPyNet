@@ -24,7 +24,7 @@ class AttentionLayer2D(Layer):
     number_of_channels : integer
         Number of channels
 
-    Returns
+    Returnsg
     -------
     Layer
         A keras layer

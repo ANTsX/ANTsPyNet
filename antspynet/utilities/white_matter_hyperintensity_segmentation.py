@@ -7,7 +7,6 @@ from tensorflow import keras
 def sysu_media_wmh_segmentation(flair,
                                 t1=None,
                                 use_ensemble=True,
-                                antsxnet_cache_directory=None,
                                 verbose=False):
 
     """
@@ -41,11 +40,6 @@ def sysu_media_wmh_segmentation(flair,
 
     use_ensemble : boolean
         check whether to use all 3 sets of weights.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -89,7 +83,6 @@ def sysu_media_wmh_segmentation(flair,
         brain_extraction_modality=None,
         do_bias_correction=False,
         do_denoising=False,
-        antsxnet_cache_directory=antsxnet_cache_directory,
         verbose=verbose)
     flair_preprocessed = flair_preprocessing["preprocessed_image"]
     flair_preprocessed.set_direction(simplified_direction)
@@ -104,7 +97,6 @@ def sysu_media_wmh_segmentation(flair,
             brain_extraction_modality=None,
             do_bias_correction=False,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"]
         t1_preprocessed.set_direction(simplified_direction)
@@ -172,11 +164,9 @@ def sysu_media_wmh_segmentation(flair,
     unet_models = list()
     for i in range(number_of_models):
         if number_of_channels == 1:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i),
-                antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairOnlyModel" + str(i))
         else:
-            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i),
-                antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("sysuMediaWmhFlairT1Model" + str(i))
         unet_model = create_sysu_media_unet_model_2d((*image_size, number_of_channels))
         unet_loss = binary_dice_coefficient(smoothing_factor=1.)
         unet_model.compile(optimizer=keras.optimizers.Adam(learning_rate=2e-4),
@@ -259,7 +249,6 @@ def hypermapp3r_segmentation(t1,
                              flair,
                              number_of_monte_carlo_iterations=30,
                              do_preprocessing=True,
-                             antsxnet_cache_directory=None,
                              verbose=False):
 
     """
@@ -292,11 +281,6 @@ def hypermapp3r_segmentation(t1,
 
     do_preprocessing : boolean
         See description above.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -335,7 +319,6 @@ def hypermapp3r_segmentation(t1,
             brain_extraction_modality="t1",
             do_bias_correction=True,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         brain_mask = t1_preprocessing['brain_mask']
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
@@ -355,7 +338,6 @@ def hypermapp3r_segmentation(t1,
             brain_extraction_modality=None,
             do_bias_correction=True,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
 
@@ -392,7 +374,7 @@ def hypermapp3r_segmentation(t1,
         print("    HyperMapp3r: generate network and load weights.")
 
     model = create_hypermapp3r_unet_model_3d((*input_image_size, 2))
-    weights_file_name = get_pretrained_network("hyperMapp3r", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("hyperMapp3r")
     model.load_weights(weights_file_name)
 
     if verbose:
@@ -421,7 +403,6 @@ def wmh_segmentation(flair,
                      prediction_batch_size=16,
                      patch_stride_length=32,
                      do_preprocessing=True,
-                     antsxnet_cache_directory=None,
                      verbose=False):
 
     """
@@ -457,15 +438,10 @@ def wmh_segmentation(flair,
         Control memory usage for prediction.  More consequential for GPU-usage.
 
     patch_stride_length : 3-D tuple or int
-        Dictates the stride length for accumulating predicting patches.    
+        Dictates the stride length for accumulating predicting patches.
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -515,7 +491,6 @@ def wmh_segmentation(flair,
             brain_extraction_modality="t1",
             do_bias_correction=True,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         brain_mask = ants.threshold_image(t1_preprocessing["brain_mask"], 0.5, 1, 1, 0)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
@@ -525,7 +500,6 @@ def wmh_segmentation(flair,
             brain_extraction_modality=None,
             do_bias_correction=True,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
 
@@ -561,9 +535,9 @@ def wmh_segmentation(flair,
                                              number_of_filters=number_of_filters)
     weights_file_name = None
     if use_combined_model:
-        weights_file_name = get_pretrained_network("antsxnetWmhOr", antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("antsxnetWmhOr")
     else:
-        weights_file_name = get_pretrained_network("antsxnetWmh", antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("antsxnetWmh")
     model.load_weights(weights_file_name)
 
     ################################
@@ -607,7 +581,7 @@ def wmh_segmentation(flair,
         print("Total number of patches: ", str(total_number_of_patches))
         print("Prediction batch size: ", str(prediction_batch_size))
         print("Number of batches: ", str(number_of_batches + 1))
-     
+
     prediction = np.zeros((total_number_of_patches, *patch_size, 1))
     for b in range(number_of_batches):
         batchX = None
@@ -619,9 +593,9 @@ def wmh_segmentation(flair,
         indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
         batchX[:,:,:,:,0] = flair_patches[indices,:,:,:]
         batchX[:,:,:,:,1] = t1_patches[indices,:,:,:]
-        
+
         if verbose:
-            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))
         prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:
@@ -639,12 +613,11 @@ def shiva_pvs_segmentation(t1,
                            flair=None,
                            which_model="all",
                            do_preprocessing=True,
-                           antsxnet_cache_directory=None,
                            verbose=False):
 
     """
     Perform segmentation of perivascular (PVS) or Vircho-Robin spaces (VRS).
-    
+
     https://pubmed.ncbi.nlm.nih.gov/34262443/
 
     with the original implementation available here:
@@ -661,7 +634,7 @@ def shiva_pvs_segmentation(t1,
 
     which_model : integer or string
         Several models were trained for the case of T1-only or T1/FLAIR image
-        pairs.  One can use a specific single trained model or the average of 
+        pairs.  One can use a specific single trained model or the average of
         the entire ensemble.  I.e., options are:
             * For T1-only:  0, 1, 2, 3, 4, 5.
             * For T1/FLAIR: 0, 1, 2, 3, 4.
@@ -669,11 +642,6 @@ def shiva_pvs_segmentation(t1,
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
-            
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -712,7 +680,6 @@ def shiva_pvs_segmentation(t1,
             do_bias_correction=True,
             do_denoising=False,
             intensity_normalization_type="01",
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         brain_mask = ants.threshold_image(t1_preprocessing["brain_mask"], 0.5, 1, 1, 0)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
@@ -724,7 +691,6 @@ def shiva_pvs_segmentation(t1,
                 do_bias_correction=True,
                 do_denoising=False,
                 intensity_normalization_type="01",
-                antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
 
@@ -737,13 +703,13 @@ def shiva_pvs_segmentation(t1,
     image_shape = (160, 214, 176)
     reorient_template = ants.from_numpy(np.ones(image_shape), origin=(0, 0, 0),
                                         spacing=(1, 1, 1), direction=np.eye(3))
-        
+
     center_of_mass_template = ants.get_center_of_mass(reorient_template)
     center_of_mass_image = ants.get_center_of_mass(brain_mask)
     translation = np.round(np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template))
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.round(np.asarray(center_of_mass_template)), translation=translation)
-    
+
     t1_preprocessed = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reorient_template)
     if flair is not None:
         flair_preprocessed = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reorient_template)
@@ -764,8 +730,7 @@ def shiva_pvs_segmentation(t1,
             model_ids = [0, 1, 2, 3, 4, 5]
 
         for i in range(len(model_ids)):
-            model_weights_file = get_pretrained_network("pvs_shiva_t1_" + str(model_ids[i]), 
-                                                        antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("pvs_shiva_t1_" + str(model_ids[i]))
             if verbose:
                 print("Loading", model_weights_file)
             model = create_shiva_unet_model_3d(number_of_modalities=1)
@@ -775,9 +740,9 @@ def shiva_pvs_segmentation(t1,
             else:
                 batchY += model.predict(batchX, verbose=verbose)
 
-        batchY /= len(model_ids) 
-        
-    else:    
+        batchY /= len(model_ids)
+
+    else:
         batchX = np.zeros((1, *image_shape, 2))
         batchX[0,:,:,:,0] = t1_preprocessed.numpy()
         batchX[0,:,:,:,1] = flair_preprocessed.numpy()
@@ -787,8 +752,7 @@ def shiva_pvs_segmentation(t1,
             model_ids = [0, 1, 2, 3, 4]
 
         for i in range(len(model_ids)):
-            model_weights_file = get_pretrained_network("pvs_shiva_t1_flair_" + str(model_ids[i]),
-                                                        antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("pvs_shiva_t1_flair_" + str(model_ids[i]))
             if verbose:
                 print("Loading", model_weights_file)
             model = create_shiva_unet_model_3d(number_of_modalities=2)
@@ -798,26 +762,25 @@ def shiva_pvs_segmentation(t1,
             else:
                 batchY += model.predict(batchX, verbose=verbose)
 
-        batchY /= len(model_ids)            
-            
+        batchY /= len(model_ids)
+
     pvs = ants.from_numpy(np.squeeze(batchY), origin=reorient_template.origin,
                           spacing=reorient_template.spacing,
                           direction=reorient_template.direction)
     pvs = ants.apply_ants_transform_to_image(xfrm.invert(), pvs, t1)
     return pvs
-        
+
 def shiva_wmh_segmentation(flair,
                            t1=None,
                            which_model="all",
                            do_preprocessing=True,
-                           antsxnet_cache_directory=None,
                            verbose=False):
 
     """
     Perform segmentation of white matter hyperintensities.
-    
+
     https://pubmed.ncbi.nlm.nih.gov/38050769/
-    
+
     with the original implementation available here:
 
     https://github.com/pboutinaud/SHIVA_WMH
@@ -832,7 +795,7 @@ def shiva_wmh_segmentation(flair,
 
     which_model : integer or string
         Several models were trained for the case of T1-only or T1/FLAIR image
-        pairs.  One can use a specific single trained model or the average of 
+        pairs.  One can use a specific single trained model or the average of
         the entire ensemble.  I.e., options are:
             * For T1-only:  0, 1, 2, 3, 4.
             * For T1/FLAIR: 0, 1, 2, 3, 4.
@@ -840,11 +803,6 @@ def shiva_wmh_segmentation(flair,
 
     do_preprocessing : boolean
         perform n4 bias correction, intensity truncation, brain extraction.
-            
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -883,7 +841,6 @@ def shiva_wmh_segmentation(flair,
             do_bias_correction=True,
             do_denoising=False,
             intensity_normalization_type="01",
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         brain_mask = ants.threshold_image(flair_preprocessing["brain_mask"], 0.5, 1, 1, 0)
         flair_preprocessed = flair_preprocessing["preprocessed_image"] * brain_mask
@@ -895,7 +852,6 @@ def shiva_wmh_segmentation(flair,
                 do_bias_correction=True,
                 do_denoising=False,
                 intensity_normalization_type="01",
-                antsxnet_cache_directory=antsxnet_cache_directory,
                 verbose=verbose)
             t1_preprocessed = t1_preprocessing["preprocessed_image"] * brain_mask
 
@@ -908,13 +864,13 @@ def shiva_wmh_segmentation(flair,
     image_shape = (160, 214, 176)
     reorient_template = ants.from_numpy(np.ones(image_shape), origin=(0, 0, 0),
                                         spacing=(1, 1, 1), direction=np.eye(3))
-        
+
     center_of_mass_template = ants.get_center_of_mass(reorient_template)
     center_of_mass_image = ants.get_center_of_mass(brain_mask)
     translation = np.round(np.asarray(center_of_mass_image) - np.asarray(center_of_mass_template))
     xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
         center=np.round(np.asarray(center_of_mass_template)), translation=translation)
-    
+
     flair_preprocessed = ants.apply_ants_transform_to_image(xfrm, flair_preprocessed, reorient_template)
     if t1 is not None:
         t1_preprocessed = ants.apply_ants_transform_to_image(xfrm, t1_preprocessed, reorient_template)
@@ -935,8 +891,7 @@ def shiva_wmh_segmentation(flair,
             model_ids = [0, 1, 2, 3, 4]
 
         for i in range(len(model_ids)):
-            model_weights_file = get_pretrained_network("wmh_shiva_flair_" + str(model_ids[i]), 
-                                                        antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("wmh_shiva_flair_" + str(model_ids[i]))
             if verbose:
                 print("Loading", model_weights_file)
             model = create_shiva_unet_model_3d(number_of_modalities=1)
@@ -946,9 +901,9 @@ def shiva_wmh_segmentation(flair,
             else:
                 batchY += model.predict(batchX, verbose=verbose)
 
-        batchY /= len(model_ids) 
-        
-    else:    
+        batchY /= len(model_ids)
+
+    else:
         batchX = np.zeros((1, *image_shape, 2))
         batchX[0,:,:,:,0] = t1_preprocessed.numpy()
         batchX[0,:,:,:,1] = flair_preprocessed.numpy()
@@ -958,8 +913,7 @@ def shiva_wmh_segmentation(flair,
             model_ids = [0, 1, 2, 3, 4]
 
         for i in range(len(model_ids)):
-            model_weights_file = get_pretrained_network("wmh_shiva_t1_flair_" + str(model_ids[i]),
-                                                        antsxnet_cache_directory=antsxnet_cache_directory)
+            model_weights_file = get_pretrained_network("wmh_shiva_t1_flair_" + str(model_ids[i]))
             if verbose:
                 print("Loading", model_weights_file)
             model = create_shiva_unet_model_3d(number_of_modalities=2)
@@ -969,11 +923,10 @@ def shiva_wmh_segmentation(flair,
             else:
                 batchY += model.predict(batchX, verbose=verbose)
 
-        batchY /= len(model_ids)            
-            
+        batchY /= len(model_ids)
+
     wmh = ants.from_numpy(np.squeeze(batchY), origin=reorient_template.origin,
                           spacing=reorient_template.spacing,
                           direction=reorient_template.direction)
     wmh = ants.apply_ants_transform_to_image(xfrm.invert(), wmh, flair)
     return wmh
-        

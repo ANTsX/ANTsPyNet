@@ -3,7 +3,6 @@ import numpy as np
 import ants
 
 def hypothalamus_segmentation(t1,
-                              antsxnet_cache_directory=None,
                               verbose=False):
 
     """
@@ -34,11 +33,6 @@ def hypothalamus_segmentation(t1,
     ---------
     t1 : ANTsImage
         input 3-D T1 brain image.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -114,7 +108,7 @@ def hypothalamus_segmentation(t1,
 
     unet_model = create_hypothalamus_unet_model_3d(t1_warped.shape)
 
-    weights_file_name = get_pretrained_network("hypothalamus", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("hypothalamus")
     unet_model.load_weights(weights_file_name)
 
     ################################

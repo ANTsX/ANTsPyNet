@@ -5,7 +5,6 @@ import ants
 def el_bicho(ventilation_image,
              mask,
              use_coarse_slices_only=True,
-             antsxnet_cache_directory=None,
              verbose=False):
 
     """
@@ -24,11 +23,6 @@ def el_bicho(ventilation_image,
     use_coarse_slices_only : boolean
         If True, apply network only in the dimension of greatest slice thickness.
         If False, apply to all dimensions and average the results.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -88,7 +82,7 @@ def el_bicho(ventilation_image,
     if verbose == True:
         print("El Bicho: retrieving model weights.")
 
-    weights_file_name = get_pretrained_network("elBicho", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("elBicho")
     unet_model.load_weights(weights_file_name)
 
     ################################
@@ -181,13 +175,12 @@ def lung_pulmonary_artery_segmentation(ct,
                                        lung_mask=None,
                                        prediction_batch_size=16,
                                        patch_stride_length=32,
-                                       antsxnet_cache_directory=None,
                                        verbose=False):
 
     """
-    Perform pulmonary artery segmentation.  Training data taken from the 
-    PARSE2022 challenge (Luo, Gongning, et al. "Efficient automatic segmentation 
-    for multi-level pulmonary arteries: The PARSE challenge." 
+    Perform pulmonary artery segmentation.  Training data taken from the
+    PARSE2022 challenge (Luo, Gongning, et al. "Efficient automatic segmentation
+    for multi-level pulmonary arteries: The PARSE challenge."
     https://arxiv.org/abs/2304.03708).
 
     Arguments
@@ -203,12 +196,7 @@ def lung_pulmonary_artery_segmentation(ct,
         Control memory usage for prediction.  More consequential for GPU-usage.
 
     patch_stride_length : 3-D tuple or int
-        Dictates the stride length for accumulating predicting patches.    
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
+        Dictates the stride length for accumulating predicting patches.
 
     verbose : boolean
         Print progress to the screen.
@@ -240,8 +228,8 @@ def lung_pulmonary_artery_segmentation(ct,
     ################################
 
     if lung_mask is None:
-        lung_ex = lung_extraction(ct, modality="ct", verbose=verbose,
-                                  antsxnet_cache_directory=antsxnet_cache_directory)
+        lung_ex = lung_extraction(ct, modality="ct", verbose=verbose)
+
         lung_mask = ants.threshold_image(lung_ex['segmentation_image'], 1, 3, 1, 0)
     ct_preprocessed = ants.image_clone(ct)
     ct_preprocessed = (ct_preprocessed + 800) / (500 + 800)
@@ -261,16 +249,15 @@ def lung_pulmonary_artery_segmentation(ct,
         patch_stride_length = (patch_stride_length,) * 3
 
     number_of_classification_labels = 1
-    channel_size = 1  
+    channel_size = 1
 
     model = create_unet_model_3d((*patch_size, channel_size),
-                number_of_outputs=number_of_classification_labels, mode="sigmoid", 
+                number_of_outputs=number_of_classification_labels, mode="sigmoid",
                 number_of_filters=(32, 64, 128, 256, 512),
                 convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
                 dropout_rate=0.0, weight_decay=0)
 
-    weights_file_name = get_pretrained_network("pulmonaryArteryWeights", 
-                                               antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("pulmonaryArteryWeights")
     model.load_weights(weights_file_name)
 
     ################################
@@ -306,7 +293,7 @@ def lung_pulmonary_artery_segmentation(ct,
         print("  Total number of patches: ", str(total_number_of_patches))
         print("  Prediction batch size: ", str(prediction_batch_size))
         print("  Number of batches: ", str(number_of_batches))
-     
+
     prediction = np.zeros((total_number_of_patches, *patch_size, 1))
     for b in range(number_of_batches):
         batchX = None
@@ -317,9 +304,9 @@ def lung_pulmonary_artery_segmentation(ct,
 
         indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
         batchX[:,:,:,:,0] = ct_patches[indices,:,:,:]
-        
+
         if verbose:
-            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))
         prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:
@@ -336,11 +323,10 @@ def lung_airway_segmentation(ct,
                              lung_mask=None,
                              prediction_batch_size=16,
                              patch_stride_length=32,
-                             antsxnet_cache_directory=None,
                              verbose=False):
 
     """
-    Perform pulmonary airway segmentation from CT images.  Training data taken 
+    Perform pulmonary airway segmentation from CT images.  Training data taken
     from the EXACT09 challenge.
 
     Arguments
@@ -356,12 +342,7 @@ def lung_airway_segmentation(ct,
         Control memory usage for prediction.  More consequential for GPU-usage.
 
     patch_stride_length : 3-D tuple or int
-        Dictates the stride length for accumulating predicting patches.    
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
+        Dictates the stride length for accumulating predicting patches.
 
     verbose : boolean
         Print progress to the screen.
@@ -396,7 +377,7 @@ def lung_airway_segmentation(ct,
         lung_ex = lung_extraction(ct, modality="ct", verbose=verbose)
         lung_mask = ants.iMath_MD(lung_ex['segmentation_image'], 2, 3)
         lung_mask = ants.threshold_image(lung_mask, 1, 3, 1, 0)
-        
+
     ct_preprocessed = ants.image_clone(ct)
     ct_preprocessed = (ct_preprocessed + 800) / (500 + 800)
     ct_preprocessed[ct_preprocessed > 1.0] = 1.0
@@ -415,15 +396,15 @@ def lung_airway_segmentation(ct,
         patch_stride_length = (patch_stride_length,) * 3
 
     number_of_classification_labels = 2
-    channel_size = 1  
+    channel_size = 1
 
     model = create_unet_model_3d((*patch_size, channel_size),
-                number_of_outputs=number_of_classification_labels, mode="classification", 
+                number_of_outputs=number_of_classification_labels, mode="classification",
                 number_of_filters=(32, 64, 128, 256, 512),
                 convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
                 dropout_rate=0.0, weight_decay=0)
 
-    weights_file_name = get_pretrained_network("pulmonaryAirwayWeights", antsxnet_cache_directory=antsxnet_cache_directory)
+    weights_file_name = get_pretrained_network("pulmonaryAirwayWeights")
     model.load_weights(weights_file_name)
 
     ################################
@@ -434,7 +415,7 @@ def lung_airway_segmentation(ct,
 
     if verbose:
         print("Extract patches.")
-    
+
     ct_masked = ct_preprocessed * lung_mask
     ct_patches = extract_image_patches(ct_masked,
                                        patch_size=patch_size,
@@ -460,7 +441,7 @@ def lung_airway_segmentation(ct,
         print("  Total number of patches: ", str(total_number_of_patches))
         print("  Prediction batch size: ", str(prediction_batch_size))
         print("  Number of batches: ", str(number_of_batches))
-     
+
     prediction = np.zeros((total_number_of_patches, *patch_size, 2))
     for b in range(number_of_batches):
         batchX = None
@@ -471,9 +452,9 @@ def lung_airway_segmentation(ct,
 
         indices = range(b * prediction_batch_size, b * prediction_batch_size + batchX.shape[0])
         batchX[:,:,:,:,0] = ct_patches[indices,:,:,:]
-        
+
         if verbose:
-            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))  
+            print("Predicting batch ", str(b + 1), " of ", str(number_of_batches))
         prediction[indices,:,:,:,:] = model.predict(batchX, verbose=verbose)
 
     if verbose:
@@ -482,5 +463,5 @@ def lung_airway_segmentation(ct,
     probability_image = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,1]),
                                                        stride_length=patch_stride_length,
                                                        domain_image=lung_mask,
-                                                       domain_image_is_mask=True) 
+                                                       domain_image_is_mask=True)
     return(probability_image)

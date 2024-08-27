@@ -4,7 +4,6 @@ import ants
 
 def hippmapp3r_segmentation(t1,
                             do_preprocessing=True,
-                            antsxnet_cache_directory=None,
                             verbose=False):
 
     """
@@ -34,11 +33,6 @@ def hippmapp3r_segmentation(t1,
 
     do_preprocessing : boolean
         See description above.
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -72,7 +66,6 @@ def hippmapp3r_segmentation(t1,
             template=None,
             do_bias_correction=True,
             do_denoising=False,
-            antsxnet_cache_directory=antsxnet_cache_directory,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
@@ -84,7 +77,7 @@ def hippmapp3r_segmentation(t1,
     if verbose == True:
         print("    HippMapp3r: template normalization.")
 
-    template_file_name_path = get_antsxnet_data("mprage_hippmapp3r", antsxnet_cache_directory=antsxnet_cache_directory)
+    template_file_name_path = get_antsxnet_data("mprage_hippmapp3r")
     template_image = ants.image_read(template_file_name_path)
 
     registration = ants.registration(fixed=template_image, moving=t1_preprocessed,
@@ -125,7 +118,7 @@ def hippmapp3r_segmentation(t1,
 
     model_initial_stage = create_hippmapp3r_unet_model_3d((*shape_initial_stage, 1), do_first_network=True)
 
-    initial_stage_weights_file_name = get_pretrained_network("hippMapp3rInitial", antsxnet_cache_directory=antsxnet_cache_directory)
+    initial_stage_weights_file_name = get_pretrained_network("hippMapp3rInitial")
     model_initial_stage.load_weights(initial_stage_weights_file_name)
 
     if verbose == True:
@@ -168,7 +161,7 @@ def hippmapp3r_segmentation(t1,
 
     model_refine_stage = create_hippmapp3r_unet_model_3d((*shape_refine_stage, 1), do_first_network=False)
 
-    refine_stage_weights_file_name = get_pretrained_network("hippMapp3rRefine", antsxnet_cache_directory=antsxnet_cache_directory)
+    refine_stage_weights_file_name = get_pretrained_network("hippMapp3rRefine")
     model_refine_stage.load_weights(refine_stage_weights_file_name)
 
     data_refine_stage = np.expand_dims(image_trimmed.numpy(), axis=0)

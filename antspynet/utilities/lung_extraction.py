@@ -8,7 +8,6 @@ from tensorflow.keras import regularizers
 
 def lung_extraction(image,
                     modality="proton",
-                    antsxnet_cache_directory=None,
                     verbose=False):
 
     """
@@ -22,11 +21,6 @@ def lung_extraction(image,
     modality : string
         Modality image type.  Options include "ct", "proton", "protonLobes",
         "maskLobes", "ventilation", and "xray".
-
-    antsxnet_cache_directory : string
-        Destination directory for storing the downloaded template and model weights.
-        Since these can be reused, if is None, these data will be downloaded to a
-        ~/.keras/ANTsXNet/.
 
     verbose : boolean
         Print progress to the screen.
@@ -58,14 +52,12 @@ def lung_extraction(image,
     unet_model = None
 
     if modality == "proton":
-        weights_file_name = get_pretrained_network("protonLungMri",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("protonLungMri")
 
         classes = ("background", "left_lung", "right_lung")
         number_of_classification_labels = len(classes)
 
-        reorient_template_file_name_path = get_antsxnet_data("protonLungTemplate",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        reorient_template_file_name_path = get_antsxnet_data("protonLungTemplate")
         reorient_template = ants.image_read(reorient_template_file_name_path)
 
         resampled_image_size = reorient_template.shape
@@ -119,14 +111,12 @@ def lung_extraction(image,
         return(return_dict)
 
     if modality == "protonLobes" or modality == "maskLobes":
-        reorient_template_file_name_path = get_antsxnet_data("protonLungTemplate",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        reorient_template_file_name_path = get_antsxnet_data("protonLungTemplate")
         reorient_template = ants.image_read(reorient_template_file_name_path)
 
         resampled_image_size = reorient_template.shape
 
-        spatial_priors_file_name_path = get_antsxnet_data("protonLobePriors",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        spatial_priors_file_name_path = get_antsxnet_data("protonLobePriors")
         spatial_priors = ants.image_read(spatial_priors_file_name_path)
         priors_image_list = ants.ndimage_to_list(spatial_priors)
 
@@ -146,11 +136,9 @@ def lung_extraction(image,
                             activation='sigmoid',
                             kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
             unet_model = Model(inputs=unet_model.input, outputs=[unet_model.output, outputs2])
-            weights_file_name = get_pretrained_network("protonLobes",
-                antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("protonLobes")
         else:
-            weights_file_name = get_pretrained_network("maskLobes",
-                antsxnet_cache_directory=antsxnet_cache_directory)
+            weights_file_name = get_pretrained_network("maskLobes")
 
         unet_model.load_weights(weights_file_name)
 
@@ -278,8 +266,7 @@ def lung_extraction(image,
         if verbose:
             print("Build model and load weights.")
 
-        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("lungCtWithPriorsSegmentationWeights")
 
         classes = ("background", "left lung", "right lung", "airways")
         number_of_classification_labels = len(classes)
@@ -370,8 +357,7 @@ def lung_extraction(image,
         if verbose:
             print("Whole lung mask: retrieving model weights.")
 
-        weights_file_name = get_pretrained_network("wholeLungMaskFromVentilation",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+        weights_file_name = get_pretrained_network("wholeLungMaskFromVentilation")
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -436,15 +422,14 @@ def lung_extraction(image,
         return(probability_image)
 
     elif modality == "xray":
-        
-        weights_file_name = get_pretrained_network("xrayLungExtraction",
-            antsxnet_cache_directory=antsxnet_cache_directory)
+
+        weights_file_name = get_pretrained_network("xrayLungExtraction")
 
         classes = ("background", "left_lung", "right_lung")
         number_of_classification_labels = len(classes)
         resampled_image_size = (256, 256)
         channel_size = 3
-        
+
         resampled_image = ants.resample_image(image, resampled_image_size, use_voxels=True, interp_type=0)
         xray_lung_priors = ants.ndimage_to_list(ants.image_read(get_antsxnet_data("xrayLungPriors")))
 
@@ -457,7 +442,7 @@ def lung_extraction(image,
         unet_model.load_weights(weights_file_name)
 
         batchX = np.zeros((1, *resampled_image_size, channel_size))
-        resampled_array = resampled_image.numpy()        
+        resampled_array = resampled_image.numpy()
         batchX[0,:,:,0] = (resampled_array - resampled_array.min()) / (resampled_array.max() - resampled_array.min())
         batchX[0,:,:,1] = xray_lung_priors[0].numpy()
         batchX[0,:,:,2] = xray_lung_priors[1].numpy()
@@ -479,7 +464,7 @@ def lung_extraction(image,
 
         for i in range(number_of_classification_labels):
             probability_images_array[i] = ants.resample_image(probability_images_array[i],
-                image.shape, use_voxels=True, interp_type=0)                                                               
+                image.shape, use_voxels=True, interp_type=0)
             probability_images_array[i] = ants.copy_image_info(image, probability_images_array[i])
 
         image_matrix = ants.image_list_to_matrix(probability_images_array, image * 0 + 1)
