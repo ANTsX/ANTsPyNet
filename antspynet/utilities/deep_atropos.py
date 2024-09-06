@@ -175,6 +175,32 @@ def deep_atropos(t1,
 
     else:
 
+        if len(t1) != 3:
+            raise ValueError("Length of input list must be 3.  Input images are (in order): [T1, T2, FA]." +
+                             "If a particular modality or modalities is not available, use None as a placeholder.") 
+        
+        if t1[0] is None:
+            raise ValueError("T1 modality must be specified.")
+        
+        which_network = ""
+        input_images = list()
+        input_images.append(t1[0])
+        if t1[1] is not None and t1[2] is not None:
+            which_network = "t1_t2_fa"
+            input_images.append(t1[1])
+            input_images.append(t1[2])
+        elif t1[1] is not None and t1[2] is None:    
+            which_network = "t1_t2"
+            input_images.append(t1[1])
+        elif t1[1] is not None and t1[2] is None:    
+            which_network = "t1_fa"
+            input_images.append(t1[2])
+        else:
+            which_network = "t1"
+
+        if verbose:
+            print("Prediction using", which_network)
+
         ################################
         #
         # Preprocess images
@@ -195,13 +221,13 @@ def deep_atropos(t1,
         reg = None
         t1_mask = None
         preprocessed_images = list()
-        for i in range(len(t1)):
-            n4 = ants.n4_bias_field_correction(t1[i], mask=t1[i]*0+1,
+        for i in range(len(input_images)):
+            n4 = ants.n4_bias_field_correction(input_images[i], mask=input_images[i]*0+1,
                                                convergence={'iters': [50, 50, 50, 50], 'tol': 0.0},
                                                rescale_intensities=True,
                                                verbose=verbose)
             if i == 0:
-                t1_mask = brain_extraction(t1[0], modality="t1", verbose=verbose)
+                t1_mask = brain_extraction(input_images[0], modality="t1", verbose=verbose)
                 n4 = n4 * t1_mask
                 # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
                 #                                  source_mask=t1_mask,
@@ -243,8 +269,7 @@ def deep_atropos(t1,
         classes = ("background", "csf", "gray matter", "white matter",
                 "deep gray matter", "brain stem", "cerebellum")
         number_of_classification_labels = len(classes)
-        image_modalities = ["T1", "T2", "FA"]
-        channel_size = len(image_modalities) + len(hcp_template_priors)
+        channel_size = len(input_images) + len(hcp_template_priors)
 
         unet_model = create_unet_model_3d((*patch_size, channel_size),
             number_of_outputs=number_of_classification_labels, mode="classification",
@@ -255,7 +280,16 @@ def deep_atropos(t1,
         if verbose:
             print("DeepAtropos:  retrieving model weights.")
 
-        weights_file_name = get_pretrained_network("test_hcpya_da")
+        weights_file_name = ""
+        if which_network == "t1":
+            weights_file_name = get_pretrained_network("DeepAtroposHcpT1Weights")
+        elif which_network == "t1_t2":    
+            weights_file_name = get_pretrained_network("DeepAtroposHcpT1T2Weights")
+        elif which_network == "t1_fa":    
+            weights_file_name = get_pretrained_network("DeepAtroposHcpT1FAWeights")
+        elif which_network == "t1_t2_fa":    
+            weights_file_name = get_pretrained_network("DeepAtroposHcpT1T2FAWeights")
+            
         unet_model.load_weights(weights_file_name)
 
         ################################
@@ -305,17 +339,17 @@ def deep_atropos(t1,
                 domain_image=hcp_templates[0], stride_length=stride_length)
 
             if do_preprocessing:
-                probability_images.append(ants.apply_transforms(fixed=t1[0],
+                probability_images.append(ants.apply_transforms(fixed=input_images[0],
                     moving=reconstructed_image,
                     transformlist=reg['invtransforms'],
                     whichtoinvert=[True], interpolator="linear", verbose=verbose))
             else:
                 probability_images.append(reconstructed_image)
 
-        image_matrix = ants.image_list_to_matrix(probability_images, t1[0] * 0 + 1)
+        image_matrix = ants.image_list_to_matrix(probability_images, input_images[0] * 0 + 1)
         segmentation_matrix = np.argmax(image_matrix, axis=0)
         segmentation_image = ants.matrix_to_images(
-            np.expand_dims(segmentation_matrix, axis=0), t1[0] * 0 + 1)[0]
+            np.expand_dims(segmentation_matrix, axis=0), input_images[0] * 0 + 1)[0]
 
         return_dict = {'segmentation_image' : segmentation_image,
                        'probability_images' : probability_images}

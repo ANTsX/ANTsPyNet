@@ -30,8 +30,8 @@ def cortical_thickness(t1, verbose=False):
 
     from ..utilities import deep_atropos
 
-    if t1.dimension != 3:
-        raise ValueError("Image dimension must be 3.")
+    # if t1.dimension != 3:
+    #     raise ValueError("Image dimension must be 3.")
 
     atropos = deep_atropos(t1, do_preprocessing=True, verbose=verbose)
 
