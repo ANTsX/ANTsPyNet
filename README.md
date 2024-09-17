@@ -14,7 +14,10 @@ A collection of deep learning architectures and applications ported to the Pytho
   <img src="docs/figures/coreANTsXNetTools.png" width="600" />
 </p>
 
-## Installation
+## Overview 
+
+<details>
+<summary>Installation</summary>
 
 ### Binaries
 
@@ -34,6 +37,9 @@ cd ANTsPyNet
 python -m pip install .
 ```
 
+</details>
+
+<!--
 ## Quickstart
 
 The core functionality that ANTsPyNet provides is the ability to initialize a Deep Learning model based on our large collection of model architectures specifically tailored for medical images. You can then train these initialized models using your standard `keras` or `tensorflow` workflows.
@@ -57,16 +63,7 @@ t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
 seg = antspynet.brain_extraction(t1, modality="t1", verbose=True)
 ants.plot(t1, overlay=seg, overlay_alpha=0.5)
 ```
-
-## Resources
-
-[ANTsPyNet Documentation](https://antsx.github.io/ANTsPyNet/)
-
-[ANTsPyNet Tutorials](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
-
-## Collection Overview
-
-The following is an overview of the available model architectures and pre-trained models that ANTsPyNet provides:
+-->
 
 <details>
 <summary>Architectures</summary>
@@ -196,6 +193,12 @@ The following is an overview of the available model architectures and pre-traine
 
 </details>
 
+<details><summary>License</summary>
+
+The ANTsPyNet package is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md).
+
+</details>
+
 <details>
 <summary>Acknowledgements</summary>
 
@@ -205,14 +208,13 @@ The following is an overview of the available model architectures and pre-traine
 
 </details>
 
+<!-- 
 ## Contributing
 
 If you encounter an issue, have questions about using ANTsPyNet, or want to request a feature, please feel free to [file an issue](https://github.com/ANTsX/ANTsPyNet/issues). If you plan to contribute new code to ANTsPyNet, we would be very appreciative. The best place to start is again by opening an issue and discussing the potential feature with us.
+-->
 
-## License
-
-The ANTsPyNet package is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md).
-
+<!-- 
 ## to publish a release
 
 before doing this - make sure you have a recent run of `pip-compile pyproject.toml`
@@ -223,3 +225,11 @@ python3 -m  build .
 python3 -m pip install --upgrade twine
 python3 -m twine upload --repository antspynet dist/*
 ```
+-->
+
+## Other resources
+
+[ANTsPyNet Documentation](https://antsx.github.io/ANTsPyNet/)
+
+[ANTsPyNet Tutorials](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
+
