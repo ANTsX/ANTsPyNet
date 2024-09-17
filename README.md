@@ -121,39 +121,55 @@ The following is an overview of the available model architectures and pre-traine
 <details>
 <summary>Applications</summary>
 
-- [MRI super-resolution](https://www.medrxiv.org/content/10.1101/2023.02.02.23285376v1)
-- [Multi-modal brain extraction](https://pubmed.ncbi.nlm.nih.gov/33907199/)
-  - T1
-  - T1 ["no brainer"](https://github.com/neuronets/nobrainer)
-  - FLAIR
-  - T2
-  - FA
-  - BOLD
-  - [T1/T2 infant](https://www.med.unc.edu/psych/research/psychiatry-department-research-programs/early-brain-development-research/)
-- [Six-tissue Atropos brain segmentation](https://pubmed.ncbi.nlm.nih.gov/33907199/)
-- [Cortical thickness](https://pubmed.ncbi.nlm.nih.gov/33907199/)
-- [Brain age](https://academic.oup.com/brain/article-abstract/143/7/2312/5863667?redirectedFrom=fulltext)
-- [HippMapp3r hippocampal segmentation](https://pubmed.ncbi.nlm.nih.gov/31609046/)
-- [Sysu white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/30125711/)
-- [HyperMapp3r white matter hyperintensity segmentation](https://pubmed.ncbi.nlm.nih.gov/35088930/)
-- [Hypothalamus segmentation](https://pubmed.ncbi.nlm.nih.gov/32853816/)
-- [Claustrum segmentation](https://arxiv.org/abs/2008.03465)
-- [Deep Flash](https://www.nature.com/articles/s41598-024-59440-6)
-- [Desikan-Killiany-Tourville cortical labeling](https://pubmed.ncbi.nlm.nih.gov/33907199/)
-- [Cerebellum segmentation, parcellation, and thickness](https://www.nature.com/articles/s41598-024-59440-6)
-- MRI modality classification
-- Lung extraction
-  - [Proton](https://pubmed.ncbi.nlm.nih.gov/34227163/)
-  - CT
-- Lung pulmonary vessel segmentation
-- [Functional lung segmentation](https://pubmed.ncbi.nlm.nih.gov/34227163/)
-- [Neural style transfer](https://arxiv.org/abs/1508.06576)
-- Image quality assessment
-  - [TID2013](https://www.sciencedirect.com/science/article/pii/S0923596514001490)
-  - [KonIQ-10k](https://ieeexplore.ieee.org/document/8968750)
-- [Mixture density networks (MDN)](https://publications.aston.ac.uk/373/1/NCRG_94_004.pdf)
+* [Brain applications](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-applications)
 
-- [Training scripts](https://github.com/ntustison/ANTsXNetTraining)
+    * [Multi-modal brain extraction](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-extraction)
+    * [Deep Atropos (Six-tissue brain segmentation)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#deep-atropos)
+    * [Cortical thickness](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#cortical-thickness)
+    * [Desikan-Killiany-Tourville parcellation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#desikan-killiany-tourville-parcellation)
+    * [DeepFLASH (medial temporal lobe parcellation)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#deepflash-medial-temporal-lobe-parcellation)
+    * [Hippmapp3r (hippocampal segmentation)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#hippmapp3r)
+    * [Brain AGE](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-age)
+    * [Claustrum segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#claustrum-segmentation)
+    * [Hypothalamus segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#hypothalamus-segmentation)
+    * [Cerebellum morphology](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#cerebellum-morphology)
+    * White matter hyperintensities segmentation 
+        * [SYSU](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-sysu)
+        * [Hypermapp3r](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-hypermapp3r)
+        * [SHIVA](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-shiva)
+        * [ANTsXNet](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-antsxnet)
+    * [Perivascular spaces segmentation (SHIVA)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#perivascular-spaces-segmentation-shiva)
+    * [Brain tumor segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-tumor-segmentation)
+    * [MRA-TOF vessel segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#mra-tof-vessel-segmentation)
+    * [Lesion segmentation (WIP)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#lesion-segmentation-wip)
+    * [Whole head inpainting](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#whole-head-inpainting)
+
+* [Lung applications](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#lung-applications)
+
+    * [Lung extraction](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#lung-extraction) 
+    * [Functional lung segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#functional-lung-segmentation)
+    * [Pulmonary artery segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#pulmonary-artery-segmentation)
+    * [Pulmonary airway segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#pulmonary-airway-segmentation)
+    * [CheXNet](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#chexnet)
+
+* [Mouse applications](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#mouse-applications)
+    * [Mouse brain extraction](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#mouse-brain-extraction)
+    * [Mouse brain parcellation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#mouse-brain-parcellation)
+    * [Mouse cortical thickness](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#mouse-cortical-thickness)
+
+* [General applications](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#general-applications)
+
+    * [MRI super resolution](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#mri-super-resolution)
+    * [No reference image quality assesment using TID](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#no-reference-image-quality-assesment-using-tid)
+    * [Full reference image quality assessment](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#full-reference-image-quality-assessment)
+
+* [Data augmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#data-augmentation)
+
+    * [Noise](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#noise)
+    * [Histogram intensity warping](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#histogram-intensity-warping)
+    * [Simulate bias field](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#simulate-bias-field)
+    * [Random spatial transformations](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#random-spatial-transformations)
+    * [Combined](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#combined)
 
 </details>
 
