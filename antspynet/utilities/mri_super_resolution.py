@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import ants
 
+from warnings import warn
 
 def mri_super_resolution(image, verbose=False):
 
@@ -25,6 +26,9 @@ def mri_super_resolution(image, verbose=False):
     >>> image = ants.image_read("t1.nii.gz")
     >>> image_sr = mri_super_resolution(image)
     """
+
+    warn('This method is deprecated.  Please see https://github.com/stnava/siq', 
+         DeprecationWarning, stacklevel=2)
 
     from ..utilities import get_pretrained_network
     from ..utilities import apply_super_resolution_model_to_image
