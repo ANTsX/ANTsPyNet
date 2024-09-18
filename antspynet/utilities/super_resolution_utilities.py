@@ -8,6 +8,8 @@ from . import regression_match_image
 from tensorflow.keras.models import load_model
 import tensorflow as tf
 
+from warnings import warn
+
 import time
 from os import path
 
@@ -255,6 +257,10 @@ def apply_super_resolution_model_to_image(
     >>> image = ants.image_read(ants.get_ants_data('r16'))
     >>> image_sr = apply_super_resolution_model_to_image(image, get_pretrained_network("dbpn4x"))
     """
+
+    warn('This method is deprecated.  Please see https://github.com/stnava/siq', 
+         DeprecationWarning, stacklevel=2)
+
     tflite_flag = False
     channel_axis = 0
     if K.image_data_format() == "channels_last":
