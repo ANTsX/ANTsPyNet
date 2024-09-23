@@ -231,5 +231,5 @@ python3 -m twine upload --repository antspynet dist/*
 
 [ANTsPyNet Documentation](https://antsx.github.io/ANTsPyNet/)
 
-[ANTsPyNet Tutorials](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
+[ANTsXNet self-contained examples](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#antsxnet)
 
