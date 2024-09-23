@@ -207,11 +207,11 @@ def deep_atropos(t1,
         #
         ################################
 
-        hcp_t1_template = ants.image_read(get_antsxnet_data("hcpyaT1Template"))
-        hcp_t2_template = ants.image_read(get_antsxnet_data("hcpyaT2Template"))
-        hcp_fa_template = ants.image_read(get_antsxnet_data("hcpyaFATemplate"))
-        hcp_template_brain_mask = ants.image_read(get_antsxnet_data("hcpyaTemplateBrainMask"))
-        hcp_template_brain_segmentation = ants.image_read(get_antsxnet_data("hcpyaTemplateBrainSegmentation"))
+        hcp_t1_template = ants.image_read(get_antsxnet_data("hcpinterT1Template"))
+        hcp_t2_template = ants.image_read(get_antsxnet_data("hcpinterT2Template"))
+        hcp_fa_template = ants.image_read(get_antsxnet_data("hcpinterFATemplate"))
+        hcp_template_brain_mask = ants.image_read(get_antsxnet_data("hcpinterTemplateBrainMask"))
+        hcp_template_brain_segmentation = ants.image_read(get_antsxnet_data("hcpinterTemplateBrainSegmentation"))
 
         hcp_templates = list()
         hcp_templates.append(hcp_t1_template * hcp_template_brain_mask)
