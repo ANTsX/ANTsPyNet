@@ -208,15 +208,10 @@ def deep_atropos(t1,
         ################################
 
         hcp_t1_template = ants.image_read(get_antsxnet_data("hcpinterT1Template"))
-        hcp_t2_template = ants.image_read(get_antsxnet_data("hcpinterT2Template"))
-        hcp_fa_template = ants.image_read(get_antsxnet_data("hcpinterFATemplate"))
         hcp_template_brain_mask = ants.image_read(get_antsxnet_data("hcpinterTemplateBrainMask"))
         hcp_template_brain_segmentation = ants.image_read(get_antsxnet_data("hcpinterTemplateBrainSegmentation"))
 
-        hcp_templates = list()
-        hcp_templates.append(hcp_t1_template * hcp_template_brain_mask)
-        hcp_templates.append(hcp_t2_template * hcp_template_brain_mask)
-        hcp_templates.append(hcp_fa_template * hcp_template_brain_mask)
+        hcp_t1_template = hcp_t1_template * hcp_template_brain_mask
 
         reg = None
         t1_mask = None
@@ -229,19 +224,13 @@ def deep_atropos(t1,
             if i == 0:
                 t1_mask = brain_extraction(input_images[0], modality="t1", verbose=verbose)
                 n4 = n4 * t1_mask
-                # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
-                #                                  source_mask=t1_mask,
-                #                                  reference_mask=hcp_template_brain_mask)
-                reg = ants.registration(hcp_templates[i], n4,
+                reg = ants.registration(hcp_t1_template, n4,
                                         type_of_transform="antsRegistrationSyNQuick[a]",
                                         verbose=verbose)
                 preprocessed_images.append(reg['warpedmovout'])
             else:
                 n4 = n4 * t1_mask
-                # n4 = ants.histogram_match_image2(n4, hcp_templates[i],
-                #                                  source_mask=t1_mask,
-                #                                  reference_mask=hcp_template_brain_mask)
-                n4 = ants.apply_transforms(hcp_templates[i], n4,
+                n4 = ants.apply_transforms(hcp_t1_template, n4,
                                            transformlist=reg['fwdtransforms'],
                                            verbose=verbose)
                 preprocessed_images.append(n4)
@@ -256,9 +245,9 @@ def deep_atropos(t1,
         ################################
 
         patch_size = (192, 224, 192)
-        stride_length = (hcp_templates[0].shape[0] - patch_size[0],
-                         hcp_templates[0].shape[1] - patch_size[1],
-                         hcp_templates[0].shape[2] - patch_size[2])
+        stride_length = (hcp_t1_template.shape[0] - patch_size[0],
+                         hcp_t1_template.shape[1] - patch_size[1],
+                         hcp_t1_template.shape[2] - patch_size[2])
 
         hcp_template_priors = list()
         for i in range(6):
@@ -301,42 +290,38 @@ def deep_atropos(t1,
         if verbose:
             print("Prediction.")
 
-        batchX = np.zeros((8, *patch_size, channel_size))
+        predicted_data = np.zeros((8, *patch_size, number_of_classification_labels))  
 
-        image_patches_list = list()
-        for i in range(len(preprocessed_images)):
-            image_patches = extract_image_patches(preprocessed_images[i],
-                                                  patch_size=patch_size,
-                                                  max_number_of_patches="all",
-                                                  stride_length=stride_length,
-                                                  return_as_array=True)
-            image_patches_list.append(image_patches)
+        batchX = np.zeros((1, *patch_size, channel_size))
 
-        for i in range(len(preprocessed_images)):
-            for j in range(8):
-                batchX[j,:,:,:,i] = image_patches_list[i][j,:,:,:]
+        for h in range(8):
+            index = 0
+            for i in range(len(preprocessed_images)):
+                patches = extract_image_patches(preprocessed_images[i],
+                                                patch_size=patch_size,
+                                                max_number_of_patches="all",
+                                                stride_length=stride_length,
+                                                return_as_array=True)
+                batchX[0,:,:,:,index] = patches[h,:,:,:]
+                index = index + 1
 
-        priors_patches_list = list()
-        for i in range(len(hcp_template_priors)):
-            prior_patches = extract_image_patches(hcp_template_priors[i],
-                                                  patch_size=patch_size,
-                                                  max_number_of_patches="all",
-                                                  stride_length=stride_length,
-                                                  return_as_array=True)
-            priors_patches_list.append(prior_patches)
+            for i in range(len(hcp_template_priors)):
+                patches = extract_image_patches(hcp_template_priors[i],
+                                                patch_size=patch_size,
+                                                max_number_of_patches="all",
+                                                stride_length=stride_length,
+                                                return_as_array=True)
+                batchX[0,:,:,:,index] = patches[h,:,:,:]
+                index = index + 1
 
-        for i in range(len(hcp_template_priors)):
-            for j in range(8):
-                batchX[j,:,:,:,len(preprocessed_images) + i] = priors_patches_list[i][j,:,:,:]
-
-        predicted_data = unet_model.predict(batchX, verbose=verbose)
+            predicted_data[h,:,:,:,:] = unet_model.predict(batchX, verbose=verbose)
 
         probability_images = list()
         for i in range(len(classes)):
             if verbose:
                 print("Reconstructing image", classes[i])
             reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
-                domain_image=hcp_templates[0], stride_length=stride_length)
+                domain_image=hcp_t1_template, stride_length=stride_length)
 
             if do_preprocessing:
                 probability_images.append(ants.apply_transforms(fixed=input_images[0],
