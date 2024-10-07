@@ -325,7 +325,8 @@ def create_hippmapp3r_unet_model_3d(input_image_size,
 
     return(unet_model)
 
-def create_shiva_unet_model_3d(number_of_modalities=1):
+def create_shiva_unet_model_3d(number_of_modalities=1,
+                               number_of_outputs=1):
     """
     Implementation of the "shiva" U-net architecture used for PVS and WMH
     segmentation.
@@ -344,6 +345,10 @@ def create_shiva_unet_model_3d(number_of_modalities=1):
     ---------
     number_of_modalities : integer
         Specifies number of channels in the architecture.
+        
+    number_of_outputs : integer
+        Specifies the number of outputs per voxel.  Determines
+        final activation function (1 = sigmoid, >1 = softmax).    
 
     Returns
     -------
@@ -455,9 +460,12 @@ def create_shiva_unet_model_3d(number_of_modalities=1):
     outputs = BatchNormalization()(outputs)
     outputs = Activation('swish')(outputs)
     
-    outputs = Conv3D(filters=1,
+    activation = "sigmoid" 
+    if number_of_outputs > 1:
+        activation = "softmax"
+    outputs = Conv3D(filters=number_of_outputs,
                      kernel_size=1,
-                     activation='sigmoid',
+                     activation=activation,
                      padding='same')(outputs)
 
     unet_model = Model(inputs=inputs, outputs=outputs)
