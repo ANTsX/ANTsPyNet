@@ -170,7 +170,7 @@ def deep_atropos(t1,
             np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
         return_dict = {'segmentation_image' : segmentation_image,
-                    'probability_images' : probability_images}
+                       'probability_images' : probability_images}
         return(return_dict)
 
     else:
@@ -222,7 +222,8 @@ def deep_atropos(t1,
                                                rescale_intensities=True,
                                                verbose=verbose)
             if i == 0:
-                t1_mask = brain_extraction(input_images[0], modality="t1", verbose=verbose)
+                t1_bw20 = brain_extraction(input_images[0], modality="bw20", verbose=verbose)
+                t1_mask = t1_bw20['probability_images'][1]
                 n4 = n4 * t1_mask
                 reg = ants.registration(hcp_t1_template, n4,
                                         type_of_transform="antsRegistrationSyNQuick[a]",

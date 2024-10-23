@@ -78,7 +78,7 @@ def brain_extraction(image,
         brain_extraction_t1 = brain_extraction(image, modality="t1", verbose=verbose)
         brain_mask = ants.iMath_get_largest_component(
           ants.threshold_image(brain_extraction_t1, 0.5, 10000))
-        brain_mask = ants.morphology(brain_mask,"close",morphological_radius).iMath_fill_holes()
+        brain_mask = ants.morphology(brain_mask, "close", morphological_radius).iMath_fill_holes()
 
         brain_extraction_t1nobrainer = brain_extraction(image * ants.iMath_MD(brain_mask, radius=morphological_radius),
           modality = "t1nobrainer", verbose=verbose)
@@ -140,6 +140,9 @@ def brain_extraction(image,
             weights_file_name_prefix = "brainExtractionInfantT1"
         elif modality == "t2infant":
             weights_file_name_prefix = "brainExtractionInfantT2"
+        elif modality == "bw20":
+            weights_file_name_prefix = "brainExtractionBrainWeb20"
+            is_standard_network = True
         else:
             raise ValueError("Unknown modality type.")
 
@@ -151,11 +154,14 @@ def brain_extraction(image,
         if verbose:
             print("Brain extraction:  retrieving template.")
 
-        reorient_template_file_name_path = get_antsxnet_data("S_template3")
-        reorient_template = ants.image_read(reorient_template_file_name_path)
-        if is_standard_network and (modality != "t1.v1" and modality != "mra"):
-            ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
-        resampled_image_size = reorient_template.shape
+        if modality == "bw20":
+            reorient_template = ants.image_read(get_antsxnet_data("nki"))
+            resampled_image_size = reorient_template.shape
+        else:    
+            reorient_template = ants.image_read(get_antsxnet_data("S_template3"))
+            if is_standard_network and (modality != "t1.v1" and modality != "mra"):
+                ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
+            resampled_image_size = reorient_template.shape
 
         number_of_filters = (8, 16, 32, 64)
         mode = "classification"
@@ -164,11 +170,21 @@ def brain_extraction(image,
             number_of_classification_labels = 1
             mode = "sigmoid"
 
-        unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
-            number_of_outputs=number_of_classification_labels, mode=mode,
-            number_of_filters=number_of_filters, dropout_rate=0.0,
-            convolution_kernel_size=3, deconvolution_kernel_size=2,
-            weight_decay=1e-5)
+        unet_model = None
+        if modality == "bw20":
+            mode = "classification"
+            number_of_classification_labels = 4 # background, brain, skull, skin/misc.
+            unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
+                number_of_outputs=number_of_classification_labels, mode=mode,
+                number_of_filters=number_of_filters, dropout_rate=0.0,
+                convolution_kernel_size=3, deconvolution_kernel_size=2,
+                weight_decay=0)
+        else:    
+            unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
+                number_of_outputs=number_of_classification_labels, mode=mode,
+                number_of_filters=number_of_filters, dropout_rate=0.0,
+                convolution_kernel_size=3, deconvolution_kernel_size=2,
+                weight_decay=1e-5)
 
         unet_model.load_weights(weights_file_name)
 
@@ -195,15 +211,30 @@ def brain_extraction(image,
             print("Brain extraction:  prediction and decoding.")
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
-        probability_images_array = decode_unet(predicted_data, reorient_template)
+        probability_images = decode_unet(predicted_data, reorient_template)
 
         if verbose:
             print("Brain extraction:  renormalize probability mask to native space.")
 
         xfrm_inv = xfrm.invert()
-        probability_image = xfrm_inv.apply_to_image(probability_images_array[0][number_of_classification_labels-1], input_images[0])
 
-        return(probability_image)
+        if modality == "bw20":
+            probability_images_warped = list()
+            for i in range(number_of_classification_labels):
+                probability_images_warped.append(xfrm_inv.apply_to_image(
+                    probability_images[0][i], input_images[0]))
+
+            image_matrix = ants.image_list_to_matrix(probability_images_warped, input_images[0] * 0 + 1)
+            segmentation_matrix = np.argmax(image_matrix, axis=0)
+            segmentation_image = ants.matrix_to_images(
+                np.expand_dims(segmentation_matrix, axis=0), input_images[0] * 0 + 1)[0]
+
+            return_dict = {'segmentation_image' : segmentation_image,
+                           'probability_images' : probability_images_warped}                    
+            return(return_dict)
+        else: 
+            probability_image = xfrm_inv.apply_to_image(probability_images[0][number_of_classification_labels-1], input_images[0])
+            return(probability_image)
 
     else:
 
