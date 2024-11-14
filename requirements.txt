@@ -198,7 +198,7 @@ urllib3==2.2.2
     # via requests
 webcolors==1.13
     # via antspyx
-werkzeug==3.0.3
+werkzeug==3.0.6
     # via tensorboard
 wheel==0.43.0
     # via astunparse
