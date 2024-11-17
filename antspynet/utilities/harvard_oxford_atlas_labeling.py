@@ -51,10 +51,6 @@ def harvard_oxford_atlas_labeling(t1,
     Label 31:	Cerebellar White Matter Left
     Label 32:	Cerebellar White Matter Right
 
-    hoa_lateral_labels = (0, 3, 4, 5, 6, 15, 24)
-    hoa_lateral_left_labels = (1, 7, 9, 11, 13, 16, 18, 20, 22, 25, 27, 29, 31)
-    hoa_lateral_right_labels = (2, 8, 10, 12, 14, 17, 19, 21, 23, 26, 28, 30, 32)
-
     Preprocessing on the training data consisted of:
        * n4 bias correction,
        * brain extraction, and
