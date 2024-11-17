@@ -194,7 +194,6 @@ def harvard_oxford_atlas_labeling(t1,
 
     hoa_label_image = ants.image_clone(segmentation_image)
     for i in range(len(hoa_labels)):
-        print("HOA label" + str(hoa_labels[i]))
         hoa_label_image[segmentation_image==i] = hoa_labels[i]
 
     return_dict = {'segmentation_image' : hoa_label_image,

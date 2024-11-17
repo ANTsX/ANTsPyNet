@@ -283,7 +283,6 @@ def multilabel_surface_loss():
             loss_single_label = binary_surface_loss_fixed(y_true_single_label, 
                                                           y_pred_single_label)
             loss += loss_single_label
-            print("Loss: ", loss_single_label)
         return(loss / tf.dtypes.cast(number_of_labels, tf.float32))    
     
     return(multilabel_surface_loss_fixed)
