@@ -193,7 +193,7 @@ def harvard_oxford_atlas_labeling(t1,
                     probability_array = np.flip(probability_array, axis=0)
                     if i == 1:
                         label = hoa_lateral_right_labels[j]
-                    else:    
+                    elif i == 2:    
                         label = hoa_lateral_left_labels[j]
                 probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)    
                 if do_preprocessing:
