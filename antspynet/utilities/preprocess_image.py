@@ -98,12 +98,15 @@ def preprocess_brain_image(image,
     # Brain extraction
     mask = None
     if brain_extraction_modality is not None:
-        if verbose == True:
+        if verbose:
             print("Preprocessing:  brain extraction.")
 
-        probability_mask = brain_extraction(preprocessed_image, modality=brain_extraction_modality, verbose=verbose)
-        mask = ants.threshold_image(probability_mask, 0.5, 1, 1, 0)
-        mask = ants.morphology(mask,"close",6).iMath_fill_holes()
+        bext = brain_extraction(preprocessed_image, modality=brain_extraction_modality, verbose=verbose)
+        if brain_extraction_modality == "bw20":
+            mask = ants.threshold_image(bext['segmentation_image'], 1, 1, 1, 0)
+        else:    
+            mask = ants.threshold_image(bext, 0.5, 1, 1, 0)
+            mask = ants.morphology(mask,"close",6).iMath_fill_holes()
 
     # Template normalization
     transforms = None
@@ -122,8 +125,11 @@ def preprocess_brain_image(image,
             transforms = dict(fwdtransforms=registration['fwdtransforms'],
                               invtransforms=registration['invtransforms'])
         else:
-            template_probability_mask = brain_extraction(template_image, modality=brain_extraction_modality, verbose=verbose)
-            template_mask = ants.threshold_image(template_probability_mask, 0.5, 1, 1, 0)
+            template_bext = brain_extraction(template_image, modality=brain_extraction_modality, verbose=verbose)
+            if brain_extraction_modality == "bw20":
+                template_mask = ants.threshold_image(template_bext['segmentation_image'], 1, 1, 1, 0)
+            else:
+                template_mask = ants.threshold_image(template_bext, 0.5, 1, 1, 0)
             template_brain_image = template_mask * template_image
 
             preprocessed_brain_image = preprocessed_image * mask

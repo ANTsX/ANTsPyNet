@@ -200,7 +200,6 @@ def desikan_killiany_tourville_labeling(t1,
 
     Preprocessing on the training data consisted of:
        * n4 bias correction,
-       * denoising,
        * brain extraction, and
        * affine registration to MNI.
     The input T1 should undergo the same steps.  If the input T1 is the raw
@@ -241,292 +240,554 @@ def desikan_killiany_tourville_labeling(t1,
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
     from ..utilities import deep_atropos
+    from ..utilities import pad_or_crop_image_to_size
 
-    if t1.dimension != 3:
-        raise ValueError( "Image dimension must be 3." )
+    if not isinstance(t1, list):
 
-    template_transform_type = "antsRegistrationSyNQuickRepro[a]"
-    ################################
-    #
-    # Preprocess images
-    #
-    ################################
+        if t1.dimension != 3:
+            raise ValueError( "Image dimension must be 3." )
 
-    t1_preprocessed = t1
-    if do_preprocessing:
-        t1_preprocessing = preprocess_brain_image(t1,
-            truncate_intensity=(0.01, 0.99),
-            brain_extraction_modality="t1",
-            template="croppedMni152",
-            template_transform_type=template_transform_type,
-            do_bias_correction=True,
-            do_denoising=True,
-            verbose=verbose)
-        t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
+        template_transform_type = "antsRegistrationSyNQuickRepro[a]"
+        ################################
+        #
+        # Preprocess images
+        #
+        ################################
 
-    ################################
-    #
-    # Download spatial priors for outer model
-    #
-    ################################
-
-    spatial_priors_file_name_path = get_antsxnet_data("priorDktLabels")
-    spatial_priors = ants.image_read(spatial_priors_file_name_path)
-    priors_image_list = ants.ndimage_to_list(spatial_priors)
-
-    ################################
-    #
-    # Build outer model and load weights
-    #
-    ################################
-
-    template_size = (96, 112, 96)
-    labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
-                 2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
-    channel_size = 1 + len(priors_image_list)
-
-    unet_model = create_unet_model_3d((*template_size, channel_size),
-        number_of_outputs = len(labels),
-        number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
-        convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-        weight_decay = 1e-5, additional_options=("attentionGating"))
-
-    weights_file_name = None
-    weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors")
-    unet_model.load_weights(weights_file_name)
-
-    ################################
-    #
-    # Do prediction and normalize to native space
-    #
-    ################################
-
-    if verbose:
-        print("Outer model Prediction.")
-
-    downsampled_image = ants.resample_image(t1_preprocessed, template_size, use_voxels=True, interp_type=0)
-    image_array = downsampled_image.numpy()
-    image_array = (image_array - image_array.mean()) / image_array.std()
-
-    batchX = np.zeros((1, *template_size, channel_size))
-    batchX[0,:,:,:,0] = image_array
-
-    for i in range(len(priors_image_list)):
-        resampled_prior_image = ants.resample_image(priors_image_list[i], template_size, use_voxels=True, interp_type=0)
-        batchX[0,:,:,:,i+1] = resampled_prior_image.numpy()
-
-    predicted_data = unet_model.predict(batchX, verbose=verbose)
-
-    origin = downsampled_image.origin
-    spacing = downsampled_image.spacing
-    direction = downsampled_image.direction
-
-    outer_probability_images = list()
-    for i in range(len(labels)):
-        probability_image = \
-            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
-            origin=origin, spacing=spacing, direction=direction)
-        resampled_image = ants.resample_image( probability_image, t1_preprocessed.shape, use_voxels=True, interp_type=0)
+        t1_preprocessed = ants.image_clone(t1)
         if do_preprocessing:
-            outer_probability_images.append(ants.apply_transforms(fixed=t1,
-                moving=resampled_image,
-                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose))
-        else:
-            outer_probability_images.append(resampled_image)
+            t1_preprocessing = preprocess_brain_image(t1,
+                truncate_intensity=(0.01, 0.99),
+                brain_extraction_modality="t1",
+                template="croppedMni152",
+                template_transform_type=template_transform_type,
+                do_bias_correction=True,
+                do_denoising=True,
+                verbose=verbose)
+            t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
-    image_matrix = ants.image_list_to_matrix(outer_probability_images, t1 * 0 + 1)
-    segmentation_matrix = np.argmax(image_matrix, axis=0)
-    segmentation_image = ants.matrix_to_images(
-        np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
+        ################################
+        #
+        # Download spatial priors for outer model
+        #
+        ################################
 
-    dkt_label_image = ants.image_clone(segmentation_image)
-    for i in range(len(labels)):
-        dkt_label_image[segmentation_image==i] = labels[i]
+        spatial_priors_file_name_path = get_antsxnet_data("priorDktLabels")
+        spatial_priors = ants.image_read(spatial_priors_file_name_path)
+        priors_image_list = ants.ndimage_to_list(spatial_priors)
 
-    ################################
-    #
-    # Build inner model and load weights
-    #
-    ################################
+        ################################
+        #
+        # Build outer model and load weights
+        #
+        ################################
 
-    template_size = (160, 192, 160)
-    labels = (0, 4, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 26,
-        28, 30, 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 58, 60, 91, 92, 630, 631, 632)
+        template_size = (96, 112, 96)
+        labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
+                    2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
+        channel_size = 1 + len(priors_image_list)
 
-    unet_model = create_unet_model_3d((*template_size, 1),
-        number_of_outputs = len(labels),
-        number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
-        convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
-        weight_decay = 1e-5, additional_options=("attentionGating"))
+        unet_model = create_unet_model_3d((*template_size, channel_size),
+            number_of_outputs = len(labels),
+            number_of_layers = 4, number_of_filters_at_base_layer = 16, dropout_rate = 0.0,
+            convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
+            weight_decay = 1e-5, additional_options=("attentionGating"))
 
-    weights_file_name = get_pretrained_network("dktInner")
-    unet_model.load_weights(weights_file_name)
+        weights_file_name = None
+        weights_file_name = get_pretrained_network("dktOuterWithSpatialPriors")
+        unet_model.load_weights(weights_file_name)
 
-    ################################
-    #
-    # Do prediction and normalize to native space
-    #
-    ################################
+        ################################
+        #
+        # Do prediction and normalize to native space
+        #
+        ################################
 
-    if verbose:
-        print("Prediction.")
+        if verbose:
+            print("Outer model Prediction.")
 
-    cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (172, 206, 160))
+        downsampled_image = ants.resample_image(t1_preprocessed, template_size, use_voxels=True, interp_type=0)
+        image_array = downsampled_image.numpy()
+        image_array = (image_array - image_array.mean()) / image_array.std()
 
-    batchX = np.expand_dims(cropped_image.numpy(), axis=0)
-    batchX = np.expand_dims(batchX, axis=-1)
-    batchX = (batchX - batchX.mean()) / batchX.std()
+        batchX = np.zeros((1, *template_size, channel_size))
+        batchX[0,:,:,:,0] = image_array
 
-    predicted_data = unet_model.predict(batchX, verbose=verbose)
+        for i in range(len(priors_image_list)):
+            resampled_prior_image = ants.resample_image(priors_image_list[i], template_size, use_voxels=True, interp_type=0)
+            batchX[0,:,:,:,i+1] = resampled_prior_image.numpy()
 
-    origin = cropped_image.origin
-    spacing = cropped_image.spacing
-    direction = cropped_image.direction
+        predicted_data = unet_model.predict(batchX, verbose=verbose)
 
-    inner_probability_images = list()
-    for i in range(len(labels)):
-        probability_image = \
-            ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
-            origin=origin, spacing=spacing, direction=direction)
-        if i > 0:
-            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
-        else:
-            decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+        outer_probability_images = list()
+        for i in range(len(labels)):
+            probability_image = \
+                ants.from_numpy_like(np.squeeze(predicted_data[0, :, :, :, i]), downsampled_image)
+            resampled_image = ants.resample_image(probability_image, t1_preprocessed.shape, use_voxels=True, interp_type=0)
+            if do_preprocessing:
+                outer_probability_images.append(ants.apply_transforms(fixed=t1,
+                    moving=resampled_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose))
+            else:
+                outer_probability_images.append(resampled_image)
 
-        if do_preprocessing:
-            inner_probability_images.append(ants.apply_transforms(fixed=t1,
-                moving=decropped_image,
-                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose))
-        else:
-            inner_probability_images.append(decropped_image)
+        image_matrix = ants.image_list_to_matrix(outer_probability_images, t1 * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
-    image_matrix = ants.image_list_to_matrix(inner_probability_images, t1 * 0 + 1)
-    segmentation_matrix = np.argmax(image_matrix, axis=0)
-    segmentation_image = ants.matrix_to_images(
-        np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
-
-    ################################
-    #
-    # Incorporate the inner model results into the final label image.
-    # Note that we purposely prioritize the inner label results.
-    #
-    ################################
-
-    for i in range(len(labels)):
-        if labels[i] > 0:
+        dkt_label_image = ants.image_clone(segmentation_image)
+        for i in range(len(labels)):
             dkt_label_image[segmentation_image==i] = labels[i]
 
-    if do_lobar_parcellation:
-
-        if verbose:
-            print("Doing lobar parcellation.")
-
         ################################
         #
-        # Lobar/hemisphere parcellation
+        # Build inner model and load weights
         #
         ################################
 
-        # Consolidate lobar cortical labels
+        template_size = (160, 192, 160)
+        labels = (0, 4, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 26,
+            28, 30, 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 58, 60, 91, 92, 630, 631, 632)
 
-        if verbose:
-            print("   Consolidating cortical labels.")
+        unet_model = create_unet_model_3d((*template_size, 1),
+            number_of_outputs = len(labels),
+            number_of_layers = 4, number_of_filters_at_base_layer = 8, dropout_rate = 0.0,
+            convolution_kernel_size = (3, 3, 3), deconvolution_kernel_size = (2, 2, 2),
+            weight_decay = 1e-5, additional_options=("attentionGating"))
 
-        frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1024, 1026, 1027, 1028,
-                            2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2024, 2026, 2027, 2028)
-        parietal_labels = (1008, 1010, 1022, 1023, 1025, 1029, 1031,
-                            2008, 2010, 2022, 2023, 2025, 2029, 2031)
-        temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
-                            2006, 2007, 2009, 2015, 2016, 2030, 2034)
-        occipital_labels = (1005, 1011, 1013, 1021,
-                            2005, 2011, 2013, 2021)
+        weights_file_name = get_pretrained_network("dktInner")
+        unet_model.load_weights(weights_file_name)
 
-        lobar_labels = list()
-        lobar_labels.append(frontal_labels)
-        lobar_labels.append(parietal_labels)
-        lobar_labels.append(temporal_labels)
-        lobar_labels.append(occipital_labels)
-
-        dkt_lobes = ants.image_clone(dkt_label_image)
-        dkt_lobes[dkt_lobes < 1000] = 0
-
-        for i in range(len(lobar_labels)):
-            for j in range(len(lobar_labels[i])):
-                dkt_lobes[dkt_lobes == lobar_labels[i][j]] = i + 1
-
-        dkt_lobes[dkt_lobes > len(lobar_labels)] = 0
-
-        six_tissue = deep_atropos(t1_preprocessed, do_preprocessing=False, verbose=verbose)
-        atropos_seg = six_tissue['segmentation_image']
-        if do_preprocessing:
-            atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,
-                transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
-
-        brain_mask = ants.image_clone(atropos_seg)
-        brain_mask[brain_mask == 1 or brain_mask == 5 or brain_mask == 6] = 0
-        brain_mask = ants.threshold_image(brain_mask, 0, 0, 0, 1)
-
-        lobar_parcellation = ants.iMath(brain_mask, "PropagateLabelsThroughMask", brain_mask * dkt_lobes)
-
-        lobar_parcellation[atropos_seg == 5] = 5
-        lobar_parcellation[atropos_seg == 6] = 6
-
-        # Do left/right
-
-        if verbose:
-            print("   Doing left/right hemispheres.")
-
-
-        left_labels = (*tuple(range(4, 8)), *tuple(range(10, 14)), 17, 18, 25, 26, 28, 30, 91,
-                       1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
-        right_labels = (*tuple(range(43, 47)), *tuple(range(49, 55)), 57, 58, 60, 62, 92, 2002, 2003,
-                        *tuple(range(2005, 2032)), 2034, 2035)
-
-        hemisphere_labels = list()
-        hemisphere_labels.append(left_labels)
-        hemisphere_labels.append(right_labels)
-
-        dkt_hemispheres = ants.image_clone(dkt_label_image)
-
-        for i in range(len(hemisphere_labels)):
-            for j in range(len(hemisphere_labels[i])):
-                dkt_hemispheres[dkt_hemispheres == hemisphere_labels[i][j]] = i + 1
-
-        dkt_hemispheres[dkt_hemispheres > 2] = 0
-
-        atropos_brain_mask = ants.threshold_image(atropos_seg, 0, 0, 0, 1)
-        hemisphere_parcellation = ants.iMath(atropos_brain_mask, "PropagateLabelsThroughMask",
-          atropos_brain_mask * dkt_hemispheres)
-
-        # The following contains a bug somewhere as only the latter condition is seen.
-        # Need to fix it.
+        ################################
         #
-        # for i in range(6):
-        #     lobar_parcellation[lobar_parcellation == (i + 1) and hemisphere_parcellation == 2] = 6 + i + 1
+        # Do prediction and normalize to native space
+        #
+        ################################
 
-        hemisphere_parcellation *= ants.threshold_image(lobar_parcellation, 0, 0, 0, 1)
-        hemisphere_parcellation[hemisphere_parcellation == 1] = 0
-        hemisphere_parcellation[hemisphere_parcellation == 2] = 1
-        hemisphere_parcellation *= 6
-        lobar_parcellation += hemisphere_parcellation
+        if verbose:
+            print("Prediction.")
 
-    if return_probability_images and do_lobar_parcellation:
-        return_dict = {'segmentation_image' : dkt_label_image,
-                       'lobar_parcellation' : lobar_parcellation,
-                       'inner_probability_images' : inner_probability_images,
-                       'outer_probability_images' : outer_probability_images }
-        return(return_dict)
-    elif return_probability_images and not do_lobar_parcellation:
-        return_dict = {'segmentation_image' : dkt_label_image,
-                       'inner_probability_images' : inner_probability_images,
-                       'outer_probability_images' : outer_probability_images }
-        return(return_dict)
-    elif not return_probability_images and do_lobar_parcellation:
-        return_dict = {'segmentation_image' : dkt_label_image,
-                       'lobar_parcellation' : lobar_parcellation }
-        return(return_dict)
+        cropped_image = ants.crop_indices(t1_preprocessed, (12, 14, 0), (172, 206, 160))
+
+        batchX = np.expand_dims(cropped_image.numpy(), axis=0)
+        batchX = np.expand_dims(batchX, axis=-1)
+        batchX = (batchX - batchX.mean()) / batchX.std()
+
+        predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+        origin = cropped_image.origin
+        spacing = cropped_image.spacing
+        direction = cropped_image.direction
+
+        inner_probability_images = list()
+        for i in range(len(labels)):
+            probability_image = \
+                ants.from_numpy(np.squeeze(predicted_data[0, :, :, :, i]),
+                origin=origin, spacing=spacing, direction=direction)
+            if i > 0:
+                decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0)
+            else:
+                decropped_image = ants.decrop_image(probability_image, t1_preprocessed * 0 + 1)
+
+            if do_preprocessing:
+                inner_probability_images.append(ants.apply_transforms(fixed=t1,
+                    moving=decropped_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose))
+            else:
+                inner_probability_images.append(decropped_image)
+
+        image_matrix = ants.image_list_to_matrix(inner_probability_images, t1 * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
+
+        ################################
+        #
+        # Incorporate the inner model results into the final label image.
+        # Note that we purposely prioritize the inner label results.
+        #
+        ################################
+
+        for i in range(len(labels)):
+            if labels[i] > 0:
+                dkt_label_image[segmentation_image==i] = labels[i]
+
+        if do_lobar_parcellation:
+
+            if verbose:
+                print("Doing lobar parcellation.")
+
+            ################################
+            #
+            # Lobar/hemisphere parcellation
+            #
+            ################################
+
+            # Consolidate lobar cortical labels
+
+            if verbose:
+                print("   Consolidating cortical labels.")
+
+            frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1024, 1026, 1027, 1028,
+                                2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2024, 2026, 2027, 2028)
+            parietal_labels = (1008, 1010, 1022, 1023, 1025, 1029, 1031,
+                                2008, 2010, 2022, 2023, 2025, 2029, 2031)
+            temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
+                                2006, 2007, 2009, 2015, 2016, 2030, 2034)
+            occipital_labels = (1005, 1011, 1013, 1021,
+                                2005, 2011, 2013, 2021)
+
+            lobar_labels = list()
+            lobar_labels.append(frontal_labels)
+            lobar_labels.append(parietal_labels)
+            lobar_labels.append(temporal_labels)
+            lobar_labels.append(occipital_labels)
+
+            dkt_lobes = ants.image_clone(dkt_label_image)
+            dkt_lobes[dkt_lobes < 1000] = 0
+
+            for i in range(len(lobar_labels)):
+                for j in range(len(lobar_labels[i])):
+                    dkt_lobes[dkt_lobes == lobar_labels[i][j]] = i + 1
+
+            dkt_lobes[dkt_lobes > len(lobar_labels)] = 0
+
+            six_tissue = deep_atropos(t1_preprocessed, do_preprocessing=False, verbose=verbose)
+            atropos_seg = six_tissue['segmentation_image']
+            if do_preprocessing:
+                atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
+
+            brain_mask = ants.image_clone(atropos_seg)
+            brain_mask[brain_mask == 1 or brain_mask == 5 or brain_mask == 6] = 0
+            brain_mask = ants.threshold_image(brain_mask, 0, 0, 0, 1)
+
+            lobar_parcellation = ants.iMath(brain_mask, "PropagateLabelsThroughMask", brain_mask * dkt_lobes)
+
+            lobar_parcellation[atropos_seg == 5] = 5
+            lobar_parcellation[atropos_seg == 6] = 6
+
+            # Do left/right
+
+            if verbose:
+                print("   Doing left/right hemispheres.")
+
+
+            left_labels = (*tuple(range(4, 8)), *tuple(range(10, 14)), 17, 18, 25, 26, 28, 30, 91,
+                        1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
+            right_labels = (*tuple(range(43, 47)), *tuple(range(49, 55)), 57, 58, 60, 62, 92, 2002, 2003,
+                            *tuple(range(2005, 2032)), 2034, 2035)
+
+            hemisphere_labels = list()
+            hemisphere_labels.append(left_labels)
+            hemisphere_labels.append(right_labels)
+
+            dkt_hemispheres = ants.image_clone(dkt_label_image)
+
+            for i in range(len(hemisphere_labels)):
+                for j in range(len(hemisphere_labels[i])):
+                    dkt_hemispheres[dkt_hemispheres == hemisphere_labels[i][j]] = i + 1
+
+            dkt_hemispheres[dkt_hemispheres > 2] = 0
+
+            atropos_brain_mask = ants.threshold_image(atropos_seg, 0, 0, 0, 1)
+            hemisphere_parcellation = ants.iMath(atropos_brain_mask, "PropagateLabelsThroughMask",
+            atropos_brain_mask * dkt_hemispheres)
+
+            # The following contains a bug somewhere as only the latter condition is seen.
+            # Need to fix it.
+            #
+            # for i in range(6):
+            #     lobar_parcellation[lobar_parcellation == (i + 1) and hemisphere_parcellation == 2] = 6 + i + 1
+
+            hemisphere_parcellation *= ants.threshold_image(lobar_parcellation, 0, 0, 0, 1)
+            hemisphere_parcellation[hemisphere_parcellation == 1] = 0
+            hemisphere_parcellation[hemisphere_parcellation == 2] = 1
+            hemisphere_parcellation *= 6
+            lobar_parcellation += hemisphere_parcellation
+
+        if return_probability_images and do_lobar_parcellation:
+            return_dict = {'segmentation_image' : dkt_label_image,
+                           'lobar_parcellation' : lobar_parcellation,
+                           'inner_probability_images' : inner_probability_images,
+                           'outer_probability_images' : outer_probability_images }
+            return(return_dict)
+        elif return_probability_images and not do_lobar_parcellation:
+            return_dict = {'segmentation_image' : dkt_label_image,
+                           'inner_probability_images' : inner_probability_images,
+                           'outer_probability_images' : outer_probability_images }
+            return(return_dict)
+        elif not return_probability_images and do_lobar_parcellation:
+            return_dict = {'segmentation_image' : dkt_label_image,
+                           'lobar_parcellation' : lobar_parcellation }
+            return(return_dict)
+        else:
+            return(dkt_label_image)
+
     else:
-        return(dkt_label_image)
+        
+        if t1[0].dimension != 3:
+            raise ValueError( "Image dimension must be 3." )
+
+        def reshape_image(image, crop_size, interp_type = "linear"):
+            image_resampled = None
+            if interp_type == "linear":
+                image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=0)
+            else:        
+                image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=1)
+            image_cropped = pad_or_crop_image_to_size(image_resampled, crop_size)
+            return image_cropped
+
+        which_template = "hcpyaT1Template"
+        template_transform_type = "antsRegistrationSyNQuick[a]"
+        template = ants.image_read(get_antsxnet_data(which_template))
+
+        cropped_template_size = (160, 176, 160)
+        
+        ################################
+        #
+        # Preprocess images
+        #
+        ################################
+
+        t1_preprocessed = ants.image_clone(t1[0])
+        if do_preprocessing:
+            t1_preprocessing = preprocess_brain_image(t1[0],
+                truncate_intensity=None,
+                brain_extraction_modality="bw20",
+                template=which_template,
+                template_transform_type=template_transform_type,
+                do_bias_correction=True,
+                do_denoising=False,
+                verbose=verbose)
+            t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
+            t1_preprocessed = reshape_image(t1_preprocessed, crop_size=cropped_template_size)
+        
+        ################################
+        #
+        # Build outer model and load weights
+        #
+        ################################
+
+        outer_labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
+                           2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
+        channel_size = 1
+        number_of_classification_labels = len(outer_labels)
+
+        unet_model = create_unet_model_3d((*cropped_template_size, channel_size),
+            number_of_outputs=number_of_classification_labels, mode="classification",
+            number_of_filters=(16, 32, 64, 128), dropout_rate=0.0,
+            convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+            weight_decay=0.0)
+
+        unet_model.load_weights(get_pretrained_network("DesikanKillianyTourvilleOuter"))
+
+        ################################
+        #
+        # Do prediction and normalize to native space
+        #
+        ################################
+
+        if verbose:
+            print("Outer model Prediction.")
+
+        batchX = np.zeros((1, *cropped_template_size, channel_size))
+        batchX[0,:,:,:,0] = t1_preprocessed.iMath("Normalize").numpy()
+
+        predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+        outer_probability_images = list()
+        for i in range(len(outer_labels)):
+            probability_image = \
+                ants.from_numpy_like(np.squeeze(predicted_data[0, :, :, :, i]), t1_preprocessed)
+            if do_preprocessing:
+                probability_image = pad_or_crop_image_to_size(probability_image, template.shape)
+                outer_probability_images.append(ants.apply_transforms(fixed=t1[0],
+                    moving=probability_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose))
+            else:
+                outer_probability_images.append(probability_image)
+
+        image_matrix = ants.image_list_to_matrix(outer_probability_images, t1[0] * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), t1[0] * 0 + 1)[0]
+
+        dkt_label_image = ants.image_clone(segmentation_image)
+        for i in range(len(outer_labels)):
+            print("DKT label" + str(outer_labels[i]))
+            dkt_label_image[segmentation_image==i] = outer_labels[i]
+
+        ################################
+        #
+        # Build inner model and load weights
+        #
+        ################################
+
+        inner_labels = (0, 4, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+                        24, 26, 28, 30, 43, 44, 45, 46, 49, 50, 51, 52, 
+                        53, 54, 58, 60, 91, 92, 630, 631, 632)
+        channel_size = 1
+        number_of_classification_labels = len(inner_labels)
+
+        unet_model = create_unet_model_3d((*cropped_template_size, channel_size),
+            number_of_outputs=number_of_classification_labels, mode="classification",
+            number_of_filters=(16, 32, 64, 128), dropout_rate=0.0,
+            convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
+            weight_decay=0.0)
+
+        unet_model.load_weights(get_pretrained_network("DesikanKillianyTourvilleInner"))
+
+        ################################
+        #
+        # Do prediction and normalize to native space
+        #
+        ################################
+
+        if verbose:
+            print("Prediction.")
+
+        predicted_data = unet_model.predict(batchX, verbose=verbose)
+
+        inner_probability_images = list()
+        for i in range(len(inner_labels)):
+            probability_image = \
+                ants.from_numpy_like(np.squeeze(predicted_data[0, :, :, :, i]), t1_preprocessed)
+            if do_preprocessing:
+                probability_image = pad_or_crop_image_to_size(probability_image, template.shape)
+                inner_probability_images.append(ants.apply_transforms(fixed=t1[0],
+                    moving=probability_image,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="linear", verbose=verbose))
+            else:
+                inner_probability_images.append(probability_image)
+
+        image_matrix = ants.image_list_to_matrix(inner_probability_images, t1[0] * 0 + 1)
+        segmentation_matrix = np.argmax(image_matrix, axis=0)
+        segmentation_image = ants.matrix_to_images(
+            np.expand_dims(segmentation_matrix, axis=0), t1[0] * 0 + 1)[0]
+
+        ants.image_write(segmentation_image, "~/Desktop/inner.nii.gz")
+
+        ################################
+        #
+        # Incorporate the inner model results into the final label image.
+        # Note that we purposely prioritize the inner label results.
+        #
+        ################################
+
+        for i in range(len(inner_labels)):
+            if inner_labels[i] > 0:
+                dkt_label_image[segmentation_image==i] = inner_labels[i]
+
+        if do_lobar_parcellation:
+
+            if verbose:
+                print("Doing lobar parcellation.")
+
+            ################################
+            #
+            # Lobar/hemisphere parcellation
+            #
+            ################################
+
+            # Consolidate lobar cortical labels
+
+            if verbose:
+                print("   Consolidating cortical labels.")
+
+            frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1024, 1026, 1027, 1028,
+                                2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2024, 2026, 2027, 2028)
+            parietal_labels = (1008, 1010, 1022, 1023, 1025, 1029, 1031,
+                                2008, 2010, 2022, 2023, 2025, 2029, 2031)
+            temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
+                                2006, 2007, 2009, 2015, 2016, 2030, 2034)
+            occipital_labels = (1005, 1011, 1013, 1021,
+                                2005, 2011, 2013, 2021)
+
+            lobar_labels = list()
+            lobar_labels.append(frontal_labels)
+            lobar_labels.append(parietal_labels)
+            lobar_labels.append(temporal_labels)
+            lobar_labels.append(occipital_labels)
+
+            dkt_lobes = ants.image_clone(dkt_label_image)
+            dkt_lobes[dkt_lobes < 1000] = 0
+
+            for i in range(len(lobar_labels)):
+                for j in range(len(lobar_labels[i])):
+                    dkt_lobes[dkt_lobes == lobar_labels[i][j]] = i + 1
+
+            dkt_lobes[dkt_lobes > len(lobar_labels)] = 0
+
+            six_tissue = deep_atropos(t1[0], do_preprocessing=False, verbose=verbose)
+            atropos_seg = six_tissue['segmentation_image']
+            if do_preprocessing:
+                atropos_seg = ants.apply_transforms(fixed=t1[0], moving=atropos_seg,
+                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                    whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
+
+            brain_mask = ants.image_clone(atropos_seg)
+            brain_mask[brain_mask == 1 or brain_mask == 5 or brain_mask == 6] = 0
+            brain_mask = ants.threshold_image(brain_mask, 0, 0, 0, 1)
+
+            lobar_parcellation = ants.iMath(brain_mask, "PropagateLabelsThroughMask", brain_mask * dkt_lobes)
+
+            lobar_parcellation[atropos_seg == 5] = 5
+            lobar_parcellation[atropos_seg == 6] = 6
+
+            # Do left/right
+
+            if verbose:
+                print("   Doing left/right hemispheres.")
+
+
+            left_labels = (*tuple(range(4, 8)), *tuple(range(10, 14)), 17, 18, 25, 26, 28, 30, 91,
+                        1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
+            right_labels = (*tuple(range(43, 47)), *tuple(range(49, 55)), 57, 58, 60, 62, 92, 2002, 2003,
+                            *tuple(range(2005, 2032)), 2034, 2035)
+
+            hemisphere_labels = list()
+            hemisphere_labels.append(left_labels)
+            hemisphere_labels.append(right_labels)
+
+            dkt_hemispheres = ants.image_clone(dkt_label_image)
+
+            for i in range(len(hemisphere_labels)):
+                for j in range(len(hemisphere_labels[i])):
+                    dkt_hemispheres[dkt_hemispheres == hemisphere_labels[i][j]] = i + 1
+
+            dkt_hemispheres[dkt_hemispheres > 2] = 0
+
+            atropos_brain_mask = ants.threshold_image(atropos_seg, 0, 0, 0, 1)
+            hemisphere_parcellation = ants.iMath(atropos_brain_mask, "PropagateLabelsThroughMask",
+            atropos_brain_mask * dkt_hemispheres)
+
+            hemisphere_parcellation *= ants.threshold_image(lobar_parcellation, 0, 0, 0, 1)
+            hemisphere_parcellation[hemisphere_parcellation == 1] = 0
+            hemisphere_parcellation[hemisphere_parcellation == 2] = 1
+            hemisphere_parcellation *= 6
+            lobar_parcellation += hemisphere_parcellation
+
+        if return_probability_images and do_lobar_parcellation:
+            return_dict = {'segmentation_image' : dkt_label_image,
+                           'lobar_parcellation' : lobar_parcellation,
+                           'inner_probability_images' : inner_probability_images,
+                           'outer_probability_images' : outer_probability_images }
+            return(return_dict)
+        elif return_probability_images and not do_lobar_parcellation:
+            return_dict = {'segmentation_image' : dkt_label_image,
+                           'inner_probability_images' : inner_probability_images,
+                           'outer_probability_images' : outer_probability_images }
+            return(return_dict)
+        elif not return_probability_images and do_lobar_parcellation:
+            return_dict = {'segmentation_image' : dkt_label_image,
+                           'lobar_parcellation' : lobar_parcellation }
+            return(return_dict)
+        else:
+            return(dkt_label_image)

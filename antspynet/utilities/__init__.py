@@ -40,6 +40,7 @@ from .custom_metrics import pearson_correlation_coefficient
 from .custom_metrics import categorical_focal_loss
 from .custom_metrics import weighted_categorical_crossentropy
 from .custom_metrics import binary_surface_loss
+from .custom_metrics import multilabel_surface_loss
 from .custom_metrics import maximum_mean_discrepancy
 
 from .custom_normalization_layers import InstanceNormalization
@@ -103,6 +104,7 @@ from .hippmapp3r_segmentation import hippmapp3r_segmentation
 from .deep_flash import deep_flash
 from .deep_atropos import deep_atropos
 from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
+from .harvard_oxford_atlas_labeling import harvard_oxford_atlas_labeling
 from .cerebellum_morphology import cerebellum_morphology
 from .brain_age import brain_age
 from .mri_super_resolution import mri_super_resolution
