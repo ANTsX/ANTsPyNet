@@ -169,6 +169,32 @@ def weighted_categorical_crossentropy(weights):
 
     return(weighted_categorical_crossentropy_fixed)
 
+def binary_surface_loss_fixed(y_true, y_pred):
+    def calculate_residual_distance_map(segmentation):
+        residual_distance = np.zeros_like(segmentation)
+
+        positive_mask = segmentation.astype(bool)
+        if positive_mask.any():
+            negative_mask = ~positive_mask
+            residual_distance = \
+                (sp.ndimage.distance_transform_edt(negative_mask) * negative_mask -
+                (sp.ndimage.distance_transform_edt(positive_mask) - 1) * positive_mask)
+
+        return(residual_distance)
+
+    def calculate_batchwise_residual_distance_maps(y_true):
+        y_true_numpy = y_true.numpy()
+        return(np.array([calculate_residual_distance_map(y)
+            for y in y_true_numpy]).astype(np.float32))
+
+    y_true_distance_map = tf.py_function(
+        func=calculate_batchwise_residual_distance_maps,
+        inp=[y_true],
+        Tout=tf.float32)
+
+    product = tf.cast(y_pred, tf.float32) * tf.cast(y_true_distance_map, tf.float32)
+    return(K.mean(product))
+
 def binary_surface_loss():
 
     """
@@ -205,34 +231,62 @@ def binary_surface_loss():
     >>> loss_value = loss(r16_tensor, r64_tensor).numpy()
     """
 
-    def binary_surface_loss_fixed(y_true, y_pred):
-        def calculate_residual_distance_map(segmentation):
-            residual_distance = np.zeros_like(segmentation)
-
-            positive_mask = segmentation.astype(bool)
-            if positive_mask.any():
-                negative_mask = ~positive_mask
-                residual_distance = \
-                    (sp.ndimage.distance_transform_edt(negative_mask) * negative_mask -
-                    (sp.ndimage.distance_transform_edt(positive_mask) - 1) * positive_mask)
-
-            return(residual_distance)
-
-        def calculate_batchwise_residual_distance_maps(y_true):
-            y_true_numpy = y_true.numpy()
-            return(np.array([calculate_residual_distance_map(y)
-                for y in y_true_numpy]).astype(np.float32))
-
-        y_true_distance_map = tf.py_function(
-            func=calculate_batchwise_residual_distance_maps,
-            inp=[y_true],
-            Tout=tf.float32)
-
-        product = tf.cast(y_pred, tf.float32) * tf.cast(y_true_distance_map, tf.float32)
-        return(K.mean(product))
-
     return(binary_surface_loss_fixed)
 
+def multilabel_surface_loss():
+
+    """
+    Multi-label surface loss
+
+    https://pubmed.ncbi.nlm.nih.gov/33080507/
+
+    ported from this implementation:
+    
+    https://github.com/LIVIAETS/boundary-loss/blob/master/keras_loss.py
+    
+    Returns
+    -------
+    Loss value.
+
+    Example
+    -------
+    >>> import ants
+    >>> import antspynet
+    >>> import tensorflow as tf
+    >>> import numpy as np
+    >>>
+    >>> r16 = ants.image_read(ants.get_ants_data("r16"))
+    >>> r16_seg = ants.kmeans_segmentation(r16, 3)['segmentation']
+    >>> r16_array = np.expand_dims(r16_seg.numpy(), axis=0)
+    >>> r16_tensor = tf.convert_to_tensor(antspynet.encode_unet(r16_array, (0, 1, 2, 3)))
+    >>>
+    >>> r64 = ants.image_read(ants.get_ants_data("r64"))
+    >>> r64_seg = ants.kmeans_segmentation(r64, 3)['segmentation']
+    >>> r64_array = np.expand_dims(r64_seg.numpy(), axis=0)
+    >>> r64_tensor = tf.convert_to_tensor(antspynet.encode_unet(r64_array, (0, 1, 2, 3)))
+    >>>
+    >>> loss = antspynet.multilabel_surface_loss()
+    >>> loss_value = loss(r16_tensor, r64_tensor).numpy()
+    """
+
+    def multilabel_surface_loss_fixed(y_true, y_pred):
+
+        y_dims = K.int_shape(y_pred)
+
+        number_of_labels = y_dims[len(y_dims)-1]
+        
+        loss = 0.0
+        for j in range(1, number_of_labels):
+            y_true_single_label = y_true[..., j]
+            y_pred_single_label = y_pred[..., j]
+            
+            loss_single_label = binary_surface_loss_fixed(y_true_single_label, 
+                                                          y_pred_single_label)
+            loss += loss_single_label
+            print("Loss: ", loss_single_label)
+        return(loss / tf.dtypes.cast(number_of_labels, tf.float32))    
+    
+    return(multilabel_surface_loss_fixed)
 
 def maximum_mean_discrepancy(sigma=1.0):
 
