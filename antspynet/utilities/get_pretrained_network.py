@@ -96,7 +96,7 @@ def get_pretrained_network(file_id=None,
             "dktOuterWithSpatialPriors": "https://ndownloader.figshare.com/files/24230768",
             "DesikanKillianyTourvilleInner": "",
             "DesikanKillianyTourvilleOuter": "",
-            "HarvardOxfordAtlasSubcortical": "",
+            "HarvardOxfordAtlasSubcortical": "https://figshare.com/ndownloader/files/50577546",
             "elBicho": "https://ndownloader.figshare.com/files/26736779",
             "lesion_patch": "https://figshare.com/ndownloader/files/43882539",
             "lesion_whole_brain": "https://figshare.com/ndownloader/files/44032017",  # 44162156
