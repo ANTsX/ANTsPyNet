@@ -84,7 +84,7 @@ def create_simple_fully_convolutional_network_model_3d(input_image_size,
 
     return model
 
-def create_rmnet_generator():
+def create_rmnet_generator(number_of_channels=3):
     
     """
     Implementation of the "RMNet" generator architecture for inpainting
@@ -107,10 +107,9 @@ def create_rmnet_generator():
     def reverse_mask(x):
         return 1-x
 
-    img_shape = (256, 256, 3)
+    img_shape = (256, 256, number_of_channels)
     img_shape_mask = (256, 256, 1) 
     gf = 64
-    channels = 3
 
     #compute inputs
     input_img = Input(shape=img_shape, dtype='float32', name='image_input')
@@ -121,31 +120,31 @@ def create_rmnet_generator():
     
     #encoder
     x =(Conv2D(gf,(5, 5), dilation_rate=2, input_shape=img_shape, padding="same",name="enc_conv_1"))(masked_image)
-    x =(LeakyReLU(alpha=0.2))(x)
+    x =(LeakyReLU(negative_slope=0.2))(x)
     x =(BatchNormalization(momentum=0.8))(x)
     
     pool_1 = MaxPooling2D(pool_size=(2,2))(x) 
     
     x =(Conv2D(gf,(5, 5), dilation_rate=2, padding="same",name="enc_conv_2"))(pool_1)
-    x =(LeakyReLU(alpha=0.2))(x)
+    x =(LeakyReLU(negative_slope=0.2))(x)
     x =(BatchNormalization(momentum=0.8))(x)
     
     pool_2 = MaxPooling2D(pool_size=(2,2))(x) 
     
     x =(Conv2D(gf*2, (5, 5), dilation_rate=2, padding="same",name="enc_conv_3"))(pool_2)
-    x =(LeakyReLU(alpha=0.2))(x)
+    x =(LeakyReLU(negative_slope=0.2))(x)
     x =(BatchNormalization(momentum=0.8))(x)
     
     pool_3 = MaxPooling2D(pool_size=(2,2))(x) 
     
     x =(Conv2D(gf*4, (5, 5), dilation_rate=2, padding="same",name="enc_conv_4"))(pool_3)
-    x =(LeakyReLU(alpha=0.2))(x)
+    x =(LeakyReLU(negative_slope=0.2))(x)
     x =(BatchNormalization(momentum=0.8))(x)
     
     pool_4 = MaxPooling2D(pool_size=(2,2))(x) 
     
     x =(Conv2D(gf*8, (5, 5), dilation_rate=2, padding="same",name="enc_conv_5"))(pool_4)
-    x =(LeakyReLU(alpha=0.2))(x)
+    x =(LeakyReLU(negative_slope=0.2))(x)
     x =(Dropout(0.5))(x)
     
     #Decoder
@@ -173,7 +172,7 @@ def create_rmnet_generator():
     x =(Activation('relu'))(x)
     x =(BatchNormalization(momentum=0.8))(x)
     
-    x = (Conv2DTranspose(channels, (3, 3),  padding="same",name="final_output"))(x)
+    x = (Conv2DTranspose(number_of_channels, (3, 3),  padding="same",name="final_output"))(x)
     x = (Activation('tanh'))(x)
 
     decoded_output = x
