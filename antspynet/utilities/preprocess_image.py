@@ -34,7 +34,7 @@ def preprocess_brain_image(image,
     brain_extraction_modality : string or None
         Perform brain extraction using antspynet tools.  One of "t1", "t1v0",
         "t1nobrainer", "t1combined", "flair", "t2", "bold", "fa", "t1infant",
-        "t2infant", or None.
+        "t2infant", "t1threetissue", or None.
 
     template_transform_type : string
         See details in help for ants.registration.  Typically "Rigid" or
