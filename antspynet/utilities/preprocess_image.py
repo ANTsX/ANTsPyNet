@@ -102,7 +102,7 @@ def preprocess_brain_image(image,
             print("Preprocessing:  brain extraction.")
 
         bext = brain_extraction(preprocessed_image, modality=brain_extraction_modality, verbose=verbose)
-        if brain_extraction_modality == "bw20":
+        if brain_extraction_modality == "t1threetissue":
             mask = ants.threshold_image(bext['segmentation_image'], 1, 1, 1, 0)
         else:    
             mask = ants.threshold_image(bext, 0.5, 1, 1, 0)
