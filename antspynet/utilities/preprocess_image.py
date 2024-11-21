@@ -126,7 +126,7 @@ def preprocess_brain_image(image,
                               invtransforms=registration['invtransforms'])
         else:
             template_bext = brain_extraction(template_image, modality=brain_extraction_modality, verbose=verbose)
-            if brain_extraction_modality == "bw20":
+            if brain_extraction_modality == "t1threetissue":
                 template_mask = ants.threshold_image(template_bext['segmentation_image'], 1, 1, 1, 0)
             else:
                 template_mask = ants.threshold_image(template_bext, 0.5, 1, 1, 0)
