@@ -119,7 +119,7 @@ def harvard_oxford_atlas_labeling(t1,
     if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=None,
-            brain_extraction_modality="bw20",
+            brain_extraction_modality="t1threetissue",
             template=which_template,
             template_transform_type=template_transform_type,
             do_bias_correction=True,
