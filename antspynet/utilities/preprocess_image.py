@@ -104,6 +104,8 @@ def preprocess_brain_image(image,
         bext = brain_extraction(preprocessed_image, modality=brain_extraction_modality, verbose=verbose)
         if brain_extraction_modality == "t1threetissue":
             mask = ants.threshold_image(bext['segmentation_image'], 1, 1, 1, 0)
+        elif brain_extraction_modality == "t1combined":
+            mask = ants.threshold_image(bext, 2, 3, 1, 0)
         else:    
             mask = ants.threshold_image(bext, 0.5, 1, 1, 0)
             mask = ants.morphology(mask,"close",6).iMath_fill_holes()
