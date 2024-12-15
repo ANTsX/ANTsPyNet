@@ -10,7 +10,7 @@ def harvard_oxford_atlas_labeling(t1,
                                   verbose=False):
 
     """
-    Cortical and deep gray matter labeling using Desikan-Killiany-Tourville
+    Subcortical and cerebellar labeling from a T1 image.
     
     Perform HOA labeling using deep learning and data from "High Resolution, 
     Comprehensive Atlases of the Human Brain Morphology" number: "NIH NIMH 
@@ -66,10 +66,6 @@ def harvard_oxford_atlas_labeling(t1,
 
     do_preprocessing : boolean
         See description above.
-
-    return_probability_images : boolean
-        Whether to return the two sets of probability images for the subcortical
-        labels.
 
     verbose : boolean
         Print progress to the screen.
@@ -130,7 +126,7 @@ def harvard_oxford_atlas_labeling(t1,
     
     ################################
     #
-    # Build outer model and load weights
+    # Build model and load weights
     #
     ################################
 
@@ -145,8 +141,7 @@ def harvard_oxford_atlas_labeling(t1,
         weight_decay=0.0)
 
     penultimate_layer = unet_model_pre.layers[-2].output
-
-    # medial temporal lobe
+    
     output2 = Conv3D(filters=1,
                      kernel_size=(1, 1, 1),
                      activation='sigmoid',
