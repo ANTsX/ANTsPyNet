@@ -529,7 +529,7 @@ def desikan_killiany_tourville_labeling_version0(t1,
 
         atropos_brain_mask = ants.threshold_image(atropos_seg, 0, 0, 0, 1)
         hemisphere_parcellation = ants.iMath(atropos_brain_mask, "PropagateLabelsThroughMask",
-        atropos_brain_mask * dkt_hemispheres)
+                                             atropos_brain_mask * dkt_hemispheres)
 
         hemisphere_parcellation *= ants.threshold_image(lobar_parcellation, 0, 0, 0, 1)
         hemisphere_parcellation[hemisphere_parcellation == 1] = 0
@@ -613,7 +613,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     ################################
 
     outer_labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
-                        2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
+                       2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
     channel_size = 1
     number_of_classification_labels = len(outer_labels)
 
@@ -692,11 +692,11 @@ def desikan_killiany_tourville_labeling_version1(t1,
             print("   Consolidating cortical labels.")
 
         frontal_labels = (1002, 1003, 1012, 1014, 1017, 1018, 1019, 1020, 1024, 1026, 1027, 1028,
-                            2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2024, 2026, 2027, 2028)
+                          2002, 2003, 2012, 2014, 2017, 2018, 2019, 2020, 2024, 2026, 2027, 2028)
         parietal_labels = (1008, 1010, 1022, 1023, 1025, 1029, 1031,
-                            2008, 2010, 2022, 2023, 2025, 2029, 2031)
+                           2008, 2010, 2022, 2023, 2025, 2029, 2031)
         temporal_labels = (1006, 1007, 1009, 1015, 1016, 1030, 1034,
-                            2006, 2007, 2009, 2015, 2016, 2030, 2034)
+                           2006, 2007, 2009, 2015, 2016, 2030, 2034)
         occipital_labels = (1005, 1011, 1013, 1021,
                             2005, 2011, 2013, 2021)
 
@@ -707,7 +707,6 @@ def desikan_killiany_tourville_labeling_version1(t1,
         lobar_labels.append(occipital_labels)
 
         dkt_lobes = ants.image_clone(dkt_label_image)
-        dkt_lobes[dkt_lobes < 1000] = 0
 
         for i in range(len(lobar_labels)):
             for j in range(len(lobar_labels[i])):
@@ -717,9 +716,6 @@ def desikan_killiany_tourville_labeling_version1(t1,
 
         six_tissue = deep_atropos([t1, None, None], do_preprocessing=True, verbose=verbose)
         atropos_seg = six_tissue['segmentation_image']
-        atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,
-            transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-            whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
         atropos_seg[atropos_seg == 1] = 0
         atropos_seg[atropos_seg == 5] = 0
         atropos_seg[atropos_seg == 6] = 0
