@@ -85,6 +85,7 @@ def harvard_oxford_atlas_labeling(t1,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
+    from ..utilities import brain_extraction
     from ..utilities import pad_or_crop_image_to_size
 
     if t1.dimension != 3:
@@ -130,7 +131,13 @@ def harvard_oxford_atlas_labeling(t1,
     #
     ################################
 
-    labels = tuple(range(36))
+    hoa_lateral_labels = (0, 3, 4, 5, 6, 15, 24)
+    hoa_lateral_left_labels = (1, 7, 9, 11, 13, 16, 18, 20, 22, 25, 27, 29, 31)
+    hoa_lateral_right_labels = (2, 8, 10, 12, 14, 17, 19, 21, 23, 26, 28, 30, 32)
+    hoa_extra_labels = (33, 34, 35)
+
+    labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels, *hoa_extra_labels))
+
     channel_size = 1
     number_of_classification_labels = len(labels)
 
@@ -164,33 +171,26 @@ def harvard_oxford_atlas_labeling(t1,
     batchX[0,:,:,:,0] = t1_preprocessed.iMath("Normalize").numpy()
     batchX[1,:,:,:,0] = np.flip(batchX[0,:,:,:,0], axis=0)
 
-    predicted_data = unet_model.predict(batchX, verbose=verbose)[0]
+    predicted_data = unet_model.predict(batchX, verbose=verbose)
 
-    probability_images = [None] * 33
-
-    hoa_lateral_labels = (0, 3, 4, 5, 6, 15, 24)
-    hoa_lateral_left_labels = (1, 7, 9, 11, 13, 16, 18, 20, 22, 25, 27, 29, 31)
-    hoa_lateral_right_labels = (2, 8, 10, 12, 14, 17, 19, 21, 23, 26, 28, 30, 32)
-
+    probability_images = [None] * (len(hoa_lateral_labels) + len(hoa_lateral_left_labels))
+    
     hoa_labels = list()
     hoa_labels.append(hoa_lateral_labels)
     hoa_labels.append(hoa_lateral_left_labels)
-    hoa_labels.append(hoa_lateral_right_labels)
+    # hoa_labels.append(hoa_lateral_right_labels)
     
     for b in range(2):
         for i in range(len(hoa_labels)):
             for j in range(len(hoa_labels[i])):
                 label = hoa_labels[i][j]
-                probability_array = np.squeeze(predicted_data[b, :, :, :, label])
+                label_index = labels.index(label)
+                probability_array = np.squeeze(predicted_data[0][b, :, :, :, label_index])
                 if label == 0:
-                    probability_array += np.squeeze(np.sum(predicted_data[b, :, :, :, 33:36], axis=3))
+                    probability_array += np.squeeze(np.sum(predicted_data[0][b, :, :, :, 21:], axis=3))
                 if b == 1:
                     probability_array = np.flip(probability_array, axis=0)
-                    if i == 1:
-                        label = hoa_lateral_right_labels[j]
-                    elif i == 2:    
-                        label = hoa_lateral_left_labels[j]
-                probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)    
+                probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)
                 if do_preprocessing:
                     probability_image = pad_or_crop_image_to_size(probability_image, template.shape)
                     probability_image = ants.apply_transforms(fixed=t1,
@@ -198,16 +198,60 @@ def harvard_oxford_atlas_labeling(t1,
                         transformlist=t1_preprocessing['template_transforms']['invtransforms'],
                         whichtoinvert=[True], interpolator="linear", verbose=verbose)
                 if b == 0:
-                    probability_images[label] = probability_image
+                    probability_images[label_index] = probability_image
                 else:
-                    probability_images[label] = 0.5 * (probability_images[label] + probability_image)
-                            
+                    probability_images[label_index] = 0.5 * (probability_images[label_index] + probability_image)
 
-    image_matrix = ants.image_list_to_matrix(probability_images, t1 * 0 + 1)
+    if verbose:
+        print("Constructing foreground probability image.")
+
+    foreground_probability_array = np.squeeze(0.5 * (predicted_data[1][0,:,:,:,:] + 
+                                                  np.flip(predicted_data[1][1,:,:,:,:], axis=0)))
+    foreground_probability_image = ants.from_numpy_like(foreground_probability_array, t1_preprocessed)
+    if do_preprocessing:
+        foreground_probability_image = pad_or_crop_image_to_size(foreground_probability_image, template.shape)
+        foreground_probability_image = ants.apply_transforms(fixed=t1,
+            moving=foreground_probability_image,
+            transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+            whichtoinvert=[True], interpolator="linear", verbose=verbose)
+
+    for i in range(len(hoa_labels)):
+        for j in range(len(hoa_labels[i])):
+            label = hoa_labels[i][j]
+            label_index = labels.index(label)
+            if label == 0:
+                probability_images[label_index] *= (foreground_probability_image * -1 + 1)
+            else:    
+                probability_images[label_index] *= foreground_probability_image
+    
+    labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels))
+
+    bext = brain_extraction(t1, modality="t1hemi", verbose=verbose)
+
+    probability_all_images = list()
+    for i in range(len(labels)):
+        probability_image = ants.image_clone(probability_images[i])
+        if labels[i] in hoa_lateral_left_labels:
+            probability_left_image = probability_image * bext['probability_images'][1]
+            probability_right_image = probability_image * bext['probability_images'][2]
+            probability_all_images.append(probability_left_image)
+            probability_all_images.append(probability_right_image)
+        else:
+            probability_all_images.append(probability_image)    
+            
+    image_matrix = ants.image_list_to_matrix(probability_all_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
-    return_dict = {'segmentation_image' : segmentation_image,
-                   'probability_images' : probability_images}
+    hoa_all_labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels, *hoa_lateral_right_labels))
+
+    hoa_label_image = segmentation_image * 0 
+    for i in range(len(hoa_all_labels)):
+        label = hoa_all_labels[i]
+        label_index = hoa_all_labels.index(label)
+        hoa_label_image[segmentation_image==label_index] = label
+
+    return_dict = {'segmentation_image' : hoa_label_image,
+                   'probability_images' : probability_all_images}
     return(return_dict)

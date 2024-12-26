@@ -25,8 +25,12 @@ def brain_extraction(image,
             * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
             * "t1combined": Brian's combination of "t1" and "t1nobrainer".  One can also specify
                             "t1combined[X]" where X is the morphological radius.  X = 12 by default.
-            * "t1threetissue":  T1-weighted MRI---originally developed from BrainWeb20 (and later expanded).
-                                Label 1: brain + subdural CSF, label 2: sinuses + skull, label 3: other head, face, neck tissue
+            * "t1threetissue":  T1-weighted MRI---originally developed from BrainWeb20 (and later 
+                                expanded).  Label 1: brain + subdural CSF, label 2: sinuses + skull, 
+                                label 3: other head, face, neck tissue.
+            * "t1hemi":  Label 1 of "t1threetissue" subdivided into left and right hemispheres.
+            * "t1lobes":  Labels 1) frontal, 2) parietal, 3) temporal, 4) occipital. 5) csf,
+              cerebellum, and brain stem.
             * "flair": FLAIR MRI.   Previous versions are specified as "flair.v0".
             * "t2": T2 MRI.  Previous versions are specified as "t2.v0".
             * "t2star": T2Star MRI.
@@ -54,9 +58,7 @@ def brain_extraction(image,
     from ..utilities import get_antsxnet_data
     from ..architectures import create_nobrainer_unet_model_3d
     from ..utilities import decode_unet
-
-    classes = ("background", "brain")
-    number_of_classification_labels = len(classes)
+    from ..utilities import pad_or_crop_image_to_size
 
     channel_size = 1
     if isinstance(image, list):
@@ -64,7 +66,12 @@ def brain_extraction(image,
 
     input_images = list()
     if channel_size == 1:
-        input_images.append(image)
+        if modality == "t1hemi" or modality == "t1lobes":
+            bext = brain_extraction(image, modality="t1threetissue", verbose=verbose)
+            mask = ants.threshold_image(bext['segmentation_image'], 1, 1, 1, 0)
+            input_images.append(image * mask)
+        else:
+            input_images.append(image)
     else:
         input_images = image
 
@@ -145,6 +152,12 @@ def brain_extraction(image,
         elif modality == "t1threetissue":
             weights_file_name_prefix = "brainExtractionBrainWeb20"
             is_standard_network = True
+        elif modality == "t1hemi":
+            weights_file_name_prefix = "brainExtractionT1Hemi"
+            is_standard_network = True
+        elif modality == "t1lobes":
+            weights_file_name_prefix = "brainExtractionT1Lobes"
+            is_standard_network = True
         else:
             raise ValueError("Unknown modality type.")
 
@@ -158,6 +171,12 @@ def brain_extraction(image,
 
         if modality == "t1threetissue":
             reorient_template = ants.image_read(get_antsxnet_data("nki"))
+        elif modality == "t1hemi" or modality == "t1lobes":
+            reorient_template = ants.image_read(get_antsxnet_data("hcpyaT1Template"))
+            reorient_template_mask = ants.image_read(get_antsxnet_data("hcpyaTemplateBrainMask"))
+            reorient_template = reorient_template * reorient_template_mask
+            reorient_template = ants.resample_image(reorient_template, (1, 1, 1), use_voxels=False, interp_type=0)            
+            reorient_template = pad_or_crop_image_to_size(reorient_template, (160, 176, 160))
         else:    
             reorient_template = ants.image_read(get_antsxnet_data("S_template3"))
             if is_standard_network and (modality != "t1.v1" and modality != "mra"):
@@ -165,6 +184,7 @@ def brain_extraction(image,
         resampled_image_size = reorient_template.shape
 
         number_of_filters = (8, 16, 32, 64)
+        number_of_classification_labels = 2
         mode = "classification"
         if is_standard_network:
             number_of_filters = (16, 32, 64, 128)
@@ -172,9 +192,14 @@ def brain_extraction(image,
             mode = "sigmoid"
 
         unet_model = None
-        if modality == "t1threetissue":
+        if modality == "t1threetissue" or modality == "t1hemi" or modality == "t1lobes":
             mode = "classification"
-            number_of_classification_labels = 4 # background, brain, meninges/csf, misc. head
+            if modality == "t1threetissue":
+                number_of_classification_labels = 4 # background, brain, meninges/csf, misc. head
+            elif modality == "t1hemi":
+                number_of_classification_labels = 3 # background, left, right
+            elif modality == "t1lobes":
+                number_of_classification_labels = 6 # background, frontal, parietal, temporal, occipital, misc
             unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
                 number_of_outputs=number_of_classification_labels, mode=mode,
                 number_of_filters=number_of_filters, dropout_rate=0.0,
@@ -219,7 +244,7 @@ def brain_extraction(image,
 
         xfrm_inv = xfrm.invert()
 
-        if modality == "t1threetissue":
+        if modality == "t1threetissue" or modality == "t1hemi" or modality == "t1lobes":
             probability_images_warped = list()
             for i in range(number_of_classification_labels):
                 probability_images_warped.append(xfrm_inv.apply_to_image(
