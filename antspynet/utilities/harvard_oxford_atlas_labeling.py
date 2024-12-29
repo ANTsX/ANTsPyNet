@@ -173,7 +173,8 @@ def harvard_oxford_atlas_labeling(t1,
 
     predicted_data = unet_model.predict(batchX, verbose=verbose)
 
-    probability_images = [None] * (len(hoa_lateral_labels) + len(hoa_lateral_left_labels))
+    labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels))
+    probability_images = [None] * len(labels)
     
     hoa_labels = list()
     hoa_labels.append(hoa_lateral_labels)
