@@ -1,5 +1,8 @@
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.layers import Conv3D
+from tensorflow.keras.models import Model
+from tensorflow.keras import regularizers
 import ants
 
 def desikan_killiany_tourville_labeling(t1,
@@ -566,6 +569,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
+    from ..utilities import brain_extraction
     from ..utilities import deep_atropos
     from ..utilities import pad_or_crop_image_to_size
 
@@ -612,16 +616,30 @@ def desikan_killiany_tourville_labeling_version1(t1,
     #
     ################################
 
-    outer_labels = (0, 1002, 1003, *tuple(range(1005, 1032)), 1034, 1035,
-                       2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
-    channel_size = 1
-    number_of_classification_labels = len(outer_labels)
+    dkt_lateral_labels = (0,)
+    deep_atropos_labels = tuple(range(1, 7))
+    dkt_left_labels = (1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
+    dkt_right_labels = (2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
 
-    unet_model = create_unet_model_3d((*cropped_template_size, channel_size),
+    labels = sorted((*dkt_lateral_labels, *deep_atropos_labels, *dkt_left_labels)) 
+
+    channel_size = 1
+    number_of_classification_labels = len(labels)
+
+    unet_model_pre = create_unet_model_3d((*cropped_template_size, channel_size),
         number_of_outputs=number_of_classification_labels, mode="classification",
         number_of_filters=(16, 32, 64, 128), dropout_rate=0.0,
         convolution_kernel_size=(3, 3, 3), deconvolution_kernel_size=(2, 2, 2),
         weight_decay=0.0)
+
+    penultimate_layer = unet_model_pre.layers[-2].output
+    
+    output2 = Conv3D(filters=1,
+                     kernel_size=(1, 1, 1),
+                     activation='sigmoid',
+                     kernel_regularizer=regularizers.l2(0.0))(penultimate_layer)
+
+    unet_model = Model(inputs=unet_model_pre.input, outputs=[unet_model_pre.output, output2])
 
     unet_model.load_weights(get_pretrained_network("DesikanKillianyTourvilleOuter"))
 
@@ -632,7 +650,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     ################################
 
     if verbose:
-        print("Outer model Prediction.")
+        print("Model prediction.")
 
     batchX = np.zeros((2, *cropped_template_size, channel_size))
     batchX[0,:,:,:,0] = t1_preprocessed.iMath("Normalize").numpy()
@@ -640,40 +658,85 @@ def desikan_killiany_tourville_labeling_version1(t1,
 
     predicted_data = unet_model.predict(batchX, verbose=verbose)
     
-    outer_probability_images = [None] * len(outer_labels)
+    labels = sorted((*dkt_lateral_labels, *dkt_left_labels)) 
+    probability_images = [None] * len(labels)
+
+    dkt_labels = list()
+    dkt_labels.append(dkt_lateral_labels)
+    dkt_labels.append(dkt_left_labels)    
 
     for b in range(2):
-        for i in range(len(outer_labels)):
-            label = outer_labels[i]
-            probability_array = np.squeeze(predicted_data[b, :, :, :, i])                
-            if b == 1:
-                probability_array = np.flip(probability_array, axis=0)
-                if label > 0:
-                    if label > 2000:
-                        label = label - 1000
-                    else:
-                        label = label + 1000
-            probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)           
-            if do_preprocessing:
-                probability_image = pad_or_crop_image_to_size(probability_image, template.shape)
-                probability_image = ants.apply_transforms(fixed=t1,
-                    moving=probability_image,
-                    transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                    whichtoinvert=[True], interpolator="linear", verbose=verbose)
-            if b == 0:
-                outer_probability_images[outer_labels.index(label)] = probability_image
-            else:
-                outer_probability_images[outer_labels.index(label)] = 0.5 * (
-                    outer_probability_images[outer_labels.index(label)] + probability_image)
+        for i in range(len(dkt_labels)):
+            for j in range(len(dkt_labels[i])):
+                label = dkt_labels[i][j]
+                label_index = labels.index(label)
+                if label == 0:
+                    probability_array = np.squeeze(np.sum(predicted_data[0][b, :, :, :, :8], axis=3))
+                else:
+                    probability_array = np.squeeze(predicted_data[0][b, :, :, :, label_index + len(deep_atropos_labels)])
+                if b == 1:
+                    probability_array = np.flip(probability_array, axis=0)
+                probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)
+                if do_preprocessing:
+                    probability_image = pad_or_crop_image_to_size(probability_image, template.shape)
+                    probability_image = ants.apply_transforms(fixed=t1,
+                        moving=probability_image,
+                        transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+                        whichtoinvert=[True], interpolator="linear", verbose=verbose)
+                if b == 0:
+                    probability_images[label_index] = probability_image
+                else:
+                    probability_images[label_index] = 0.5 * (probability_images[label_index] + probability_image)
 
-    image_matrix = ants.image_list_to_matrix(outer_probability_images, t1 * 0 + 1)
+    if verbose:
+        print("Constructing foreground probability image.")
+
+    foreground_probability_array = np.squeeze(0.5 * (predicted_data[1][0,:,:,:,:] + 
+                                                  np.flip(predicted_data[1][1,:,:,:,:], axis=0)))
+    foreground_probability_image = ants.from_numpy_like(foreground_probability_array, t1_preprocessed)
+    if do_preprocessing:
+        foreground_probability_image = pad_or_crop_image_to_size(foreground_probability_image, template.shape)
+        foreground_probability_image = ants.apply_transforms(fixed=t1,
+            moving=foreground_probability_image,
+            transformlist=t1_preprocessing['template_transforms']['invtransforms'],
+            whichtoinvert=[True], interpolator="linear", verbose=verbose)
+
+    for i in range(len(dkt_labels)):
+        for j in range(len(dkt_labels[i])):
+            label = dkt_labels[i][j]
+            label_index = labels.index(label)
+            if label == 0:
+                probability_images[label_index] *= (foreground_probability_image * -1 + 1)
+            else:    
+                probability_images[label_index] *= foreground_probability_image
+
+    labels = sorted((*dkt_lateral_labels, *dkt_left_labels)) 
+
+    bext = brain_extraction(t1, modality="t1hemi", verbose=verbose)
+
+    probability_all_images = list()
+    probability_all_images.append(probability_images[0])
+    for i in range(len(dkt_left_labels)):
+        probability_image = ants.image_clone(probability_images[i+1])
+        probability_left_image = probability_image * bext['probability_images'][1]
+        probability_all_images.append(probability_left_image)
+    for i in range(len(dkt_right_labels)):
+        probability_image = ants.image_clone(probability_images[i+1])
+        probability_right_image = probability_image * bext['probability_images'][2]
+        probability_all_images.append(probability_right_image)
+        
+    image_matrix = ants.image_list_to_matrix(probability_all_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
         np.expand_dims(segmentation_matrix, axis=0), t1 * 0 + 1)[0]
 
-    dkt_label_image = ants.image_clone(segmentation_image)
-    for i in range(len(outer_labels)):
-        dkt_label_image[segmentation_image==i] = outer_labels[i]
+    dkt_all_labels = sorted((*dkt_lateral_labels, *dkt_left_labels, *dkt_right_labels))
+
+    dkt_label_image = segmentation_image * 0 
+    for i in range(len(dkt_all_labels)):
+        label = dkt_all_labels[i]
+        label_index = dkt_all_labels.index(label)
+        dkt_label_image[segmentation_image==label_index] = label
 
     if do_lobar_parcellation:
 
@@ -730,12 +793,9 @@ def desikan_killiany_tourville_labeling_version1(t1,
         if verbose:
             print("   Doing left/right hemispheres.")
 
-        left_labels = (1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
-        right_labels = (2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
-
         hemisphere_labels = list()
-        hemisphere_labels.append(left_labels)
-        hemisphere_labels.append(right_labels)
+        hemisphere_labels.append(dkt_left_labels)
+        hemisphere_labels.append(dkt_right_labels)
 
         dkt_hemispheres = ants.image_clone(dkt_label_image)
 
@@ -758,11 +818,11 @@ def desikan_killiany_tourville_labeling_version1(t1,
     if return_probability_images and do_lobar_parcellation:
         return_dict = {'segmentation_image' : dkt_label_image,
                        'lobar_parcellation' : lobar_parcellation,
-                       'probability_images' : outer_probability_images }
+                       'probability_images' : probability_all_images }
         return(return_dict)
     elif return_probability_images and not do_lobar_parcellation:
         return_dict = {'segmentation_image' : dkt_label_image,
-                       'probability_images' : outer_probability_images }
+                       'probability_images' : probability_all_images }
         return(return_dict)
     elif not return_probability_images and do_lobar_parcellation:
         return_dict = {'segmentation_image' : dkt_label_image,
