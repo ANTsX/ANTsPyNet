@@ -9,7 +9,7 @@ def desikan_killiany_tourville_labeling(t1,
                                         do_preprocessing=True,
                                         return_probability_images=False,
                                         do_lobar_parcellation=False,
-                                        version=1,
+                                        version=0,
                                         verbose=False):
 
     """
