@@ -807,7 +807,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
 
         atropos_brain_mask = ants.threshold_image(atropos_seg, 0, 0, 0, 1)
         hemisphere_parcellation = ants.iMath(atropos_brain_mask, "PropagateLabelsThroughMask",
-        atropos_brain_mask * dkt_hemispheres)
+                                             atropos_brain_mask * dkt_hemispheres)
 
         hemisphere_parcellation *= ants.threshold_image(lobar_parcellation, 0, 0, 0, 1)
         hemisphere_parcellation[hemisphere_parcellation == 1] = 0
