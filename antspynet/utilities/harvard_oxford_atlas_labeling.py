@@ -188,7 +188,7 @@ def harvard_oxford_atlas_labeling(t1,
                 label_index = labels.index(label)
                 probability_array = np.squeeze(predicted_data[0][b, :, :, :, label_index])
                 if label == 0:
-                    probability_array += np.squeeze(np.sum(predicted_data[0][b, :, :, :, 21:], axis=3))
+                    probability_array += np.squeeze(np.sum(predicted_data[0][b, :, :, :, 20:], axis=3))
                 if b == 1:
                     probability_array = np.flip(probability_array, axis=0)
                 probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)
@@ -224,7 +224,7 @@ def harvard_oxford_atlas_labeling(t1,
                 probability_images[label_index] *= (foreground_probability_image * -1 + 1)
             else:    
                 probability_images[label_index] *= foreground_probability_image
-    
+
     labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels))
 
     bext = brain_extraction(t1, modality="t1hemi", verbose=verbose)
