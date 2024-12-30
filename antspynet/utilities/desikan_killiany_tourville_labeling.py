@@ -233,7 +233,7 @@ def desikan_killiany_tourville_labeling(t1,
         Print progress to the screen.
 
     version : integer
-        Which version.  The default is the latest version.
+        Which version.  
 
     Returns
     -------
