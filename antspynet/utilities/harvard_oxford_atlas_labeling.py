@@ -72,13 +72,13 @@ def harvard_oxford_atlas_labeling(t1,
 
     Returns
     -------
-    List consisting of the segmentation image and probability images for
+    Dict consisting of the segmentation image and probability images for
     each label.
 
     Example
     -------
     >>> image = ants.image_read("t1.nii.gz")
-    >>> dkt = harvard_oxford_atlas_labeling(image)
+    >>> hoa = harvard_oxford_atlas_labeling(image)
     """
 
     from ..architectures import create_unet_model_3d
