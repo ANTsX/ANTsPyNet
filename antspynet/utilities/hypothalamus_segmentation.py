@@ -49,6 +49,7 @@ def hypothalamus_segmentation(t1,
 
     from ..architectures import create_hypothalamus_unet_model_3d
     from ..utilities import get_pretrained_network
+    from ..utilities import pad_or_crop_image_to_size
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -88,6 +89,7 @@ def hypothalamus_segmentation(t1,
     crop_image = ants.crop_image(crop_image, label_image=crop_image, label=1)
 
     t1_warped = ants.apply_ants_transform_to_image(xfrm, t1, crop_image)
+    t1_warped = pad_or_crop_image_to_size(t1_warped, (204, 256, 256))
 
     ################################
     #
