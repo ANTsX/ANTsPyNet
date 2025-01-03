@@ -118,12 +118,15 @@ ants.plot(t1, overlay=seg, overlay_alpha=0.5)
 <details>
 <summary>Applications</summary>
 
+* [Installation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#installation)
+
 * [Brain applications](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-applications)
 
     * [Multi-modal brain extraction](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-extraction)
     * [Deep Atropos (Six-tissue brain segmentation)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#deep-atropos)
     * [Cortical thickness](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#cortical-thickness)
     * [Desikan-Killiany-Tourville parcellation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#desikan-killiany-tourville-parcellation)
+    * [Harvard-Oxford Atlas subcortical parcellation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#harvard-oxford-atlas-subcortical-parcellation)
     * [DeepFLASH (medial temporal lobe parcellation)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#deepflash-medial-temporal-lobe-parcellation)
     * [Hippmapp3r (hippocampal segmentation)](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#hippmapp3r)
     * [Brain AGE](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#brain-age)
