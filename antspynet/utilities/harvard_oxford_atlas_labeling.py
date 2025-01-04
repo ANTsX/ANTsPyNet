@@ -11,9 +11,9 @@ def harvard_oxford_atlas_labeling(t1,
 
     """
     Subcortical and cerebellar labeling from a T1 image.
-    
-    Perform HOA labeling using deep learning and data from "High Resolution, 
-    Comprehensive Atlases of the Human Brain Morphology" number: "NIH NIMH 
+
+    Perform HOA labeling using deep learning and data from "High Resolution,
+    Comprehensive Atlases of the Human Brain Morphology" number: "NIH NIMH
     5R01MH112748-04". Repository: 'https://github.com/HOA-2/SubcorticalParcellations'
 
     The labeling is as follows:
@@ -95,7 +95,7 @@ def harvard_oxford_atlas_labeling(t1,
         image_resampled = None
         if interp_type == "linear":
             image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=0)
-        else:        
+        else:
             image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=1)
         image_cropped = pad_or_crop_image_to_size(image_resampled, crop_size)
         return image_cropped
@@ -105,14 +105,14 @@ def harvard_oxford_atlas_labeling(t1,
     template = ants.image_read(get_antsxnet_data(which_template))
 
     cropped_template_size = (160, 176, 160)
-    
+
     ################################
     #
     # Preprocess images
     #
     ################################
 
-    t1_preprocessed = ants.image_clone(t1)
+    t1_preprocessed = ants.image_clone(t1, pixeltype="float")
     if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=None,
@@ -124,7 +124,7 @@ def harvard_oxford_atlas_labeling(t1,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
         t1_preprocessed = reshape_image(t1_preprocessed, crop_size=cropped_template_size)
-    
+
     ################################
     #
     # Build model and load weights
@@ -148,7 +148,7 @@ def harvard_oxford_atlas_labeling(t1,
         weight_decay=0.0)
 
     penultimate_layer = unet_model_pre.layers[-2].output
-    
+
     output2 = Conv3D(filters=1,
                      kernel_size=(1, 1, 1),
                      activation='sigmoid',
@@ -175,12 +175,12 @@ def harvard_oxford_atlas_labeling(t1,
 
     labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels))
     probability_images = [None] * len(labels)
-    
+
     hoa_labels = list()
     hoa_labels.append(hoa_lateral_labels)
     hoa_labels.append(hoa_lateral_left_labels)
     # hoa_labels.append(hoa_lateral_right_labels)
-    
+
     for b in range(2):
         for i in range(len(hoa_labels)):
             for j in range(len(hoa_labels[i])):
@@ -197,7 +197,7 @@ def harvard_oxford_atlas_labeling(t1,
                     probability_image = ants.apply_transforms(fixed=t1,
                         moving=probability_image,
                         transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                        whichtoinvert=[True], interpolator="linear", verbose=verbose)
+                        whichtoinvert=[True], interpolator="linear", singleprecision=True, verbose=verbose)
                 if b == 0:
                     probability_images[label_index] = probability_image
                 else:
@@ -206,7 +206,7 @@ def harvard_oxford_atlas_labeling(t1,
     if verbose:
         print("Constructing foreground probability image.")
 
-    foreground_probability_array = np.squeeze(0.5 * (predicted_data[1][0,:,:,:,:] + 
+    foreground_probability_array = np.squeeze(0.5 * (predicted_data[1][0,:,:,:,:] +
                                                   np.flip(predicted_data[1][1,:,:,:,:], axis=0)))
     foreground_probability_image = ants.from_numpy_like(foreground_probability_array, t1_preprocessed)
     if do_preprocessing:
@@ -214,7 +214,7 @@ def harvard_oxford_atlas_labeling(t1,
         foreground_probability_image = ants.apply_transforms(fixed=t1,
             moving=foreground_probability_image,
             transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-            whichtoinvert=[True], interpolator="linear", verbose=verbose)
+            whichtoinvert=[True], interpolator="linear", singleprecision=True, verbose=verbose)
 
     for i in range(len(hoa_labels)):
         for j in range(len(hoa_labels[i])):
@@ -222,7 +222,7 @@ def harvard_oxford_atlas_labeling(t1,
             label_index = labels.index(label)
             if label == 0:
                 probability_images[label_index] *= (foreground_probability_image * -1 + 1)
-            else:    
+            else:
                 probability_images[label_index] *= foreground_probability_image
 
     labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels))
@@ -238,8 +238,8 @@ def harvard_oxford_atlas_labeling(t1,
             probability_all_images.append(probability_left_image)
             probability_all_images.append(probability_right_image)
         else:
-            probability_all_images.append(probability_image)    
-            
+            probability_all_images.append(probability_image)
+
     image_matrix = ants.image_list_to_matrix(probability_all_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
@@ -247,7 +247,7 @@ def harvard_oxford_atlas_labeling(t1,
 
     hoa_all_labels = sorted((*hoa_lateral_labels, *hoa_lateral_left_labels, *hoa_lateral_right_labels))
 
-    hoa_label_image = segmentation_image * 0 
+    hoa_label_image = segmentation_image * 0
     for i in range(len(hoa_all_labels)):
         label = hoa_all_labels[i]
         label_index = hoa_all_labels.index(label)

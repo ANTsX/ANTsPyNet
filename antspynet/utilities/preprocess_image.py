@@ -84,7 +84,7 @@ def preprocess_brain_image(image,
     from ..utilities import regression_match_image
     from ..utilities import get_antsxnet_data
 
-    preprocessed_image = ants.image_clone(image)
+    preprocessed_image = ants.image_clone(image, pixeltype='float')
 
     # Truncate intensity
     if truncate_intensity is not None:
@@ -106,7 +106,7 @@ def preprocess_brain_image(image,
             mask = ants.threshold_image(bext['segmentation_image'], 1, 1, 1, 0)
         elif brain_extraction_modality == "t1combined":
             mask = ants.threshold_image(bext, 2, 3, 1, 0)
-        else:    
+        else:
             mask = ants.threshold_image(bext, 0.5, 1, 1, 0)
             mask = ants.morphology(mask,"close",6).iMath_fill_holes()
 
@@ -142,9 +142,10 @@ def preprocess_brain_image(image,
                               invtransforms=registration['invtransforms'])
 
             preprocessed_image = ants.apply_transforms(fixed = template_image, moving = preprocessed_image,
-                transformlist=registration['fwdtransforms'], interpolator="linear", verbose=verbose)
+                transformlist=registration['fwdtransforms'], interpolator="linear", singleprecision=True, verbose=verbose)
             mask = ants.apply_transforms(fixed = template_image, moving = mask,
-                transformlist=registration['fwdtransforms'], interpolator="genericLabel", verbose=verbose)
+                transformlist=registration['fwdtransforms'], interpolator="genericLabel", singleprecision=True,
+                verbose=verbose)
 
     # Do bias correction
     bias_field = None
