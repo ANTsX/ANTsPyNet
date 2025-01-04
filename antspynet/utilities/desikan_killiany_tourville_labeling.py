@@ -248,6 +248,7 @@ def desikan_killiany_tourville_labeling(t1,
 
 
     dkt = None
+    t1 = ants.image_clone(t1, pixeltype='float')
     if version == 0:
         dkt = desikan_killiany_tourville_labeling_version0(t1,
                                                            do_preprocessing=do_preprocessing,
@@ -288,7 +289,7 @@ def desikan_killiany_tourville_labeling_version0(t1,
     #
     ################################
 
-    t1_preprocessed = ants.image_clone(t1, pixeltype='float')
+    t1_preprocessed = ants.image_clone(t1)
     if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=(0.01, 0.99),
@@ -600,7 +601,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     #
     ################################
 
-    t1_preprocessed = ants.image_clone(t1, pixeltype='float')
+    t1_preprocessed = ants.image_clone(t1)
     if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=None,

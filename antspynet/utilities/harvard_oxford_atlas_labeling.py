@@ -91,6 +91,9 @@ def harvard_oxford_atlas_labeling(t1,
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
 
+    # clone input to float
+    t1 = ants.image_clone(t1, pixeltype="float")
+
     def reshape_image(image, crop_size, interp_type = "linear"):
         image_resampled = None
         if interp_type == "linear":
@@ -112,7 +115,7 @@ def harvard_oxford_atlas_labeling(t1,
     #
     ################################
 
-    t1_preprocessed = ants.image_clone(t1, pixeltype="float")
+    t1_preprocessed = ants.image_clone(t1)
     if do_preprocessing:
         t1_preprocessing = preprocess_brain_image(t1,
             truncate_intensity=None,
