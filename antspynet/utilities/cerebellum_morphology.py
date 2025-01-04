@@ -87,6 +87,7 @@ def cerebellum_morphology(t1,
 
     if t1.dimension != 3:
         raise ValueError("Image dimension must be 3.")
+    t1 = ants.image_clone(t1, pixeltype='float')
 
     transform_type = "antsRegistrationSyNQuick[s]"
     whichtoinvert=[True, False, True]
@@ -154,7 +155,8 @@ def cerebellum_morphology(t1,
         t1_cerebellum_template_mask = ants.apply_transforms(t1_template, t1_cerebellum_template_mask,
                                                             transformlist=cerebellum_x_template_xfrm,
                                                             interpolator='nearestNeighbor',
-                                                            whichtoinvert=[True])
+                                                            whichtoinvert=[True],
+                                                            singleprecision=True)
 
         if verbose:
             print("Register T1 cerebellum to the cerebellum of the whole brain template.")
@@ -168,11 +170,13 @@ def cerebellum_morphology(t1,
                                    invtransforms=registration['invtransforms'])
 
     t1_preprocessed_in_cerebellum_space = ants.apply_transforms(t1_cerebellum_template, t1_preprocessed,
-                                                                transformlist=registration['fwdtransforms'])
+                                                                transformlist=registration['fwdtransforms'],
+                                                                singleprecision=True)
     t1_preprocessed_mask_in_cerebellum_space = None
     if cerebellum_mask is not None:
         t1_preprocessed_mask_in_cerebellum_space = ants.apply_transforms(t1_cerebellum_template, cerebellum_mask,
-                                                                         transformlist=registration['fwdtransforms'])
+                                                                         transformlist=registration['fwdtransforms'],
+                                                                         singleprecision=True)
 
 
     ################################
@@ -287,7 +291,7 @@ def cerebellum_morphology(t1,
             probability_image = ants.apply_transforms(fixed=t1,
                 moving=probability_image,
                 transformlist=template_transforms['invtransforms'],
-                whichtoinvert=whichtoinvert, interpolator="linear", verbose=verbose)
+                whichtoinvert=whichtoinvert, interpolator="linear", singleprecision=True, verbose=verbose)
             cerebellum_probability_image = probability_image
 
         elif m == 1:
@@ -300,7 +304,7 @@ def cerebellum_morphology(t1,
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
                     transformlist=template_transforms['invtransforms'],
-                    whichtoinvert=whichtoinvert, interpolator="linear", verbose=verbose)
+                    whichtoinvert=whichtoinvert, interpolator="linear", singleprecision=True, verbose=verbose)
                 tissue_probability_images.append(probability_image)
 
         else:
@@ -318,7 +322,7 @@ def cerebellum_morphology(t1,
                 probability_image = ants.apply_transforms(fixed=t1,
                     moving=probability_image,
                     transformlist=template_transforms['invtransforms'],
-                    whichtoinvert=whichtoinvert, interpolator="linear", verbose=verbose)
+                    whichtoinvert=whichtoinvert, interpolator="linear", singleprecision=True, verbose=verbose)
                 region_probability_images.append(probability_image)
 
     ################################
