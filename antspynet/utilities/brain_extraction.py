@@ -25,8 +25,8 @@ def brain_extraction(image,
             * "t1nobrainer": T1-weighted MRI---FreeSurfer-trained: h/t Satra Ghosh and Jakub Kaczmarzyk.
             * "t1combined": Brian's combination of "t1" and "t1nobrainer".  One can also specify
                             "t1combined[X]" where X is the morphological radius.  X = 12 by default.
-            * "t1threetissue":  T1-weighted MRI---originally developed from BrainWeb20 (and later 
-                                expanded).  Label 1: brain + subdural CSF, label 2: sinuses + skull, 
+            * "t1threetissue":  T1-weighted MRI---originally developed from BrainWeb20 (and later
+                                expanded).  Label 1: brain + subdural CSF, label 2: sinuses + skull,
                                 label 3: other head, face, neck tissue.
             * "t1hemi":  Label 1 of "t1threetissue" subdivided into left and right hemispheres.
             * "t1lobes":  Labels 1) frontal, 2) parietal, 3) temporal, 4) occipital. 5) csf,
@@ -77,6 +77,10 @@ def brain_extraction(image,
 
     if input_images[0].dimension != 3:
         raise ValueError("Image dimension must be 3.")
+
+    for i in range(len(input_images)):
+        if input_images[i].pixeltype != 'float':
+            input_images[i] = input_images[i].clone('float')
 
     if "t1combined" in modality:
         # Need to change with voxel resolution
@@ -175,12 +179,12 @@ def brain_extraction(image,
             reorient_template = ants.image_read(get_antsxnet_data("hcpyaT1Template"))
             reorient_template_mask = ants.image_read(get_antsxnet_data("hcpyaTemplateBrainMask"))
             reorient_template = reorient_template * reorient_template_mask
-            reorient_template = ants.resample_image(reorient_template, (1, 1, 1), use_voxels=False, interp_type=0)            
+            reorient_template = ants.resample_image(reorient_template, (1, 1, 1), use_voxels=False, interp_type=0)
             reorient_template = pad_or_crop_image_to_size(reorient_template, (160, 176, 160))
             xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
                 center=np.asarray(ants.get_center_of_mass(reorient_template)), translation=(0, -10, -15))
             reorient_template = xfrm.apply_to_image(reorient_template)
-        else:    
+        else:
             reorient_template = ants.image_read(get_antsxnet_data("S_template3"))
             if is_standard_network and (modality != "t1.v1" and modality != "mra"):
                 ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
@@ -208,7 +212,7 @@ def brain_extraction(image,
                 number_of_filters=number_of_filters, dropout_rate=0.0,
                 convolution_kernel_size=3, deconvolution_kernel_size=2,
                 weight_decay=0)
-        else:    
+        else:
             unet_model = create_unet_model_3d((*resampled_image_size, channel_size),
                 number_of_outputs=number_of_classification_labels, mode=mode,
                 number_of_filters=number_of_filters, dropout_rate=0.0,
@@ -259,9 +263,9 @@ def brain_extraction(image,
                 np.expand_dims(segmentation_matrix, axis=0), input_images[0] * 0 + 1)[0]
 
             return_dict = {'segmentation_image' : segmentation_image,
-                           'probability_images' : probability_images_warped}                    
+                           'probability_images' : probability_images_warped}
             return(return_dict)
-        else: 
+        else:
             probability_image = xfrm_inv.apply_to_image(probability_images[0][number_of_classification_labels-1], input_images[0])
             return(probability_image)
 

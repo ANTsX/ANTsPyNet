@@ -17,7 +17,7 @@ def desikan_killiany_tourville_labeling(t1,
 
     Perform DKT labeling using deep learning.  Description available here:
     https://mindboggle.readthedocs.io/en/latest/labels.html
-    
+
     The labeling is as follows:
 
     Outer labels:
@@ -159,11 +159,11 @@ def desikan_killiany_tourville_labeling(t1,
 
     Other outer labels:
     Label 1035:  left insula
-    Label 2035:  right insula    
-    
-    For the original DKT version (version 0), the set of inner labels are 
+    Label 2035:  right insula
+
+    For the original DKT version (version 0), the set of inner labels are
     also included.
-    
+
     Inner labels:
     Label 0: background
     Label 4: left lateral ventricle
@@ -233,7 +233,7 @@ def desikan_killiany_tourville_labeling(t1,
         Print progress to the screen.
 
     version : integer
-        Which version.  
+        Which version.
 
     Returns
     -------
@@ -248,20 +248,21 @@ def desikan_killiany_tourville_labeling(t1,
 
 
     dkt = None
+    t1 = ants.image_clone(t1, pixeltype='float')
     if version == 0:
-        dkt = desikan_killiany_tourville_labeling_version0(t1, 
+        dkt = desikan_killiany_tourville_labeling_version0(t1,
                                                            do_preprocessing=do_preprocessing,
                                                            return_probability_images=return_probability_images,
                                                            do_lobar_parcellation=do_lobar_parcellation,
                                                            verbose=verbose
-                                                           ) 
+                                                           )
     elif version == 1:
-        dkt = desikan_killiany_tourville_labeling_version1(t1, 
+        dkt = desikan_killiany_tourville_labeling_version1(t1,
                                                            do_preprocessing=do_preprocessing,
                                                            return_probability_images=return_probability_images,
                                                            do_lobar_parcellation=do_lobar_parcellation,
                                                            verbose=verbose
-                                                           ) 
+                                                           )
     return dkt
 
 
@@ -362,7 +363,8 @@ def desikan_killiany_tourville_labeling_version0(t1,
             outer_probability_images.append(ants.apply_transforms(fixed=t1,
                 moving=resampled_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+                whichtoinvert=[True], interpolator="linear", singleprecision=True,
+                verbose=verbose))
         else:
             outer_probability_images.append(resampled_image)
 
@@ -382,8 +384,8 @@ def desikan_killiany_tourville_labeling_version0(t1,
     ################################
 
     template_size = (160, 192, 160)
-    labels = (0, 4, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 
-                26, 28, 30, 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 58, 
+    labels = (0, 4, 6, 7, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24,
+                26, 28, 30, 43, 44, 45, 46, 49, 50, 51, 52, 53, 54, 58,
                 60, 91, 92, 630, 631, 632)
 
     unet_model = create_unet_model_3d((*template_size, 1),
@@ -430,7 +432,8 @@ def desikan_killiany_tourville_labeling_version0(t1,
             inner_probability_images.append(ants.apply_transforms(fixed=t1,
                 moving=decropped_image,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="linear", verbose=verbose))
+                whichtoinvert=[True], interpolator="linear", singleprecision=True,
+                verbose=verbose))
         else:
             inner_probability_images.append(decropped_image)
 
@@ -495,7 +498,8 @@ def desikan_killiany_tourville_labeling_version0(t1,
         if do_preprocessing:
             atropos_seg = ants.apply_transforms(fixed=t1, moving=atropos_seg,
                 transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                whichtoinvert=[True], interpolator="genericLabel", verbose=verbose)
+                whichtoinvert=[True], interpolator="genericLabel", singleprecision=True,
+                verbose=verbose)
 
         brain_mask = ants.image_clone(atropos_seg)
         brain_mask[brain_mask == 1] = 0
@@ -580,7 +584,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
         image_resampled = None
         if interp_type == "linear":
             image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=0)
-        else:        
+        else:
             image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=1)
         image_cropped = pad_or_crop_image_to_size(image_resampled, crop_size)
         return image_cropped
@@ -590,7 +594,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     template = ants.image_read(get_antsxnet_data(which_template))
 
     cropped_template_size = (160, 176, 160)
-    
+
     ################################
     #
     # Preprocess images
@@ -609,7 +613,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
         t1_preprocessed = reshape_image(t1_preprocessed, crop_size=cropped_template_size)
-    
+
     ################################
     #
     # Build outer model and load weights
@@ -621,7 +625,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     dkt_left_labels = (1002, 1003, *tuple(range(1005, 1032)), 1034, 1035)
     dkt_right_labels = (2002, 2003, *tuple(range(2005, 2032)), 2034, 2035)
 
-    labels = sorted((*dkt_lateral_labels, *deep_atropos_labels, *dkt_left_labels)) 
+    labels = sorted((*dkt_lateral_labels, *deep_atropos_labels, *dkt_left_labels))
 
     channel_size = 1
     number_of_classification_labels = len(labels)
@@ -633,7 +637,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
         weight_decay=0.0)
 
     penultimate_layer = unet_model_pre.layers[-2].output
-    
+
     output2 = Conv3D(filters=1,
                      kernel_size=(1, 1, 1),
                      activation='sigmoid',
@@ -657,13 +661,13 @@ def desikan_killiany_tourville_labeling_version1(t1,
     batchX[1,:,:,:,0] = np.flip(batchX[0,:,:,:,0], axis=0)
 
     predicted_data = unet_model.predict(batchX, verbose=verbose)
-    
-    labels = sorted((*dkt_lateral_labels, *dkt_left_labels)) 
+
+    labels = sorted((*dkt_lateral_labels, *dkt_left_labels))
     probability_images = [None] * len(labels)
 
     dkt_labels = list()
     dkt_labels.append(dkt_lateral_labels)
-    dkt_labels.append(dkt_left_labels)    
+    dkt_labels.append(dkt_left_labels)
 
     for b in range(2):
         for i in range(len(dkt_labels)):
@@ -682,7 +686,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
                     probability_image = ants.apply_transforms(fixed=t1,
                         moving=probability_image,
                         transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-                        whichtoinvert=[True], interpolator="linear", verbose=verbose)
+                        whichtoinvert=[True], interpolator="linear", singleprecision=True, verbose=verbose)
                 if b == 0:
                     probability_images[label_index] = probability_image
                 else:
@@ -691,7 +695,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     if verbose:
         print("Constructing foreground probability image.")
 
-    foreground_probability_array = np.squeeze(0.5 * (predicted_data[1][0,:,:,:,:] + 
+    foreground_probability_array = np.squeeze(0.5 * (predicted_data[1][0,:,:,:,:] +
                                                   np.flip(predicted_data[1][1,:,:,:,:], axis=0)))
     foreground_probability_image = ants.from_numpy_like(foreground_probability_array, t1_preprocessed)
     if do_preprocessing:
@@ -699,7 +703,8 @@ def desikan_killiany_tourville_labeling_version1(t1,
         foreground_probability_image = ants.apply_transforms(fixed=t1,
             moving=foreground_probability_image,
             transformlist=t1_preprocessing['template_transforms']['invtransforms'],
-            whichtoinvert=[True], interpolator="linear", verbose=verbose)
+            whichtoinvert=[True], interpolator="linear", singleprecision=True,
+            verbose=verbose)
 
     for i in range(len(dkt_labels)):
         for j in range(len(dkt_labels[i])):
@@ -707,10 +712,10 @@ def desikan_killiany_tourville_labeling_version1(t1,
             label_index = labels.index(label)
             if label == 0:
                 probability_images[label_index] *= (foreground_probability_image * -1 + 1)
-            else:    
+            else:
                 probability_images[label_index] *= foreground_probability_image
 
-    labels = sorted((*dkt_lateral_labels, *dkt_left_labels)) 
+    labels = sorted((*dkt_lateral_labels, *dkt_left_labels))
 
     bext = brain_extraction(t1, modality="t1hemi", verbose=verbose)
 
@@ -724,7 +729,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
         probability_image = ants.image_clone(probability_images[i+1])
         probability_right_image = probability_image * bext['probability_images'][2]
         probability_all_images.append(probability_right_image)
-        
+
     image_matrix = ants.image_list_to_matrix(probability_all_images, t1 * 0 + 1)
     segmentation_matrix = np.argmax(image_matrix, axis=0)
     segmentation_image = ants.matrix_to_images(
@@ -732,7 +737,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
 
     dkt_all_labels = sorted((*dkt_lateral_labels, *dkt_left_labels, *dkt_right_labels))
 
-    dkt_label_image = segmentation_image * 0 
+    dkt_label_image = segmentation_image * 0
     for i in range(len(dkt_all_labels)):
         label = dkt_all_labels[i]
         label_index = dkt_all_labels.index(label)
@@ -782,7 +787,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
         atropos_seg[atropos_seg == 1] = 0
         atropos_seg[atropos_seg == 5] = 0
         atropos_seg[atropos_seg == 6] = 0
-        
+
         brain_mask = ants.image_clone(atropos_seg)
         brain_mask = ants.threshold_image(brain_mask, 0, 0, 0, 1)
 
