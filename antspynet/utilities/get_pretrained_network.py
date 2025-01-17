@@ -97,7 +97,7 @@ def get_pretrained_network(file_id=None,
             "dktOuter": "https://ndownloader.figshare.com/files/23765132",
             "dktOuterWithSpatialPriors": "https://ndownloader.figshare.com/files/24230768",
             "DesikanKillianyTourvilleOuter": "https://figshare.com/ndownloader/files/51408209",
-            "HarvardOxfordAtlasSubcortical": "https://figshare.com/ndownloader/files/51371483",
+            "HarvardOxfordAtlasSubcortical": "https://figshare.com/ndownloader/files/51755546",
             "elBicho": "https://ndownloader.figshare.com/files/26736779",
             "lesion_patch": "https://figshare.com/ndownloader/files/43882539",
             "lesion_whole_brain": "https://figshare.com/ndownloader/files/44032017",  # 44162156
