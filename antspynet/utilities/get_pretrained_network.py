@@ -184,14 +184,14 @@ def get_pretrained_network(file_id=None,
             "sig_smallshort_train_1x1x2_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339840",
             "sig_smallshort_train_1x1x3_1chan_featgraderL6_best_mdl": "https://figshare.com/ndownloader/files/49339843",
             "sig_smallshort_train_1x1x3_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339846",
-            "sig_smallshort_train_1x1x4_1chan_featgraderL6_best_": "https://figshare.com/ndownloader/files/49339849",
-            "sig_smallshort_train_1x1x4_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339852",
-            # "sig_smallshort_train_1x1x6_1chan_featgraderL6_best_", Not available
-            "sig_smallshort_train_1x1x6_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339855",
-            "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_": "https://figshare.com/ndownloader/files/49339858",
-            "sig_smallshort_train_2x2x2_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339861",
-            "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_": "https://figshare.com/ndownloader/files/49339867",
-            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339864"            
+            "sig_smallshort_train_1x1x4_1chan_featgraderL6_best_mdl": "https://figshare.com/ndownloader/files/49339849",
+            "sig_smallshort_train_1x1x4_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339852",
+            # "sig_smallshort_train_1x1x6_1chan_featgraderL6_best_mdl", Not available
+            "sig_smallshort_train_1x1x6_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339855",
+            "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_mdl": "https://figshare.com/ndownloader/files/49339858",
+            "sig_smallshort_train_2x2x2_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339861",
+            "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_mdl": "https://figshare.com/ndownloader/files/49339867",
+            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339864"            
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -351,13 +351,13 @@ def get_pretrained_network(file_id=None,
                   "sig_smallshort_train_1x1x2_1chan_featvggL6_best_mdl",
                   "sig_smallshort_train_1x1x3_1chan_featgraderL6_best_mdl",
                   "sig_smallshort_train_1x1x3_1chan_featvggL6_best_mdl",
-                  "sig_smallshort_train_1x1x4_1chan_featgraderL6_best_",
-                  "sig_smallshort_train_1x1x4_1chan_featvggL6_best_",
-                  "sig_smallshort_train_1x1x6_1chan_featvggL6_best_",
-                  "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_",
-                  "sig_smallshort_train_2x2x2_1chan_featvggL6_best_",
-                  "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_",
-                  "sig_smallshort_train_2x2x4_1chan_featvggL6_best_",
+                  "sig_smallshort_train_1x1x4_1chan_featgraderL6_best_mdl",
+                  "sig_smallshort_train_1x1x4_1chan_featvggL6_best_mdl",
+                  "sig_smallshort_train_1x1x6_1chan_featvggL6_best_mdl",
+                  "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_mdl",
+                  "sig_smallshort_train_2x2x2_1chan_featvggL6_best_mdl",
+                  "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_mdl",
+                  "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl",
                   "show")
 
     if not file_id in valid_list:
