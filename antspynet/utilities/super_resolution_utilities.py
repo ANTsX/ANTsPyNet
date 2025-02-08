@@ -258,9 +258,6 @@ def apply_super_resolution_model_to_image(
     >>> image_sr = apply_super_resolution_model_to_image(image, get_pretrained_network("dbpn4x"))
     """
 
-    warn('This method is deprecated.  Please see https://github.com/stnava/siq', 
-         DeprecationWarning, stacklevel=2)
-
     tflite_flag = False
     channel_axis = 0
     if K.image_data_format() == "channels_last":
@@ -375,8 +372,8 @@ def apply_super_resolution_model_to_image(
                 return input_array[:, :, :, :, slice]
 
     expansion_factor = np.asarray(prediction.shape) / np.asarray(image_patches.shape)
-    if channel_axis == 0:
-        FIXME
+    # if channel_axis == 0:
+    #     FIXME
 
     expansion_factor = expansion_factor[1 : (len(expansion_factor) - 1)]
 
