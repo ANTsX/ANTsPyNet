@@ -375,8 +375,8 @@ def apply_super_resolution_model_to_image(
                 return input_array[:, :, :, :, slice]
 
     expansion_factor = np.asarray(prediction.shape) / np.asarray(image_patches.shape)
-    if channel_axis == 0:
-        FIXME
+    # if channel_axis == 0:
+    #     FIXME
 
     expansion_factor = expansion_factor[1 : (len(expansion_factor) - 1)]
 

@@ -179,7 +179,19 @@ def get_pretrained_network(file_id=None,
             "DeepAtroposHcpT1Weights": "https://figshare.com/ndownloader/files/51906071",
             "DeepAtroposHcpT1T2Weights": "https://figshare.com/ndownloader/files/49132498", # "https://figshare.com/ndownloader/files/49132504"
             "DeepAtroposHcpT1FAWeights": "https://figshare.com/ndownloader/files/49132507",
-            "DeepAtroposHcpT1T2FAWeights": "https://figshare.com/ndownloader/files/49132501"
+            "DeepAtroposHcpT1T2FAWeights": "https://figshare.com/ndownloader/files/49132501",
+            "sig_smallshort_train_1x1x2_1chan_featgraderL6_best_mdl": "https://figshare.com/ndownloader/files/49339837",
+            "sig_smallshort_train_1x1x2_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339840",
+            "sig_smallshort_train_1x1x3_1chan_featgraderL6_best_mdl": "https://figshare.com/ndownloader/files/49339843",
+            "sig_smallshort_train_1x1x3_1chan_featvggL6_best_mdl": "https://figshare.com/ndownloader/files/49339846",
+            "sig_smallshort_train_1x1x4_1chan_featgraderL6_best_": "https://figshare.com/ndownloader/files/49339849",
+            "sig_smallshort_train_1x1x4_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339852",
+            # "sig_smallshort_train_1x1x6_1chan_featgraderL6_best_", Not available
+            "sig_smallshort_train_1x1x6_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339855",
+            "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_": "https://figshare.com/ndownloader/files/49339858",
+            "sig_smallshort_train_2x2x2_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339861",
+            "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_": "https://figshare.com/ndownloader/files/49339867",
+            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_": "https://figshare.com/ndownloader/files/49339864"            
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -335,10 +347,21 @@ def get_pretrained_network(file_id=None,
                   "DeepAtroposHcpT1T2Weights",
                   "DeepAtroposHcpT1FAWeights",
                   "DeepAtroposHcpT1T2FAWeights",
+                  "sig_smallshort_train_1x1x2_1chan_featgraderL6_best_mdl",
+                  "sig_smallshort_train_1x1x2_1chan_featvggL6_best_mdl",
+                  "sig_smallshort_train_1x1x3_1chan_featgraderL6_best_mdl",
+                  "sig_smallshort_train_1x1x3_1chan_featvggL6_best_mdl",
+                  "sig_smallshort_train_1x1x4_1chan_featgraderL6_best_",
+                  "sig_smallshort_train_1x1x4_1chan_featvggL6_best_",
+                  "sig_smallshort_train_1x1x6_1chan_featvggL6_best_",
+                  "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_",
+                  "sig_smallshort_train_2x2x2_1chan_featvggL6_best_",
+                  "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_",
+                  "sig_smallshort_train_2x2x4_1chan_featvggL6_best_",
                   "show")
 
     if not file_id in valid_list:
-        raise ValueError("No data with the id you passed - try \"show\" to get list of valid ids.")
+        raise ValueError("No data with the id you passed (" + file_id + ")- try \"show\" to get list of valid ids.")
 
     if file_id == "show":
        return(valid_list)
