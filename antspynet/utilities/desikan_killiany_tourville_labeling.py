@@ -593,7 +593,7 @@ def desikan_killiany_tourville_labeling_version1(t1,
     template_transform_type = "antsRegistrationSyNQuick[a]"
     template = ants.image_read(get_antsxnet_data(which_template))
 
-    cropped_template_size = (160, 176, 160)
+    cropped_template_size = (160, 192, 160)
 
     ################################
     #
