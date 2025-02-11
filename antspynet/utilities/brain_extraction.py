@@ -182,7 +182,7 @@ def brain_extraction(image,
             reorient_template = ants.resample_image(reorient_template, (1, 1, 1), use_voxels=False, interp_type=0)
             reorient_template = pad_or_crop_image_to_size(reorient_template, (160, 192, 160))
             xfrm = ants.create_ants_transform(transform_type="Euler3DTransform",
-                center=np.asarray(ants.get_center_of_mass(reorient_template)), translation=(0, 0, 0))
+                center=np.asarray(ants.get_center_of_mass(reorient_template)), translation=(0, 0, -10))
             reorient_template = xfrm.apply_to_image(reorient_template)
         else:
             reorient_template = ants.image_read(get_antsxnet_data("S_template3"))
