@@ -21,18 +21,17 @@ def create_normalizing_flow_model(input_size,
     mask : ANTsImage (optional)
         Specifies foreground.    
 
-    number_of_hidden__layer : integer
-        number of filters at the initial dense layer.  This number is halved for
-        each subsequent layer.
+    hidden_layers : tuple
+        Shift and log scale parameter in the NVP.
 
-    number_of_layers : integer
-        Number of dense layers defining the model.
+    flow_steps : integer
+        Number of layers defining the model.
 
-    mode : string
-        "regression" or "classification".
+    regularization : float
+        L2 regularization in NVP.
 
-    number_of_outputs : integer
-        Specifies output for networks.
+    validate_args : bool
+        tfp.bijectors parameter.
 
     Returns
     -------
