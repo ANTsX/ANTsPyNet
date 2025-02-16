@@ -189,10 +189,10 @@ def deep_atropos(t1,
             which_network = "t1_t2_fa"
             input_images.append(t1[1])
             input_images.append(t1[2])
-        elif t1[1] is not None and t1[2] is None:    
+        elif t1[1] is not None:    
             which_network = "t1_t2"
             input_images.append(t1[1])
-        elif t1[1] is not None and t1[2] is None:    
+        elif t1[2] is not None:    
             which_network = "t1_fa"
             input_images.append(t1[2])
         else:
