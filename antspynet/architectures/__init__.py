@@ -43,5 +43,3 @@ from .create_dense_model import create_dense_model
 from .create_transformer_model import create_vision_transformer_model_2d, create_vision_transformer_model_3d
 from .create_transformer_model import create_compact_convolutional_transformer_model_2d, create_compact_convolutional_transformer_model_3d
 
-from .create_normalizing_flow_model import create_normalizing_flow_model
-
