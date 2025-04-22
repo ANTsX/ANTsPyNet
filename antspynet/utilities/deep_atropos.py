@@ -206,6 +206,15 @@ def deep_atropos(t1,
         # Preprocess images
         #
         ################################
+        
+        def truncate_image_intensity(image,
+                                     truncate_values=[0.01, 0.99]):
+            truncated_image = ants.image_clone(image)
+            quantiles = (truncated_image.quantile(truncate_values[0]), 
+                         truncated_image.quantile(truncate_values[1]))            
+            truncated_image[image < quantiles[0]] = quantiles[0]
+            truncated_image[image > quantiles[1]] = quantiles[1]
+            return truncated_image
 
         hcp_t1_template = ants.image_read(get_antsxnet_data("hcpinterT1Template"))
         hcp_template_brain_mask = ants.image_read(get_antsxnet_data("hcpinterTemplateBrainMask"))
@@ -217,13 +226,14 @@ def deep_atropos(t1,
         t1_mask = None
         preprocessed_images = list()
         for i in range(len(input_images)):
-            n4 = ants.n4_bias_field_correction(input_images[i], mask=input_images[i]*0+1,
+            n4 = ants.n4_bias_field_correction(truncate_image_intensity(input_images[i]), 
+                                               mask=input_images[i]*0+1,
                                                convergence={'iters': [50, 50, 50, 50], 'tol': 0.0},
                                                rescale_intensities=True,
                                                verbose=verbose)
             if i == 0:
                 t1_bext = brain_extraction(input_images[0], modality="t1threetissue", verbose=verbose)
-                t1_mask = t1_bext['probability_images'][1]
+                t1_mask = ants.threshold_image(t1_bext['segmentation_image'], 1, 1, 1, 0)
                 n4 = n4 * t1_mask
                 reg = ants.registration(hcp_t1_template, n4,
                                         type_of_transform="antsRegistrationSyNQuick[a]",
