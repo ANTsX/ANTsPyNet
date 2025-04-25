@@ -351,7 +351,6 @@ def mouse_brain_parcellation(image,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import pad_or_crop_image_to_size
 
     if (which_parcellation == "nick" or
         which_parcellation == "jay" or
@@ -383,11 +382,11 @@ def mouse_brain_parcellation(image,
 
         ants.set_spacing(template, (0.05, 0.05, 0.05))
         template = ants.resample_image(template, template_spacing, use_voxels=False, interp_type=4)
-        template = pad_or_crop_image_to_size(template, template_crop_size)
+        template = ants.pad_or_crop_image_to_size(template, template_crop_size)
 
         ants.set_spacing(template_mask, (0.05, 0.05, 0.05))
         template_mask = ants.resample_image(template_mask, template_spacing, use_voxels=False, interp_type=1)
-        template_mask = pad_or_crop_image_to_size(template_mask, template_crop_size)
+        template_mask = ants.pad_or_crop_image_to_size(template_mask, template_crop_size)
 
         number_of_nonzero_labels = len(np.unique(template_mask.numpy())) - 1
 
@@ -970,7 +969,6 @@ def mouse_histology_super_resolution(image,
 
     from ..architectures import create_deep_back_projection_network_model_2d
     from ..utilities import get_pretrained_network
-    from ..utilities import regression_match_image
 
     image_list = list()
     if isinstance(image, list):
@@ -1037,7 +1035,7 @@ def mouse_histology_super_resolution(image,
         for c in range(len(image_sr_channels)):
             image_lr_channel_resampled = ants.resample_image(image_channels[c], resample_params=sr_image_size,
                                                              use_voxels=True, interp_type=0)
-            image_sr_channels[c] = regression_match_image(image_sr_channels[c], image_lr_channel_resampled)
+            image_sr_channels[c] = ants.regression_match_image(image_sr_channels[c], image_lr_channel_resampled)
         image_sr_list.append(ants.merge_channels(image_sr_channels))
 
     if isinstance(image, list):

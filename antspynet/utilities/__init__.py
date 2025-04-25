@@ -9,11 +9,6 @@ from .spatial_transformer_network_utilities import SpatialTransformer2D, Spatial
 
 from .transformer_utilities import ExtractPatches2D, ExtractPatches3D, EncodePatches, StochasticDepth, ExtractConvolutionalPatches2D, ExtractConvolutionalPatches3D
 
-from .extract_image_patches import extract_image_patches
-from .reconstruct_image_from_patches import reconstruct_image_from_patches
-
-from .regression_match_image import regression_match_image
-
 from .super_resolution_utilities import mse, mae, psnr, ssim, gmsd
 from .super_resolution_utilities import apply_super_resolution_model_to_image
 
@@ -50,16 +45,6 @@ from .custom_activation_layers import LogSoftmax
 from .custom_convolution_layers import PartialConv2D, PartialConv3D
 
 from .gaussian_diffusion_utilities import GaussianDiffusion
-
-from .cropping_and_padding_utilities import crop_image_center
-from .cropping_and_padding_utilities import pad_or_crop_image_to_size
-from .cropping_and_padding_utilities import pad_image_by_factor
-
-from .histogram_warp_image_intensities import histogram_warp_image_intensities
-from .simulate_bias_field import simulate_bias_field
-
-from .randomly_transform_image_data import randomly_transform_image_data
-from .data_augmentation import data_augmentation
 
 from .preprocess_image import preprocess_brain_image
 from .brain_extraction import brain_extraction

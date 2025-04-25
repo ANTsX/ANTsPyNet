@@ -59,8 +59,6 @@ def deep_atropos(t1,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import brain_extraction
 
     if not isinstance(t1, list):
@@ -136,13 +134,13 @@ def deep_atropos(t1,
             print("Prediction.")
 
         t1_preprocessed = (t1_preprocessed - t1_preprocessed.mean()) / t1_preprocessed.std()
-        image_patches = extract_image_patches(t1_preprocessed, patch_size=patch_size,
+        image_patches = ants.extract_image_patches(t1_preprocessed, patch_size=patch_size,
                                             max_number_of_patches="all", stride_length=stride_length,
                                             return_as_array=True)
         batchX = np.zeros((*image_patches.shape, channel_size))
         batchX[:,:,:,:,0] = image_patches
         if channel_size > 1:
-            prior_patches = extract_image_patches(mni_priors[6], patch_size=patch_size,
+            prior_patches = ants.extract_image_patches(mni_priors[6], patch_size=patch_size,
                                 max_number_of_patches="all", stride_length=stride_length,
                                 return_as_array=True)
             batchX[:,:,:,:,1] = prior_patches
@@ -153,7 +151,7 @@ def deep_atropos(t1,
         for i in range(len(classes)):
             if verbose:
                 print("Reconstructing image", classes[i])
-            reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
+            reconstructed_image = ants.reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
                 domain_image=t1_preprocessed, stride_length=stride_length)
 
             if do_preprocessing:
@@ -308,7 +306,7 @@ def deep_atropos(t1,
         for h in range(8):
             index = 0
             for i in range(len(preprocessed_images)):
-                patches = extract_image_patches(preprocessed_images[i],
+                patches = ants.extract_image_patches(preprocessed_images[i],
                                                 patch_size=patch_size,
                                                 max_number_of_patches="all",
                                                 stride_length=stride_length,
@@ -317,7 +315,7 @@ def deep_atropos(t1,
                 index = index + 1
 
             for i in range(len(hcp_template_priors)):
-                patches = extract_image_patches(hcp_template_priors[i],
+                patches = ants.extract_image_patches(hcp_template_priors[i],
                                                 patch_size=patch_size,
                                                 max_number_of_patches="all",
                                                 stride_length=stride_length,
@@ -331,7 +329,7 @@ def deep_atropos(t1,
         for i in range(len(classes)):
             if verbose:
                 print("Reconstructing image", classes[i])
-            reconstructed_image = reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
+            reconstructed_image = ants.reconstruct_image_from_patches(predicted_data[:,:,:,:,i],
                 domain_image=hcp_t1_template, stride_length=stride_length)
 
             if do_preprocessing:

@@ -2,8 +2,6 @@ import ants
 import numpy as np
 import tensorflow.keras.backend as K
 
-from . import extract_image_patches
-from . import regression_match_image
 
 from tensorflow.keras.models import load_model
 import tensorflow as tf
@@ -315,7 +313,7 @@ def apply_super_resolution_model_to_image(
             "of the input image.",
         )
 
-    image_patches = extract_image_patches(
+    image_patches = ants.extract_image_patches(
         image,
         patch_size=image.shape,
         max_number_of_patches=1,
@@ -388,7 +386,7 @@ def apply_super_resolution_model_to_image(
         )
         if regression_order is not None:
             reference_image = ants.resample_image_to_target(image, prediction_image)
-            prediction_image = regression_match_image(
+            prediction_image = ants.regression_match_image(
                 prediction_image, reference_image, poly_order=regression_order
             )
     else:

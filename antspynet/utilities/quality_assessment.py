@@ -123,9 +123,6 @@ def tid_neural_image_assessment(image,
     """
 
     from ..utilities import get_pretrained_network
-    from ..utilities import pad_or_crop_image_to_size
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
 
     def is_prime(n):
         if n == 2 or n == 3:
@@ -172,7 +169,7 @@ def tid_neural_image_assessment(image,
         dimensions_to_predict = (dimensions_to_predict,)
 
     padded_image_size = image.shape + padding_size_vector
-    padded_image = pad_or_crop_image_to_size(image, padded_image_size)
+    padded_image = ants.pad_or_crop_image_to_size(image, padded_image_size)
 
     number_of_channels = 3
 
@@ -300,10 +297,10 @@ def tid_neural_image_assessment(image,
                     raise ValueError("dimensions_to_predict elements should be 1, 2, and/or 3 for 3-D image.")
 
             if mask is None:
-                patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
+                patches = ants.extract_image_patches(evaluation_image, patch_size=patch_size_vector,
                     stride_length=stride_length_vector, return_as_array=False)
             else:
-                patches = extract_image_patches(evaluation_image, patch_size=patch_size_vector,
+                patches = ants.extract_image_patches(evaluation_image, patch_size=patch_size_vector,
                     max_number_of_patches=int((mask==1).sum()),
                     return_as_array=False, mask_image=mask,  randomize=False )
 
@@ -362,15 +359,15 @@ def tid_neural_image_assessment(image,
                 print("reconstruct")
 
             if mask is None:
-                mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                mos += ants.pad_or_crop_image_to_size(ants.reconstruct_image_from_patches(
                     patches_mos, evaluation_image, stride_length=stride_length_vector), image.shape)
-                mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                mos_standard_deviation += ants.pad_or_crop_image_to_size(ants.reconstruct_image_from_patches(
                     patches_mos_standard_deviation, evaluation_image,
                     stride_length=stride_length_vector), image.shape)
             else:
-                mos += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                mos += ants.pad_or_crop_image_to_size(ants.reconstruct_image_from_patches(
                     patches_mos, mask, domain_image_is_mask=True), image.shape)
-                mos_standard_deviation += pad_or_crop_image_to_size(reconstruct_image_from_patches(
+                mos_standard_deviation += ants.pad_or_crop_image_to_size(ants.reconstruct_image_from_patches(
                     patches_mos_standard_deviation, mask,  domain_image_is_mask=True), image.shape)
 
         mos /= len(dimensions_to_predict)

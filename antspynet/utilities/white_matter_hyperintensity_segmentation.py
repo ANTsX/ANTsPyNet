@@ -56,7 +56,6 @@ def sysu_media_wmh_segmentation(flair,
 
     from ..architectures import create_sysu_media_unet_model_2d
     from ..utilities import get_pretrained_network
-    from ..utilities import pad_or_crop_image_to_size
     from ..utilities import preprocess_brain_image
     from ..utilities import binary_dice_coefficient
 
@@ -197,10 +196,10 @@ def sysu_media_wmh_segmentation(flair,
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
-            flair_slice = pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+            flair_slice = ants.pad_or_crop_image_to_size(ants.slice_image(flair_preprocessed_warped, dimensions_to_predict[d], i), image_size)
             batchX[slice_count,:,:,0] = flair_slice.numpy()
             if number_of_channels == 2:
-                t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+                t1_slice = ants.pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
                 batchX[slice_count,:,:,1] = t1_slice.numpy()
             slice_count += 1
 
@@ -234,7 +233,7 @@ def sysu_media_wmh_segmentation(flair,
         prediction_per_dimension = prediction[which_batch_slices,:,:,:]
         prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
         prediction_image = ants.copy_image_info(flair_preprocessed_warped,
-          pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+          ants.pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
             flair_preprocessed_warped.shape))
         prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
         current_start_slice = current_end_slice
@@ -459,8 +458,6 @@ def wmh_segmentation(flair,
 
     from ..architectures import create_sysu_media_unet_model_3d
     from ..utilities import deep_atropos
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
 
@@ -549,14 +546,14 @@ def wmh_segmentation(flair,
     if verbose:
         print("Extract patches.")
 
-    t1_patches = extract_image_patches(t1_preprocessed,
+    t1_patches = ants.extract_image_patches(t1_preprocessed,
                                        patch_size=patch_size,
                                        max_number_of_patches="all",
                                        stride_length=patch_stride_length,
                                        mask_image=white_matter_mask,
                                        random_seed=None,
                                        return_as_array=True)
-    flair_patches = extract_image_patches(flair_preprocessed,
+    flair_patches = ants.extract_image_patches(flair_preprocessed,
                                           patch_size=patch_size,
                                           max_number_of_patches="all",
                                           stride_length=patch_stride_length,
@@ -602,7 +599,7 @@ def wmh_segmentation(flair,
         print("Predict patches and reconstruct.")
 
 
-    wmh_probability_image = reconstruct_image_from_patches(np.squeeze(prediction),
+    wmh_probability_image = ants.reconstruct_image_from_patches(np.squeeze(prediction),
                                                            stride_length=patch_stride_length,
                                                            domain_image=white_matter_mask,
                                                            domain_image_is_mask=True)

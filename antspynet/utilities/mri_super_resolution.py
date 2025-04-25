@@ -59,7 +59,6 @@ def mri_super_resolution(image,
 
     from ..utilities import get_pretrained_network
     from ..utilities import apply_super_resolution_model_to_image
-    from ..utilities import regression_match_image
 
     if image.dimension != 3:
         raise ValueError("Image dimension must be 3.")
@@ -83,6 +82,6 @@ def mri_super_resolution(image,
             if verbose:
                 print("Regression match input/output images.")
             image_resampled = ants.resample_image_to_target(image, image_sr)
-            image_sr = regression_match_image(image_sr, image_resampled, poly_order=poly_order)
+            image_sr = ants.regression_match_image(image_sr, image_resampled, poly_order=poly_order)
 
     return image_sr

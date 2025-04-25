@@ -38,7 +38,6 @@ def lung_extraction(image,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import pad_or_crop_image_to_size
 
     if image.dimension != 3 and modality != "xray":
         raise ValueError( "Image dimension must be 3." )
@@ -383,7 +382,7 @@ def lung_extraction(image,
                 print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
             for i in range(number_of_slices):
-                ventilation_slice = pad_or_crop_image_to_size(ants.slice_image(preprocessed_image, dimensions_to_predict[d], i), template_size)
+                ventilation_slice = ants.pad_or_crop_image_to_size(ants.slice_image(preprocessed_image, dimensions_to_predict[d], i), template_size)
                 batchX[slice_count,:,:,0] = ventilation_slice.numpy()
                 slice_count += 1
 
@@ -413,7 +412,7 @@ def lung_extraction(image,
             prediction_per_dimension = prediction[which_batch_slices,:,:,0]
             prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
             prediction_image = ants.copy_image_info(image,
-                pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+                ants.pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
                 image.shape))
             probability_image = probability_image + (prediction_image - probability_image) / (d + 1)
 

@@ -44,10 +44,8 @@ def claustrum_segmentation(t1,
     """
 
     from ..architectures import create_sysu_media_unet_model_2d
-    from ..utilities import brain_extraction
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
-    from ..utilities import pad_or_crop_image_to_size
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -145,7 +143,7 @@ def claustrum_segmentation(t1,
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
-            t1_slice = pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
+            t1_slice = ants.pad_or_crop_image_to_size(ants.slice_image(t1_preprocessed_warped, dimensions_to_predict[d], i), image_size)
             if dimensions_to_predict[d] == 1:
                 batch_coronal_X[i,:,:,0] = np.rot90(t1_slice.numpy(), k=-1)
             else:
@@ -200,7 +198,7 @@ def claustrum_segmentation(t1,
             prediction_per_dimension = prediction_axial[which_batch_slices,:,:,:]
         prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
         prediction_image = ants.copy_image_info(t1_preprocessed_warped,
-          pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+          ants.pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
             t1_preprocessed_warped.shape))
         prediction_image_average = prediction_image_average + (prediction_image - prediction_image_average) / (d + 1)
 

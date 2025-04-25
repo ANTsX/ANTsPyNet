@@ -40,8 +40,6 @@ def brain_mra_vessel_segmentation(mra,
     """
 
     from ..architectures import create_unet_model_3d
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import brain_extraction
@@ -108,14 +106,14 @@ def brain_mra_vessel_segmentation(mra,
     if verbose:
         print("Extract patches.")
 
-    mra_patches = extract_image_patches(mra_preprocessed,
+    mra_patches = ants.extract_image_patches(mra_preprocessed,
                                         patch_size=patch_size,
                                         max_number_of_patches="all",
                                         stride_length=patch_stride_length,
                                         mask_image=template_brain_mask,
                                         random_seed=None,
                                         return_as_array=True)
-    mra_prior_patches = extract_image_patches(template_mra_prior,
+    mra_prior_patches = ants.extract_image_patches(template_mra_prior,
                                         patch_size=patch_size,
                                         max_number_of_patches="all",
                                         stride_length=patch_stride_length,
@@ -159,7 +157,7 @@ def brain_mra_vessel_segmentation(mra,
     if verbose:
         print("Predict patches and reconstruct.")
 
-    probability_image_warped = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,0]),
+    probability_image_warped = ants.reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,0]),
                                                        stride_length=patch_stride_length,
                                                        domain_image=template_brain_mask,
                                                        domain_image_is_mask=True)

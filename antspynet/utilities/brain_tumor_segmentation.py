@@ -65,8 +65,6 @@ def brain_tumor_segmentation(flair,
 
     from ..architectures import create_sysu_media_unet_model_3d
     from ..architectures import create_unet_model_3d
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import get_pretrained_network
     from ..utilities import preprocess_brain_image
 
@@ -175,7 +173,7 @@ def brain_tumor_segmentation(flair,
 
     image_patches = list()
     for i in range(len(images)):
-        image_patches.append(extract_image_patches(images[i],
+        image_patches.append(ants.extract_image_patches(images[i],
                                            patch_size=patch_size,
                                            max_number_of_patches="all",
                                            stride_length=patch_stride_length,
@@ -219,7 +217,7 @@ def brain_tumor_segmentation(flair,
     if verbose:
         print("Stage 1:  Predict patches and reconstruct.")
 
-    tumor_probability_image = reconstruct_image_from_patches(np.squeeze(prediction),
+    tumor_probability_image = ants.reconstruct_image_from_patches(np.squeeze(prediction),
                                                            stride_length=patch_stride_length,
                                                            domain_image=brain_mask,
                                                            domain_image_is_mask=True)
@@ -269,7 +267,7 @@ def brain_tumor_segmentation(flair,
 
     image_patches = list()
     for i in range(len(images)):
-        image_patches.append(extract_image_patches(images[i],
+        image_patches.append(ants.extract_image_patches(images[i],
                                            patch_size=patch_size,
                                            max_number_of_patches="all",
                                            stride_length=patch_stride_length,
@@ -315,7 +313,7 @@ def brain_tumor_segmentation(flair,
 
     probability_images = list()
     for c in range(number_of_classification_labels):
-        probability_images.append(reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,c]),
+        probability_images.append(ants.reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,c]),
                                                            stride_length=patch_stride_length,
                                                            domain_image=tumor_mask,
                                                            domain_image_is_mask=True))

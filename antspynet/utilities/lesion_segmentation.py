@@ -33,7 +33,6 @@ def lesion_segmentation(t1,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
-    from ..utilities import pad_or_crop_image_to_size
     from ..utilities import brain_extraction
 
     ################################
@@ -63,7 +62,7 @@ def lesion_segmentation(t1,
 
     template_size = (192, 208, 192)
     template = ants.image_read(get_antsxnet_data('mni152'))
-    template = pad_or_crop_image_to_size(template, template_size)
+    template = ants.pad_or_crop_image_to_size(template, template_size)
     template_mask = brain_extraction(template, modality="t1", verbose=verbose)
     template = template * template_mask
 
@@ -146,12 +145,9 @@ def lesion_segmentation_experimental(t1,
 
     from ..architectures import create_sysu_media_unet_model_3d
     from ..architectures import create_unet_model_3d
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
-    from ..utilities import pad_or_crop_image_to_size
     from ..utilities import brain_extraction
 
     if which_model == 0 and np.any(t1.shape < np.array((64, 64, 64))):
@@ -216,7 +212,7 @@ def lesion_segmentation_experimental(t1,
         image = t1_preprocessed
         image = (image - image.min()) / (image.max() - image.min())
 
-        image_patches = extract_image_patches(image,
+        image_patches = ants.extract_image_patches(image,
                                         patch_size=patch_size,
                                         max_number_of_patches="all",
                                         stride_length=patch_stride_length,
@@ -259,7 +255,7 @@ def lesion_segmentation_experimental(t1,
         if verbose:
             print("Predict patches and reconstruct.")
 
-        probability_image = reconstruct_image_from_patches(np.squeeze(unet_prediction[:,:,:,:,0]),
+        probability_image = ants.reconstruct_image_from_patches(np.squeeze(unet_prediction[:,:,:,:,0]),
                                                             stride_length=patch_stride_length,
                                                             domain_image=brain_mask,
                                                             domain_image_is_mask=True)
@@ -269,7 +265,7 @@ def lesion_segmentation_experimental(t1,
 
         template_size = (192, 208, 192)
         template = ants.image_read(get_antsxnet_data('mni152'))
-        template = pad_or_crop_image_to_size(template, template_size)
+        template = ants.pad_or_crop_image_to_size(template, template_size)
         template_mask = brain_extraction(template, modality="t1", verbose=True)
         template = template * template_mask
 
@@ -311,7 +307,7 @@ def lesion_segmentation_experimental(t1,
 
         template_size = (192, 208, 192)
         template = ants.image_read(get_antsxnet_data('mni152'))
-        template = pad_or_crop_image_to_size(template, template_size)
+        template = ants.pad_or_crop_image_to_size(template, template_size)
         template_mask = brain_extraction(template, modality="t1", verbose=True)
         template = template * template_mask
 
@@ -354,7 +350,7 @@ def lesion_segmentation_experimental(t1,
 
         template_size = (192, 208, 192)
         template = ants.image_read(get_antsxnet_data('mni152'))
-        template = pad_or_crop_image_to_size(template, template_size)
+        template = ants.pad_or_crop_image_to_size(template, template_size)
         template_mask = brain_extraction(template, modality="t1", verbose=True)
         template = template * template_mask
 
