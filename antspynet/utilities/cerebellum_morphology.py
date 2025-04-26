@@ -82,7 +82,6 @@ def cerebellum_morphology(t1,
     from ..architectures import create_unet_model_3d
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import pad_or_crop_image_to_size
     from ..utilities import brain_extraction
 
     if t1.dimension != 3:
@@ -258,21 +257,21 @@ def cerebellum_morphology(t1,
              (t1_preprocessed_in_cerebellum_space.max() - t1_preprocessed_in_cerebellum_space.min()))
 
         batchX = np.zeros((2, *image_size, channel_size))
-        batchX[0,:,:,:,0] = pad_or_crop_image_to_size(t1_preprocessed_in_cerebellum_space, image_size).numpy()
+        batchX[0,:,:,:,0] = ants.pad_or_crop_image_to_size(t1_preprocessed_in_cerebellum_space, image_size).numpy()
         batchX[1,:,:,:,0] = np.flip(batchX[0,:,:,:,0], axis=0)
 
         if m == 0:
             for j in range(batchX.shape[0]):
-                batchX[j,:,:,:,1] = pad_or_crop_image_to_size(t1_cerebellum_template, image_size).numpy()
+                batchX[j,:,:,:,1] = ants.pad_or_crop_image_to_size(t1_cerebellum_template, image_size).numpy()
         if m > 0:
             for i in range(len(which_priors)):
                 for j in range(batchX.shape[0]):
-                    batchX[j,:,:,:,i+1] = pad_or_crop_image_to_size(priors_image_list[which_priors[i]], image_size).numpy()
+                    batchX[j,:,:,:,i+1] = ants.pad_or_crop_image_to_size(priors_image_list[which_priors[i]], image_size).numpy()
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
 
         def decrop_to_cerebellum_template_space(target_image, reference_image):
-            target_image_padded = pad_or_crop_image_to_size(target_image, reference_image.shape)
+            target_image_padded = ants.pad_or_crop_image_to_size(target_image, reference_image.shape)
             one_padding_shape = np.array(target_image_padded.shape) + 1
             target_image_padded = ants.pad_image(target_image_padded, shape=one_padding_shape)
             lower_indices = np.array((1, 1, 0))

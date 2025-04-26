@@ -59,7 +59,6 @@ def brain_age(t1,
 
     from ..utilities import preprocess_brain_image
     from ..utilities import get_pretrained_network
-    from ..utilities import randomly_transform_image_data
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -107,7 +106,7 @@ def brain_age(t1,
     input_image_list.append(input_image)
 
     if number_of_simulations > 0:
-        data_augmentation = randomly_transform_image_data(
+        data_augmentation = ants.randomly_transform_image_data(
             reference_image=t1_preprocessed,
             input_image_list=input_image_list,
             number_of_simulations=number_of_simulations,

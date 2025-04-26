@@ -46,7 +46,6 @@ def whole_head_inpainting(image,
     from ..architectures import create_rmnet_generator
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import pad_or_crop_image_to_size
 
     if image.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -57,7 +56,7 @@ def whole_head_inpainting(image,
             print("Preprocessing:  Reorientation.")
 
         reorient_template = ants.image_read(get_antsxnet_data("nki"))
-        reorient_template = pad_or_crop_image_to_size(reorient_template, (256, 256, 256))
+        reorient_template = ants.pad_or_crop_image_to_size(reorient_template, (256, 256, 256))
 
         center_of_mass_template = np.round(np.asarray(ants.get_center_of_mass(reorient_template)))
         center_of_mass_image = np.round(np.asarray(ants.get_center_of_mass(image)))

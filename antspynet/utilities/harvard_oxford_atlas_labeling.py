@@ -86,7 +86,6 @@ def harvard_oxford_atlas_labeling(t1,
     from ..utilities import get_antsxnet_data
     from ..utilities import preprocess_brain_image
     from ..utilities import brain_extraction
-    from ..utilities import pad_or_crop_image_to_size
 
     if t1.dimension != 3:
         raise ValueError( "Image dimension must be 3." )
@@ -100,7 +99,7 @@ def harvard_oxford_atlas_labeling(t1,
             image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=0)
         else:
             image_resampled = ants.resample_image(image, (1, 1, 1), use_voxels=False, interp_type=1)
-        image_cropped = pad_or_crop_image_to_size(image_resampled, crop_size)
+        image_cropped = ants.pad_or_crop_image_to_size(image_resampled, crop_size)
         return image_cropped
 
     which_template = "hcpyaT1Template"
@@ -196,7 +195,7 @@ def harvard_oxford_atlas_labeling(t1,
                     probability_array = np.flip(probability_array, axis=0)
                 probability_image = ants.from_numpy_like(probability_array, t1_preprocessed)
                 if do_preprocessing:
-                    probability_image = pad_or_crop_image_to_size(probability_image, template.shape)
+                    probability_image = ants.pad_or_crop_image_to_size(probability_image, template.shape)
                     probability_image = ants.apply_transforms(fixed=t1,
                         moving=probability_image,
                         transformlist=t1_preprocessing['template_transforms']['invtransforms'],
@@ -213,7 +212,7 @@ def harvard_oxford_atlas_labeling(t1,
                                                   np.flip(predicted_data[1][1,:,:,:,:], axis=0)))
     foreground_probability_image = ants.from_numpy_like(foreground_probability_array, t1_preprocessed)
     if do_preprocessing:
-        foreground_probability_image = pad_or_crop_image_to_size(foreground_probability_image, template.shape)
+        foreground_probability_image = ants.pad_or_crop_image_to_size(foreground_probability_image, template.shape)
         foreground_probability_image = ants.apply_transforms(fixed=t1,
             moving=foreground_probability_image,
             transformlist=t1_preprocessing['template_transforms']['invtransforms'],

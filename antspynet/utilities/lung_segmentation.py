@@ -40,7 +40,6 @@ def el_bicho(ventilation_image,
 
     from ..architectures import create_unet_model_2d
     from ..utilities import get_pretrained_network
-    from ..utilities import pad_or_crop_image_to_size
 
     if ventilation_image.dimension != 3:
         raise ValueError("Image dimension must be 3.")
@@ -110,10 +109,10 @@ def el_bicho(ventilation_image,
             print("Extracting slices for dimension ", dimensions_to_predict[d], ".")
 
         for i in range(number_of_slices):
-            ventilation_slice = pad_or_crop_image_to_size(ants.slice_image(preprocessed_image, dimensions_to_predict[d], i), template_size)
+            ventilation_slice = ants.pad_or_crop_image_to_size(ants.slice_image(preprocessed_image, dimensions_to_predict[d], i), template_size)
             batchX[slice_count,:,:,0] = ventilation_slice.numpy()
 
-            mask_slice = pad_or_crop_image_to_size(ants.slice_image(mask_identity, dimensions_to_predict[d], i), template_size)
+            mask_slice = ants.pad_or_crop_image_to_size(ants.slice_image(mask_identity, dimensions_to_predict[d], i), template_size)
             batchX[slice_count,:,:,1] = mask_slice.numpy()
 
             slice_count += 1
@@ -147,7 +146,7 @@ def el_bicho(ventilation_image,
             prediction_per_dimension = prediction[which_batch_slices,:,:,l]
             prediction_array = np.transpose(np.squeeze(prediction_per_dimension), permutations[dimensions_to_predict[d]])
             prediction_image = ants.copy_image_info(ventilation_image,
-                pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
+                ants.pad_or_crop_image_to_size(ants.from_numpy(prediction_array),
                 ventilation_image.shape))
             probability_images[l] = probability_images[l] + (prediction_image - probability_images[l]) / (d + 1)
 
@@ -211,8 +210,6 @@ def lung_pulmonary_artery_segmentation(ct,
     """
 
     from ..architectures import create_unet_model_3d
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import get_pretrained_network
     from ..utilities import lung_extraction
 
@@ -269,7 +266,7 @@ def lung_pulmonary_artery_segmentation(ct,
     if verbose:
         print("Extract patches.")
 
-    ct_patches = extract_image_patches(ct_preprocessed,
+    ct_patches = ants.extract_image_patches(ct_preprocessed,
                                        patch_size=patch_size,
                                        max_number_of_patches="all",
                                        stride_length=patch_stride_length,
@@ -312,7 +309,7 @@ def lung_pulmonary_artery_segmentation(ct,
     if verbose:
         print("Predict patches and reconstruct.")
 
-    probability_image = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,0]),
+    probability_image = ants.reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,0]),
                                                        stride_length=patch_stride_length,
                                                        domain_image=lung_mask,
                                                        domain_image_is_mask=True)
@@ -357,8 +354,6 @@ def lung_airway_segmentation(ct,
     """
 
     from ..architectures import create_unet_model_3d
-    from ..utilities import extract_image_patches
-    from ..utilities import reconstruct_image_from_patches
     from ..utilities import get_pretrained_network
     from ..utilities import lung_extraction
 
@@ -417,7 +412,7 @@ def lung_airway_segmentation(ct,
         print("Extract patches.")
 
     ct_masked = ct_preprocessed * lung_mask
-    ct_patches = extract_image_patches(ct_masked,
+    ct_patches = ants.extract_image_patches(ct_masked,
                                        patch_size=patch_size,
                                        max_number_of_patches="all",
                                        stride_length=patch_stride_length,
@@ -460,7 +455,7 @@ def lung_airway_segmentation(ct,
     if verbose:
         print("Predict patches and reconstruct.")
 
-    probability_image = reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,1]),
+    probability_image = ants.reconstruct_image_from_patches(np.squeeze(prediction[:,:,:,:,1]),
                                                        stride_length=patch_stride_length,
                                                        domain_image=lung_mask,
                                                        domain_image_is_mask=True)

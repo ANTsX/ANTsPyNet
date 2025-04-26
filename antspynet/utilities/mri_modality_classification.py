@@ -40,7 +40,6 @@ def mri_modality_classification(image,
 
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
-    from ..utilities import pad_or_crop_image_to_size
     from ..architectures import create_resnet_model_3d
 
     if image.dimension != 3:
@@ -57,7 +56,7 @@ def mri_modality_classification(image,
 
     template = ants.image_read(get_antsxnet_data("kirby"))
     template = ants.resample_image(template, resample_size)
-    template = pad_or_crop_image_to_size(template, image_size)
+    template = ants.pad_or_crop_image_to_size(template, image_size)
     direction = template.direction
     direction[0, 0] = 1.0
     ants.set_direction(template, direction)

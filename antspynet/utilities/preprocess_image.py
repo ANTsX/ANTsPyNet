@@ -81,7 +81,6 @@ def preprocess_brain_image(image,
     """
 
     from ..utilities import brain_extraction
-    from ..utilities import regression_match_image
     from ..utilities import get_antsxnet_data
 
     preprocessed_image = ants.image_clone(image, pixeltype='float')
@@ -178,7 +177,7 @@ def preprocess_brain_image(image,
             print("Preprocessing:  intensity matching.")
 
         if intensity_matching_type == "regression":
-            preprocessed_image = regression_match_image(preprocessed_image, reference_image)
+            preprocessed_image = ants.regression_match_image(preprocessed_image, reference_image)
         elif intensity_matching_type == "histogram":
             preprocessed_image = ants.histogram_match_image(preprocessed_image, reference_image)
         else:
