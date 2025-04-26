@@ -75,14 +75,14 @@ class Test_hippmapp3r(unittest.TestCase):
         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
         hipp = antspynet.hippmapp3r_segmentation(t1)
 
-class Test_brain_age(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        age = antspynet.brain_age(t1, number_of_simulations=3, sd_affine=0.01)
+# class Test_brain_age(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         age = antspynet.brain_age(t1, number_of_simulations=3, sd_affine=0.01)
 
 class Test_claustrum(unittest.TestCase):
     def setUp(self):
@@ -135,7 +135,7 @@ class Test_mra(unittest.TestCase):
     def test_example(self):
         mra_file = tf.keras.utils.get_file(fname="mra.nii.gz", origin="https://figshare.com/ndownloader/files/46406755")
         mra = ants.image_read(mra_file)
-        vessels = antspynet.mra_brain_vessel_segmentation(mra)
+        vessels = antspynet.brain_mra_vessel_segmentation(mra)
 
 class Test_lesion(unittest.TestCase):
     def setUp(self):

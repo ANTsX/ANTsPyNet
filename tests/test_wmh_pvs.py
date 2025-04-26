@@ -47,10 +47,10 @@ class Test_ants_wmh(unittest.TestCase):
     def test_example(self):
         t1_file = tf.keras.utils.get_file(fname="t1.nii.gz", origin="https://figshare.com/ndownloader/files/40251796")
         t1 = ants.image_read(t1_file)
-        t1 = ants.resample_image(t1, (240, 240, 64), use_voxels=True)
+        t1 = ants.resample_image(t1, (240, 240, 96), use_voxels=True)
         flair_file = tf.keras.utils.get_file(fname="flair.nii.gz", origin="https://figshare.com/ndownloader/files/40251793")
         flair = ants.image_read(flair_file)
-        flair = ants.resample_image(flair, (240, 240, 64), use_voxels=True)
+        flair = ants.resample_image(flair, (240, 240, 96), use_voxels=True)
         wmh = antspynet.wmh_segmentation(flair, t1, use_combined_model=True)
 
 class Test_shiva_wmh(unittest.TestCase):
