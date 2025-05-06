@@ -207,6 +207,8 @@ The ANTsPyNet package is released under an [Apache License](https://github.com/A
 
 - We gratefully acknowledge the grant support of the [Office of Naval Research](https://www.onr.navy.mil) and [Cohen Veterans Bioscience](https://www.cohenveteransbioscience.org).
 
+- HCP-Aging templates acknowledgment:  "The HCP-Aging 2.0 Release data used in this analysis was released on the NDA DOI: 10.15154/1520707. HCP-A was supported by the National Institute On Aging of the National Institutes of Health under Award Number U01AG052564 and by funds provided by the McDonnell Center for Systems Neuroscience at Washington University in St. Louis."
+
 </details>
 
 <!-- 
