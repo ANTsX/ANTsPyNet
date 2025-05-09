@@ -65,12 +65,12 @@ def multilabel_dice_coefficient(dimensionality=3, smoothing_factor=0.0):
     >>> r16 = ants.image_read(ants.get_ants_data("r16"))
     >>> r16_seg = ants.kmeans_segmentation(r16, 3)['segmentation']
     >>> r16_array = np.expand_dims(r16_seg.numpy(), axis=0)
-    >>> r16_tensor = tf.convert_to_tensor(antspynet.encode_unet(r16_array, (0, 1, 2, 3)))
+    >>> r16_tensor = tf.convert_to_tensor(ants.segmentation_to_one_hot(r16_array, (0, 1, 2, 3)))
     >>>
     >>> r64 = ants.image_read(ants.get_ants_data("r64"))
     >>> r64_seg = ants.kmeans_segmentation(r64, 3)['segmentation']
     >>> r64_array = np.expand_dims(r64_seg.numpy(), axis=0)
-    >>> r64_tensor = tf.convert_to_tensor(antspynet.encode_unet(r64_array, (0, 1, 2, 3)))
+    >>> r64_tensor = tf.convert_to_tensor(ants.segmentation_to_one_hot(r64_array, (0, 1, 2, 3)))
     >>>
     >>> dice_loss = antspynet.multilabel_dice_coefficient(dimensionality=2)
     >>> loss_value = dice_loss(r16_tensor, r64_tensor).numpy()
@@ -258,12 +258,12 @@ def multilabel_surface_loss():
     >>> r16 = ants.image_read(ants.get_ants_data("r16"))
     >>> r16_seg = ants.kmeans_segmentation(r16, 3)['segmentation']
     >>> r16_array = np.expand_dims(r16_seg.numpy(), axis=0)
-    >>> r16_tensor = tf.convert_to_tensor(antspynet.encode_unet(r16_array, (0, 1, 2, 3)))
+    >>> r16_tensor = tf.convert_to_tensor(ants.segmentation_to_one_hot(r16_array, (0, 1, 2, 3)))
     >>>
     >>> r64 = ants.image_read(ants.get_ants_data("r64"))
     >>> r64_seg = ants.kmeans_segmentation(r64, 3)['segmentation']
     >>> r64_array = np.expand_dims(r64_seg.numpy(), axis=0)
-    >>> r64_tensor = tf.convert_to_tensor(antspynet.encode_unet(r64_array, (0, 1, 2, 3)))
+    >>> r64_tensor = tf.convert_to_tensor(ants.segmentation_to_one_hot(r64_array, (0, 1, 2, 3)))
     >>>
     >>> loss = antspynet.multilabel_surface_loss()
     >>> loss_value = loss(r16_tensor, r64_tensor).numpy()
