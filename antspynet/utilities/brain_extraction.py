@@ -57,7 +57,6 @@ def brain_extraction(image,
     from ..utilities import get_pretrained_network
     from ..utilities import get_antsxnet_data
     from ..architectures import create_nobrainer_unet_model_3d
-    from ..utilities import decode_unet
 
     channel_size = 1
     if isinstance(image, list):
@@ -243,7 +242,7 @@ def brain_extraction(image,
             print("Brain extraction:  prediction and decoding.")
 
         predicted_data = unet_model.predict(batchX, verbose=verbose)
-        probability_images = decode_unet(predicted_data, reorient_template)
+        probability_images = ants.one_hot_to_segmentation(predicted_data[0,:,:,:], reorient_template)
 
         if verbose:
             print("Brain extraction:  renormalize probability mask to native space.")
@@ -254,7 +253,7 @@ def brain_extraction(image,
             probability_images_warped = list()
             for i in range(number_of_classification_labels):
                 probability_images_warped.append(xfrm_inv.apply_to_image(
-                    probability_images[0][i], input_images[0]))
+                    probability_images[i], input_images[0]))
 
             image_matrix = ants.image_list_to_matrix(probability_images_warped, input_images[0] * 0 + 1)
             segmentation_matrix = np.argmax(image_matrix, axis=0)
@@ -265,7 +264,7 @@ def brain_extraction(image,
                            'probability_images' : probability_images_warped}
             return(return_dict)
         else:
-            probability_image = xfrm_inv.apply_to_image(probability_images[0][number_of_classification_labels-1], input_images[0])
+            probability_image = xfrm_inv.apply_to_image(probability_images[number_of_classification_labels-1], input_images[0])
             return(probability_image)
 
     else:
