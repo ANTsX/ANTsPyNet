@@ -139,7 +139,7 @@ pytz==2024.1
     # via pandas
 pyyaml==6.0.1
     # via antspyx
-requests==2.32.2
+requests==2.32.4
     # via
     #   antspynet (pyproject.toml)
     #   chart-studio
