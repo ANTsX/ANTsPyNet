@@ -35,3 +35,7 @@ homepage = "https://github.com/ANTsX/ANTsPyNet"
 
 [tool.setuptools.packages]
 find = { include = ["antspynet","antspynet.*"] }
+
+[tool.setuptools]
+license-files = []
+
