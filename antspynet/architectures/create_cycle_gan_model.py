@@ -129,7 +129,7 @@ class CycleGanModel(object):
                                  kernel_size=kernel_size,
                                  strides=2,
                                  padding='same')(encoder)
-            encoder = LeakyReLU(alpha=0.2)(encoder)
+            encoder = LeakyReLU(negative_slope=0.2)(encoder)
             encoder = InstanceNormalization()(encoder)
             return(encoder)
 
@@ -152,7 +152,7 @@ class CycleGanModel(object):
                                  activation='relu')(decoder)
             if dropout_rate > 0.0:
                 decoder = Dropout(dropout_rate=dropout_rate)(decoder)
-            decoder = LeakyReLU(alpha=0.2)(decoder)
+            decoder = LeakyReLU(negative_slope=0.2)(decoder)
             decoder = Concatenate()([decoder, skip_input])
             return(decoder)
 
@@ -208,7 +208,7 @@ class CycleGanModel(object):
                                  kernel_size=kernel_size,
                                  strides=2,
                                  padding='same')(layer)
-            layer = LeakyReLU(alpha=0.2)(layer)
+            layer = LeakyReLU(negative_slope=0.2)(layer)
             if normalization == True:
                 layer = InstanceNormalization()(layer)
             return(layer)
