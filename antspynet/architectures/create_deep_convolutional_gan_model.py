@@ -177,7 +177,7 @@ class DeepConvolutionalGanModel(object):
                                  padding='same'))
 
             model.add(BatchNormalization(momentum=0.8))
-            model.add(LeakyReLU(alpha=0.2))
+            model.add(LeakyReLU(negative_slope=0.2))
             model.add(Dropout(rate=dropout_rate))
 
         model.add(Flatten())

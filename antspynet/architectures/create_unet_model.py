@@ -117,7 +117,7 @@ def create_unet_model_2d(input_image_size,
 
     def nn_unet_activation(x):
         x = InstanceNormalization()(x)
-        x = LeakyReLU(alpha=0.01)(x)
+        x = LeakyReLU(negative_slope=0.01)(x)
         return x
 
     def attention_gate_2d(x, g, inter_shape):
@@ -394,7 +394,7 @@ def create_unet_model_3d(input_image_size,
 
     def nn_unet_activation(x):
         x = InstanceNormalization()(x)
-        x = LeakyReLU(alpha=0.01)(x)
+        x = LeakyReLU(negative_slope=0.01)(x)
         return x
 
     def attention_gate_3d(x, g, inter_shape):

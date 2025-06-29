@@ -44,7 +44,7 @@ def create_dense_model(input_vector_size,
     for _ in range(number_of_layers):
 
         output = Dense(units=number_of_filters)(output)
-        output = LeakyReLU(alpha=0.2)(output)
+        output = LeakyReLU(negative_slope=0.2)(output)
         number_of_filters = int(number_of_filters / 2)
 
     if mode == "classification":

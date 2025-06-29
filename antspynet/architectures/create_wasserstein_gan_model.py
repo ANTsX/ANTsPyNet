@@ -3,8 +3,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Layer
-from tensorflow.keras.layers import (Input, Concatenate, Dense, Activation,
+from tensorflow.keras.layers import (Input, Dense, Activation,
                                      BatchNormalization, Reshape, Dropout,
                                      Flatten, LeakyReLU, Conv2D, Conv3D)
 from tensorflow.keras.optimizers import RMSprop
@@ -195,7 +194,7 @@ class WassersteinGanModel(object):
             if i > 0:
                 model.add(BatchNormalization(momentum=0.8))
 
-            model.add(LeakyReLU(alpha=0.2))
+            model.add(LeakyReLU(negative_slope=0.2))
             model.add(Dropout(rate=dropout_rate))
 
         model.add(Flatten())

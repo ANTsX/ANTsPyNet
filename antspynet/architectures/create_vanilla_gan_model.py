@@ -4,8 +4,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Layer
-from tensorflow.keras.layers import (Input, Concatenate, Dense, Activation,
+from tensorflow.keras.layers import (Input, Dense,
                                      BatchNormalization, Reshape,
                                      Flatten, LeakyReLU)
 from tensorflow.keras.optimizers import Adam
@@ -80,7 +79,7 @@ class VanillaGanModel(object):
                 model.add(Dense(units=number_of_units))
 
             model.add(Dense(units=number_of_units))
-            model.add(LeakyReLU(alpha=0.2))
+            model.add(LeakyReLU(negative_slope=0.2))
             model.add(BatchNormalization(momentum=0.8))
 
         size = 1.0
@@ -101,9 +100,9 @@ class VanillaGanModel(object):
 
         model.add(Flatten(input_shape=self.input_image_size))
         model.add(Dense(units=512))
-        model.add(LeakyReLU(alpha=0.2))
+        model.add(LeakyReLU(negative_slope=0.2))
         model.add(Dense(units=256))
-        model.add(LeakyReLU(alpha=0.2))
+        model.add(LeakyReLU(negative_slope=0.2))
         model.add(Dense(units=1,
                         activation='sigmoid'))
 

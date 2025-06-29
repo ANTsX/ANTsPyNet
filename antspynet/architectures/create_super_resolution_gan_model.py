@@ -287,7 +287,7 @@ class SuperResolutionGanModel(object):
                                kernel_size=kernel_size,
                                strides=strides,
                                padding='same')(layer)
-            layer = LeakyReLU(alpha=0.2)(layer)
+            layer = LeakyReLU(negative_slope=0.2)(layer)
             if normalization == True:
                 layer = BatchNormalization(momentum=0.8)(layer)
             return(layer)
@@ -309,7 +309,7 @@ class SuperResolutionGanModel(object):
           strides=2)
 
         model = Dense(units=self.number_of_filters_at_base_layer[1] * 16)(model)
-        model = LeakyReLU(alpha=0.2)(model)
+        model = LeakyReLU(negative_slope=0.2)(model)
         validity = Dense(units=1, activation = 'sigmoid')(model)
 
         discriminator = Model(inputs=image, outputs=validity)
