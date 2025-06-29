@@ -5,7 +5,6 @@ def cerebellum_morphology(t1,
                           cerebellum_mask=None,
                           compute_thickness_image=False,
                           do_preprocessing=True,
-                          reproducible=False,
                           verbose=False
                           ):
 
@@ -66,9 +65,6 @@ def cerebellum_morphology(t1,
     do_preprocessing : boolean
         Perform N4 bias correction and spatiall normalize to template space.
 
-    reproducible : boolean
-        use reproducible registration approach
-
     verbose : boolean
         Print progress to the screen.
 
@@ -92,9 +88,8 @@ def cerebellum_morphology(t1,
         raise ValueError("Image dimension must be 3.")
     t1 = ants.image_clone(t1, pixeltype='float')
 
-    transform_type = "antsRegistrationSyNQuick[s]"
-    if reproducible:
-        transform_type = "antsRegistrationSyNQuickRepro[s]"
+    # transform_type = "antsRegistrationSyNQuick[s]" # up to 10% or so difference in repeat runs
+    transform_type = "antsRegistrationSyNQuickRepro[s]"
     whichtoinvert=[True, False, True]
     # transform_type = "antsRegistrationSyNQuick[a]"
     # whichtoinvert=[True, True]
