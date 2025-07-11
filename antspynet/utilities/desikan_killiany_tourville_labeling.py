@@ -9,6 +9,7 @@ def desikan_killiany_tourville_labeling(t1,
                                         do_preprocessing=True,
                                         return_probability_images=False,
                                         do_lobar_parcellation=False,
+                                        do_denoising=True,
                                         version=0,
                                         verbose=False):
 
@@ -229,6 +230,9 @@ def desikan_killiany_tourville_labeling(t1,
     do_lobar_parcellation : boolean
         Perform lobar parcellation (also divided by hemisphere).
 
+    do_denoising : boolean
+        Perform denoising in preprocessing of brain image.  May impact reproducibility.
+
     verbose : boolean
         Print progress to the screen.
 
@@ -254,6 +258,7 @@ def desikan_killiany_tourville_labeling(t1,
                                                            do_preprocessing=do_preprocessing,
                                                            return_probability_images=return_probability_images,
                                                            do_lobar_parcellation=do_lobar_parcellation,
+                                                           do_denoising=do_denoising,
                                                            verbose=verbose
                                                            )
     elif version == 1:
@@ -270,6 +275,7 @@ def desikan_killiany_tourville_labeling_version0(t1,
                                                  do_preprocessing=True,
                                                  return_probability_images=False,
                                                  do_lobar_parcellation=False,
+                                                 do_denoising=True,
                                                  verbose=False):
 
     from ..architectures import create_unet_model_3d
@@ -296,7 +302,7 @@ def desikan_killiany_tourville_labeling_version0(t1,
             template="croppedMni152",
             template_transform_type=template_transform_type,
             do_bias_correction=True,
-            do_denoising=True,
+            do_denoising=do_denoising,
             verbose=verbose)
         t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 

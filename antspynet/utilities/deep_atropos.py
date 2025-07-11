@@ -4,6 +4,7 @@ import ants
 def deep_atropos(t1,
                  do_preprocessing=True,
                  use_spatial_priors=1,
+                 do_denoising=True,
                  verbose=False):
 
     """
@@ -40,6 +41,9 @@ def deep_atropos(t1,
     use_spatial_priors : integer
         Use MNI spatial tissue priors (0 or 1).  Currently, only '0' (no priors) and '1'
         (cerebellar prior only) are the only two options.  Default is 1.
+
+    do_denoising : boolean
+        Activate denoising within preprocessing (default True).
 
     verbose : boolean
         Print progress to the screen.
@@ -80,7 +84,7 @@ def deep_atropos(t1,
                 template="croppedMni152",
                 template_transform_type="antsRegistrationSyNQuickRepro[a]",
                 do_bias_correction=True,
-                do_denoising=True,
+                do_denoising=do_denoising,
                 verbose=verbose)
             t1_preprocessed = t1_preprocessing["preprocessed_image"] * t1_preprocessing['brain_mask']
 
