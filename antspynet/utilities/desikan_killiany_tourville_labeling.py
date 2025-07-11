@@ -275,7 +275,7 @@ def desikan_killiany_tourville_labeling_version0(t1,
                                                  do_preprocessing=True,
                                                  return_probability_images=False,
                                                  do_lobar_parcellation=False,
-                                                 do_denoising=True
+                                                 do_denoising=True,
                                                  verbose=False):
 
     from ..architectures import create_unet_model_3d
