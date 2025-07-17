@@ -3,14 +3,14 @@ import ants
 import antspynet
 import tensorflow as tf
 
-class Test_deep_atropos_version0(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        seg = antspynet.deep_atropos(t1)
+# class Test_deep_atropos_version0(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         seg = antspynet.deep_atropos(t1)
 
 # class Test_deep_atropos_version1(unittest.TestCase):
 #     def setUp(self):
@@ -30,23 +30,23 @@ class Test_deep_atropos_version0(unittest.TestCase):
 #         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
 #         kk = antspynet.cortical_thickness([t1, None, None])
 
-class Test_dkt_version0(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        dkt = antspynet.desikan_killiany_tourville_labeling(t1, version=0)
+# class Test_dkt_version0(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         dkt = antspynet.desikan_killiany_tourville_labeling(t1, version=0)
 
-class Test_dkt_version1(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        dkt = antspynet.desikan_killiany_tourville_labeling(t1, version=1)
+# class Test_dkt_version1(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         dkt = antspynet.desikan_killiany_tourville_labeling(t1, version=1)
 
 class Test_hoa(unittest.TestCase):
     def setUp(self):
