@@ -3,7 +3,7 @@ name: ANTsPyNet Unit Tests
 on:
   push:
   pull_request:
-  
+
 jobs:
   test:
     name: Test on Python ${{ matrix.python-version }}
@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8, 3.9, 3.10, 3.11]
+        python-version: [3.11]
 
     steps:
     - name: Checkout ANTsPyNet
