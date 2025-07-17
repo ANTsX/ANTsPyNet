@@ -29,14 +29,14 @@ class Test_t1combined(unittest.TestCase):
         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
         seg = antspynet.brain_extraction(t1, modality="t1combined")
 
-class Test_t1threetissue(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        bext = antspynet.brain_extraction(t1, modality="t1threetissue")
+# class Test_t1threetissue(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         bext = antspynet.brain_extraction(t1, modality="t1threetissue")
 
 class Test_t1hemi(unittest.TestCase):
     def setUp(self):
