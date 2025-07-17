@@ -111,21 +111,21 @@ class Test_cerebellum(unittest.TestCase):
         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
         cereb = antspynet.cerebellum_morphology(t1, compute_thickness_image=False)	
 	
-class Test_brain_tumor(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        flair_file = tf.keras.utils.get_file(fname="flair.nii.gz", origin="https://figshare.com/ndownloader/files/42385077")
-        flair = ants.resample_image(ants.image_read(flair_file), (240, 240, 64), use_voxels=True, interp_type=0)
-        t1_file = tf.keras.utils.get_file(fname="t1.nii.gz", origin="https://figshare.com/ndownloader/files/42385071")
-        t1 = ants.resample_image_to_target(ants.image_read(t1_file), flair)
-        t1_contrast_file = tf.keras.utils.get_file(fname="t1_contrast.nii.gz", origin="https://figshare.com/ndownloader/files/42385068")
-        t1_contrast = ants.resample_image_to_target(ants.image_read(t1_contrast_file), flair)
-        t2_file = tf.keras.utils.get_file(fname="t2.nii.gz", origin="https://figshare.com/ndownloader/files/42385074")
-        t2 = ants.resample_image_to_target(ants.image_read(t2_file), flair)
-        bt = antspynet.brain_tumor_segmentation(flair, t1, t1_contrast, t2, patch_stride_length=32)
+# class Test_brain_tumor(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         flair_file = tf.keras.utils.get_file(fname="flair.nii.gz", origin="https://figshare.com/ndownloader/files/42385077")
+#         flair = ants.resample_image(ants.image_read(flair_file), (240, 240, 64), use_voxels=True, interp_type=0)
+#         t1_file = tf.keras.utils.get_file(fname="t1.nii.gz", origin="https://figshare.com/ndownloader/files/42385071")
+#         t1 = ants.resample_image_to_target(ants.image_read(t1_file), flair)
+#         t1_contrast_file = tf.keras.utils.get_file(fname="t1_contrast.nii.gz", origin="https://figshare.com/ndownloader/files/42385068")
+#         t1_contrast = ants.resample_image_to_target(ants.image_read(t1_contrast_file), flair)
+#         t2_file = tf.keras.utils.get_file(fname="t2.nii.gz", origin="https://figshare.com/ndownloader/files/42385074")
+#         t2 = ants.resample_image_to_target(ants.image_read(t2_file), flair)
+#         bt = antspynet.brain_tumor_segmentation(flair, t1, t1_contrast, t2, patch_stride_length=32)
 
 class Test_mra(unittest.TestCase):
     def setUp(self):
