@@ -1,0 +1,44 @@
+name: ANTsPyNet Unit Tests
+
+on:
+  push:
+  pull_request:
+  
+jobs:
+  test:
+    name: Test on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10, 3.11]
+
+    steps:
+    - name: Checkout ANTsPyNet
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential git
+
+    - name: Install ANTsPy from source
+      run: |
+        git clone https://github.com/ANTsX/ANTsPy.git
+        cd ANTsPy
+        pip install -e .
+        cd ..
+
+    - name: Install ANTsPyNet and dependencies
+      run: |
+        pip install -e .
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run unit tests
+      run: |
+        python -m unittest discover -s tests
