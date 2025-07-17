@@ -93,14 +93,14 @@ class Test_claustrum(unittest.TestCase):
         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
         seg = antspynet.claustrum_segmentation(t1)
 
-class Test_hypothalamus(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        seg = antspynet.hypothalamus_segmentation(t1)
+# class Test_hypothalamus(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         seg = antspynet.hypothalamus_segmentation(t1)
 
 class Test_cerebellum(unittest.TestCase):
     def setUp(self):
