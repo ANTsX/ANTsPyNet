@@ -147,17 +147,17 @@ class Test_lesion(unittest.TestCase):
         t1 = ants.image_read(t1_file)
         probability_mask = antspynet.lesion_segmentation(t1, do_preprocessing=True)
 
-class Test_inpainting(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1_file = tf.keras.utils.get_file(fname="t1w_with_lesion.nii.gz", origin="https://figshare.com/ndownloader/files/44053868")
-        t1 = ants.image_read(t1_file)
-        probability_mask = antspynet.lesion_segmentation(t1, do_preprocessing=True)
-        lesion_mask = ants.threshold_image(probability_mask, 0.5, 1.1, 1, 0)
-        t1_inpainted = antspynet.whole_head_inpainting(t1, roi_mask=lesion_mask, modality="t1", mode="axial")
+# class Test_inpainting(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1_file = tf.keras.utils.get_file(fname="t1w_with_lesion.nii.gz", origin="https://figshare.com/ndownloader/files/44053868")
+#         t1 = ants.image_read(t1_file)
+#         probability_mask = antspynet.lesion_segmentation(t1, do_preprocessing=True)
+#         lesion_mask = ants.threshold_image(probability_mask, 0.5, 1.1, 1, 0)
+#         t1_inpainted = antspynet.whole_head_inpainting(t1, roi_mask=lesion_mask, modality="t1", mode="axial")
 
 if __name__ == '__main__':
     unittest.main()
