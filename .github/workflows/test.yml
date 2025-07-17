@@ -31,10 +31,22 @@ jobs:
       run: |
         pip install antspyx
 
+    - name: Cache ANTsXNet model/data downloads
+      uses: actions/cache@v4
+      with:
+        path: ~/.keras/ANTsXNet
+        key: antsxnet-${{ runner.os }}-${{ hashFiles('**/download_all_data.py') }}
+        restore-keys: |
+          antsxnet-${{ runner.os }}-
+
     - name: Install ANTsPyNet and dependencies
       run: |
         pip install -e .
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Pre-download ANTsXNet models and data
+      run: |
+        python download_all_data.py --strict
 
     - name: Run unit tests
       run: |
