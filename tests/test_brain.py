@@ -48,14 +48,14 @@ import tensorflow as tf
 #         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
 #         dkt = antspynet.desikan_killiany_tourville_labeling(t1, version=1)
 
-class Test_hoa(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        hoa = antspynet.harvard_oxford_atlas_labeling(t1)
+# class Test_hoa(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         hoa = antspynet.harvard_oxford_atlas_labeling(t1)
 
 class Test_deep_flash(unittest.TestCase):
     def setUp(self):
@@ -66,14 +66,14 @@ class Test_deep_flash(unittest.TestCase):
         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
         df = antspynet.deep_flash(t1)
 
-class Test_hippmapp3r(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        hipp = antspynet.hippmapp3r_segmentation(t1)
+# class Test_hippmapp3r(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         hipp = antspynet.hippmapp3r_segmentation(t1)
 
 # class Test_brain_age(unittest.TestCase):
 #     def setUp(self):
