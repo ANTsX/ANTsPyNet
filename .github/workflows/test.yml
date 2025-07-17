@@ -27,12 +27,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cmake build-essential git
 
-    - name: Install ANTsPy from source
+    - name: Install ANTsPy
       run: |
-        git clone https://github.com/ANTsX/ANTsPy.git
-        cd ANTsPy
-        pip install -e .
-        cd ..
+        pip install antspyx
 
     - name: Install ANTsPyNet and dependencies
       run: |
@@ -41,4 +38,4 @@ jobs:
 
     - name: Run unit tests
       run: |
-        python -m unittest discover -s tests
+        python -m unittest discover -s tests --verbose
