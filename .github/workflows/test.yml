@@ -35,7 +35,7 @@ jobs:
           if [ "$USE_SOURCE_BUILD" = "true" ]; then
             echo "🔧 Installing ANTsPy from GitHub source..."
             git clone https://github.com/ANTsX/ANTsPy.git
-            pip install scikit-build-core pybind11  # 🔑 install build backend dependencies
+            pip install scikit-build-core pybind11 nanobind # 🔑 install build backend dependencies
             pip install ./ANTsPy --no-build-isolation --no-deps
           else
             echo "📦 Installing ANTsPy from PyPI..."
