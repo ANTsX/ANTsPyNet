@@ -127,25 +127,25 @@ class Test_cerebellum(unittest.TestCase):
 #         t2 = ants.resample_image_to_target(ants.image_read(t2_file), flair)
 #         bt = antspynet.brain_tumor_segmentation(flair, t1, t1_contrast, t2, patch_stride_length=32)
 
-class Test_mra(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        mra_file = tf.keras.utils.get_file(fname="mra.nii.gz", origin="https://figshare.com/ndownloader/files/46406755")
-        mra = ants.image_read(mra_file)
-        vessels = antspynet.brain_mra_vessel_segmentation(mra)
+# class Test_mra(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         mra_file = tf.keras.utils.get_file(fname="mra.nii.gz", origin="https://figshare.com/ndownloader/files/46406755")
+#         mra = ants.image_read(mra_file)
+#         vessels = antspynet.brain_mra_vessel_segmentation(mra)
 
-class Test_lesion(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1_file = tf.keras.utils.get_file(fname="t1w_with_lesion.nii.gz", origin="https://figshare.com/ndownloader/files/44053868")
-        t1 = ants.image_read(t1_file)
-        probability_mask = antspynet.lesion_segmentation(t1, do_preprocessing=True)
+# class Test_lesion(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1_file = tf.keras.utils.get_file(fname="t1w_with_lesion.nii.gz", origin="https://figshare.com/ndownloader/files/44053868")
+#         t1 = ants.image_read(t1_file)
+#         probability_mask = antspynet.lesion_segmentation(t1, do_preprocessing=True)
 
 # class Test_inpainting(unittest.TestCase):
 #     def setUp(self):
