@@ -50,7 +50,7 @@ jobs:
 
     - name: Run tests (individually via pytest)
       run: |
-        pip install pytest pytest-xdist[psutil]
+        pip install pytest pytest-xdist pytest-forked psutil
         for f in tests/test_*.py; do
           echo "🔍 Running $f"
           python -c "import psutil; print('Memory before:', psutil.virtual_memory().used // (1024*1024), 'MB')"
