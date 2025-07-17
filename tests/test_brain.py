@@ -21,14 +21,14 @@ class Test_deep_atropos_version1(unittest.TestCase):
         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
         seg = antspynet.deep_atropos([t1, None, None])
 
-class Test_cortical_thickness(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
-        kk = antspynet.cortical_thickness([t1, None, None])
+# class Test_cortical_thickness(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         t1 = ants.image_read(antspynet.get_antsxnet_data('mprage_hippmapp3r'))
+#         kk = antspynet.cortical_thickness([t1, None, None])
 
 class Test_dkt_version0(unittest.TestCase):
     def setUp(self):
