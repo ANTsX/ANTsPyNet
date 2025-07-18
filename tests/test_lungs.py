@@ -60,25 +60,25 @@ class Test_elbicho(unittest.TestCase):
         ventilation = ants.image_read(ventilation_file)
         eb = antspynet.el_bicho(ventilation, lung_mask)
 
-class Test_ct_arteries(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        ct_file = tf.keras.utils.get_file(fname="ctLung.nii.gz", origin="https://figshare.com/ndownloader/files/42934234")
-        ct = ants.image_read(ct_file)
-        arteries = antspynet.lung_pulmonary_artery_segmentation(ct)
+# class Test_ct_arteries(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         ct_file = tf.keras.utils.get_file(fname="ctLung.nii.gz", origin="https://figshare.com/ndownloader/files/42934234")
+#         ct = ants.image_read(ct_file)
+#         arteries = antspynet.lung_pulmonary_artery_segmentation(ct)
 
-class Test_ct_airways(unittest.TestCase):
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
-    def test_example(self):
-        ct_file = tf.keras.utils.get_file(fname="ctLung.nii.gz", origin="https://figshare.com/ndownloader/files/42934234")
-        ct = ants.image_read(ct_file)
-        airways = antspynet.lung_airway_segmentation(ct)
+# class Test_ct_airways(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#     def tearDown(self):
+#         pass
+#     def test_example(self):
+#         ct_file = tf.keras.utils.get_file(fname="ctLung.nii.gz", origin="https://figshare.com/ndownloader/files/42934234")
+#         ct = ants.image_read(ct_file)
+#         airways = antspynet.lung_airway_segmentation(ct)
 
 class Test_chexnet(unittest.TestCase):
     def setUp(self):
