@@ -50,7 +50,7 @@ def deep_atropos(t1,
 
     Returns
     -------
-    List consisting of the segmentation image and probability images for
+    Dictionary consisting of the segmentation image and probability images for
     each label.
 
     Example

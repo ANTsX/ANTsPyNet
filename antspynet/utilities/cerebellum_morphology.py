@@ -103,6 +103,7 @@ def cerebellum_morphology(t1,
     t1_template = ants.image_read(get_antsxnet_data("magetTemplate"))
     t1_template_brain_mask = ants.image_read(get_antsxnet_data("magetTemplateBrainMask"))
     t1_template_brain = t1_template * t1_template_brain_mask
+
     t1_cerebellum_template = ants.image_read(get_antsxnet_data("magetCerebellumTemplate"))
     t1_cerebellum_template = ((t1_cerebellum_template - t1_cerebellum_template.min()) /
                               (t1_cerebellum_template.max() - t1_cerebellum_template.min()))
@@ -121,16 +122,14 @@ def cerebellum_morphology(t1,
     # Preprocess images
     #
     ################################
-
     t1_preprocessed = ants.image_clone(t1)
     t1_mask = None
-
     template_transforms = None
+
     if do_preprocessing:
 
         if verbose:
             print("Preprocessing T1.")
-
         # Do bias correction
         t1_preprocessed = ants.n4_bias_field_correction(t1_preprocessed, shrink_factor=4, verbose=verbose)
 
@@ -187,7 +186,6 @@ def cerebellum_morphology(t1,
 
     tissue_labels = (0, 1, 2, 3)
     region_labels = (0, *list(range(1, 13)), *list(range(101, 113)))
-
     image_size = (240, 144, 144)
 
     cerebellum_probability_image = None
@@ -199,6 +197,7 @@ def cerebellum_morphology(t1,
     if cerebellum_mask is not None:
         start_m = 1
         cerebellum_probability_image = ants.image_clone(cerebellum_mask)
+
     for m in range(start_m, 3):
         if m == 0:
             labels = (0, 1)
@@ -305,7 +304,13 @@ def cerebellum_morphology(t1,
                     moving=probability_image,
                     transformlist=template_transforms['invtransforms'],
                     whichtoinvert=whichtoinvert, interpolator="linear", singleprecision=True, verbose=verbose)
-                tissue_probability_images.append(probability_image)
+                tissue_probability_images.append(probability_image * cerebellum_probability_image)
+
+            for i, label in enumerate(tissue_labels):
+                if label == 0:
+                    tissue_probability_images[i] = tissue_probability_images[i] * (cerebellum_probability_image * -1 + 1)
+                else:
+                    tissue_probability_images[i] = tissue_probability_images[i] * cerebellum_probability_image
 
         else:
             # region labels
@@ -323,7 +328,14 @@ def cerebellum_morphology(t1,
                     moving=probability_image,
                     transformlist=template_transforms['invtransforms'],
                     whichtoinvert=whichtoinvert, interpolator="linear", singleprecision=True, verbose=verbose)
-                region_probability_images.append(probability_image)
+                region_probability_images.append(probability_image * cerebellum_probability_image)
+
+            for i, label in enumerate(region_labels):
+                if label == 0:
+                    region_probability_images[i] = region_probability_images[i] * (cerebellum_probability_image * -1 + 1)
+                else:
+                    region_probability_images[i] = region_probability_images[i] * cerebellum_probability_image
+
 
     ################################
     #
