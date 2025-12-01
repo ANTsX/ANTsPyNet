@@ -25,7 +25,7 @@ cycler==0.12.1
     # via matplotlib
 flatbuffers==24.3.25
     # via tensorflow
-fonttools==4.51.0
+fonttools==4.61.0
     # via matplotlib
 gast==0.5.4
     # via tensorflow
