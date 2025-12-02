@@ -2,22 +2,101 @@ name: ANTsPyNet Unit Tests
 
 on:
   push:
+    branches: [master]
   pull_request:
+    branches: [master]
+  workflow_dispatch:
 
 env:
-  USE_SOURCE_BUILD: false  # Set to 'false' to use PyPI version of ANTsPy
+  USE_ANTSPY_SOURCE_BUILD: false
 
 jobs:
+
+  ###########################################
+  # Job 1 — Build or Restore ANTsXNet Data Cache
+  ###########################################
+  prepare-data:
+    name: Prepare ANTsXNet Data
+    runs-on: ubuntu-22.04
+    outputs:
+      cache-key: ${{ steps.compute-key.outputs.cache-key }}
+      cache-hit: ${{ steps.restore-cache.outputs.cache-hit }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Compute cache key
+        id: compute-key
+        run: |
+          KEY="antsxnet-${{ hashFiles(
+            'antspynet/utilities/get_antsxnet_data.py',
+            'antspynet/utilities/get_pretrained_network.py'
+          ) }}"
+          echo "cache-key=$KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Try restoring ANTsXNet data cache
+        id: restore-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: ${{ steps.compute-key.outputs.cache-key }}
+          path: ${{ runner.temp }}/ANTsXNet
+
+      - name: Cache hit — skip download
+        if: steps.restore-cache.outputs.cache-hit == 'true'
+        run: echo "Cache HIT — will use cached ANTsXNet data."
+
+      - name: Set up Python 3.11
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ANTsPy for data download
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: |
+          if [ "$USE_ANTSPY_SOURCE_BUILD" = "true" ]; then
+            echo "Installing ANTsPy from source..."
+            git clone https://github.com/ANTsX/ANTsPy.git
+            pip install scikit-build-core pybind11 nanobind
+            pip install ./ANTsPy --no-build-isolation --no-deps
+          else
+            echo "Installing ANTsPy from PyPI..."
+            pip install antspyx
+          fi
+
+      - name: Download ANTsXNet models (cache miss)
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        run: |
+          pip install -e .
+          python download_all_data.py --strict
+          # Move to cache save location
+          mkdir -p ${{ runner.temp }}/ANTsXNet
+          cp -r ~/.keras/ANTsXNet/* ${{ runner.temp }}/ANTsXNet/
+
+      - name: Save newly downloaded ANTsXNet data to cache
+        if: steps.restore-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: ${{ steps.compute-key.outputs.cache-key }}
+          path: ${{ runner.temp }}/ANTsXNet
+
+
+  ###########################################
+  # Job 2 — Test Matrix
+  ###########################################
   test:
     name: Test on Python ${{ matrix.python-version }}
     runs-on: ubuntu-22.04
+    needs: prepare-data
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.11]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-      - name: Checkout ANTsPyNet
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -30,35 +109,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential git
 
-      - name: Install ANTsPy (source or PyPI)
+      - name: Install ANTsPy
         run: |
-          if [ "$USE_SOURCE_BUILD" = "true" ]; then
-            echo "🔧 Installing ANTsPy from GitHub source..."
+          if [ "$USE_ANTSPY_SOURCE_BUILD" = "true" ]; then
+            echo "Installing ANTsPy from source..."
             git clone https://github.com/ANTsX/ANTsPy.git
-            pip install scikit-build-core pybind11 nanobind # 🔑 install build backend dependencies
+            pip install scikit-build-core pybind11 nanobind
             pip install ./ANTsPy --no-build-isolation --no-deps
           else
-            echo "📦 Installing ANTsPy from PyPI..."
+            echo "Installing ANTsPy from PyPI..."
             pip install antspyx
           fi
 
-      - name: Cache ANTsXNet model/data downloads
-        uses: actions/cache@v4
+      - name: Restore ANTsXNet model cache for tests
+        uses: actions/cache/restore@v4
         with:
-          path: ~/.keras/ANTsXNet
-          key: antsxnet-${{ runner.os }}-${{ hashFiles('**/download_all_data.py') }}
-          restore-keys: |
-            antsxnet-${{ runner.os }}-
+          key: ${{ needs.prepare-data.outputs.cache-key }}
+          path: ${{ runner.temp }}/ANTsXNet
 
-      - name: Install ANTsPyNet and dependencies
+      - name: Move cached data into ~/.keras
+        run: |
+          mkdir -p ~/.keras/ANTsXNet
+          cp -r ${{ runner.temp }}/ANTsXNet/* ~/.keras/ANTsXNet/
+
+      - name: Install ANTsPyNet
         run: |
           pip install -e .
-          sed -i '/antspyx==/d' requirements.txt
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Pre-download ANTsXNet models and data
-        run: |
-          python download_all_data.py --strict
 
       - name: Run tests (individually via pytest)
         run: |
