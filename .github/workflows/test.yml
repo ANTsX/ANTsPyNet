@@ -14,9 +14,15 @@ jobs:
 
   ###########################################
   # Job 1 — Build or Restore ANTsXNet Data Cache
+  #
+  # This job downloads all ANTsXNet data and pretrained models and uploads as an artifact
+  # The data is too big for Github's cache and runner disk space to handle
+  #
+  # But we still avoid independent downloads from figshare for each build matrix job
+  #
   ###########################################
   prepare-data:
-    name: Prepare ANTsXNet Data
+    name: Prepare ANTsXNet data and models
     runs-on: ubuntu-22.04
 
     outputs:
@@ -36,27 +42,12 @@ jobs:
           ) }}"
           echo "cache-key=$KEY" >> "$GITHUB_OUTPUT"
 
-      - name: Try restoring ANTsXNet data cache
-        id: restore-cache
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ steps.compute-key.outputs.cache-key }}
-          path: ${{ runner.temp }}/ANTsXNet
-
-      - name: Cache hit — skip download
-        if: steps.restore-cache.outputs.cache-hit == 'true'
-        run: |
-          echo "Cache HIT — will use cached ANTsXNet data."
-          rm -rf ${{ runner.temp }}/ANTsXNet
-
       - name: Set up Python 3.11
-        if: steps.restore-cache.outputs.cache-hit != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install ANTsPy for data download
-        if: steps.restore-cache.outputs.cache-hit != 'true'
         run: |
           if [ "$USE_ANTSPY_SOURCE_BUILD" = "true" ]; then
             echo "Installing ANTsPy from source..."
@@ -68,18 +59,17 @@ jobs:
             pip install antspyx
           fi
 
-      - name: Download ANTsXNet models (cache miss)
-        if: steps.restore-cache.outputs.cache-hit != 'true'
+      - name: Download ANTsXNet data and models
         run: |
           pip install -e .
           python download_all_data.py --strict --cache-dir ${{ runner.temp }}/ANTsXNet
 
-      - name: Save newly downloaded ANTsXNet data to cache
-        if: steps.restore-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+      - name: Upload data to artifact
+        uses: actions/upload-artifact@v4
         with:
-          key: ${{ steps.compute-key.outputs.cache-key }}
-          path: ${{ runner.temp }}/ANTsXNet
+          name: ANTSXNet-data
+          path: ${{ env.ANTSXNET_CACHE_DIR }}
+          retention-days: 1
 
 
   ###########################################
@@ -98,6 +88,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Download ANTsXNet data and models artifact
+        uses: actions/download-artifact@v4
+        with:
+         name: ANTSXNet-data
+         path: ~/.keras/ANTsXNet
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -121,12 +117,6 @@ jobs:
             pip install antspyx
           fi
 
-      - name: Restore ANTsXNet model cache for tests
-        uses: actions/cache/restore@v4
-        with:
-          key: ${{ needs.prepare-data.outputs.cache-key }}
-          path: ~/.keras/ANTsXNet
-
       - name: Install ANTsPyNet
         run: |
           pip install -e .
@@ -134,6 +124,8 @@ jobs:
       - name: Run tests (individually via pytest)
         run: |
           pip install pytest pytest-xdist pytest-forked psutil
+          echo "DEBUG"
+          echo ${{ ls -la ~/.keras/ANTsXNet }}
           for f in tests/test_*.py; do
             echo "🔍 Running $f"
             python -c "import psutil; print('Memory before:', psutil.virtual_memory().used // (1024*1024), 'MB')"
