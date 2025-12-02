@@ -124,8 +124,6 @@ jobs:
       - name: Run tests (individually via pytest)
         run: |
           pip install pytest pytest-xdist pytest-forked psutil
-          echo "DEBUG"
-          ls -la ~/.keras/ANTsXNet
           for f in tests/test_*.py; do
             echo "🔍 Running $f"
             python -c "import psutil; print('Memory before:', psutil.virtual_memory().used // (1024*1024), 'MB')"
