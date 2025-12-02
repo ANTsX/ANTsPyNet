@@ -9,7 +9,7 @@ on:
 
 env:
   USE_ANTSPY_SOURCE_BUILD: false
-  ANTSXNET_CACHE_DIR: ${{ runner.temp }}/ANTsXNet
+
 jobs:
 
   ###########################################
@@ -18,6 +18,8 @@ jobs:
   prepare-data:
     name: Prepare ANTsXNet Data
     runs-on: ubuntu-22.04
+    env:
+      ANTSXNET_CACHE_DIR: ${{ runner.temp }}/ANTsXNet
     outputs:
       cache-key: ${{ steps.compute-key.outputs.cache-key }}
       cache-hit: ${{ steps.restore-cache.outputs.cache-hit }}
@@ -85,6 +87,8 @@ jobs:
   test:
     name: Test on Python ${{ matrix.python-version }}
     runs-on: ubuntu-22.04
+    env:
+      ANTSXNET_CACHE_DIR: ${{ runner.temp }}/ANTsXNet
     needs: prepare-data
 
     strategy:
