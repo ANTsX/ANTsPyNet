@@ -46,7 +46,9 @@ jobs:
 
       - name: Cache hit — skip download
         if: steps.restore-cache.outputs.cache-hit == 'true'
-        run: echo "Cache HIT — will use cached ANTsXNet data."
+        run: |
+          echo "Cache HIT — will use cached ANTsXNet data."
+          rm -rf ${{ env.ANTSXNET_CACHE_DIR }}
 
       - name: Set up Python 3.11
         if: steps.restore-cache.outputs.cache-hit != 'true'
@@ -87,8 +89,6 @@ jobs:
   test:
     name: Test on Python ${{ matrix.python-version }}
     runs-on: ubuntu-22.04
-    env:
-      ANTSXNET_CACHE_DIR: ${{ runner.temp }}/ANTsXNet
     needs: prepare-data
 
     strategy:
