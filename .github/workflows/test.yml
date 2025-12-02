@@ -9,7 +9,7 @@ on:
 
 env:
   USE_ANTSPY_SOURCE_BUILD: false
-
+  ANTSXNET_CACHE_DIR: ${{ runner.temp }}/ANTsXNet
 jobs:
 
   ###########################################
@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ steps.compute-key.outputs.cache-key }}
-          path: ${{ runner.temp }}/ANTsXNet
+          path: ${{ env.ANTSXNET_CACHE_DIR }}
 
       - name: Cache hit — skip download
         if: steps.restore-cache.outputs.cache-hit == 'true'
@@ -69,17 +69,14 @@ jobs:
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: |
           pip install -e .
-          python download_all_data.py --strict
-          # Move to cache save location
-          mkdir -p ${{ runner.temp }}/ANTsXNet
-          cp -r ~/.keras/ANTsXNet/* ${{ runner.temp }}/ANTsXNet/
+          python download_all_data.py --strict --cache-dir ${{ env.ANTSXNET_CACHE_DIR }}
 
       - name: Save newly downloaded ANTsXNet data to cache
         if: steps.restore-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           key: ${{ steps.compute-key.outputs.cache-key }}
-          path: ${{ runner.temp }}/ANTsXNet
+          path: ${{ env.ANTSXNET_CACHE_DIR }}
 
 
   ###########################################
@@ -125,12 +122,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ needs.prepare-data.outputs.cache-key }}
-          path: ${{ runner.temp }}/ANTsXNet
-
-      - name: Move cached data into ~/.keras
-        run: |
-          mkdir -p ~/.keras/ANTsXNet
-          cp -r ${{ runner.temp }}/ANTsXNet/* ~/.keras/ANTsXNet/
+          path: ~/.keras/ANTsXNet
 
       - name: Install ANTsPyNet
         run: |
