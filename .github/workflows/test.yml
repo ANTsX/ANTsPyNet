@@ -18,8 +18,7 @@ jobs:
   prepare-data:
     name: Prepare ANTsXNet Data
     runs-on: ubuntu-22.04
-    env:
-      ANTSXNET_CACHE_DIR: ${{ runner.temp }}/ANTsXNet
+
     outputs:
       cache-key: ${{ steps.compute-key.outputs.cache-key }}
       cache-hit: ${{ steps.restore-cache.outputs.cache-hit }}
@@ -42,13 +41,13 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: ${{ steps.compute-key.outputs.cache-key }}
-          path: ${{ env.ANTSXNET_CACHE_DIR }}
+          path: ${{ runner.temp }}/ANTsXNet
 
       - name: Cache hit — skip download
         if: steps.restore-cache.outputs.cache-hit == 'true'
         run: |
           echo "Cache HIT — will use cached ANTsXNet data."
-          rm -rf ${{ env.ANTSXNET_CACHE_DIR }}
+          rm -rf ${{ runner.temp }}/ANTsXNet
 
       - name: Set up Python 3.11
         if: steps.restore-cache.outputs.cache-hit != 'true'
@@ -73,14 +72,14 @@ jobs:
         if: steps.restore-cache.outputs.cache-hit != 'true'
         run: |
           pip install -e .
-          python download_all_data.py --strict --cache-dir ${{ env.ANTSXNET_CACHE_DIR }}
+          python download_all_data.py --strict --cache-dir ${{ runner.temp }}/ANTsXNet
 
       - name: Save newly downloaded ANTsXNet data to cache
         if: steps.restore-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           key: ${{ steps.compute-key.outputs.cache-key }}
-          path: ${{ env.ANTSXNET_CACHE_DIR }}
+          path: ${{ runner.temp }}/ANTsXNet
 
 
   ###########################################
