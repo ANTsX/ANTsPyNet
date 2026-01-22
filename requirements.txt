@@ -200,7 +200,7 @@ webcolors==1.13
     # via antspyx
 werkzeug==3.1.5
     # via tensorboard
-wheel==0.43.0
+wheel==0.46.2
     # via astunparse
 wrapt==1.16.0
     # via tensorflow
