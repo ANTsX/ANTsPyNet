@@ -73,10 +73,6 @@ if len(sys.argv) > 4:
         all_networks = f.read().splitlines()
 else:
     all_networks = list(antspynet.get_pretrained_network('show'))
-    all_networks.remove('allen_brain_leftright_coronal_mask_weights')
-    all_networks.remove('allen_cerebellum_coronal_mask_weights')
-    all_networks.remove('allen_cerebellum_sagittal_mask_weights')
-    all_networks.remove('allen_sr_weights')
     all_networks.remove('show')
 
 for entry in all_networks:
