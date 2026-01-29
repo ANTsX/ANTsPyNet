@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - master
+  workflow_dispatch:
 
 env:
   USE_SOURCE_BUILD: false  # Set to 'false' to use PyPI version of ANTsPy
