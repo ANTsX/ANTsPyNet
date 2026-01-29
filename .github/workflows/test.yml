@@ -1,14 +1,8 @@
 name: ANTsPyNet Unit Tests
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_call:
   workflow_dispatch:
-
 env:
   USE_SOURCE_BUILD: false  # Set to 'false' to use PyPI version of ANTsPy
 
@@ -46,14 +40,6 @@ jobs:
             echo "📦 Installing ANTsPy from PyPI..."
             pip install antspyx
           fi
-
-      - name: Cache ANTsXNet model/data downloads
-        uses: actions/cache@v4
-        with:
-          path: ~/.keras/ANTsXNet
-          key: antsxnet-${{ runner.os }}-${{ hashFiles('**/download_all_data.py') }}
-          restore-keys: |
-            antsxnet-${{ runner.os }}-
 
       - name: Install ANTsPyNet and dependencies
         run: |

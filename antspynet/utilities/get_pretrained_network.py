@@ -60,7 +60,7 @@ def get_pretrained_network(file_id=None,
             "brainSegmentation": "https://ndownloader.figshare.com/files/13900010",
             "brainSegmentationPatchBased": "https://ndownloader.figshare.com/files/14249717",
             "bratsStage1": "https://ndownloader.figshare.com/files/42384756",
-            "bratsStage2": "https://ndownloader.figshare.com/files/42685150", 
+            "bratsStage2": "https://ndownloader.figshare.com/files/42685150",
             "cerebellumWhole": "https://ndownloader.figshare.com/files/41460447",
             "cerebellumTissue": "https://ndownloader.figshare.com/files/41107724",
             "cerebellumLabels": "https://ndownloader.figshare.com/files/41168678",
@@ -173,7 +173,7 @@ def get_pretrained_network(file_id=None,
             "wholeTumorSegmentationT2Flair": "https://ndownloader.figshare.com/files/14087045",
             "wholeLungMaskFromVentilation": "https://ndownloader.figshare.com/files/28914441",
             "DeepAtroposHcpT1Weights": "https://ndownloader.figshare.com/files/51906071",
-            "DeepAtroposHcpT1T2Weights": "https://ndownloader.figshare.com/files/52392374", 
+            "DeepAtroposHcpT1T2Weights": "https://ndownloader.figshare.com/files/52392374",
             "DeepAtroposHcpT1FAWeights": "https://ndownloader.figshare.com/files/52392368",
             "DeepAtroposHcpT1T2FAWeights": "https://ndownloader.figshare.com/files/52392371",
             "sig_smallshort_train_1x1x2_1chan_featgraderL6_best_mdl": "https://ndownloader.figshare.com/files/49339837",
@@ -187,7 +187,7 @@ def get_pretrained_network(file_id=None,
             "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_mdl": "https://ndownloader.figshare.com/files/49339858",
             "sig_smallshort_train_2x2x2_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339861",
             "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_mdl": "https://ndownloader.figshare.com/files/49339867",
-            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339864"            
+            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339864"
         }
         return(switcher.get(argument, "Invalid argument."))
 

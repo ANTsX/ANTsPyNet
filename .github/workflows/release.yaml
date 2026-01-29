@@ -13,8 +13,13 @@ env:
   TEST_PYPI_REPOSITORY_URL: "https://test.pypi.org/legacy/"
 
 jobs:
+
+  tests:
+    uses: ./.github/workflows/test.yml
+
   build-sdist:
     name: Build sdist
+    needs: [tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +42,7 @@ jobs:
 
   docker:
     name: Build and push Docker image
+    needs: [tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
