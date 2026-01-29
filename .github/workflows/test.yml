@@ -2,7 +2,11 @@ name: ANTsPyNet Unit Tests
 
 on:
   push:
+    branches:
+      - master
   pull_request:
+    branches:
+      - master
 
 env:
   USE_SOURCE_BUILD: false  # Set to 'false' to use PyPI version of ANTsPy
