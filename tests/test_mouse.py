@@ -9,7 +9,7 @@ class Test_mouse_brain_extraction(unittest.TestCase):
     def tearDown(self):
         pass
     def test_example(self):
-        mouse_t2_file = tf.keras.utils.get_file(fname="mouse.nii.gz", origin="https://figshare.com/ndownloader/files/45289309")
+        mouse_t2_file = tf.keras.utils.get_file(fname="mouse.nii.gz", origin="https://ndownloader.figshare.com/files/45289309")
         mouse_t2 = ants.image_read(mouse_t2_file)
         mouse_t2_n4 = ants.n4_bias_field_correction(mouse_t2, 
                                                         rescale_intensities=True,
@@ -24,7 +24,7 @@ class Test_mouse_brain_parcellation(unittest.TestCase):
     def tearDown(self):
         pass
     def test_example(self):
-        mouse_t2_file = tf.keras.utils.get_file(fname="mouse.nii.gz", origin="https://figshare.com/ndownloader/files/45289309")
+        mouse_t2_file = tf.keras.utils.get_file(fname="mouse.nii.gz", origin="https://ndownloader.figshare.com/files/45289309")
         mouse_t2 = ants.image_read(mouse_t2_file)
         mouse_t2_n4 = ants.n4_bias_field_correction(mouse_t2, 
                                                         rescale_intensities=True,
@@ -46,7 +46,7 @@ class Test_mouse_cortical_thickness(unittest.TestCase):
     def tearDown(self):
         pass
     def test_example(self):
-        mouse_t2_file = tf.keras.utils.get_file(fname="mouse.nii.gz", origin="https://figshare.com/ndownloader/files/45289309")
+        mouse_t2_file = tf.keras.utils.get_file(fname="mouse.nii.gz", origin="https://ndownloader.figshare.com/files/45289309")
         mouse_t2 = ants.image_read(mouse_t2_file)
         mouse_t2_n4 = ants.n4_bias_field_correction(mouse_t2, 
                                                         rescale_intensities=True,

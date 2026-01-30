@@ -1,6 +1,7 @@
 import antspynet
 import argparse
 import sys
+import tensorflow as tf
 
 def download_all_data(strict=False):
     print("Downloading data files from get_antsxnet_data...")
@@ -44,7 +45,12 @@ def download_all_data(strict=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--strict", action="store_true", help="Exit on first failed download.")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output showing download progress.")
     args = parser.parse_args()
+
+    if not args.verbose:
+        # This stops download progress logs from clogging the output in non-interactive environments
+        tf.keras.utils.disable_interactive_logging()
 
     try:
         download_all_data(strict=args.strict)
