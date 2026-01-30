@@ -3,8 +3,11 @@ import argparse
 import sys
 import tensorflow as tf
 
-def download_all_data(strict=False):
+def download_all_data(strict=False, cache_dir=None):
     print("Downloading data files from get_antsxnet_data...")
+    if cache_dir is not None:
+        antspynet.set_antsxnet_cache_directory(cache_dir)
+        print(f"Using custom cache directory: {cache_dir}")
     try:
         data_keys = antspynet.get_antsxnet_data("show")
         for key in data_keys:
@@ -46,6 +49,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--strict", action="store_true", help="Exit on first failed download.")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output showing download progress.")
+    parser.add_argument("--cache-dir", type=str, help="Custom cache directory for downloads.", default=None)
     args = parser.parse_args()
 
     if not args.verbose:
@@ -53,7 +57,7 @@ if __name__ == "__main__":
         tf.keras.utils.disable_interactive_logging()
 
     try:
-        download_all_data(strict=args.strict)
+        download_all_data(strict=args.strict, cache_dir=args.cache_dir)
     except Exception as e:
         print(f"\nAborted due to error: {e}")
         sys.exit(1)

@@ -1,23 +1,91 @@
 name: ANTsPyNet Unit Tests
 
 on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [master]
   workflow_call:
   workflow_dispatch:
+
 env:
-  USE_SOURCE_BUILD: false  # Set to 'false' to use PyPI version of ANTsPy
+  USE_ANTSPY_SOURCE_BUILD: false
 
 jobs:
+
+  ###########################################
+  # Job 1 — Build ANTsXNet Data Cache
+  #
+  # This job downloads all ANTsXNet data and pretrained models and uploads as an artifact
+  # The data is too big for Github's cache and runner disk space to handle
+  #
+  # But we still avoid independent downloads from figshare for each build matrix job
+  #
+  ###########################################
+  prepare-data:
+    name: Prepare ANTsXNet data and models
+    runs-on: ubuntu-22.04
+
+    outputs:
+      cache-key: ${{ steps.compute-key.outputs.cache-key }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Compute cache key
+        id: compute-key
+        run: |
+          KEY="antsxnet-${{ hashFiles(
+            'antspynet/utilities/get_antsxnet_data.py',
+            'antspynet/utilities/get_pretrained_network.py'
+          ) }}"
+          echo "cache-key=$KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ANTsPy for data download
+        run: |
+          echo "Installing ANTsPy from PyPI for cache preparation"
+          pip install antspyx
+
+      - name: Download ANTsXNet data and models
+        run: |
+          pip install -e .
+          python download_all_data.py --strict --cache-dir ${{ runner.temp }}/ANTsXNet
+
+      - name: Upload data to artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ANTSXNet-data-${{ steps.compute-key.outputs.cache-key }}
+          path: ${{ runner.temp }}/ANTsXNet
+          retention-days: 7
+
+
+  ###########################################
+  # Job 2 — Test Matrix
+  ###########################################
   test:
     name: Test on Python ${{ matrix.python-version }}
     runs-on: ubuntu-22.04
+    needs: prepare-data
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.11]
+        python-version: ["3.11", "3.13"]
 
     steps:
-      - name: Checkout ANTsPyNet
+      - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Download ANTsXNet data and models artifact
+        uses: actions/download-artifact@v4
+        with:
+         name: ANTSXNet-data-${{ needs.prepare-data.outputs.cache-key }}
+         path: ~/.keras/ANTsXNet
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,27 +97,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential git
 
-      - name: Install ANTsPy (source or PyPI)
+      - name: Install ANTsPy
         run: |
-          if [ "$USE_SOURCE_BUILD" = "true" ]; then
-            echo "🔧 Installing ANTsPy from GitHub source..."
+          if [ "$USE_ANTSPY_SOURCE_BUILD" = "true" ]; then
+            echo "Installing ANTsPy from source..."
             git clone https://github.com/ANTsX/ANTsPy.git
-            pip install scikit-build-core pybind11 nanobind # 🔑 install build backend dependencies
+            pip install scikit-build-core pybind11 nanobind
             pip install ./ANTsPy --no-build-isolation --no-deps
           else
-            echo "📦 Installing ANTsPy from PyPI..."
+            echo "Installing ANTsPy from PyPI..."
             pip install antspyx
           fi
 
       - name: Install ANTsPyNet and dependencies
         run: |
           pip install -e .
-          sed -i '/antspyx==/d' requirements.txt
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Pre-download ANTsXNet models and data
-        run: |
-          python download_all_data.py --strict
 
       - name: Run tests (individually via pytest)
         run: |
