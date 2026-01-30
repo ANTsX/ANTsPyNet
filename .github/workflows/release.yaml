@@ -9,8 +9,7 @@ permissions:
 
 env:
   PYTHON_VERSION: "3.12"
-  DOCKER_IMAGE: cookpa/antspynettest
-  TEST_PYPI_REPOSITORY_URL: "https://test.pypi.org/legacy/"
+  DOCKER_IMAGE: antsx/antspynet
 
 jobs:
 
@@ -73,12 +72,11 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:latest
 
   publish-testpypi:
-    name: Publish sdist to TestPyPI
+    name: Publish sdist to PyPI
     runs-on: ubuntu-latest
     needs:
       - build-sdist
       - docker
-    # If docker fails, this job is skipped automatically.
     steps:
       - name: Download sdist artifact
         uses: actions/download-artifact@v4
@@ -89,6 +87,7 @@ jobs:
       - name: Publish to TestPyPI (API token)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          repository-url: ${{ env.TEST_PYPI_REPOSITORY_URL }}
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
+          verify-metadata: true
