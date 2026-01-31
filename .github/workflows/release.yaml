@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -34,7 +34,7 @@ jobs:
           python -m build --sdist --outdir dist
 
       - name: Upload sdist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: python-dist
           path: dist/*
@@ -79,7 +79,7 @@ jobs:
       - docker
     steps:
       - name: Download sdist artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: python-dist
           path: dist

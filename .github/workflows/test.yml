@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Compute cache key
         id: compute-key
@@ -42,7 +42,7 @@ jobs:
           echo "cache-key=$KEY" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -57,7 +57,7 @@ jobs:
           python download_all_data.py --strict --cache-dir ${{ runner.temp }}/ANTsXNet
 
       - name: Upload data to artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ANTSXNet-data-${{ steps.compute-key.outputs.cache-key }}
           path: ${{ runner.temp }}/ANTsXNet
@@ -79,16 +79,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download ANTsXNet data and models artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
          name: ANTSXNet-data-${{ needs.prepare-data.outputs.cache-key }}
          path: ~/.keras/ANTsXNet
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
