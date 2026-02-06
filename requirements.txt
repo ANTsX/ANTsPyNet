@@ -123,7 +123,7 @@ pillow==10.3.0
     #   scikit-image
 plotly==5.22.0
     # via chart-studio
-protobuf==4.25.8
+protobuf==5.29.6
     # via
     #   tensorboard
     #   tensorflow
