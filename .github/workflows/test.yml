@@ -54,7 +54,7 @@ jobs:
       - name: Download ANTsXNet data and models
         run: |
           pip install -e .
-          python download_all_data.py --strict --cache-dir ${{ runner.temp }}/ANTsXNet
+          python download_antsxnet_data.py --strict --cache-dir ${{ runner.temp }}/ANTsXNet
 
       - name: Upload data to artifact
         uses: actions/upload-artifact@v6

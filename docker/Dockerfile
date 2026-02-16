@@ -47,11 +47,17 @@ RUN useradd --create-home antspyuser && \
 COPY --from=builder --chown=antspyuser \
      /opt/antspydata/* /home/antspyuser/.antspy/
 
-COPY docker/get_antsxnet_data.py /opt/bin/
+COPY download_antsxnet_data.py /opt/bin/
 
-RUN echo "Install data option: ${install_antsxnet_data}"
-RUN . ${VIRTUAL_ENV}/bin/activate && \
-    /opt/bin/get_antsxnet_data.py /home/antspyuser/.keras ${INSTALL_ANTSXNET_DATA} && \
+RUN echo "Install data option: ${INSTALL_ANTSXNET_DATA}" && \
+    if [ "${INSTALL_ANTSXNET_DATA}" = "1" ]; then \
+        . "${VIRTUAL_ENV}/bin/activate" && \
+        /opt/bin/download_antsxnet_data.py \
+            --cache-dir /home/antspyuser/.keras/ANTsXNet \
+            --strict ; \
+    else \
+        echo "Skipping ANTsXNet data download"; \
+    fi && \
     chmod -R 0755 /home/antspyuser/.antspy /home/antspyuser/.keras
 
 WORKDIR /home/antspyuser
