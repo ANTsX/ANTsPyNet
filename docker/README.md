@@ -42,7 +42,8 @@ docker build \
 ```
 
 This will make the container larger, but all data and pretrained networks will be
-available at run time without downloading.
+available at run time without downloading. You can also download a subset of data /
+networks, see the help for the `download_antsxnet_data.py` script.
 
 
 ## Downloading data to a local cache
@@ -54,19 +55,18 @@ you are using, and preferably make it read-only after populating it. To download
 and networks, run
 ```
 docker run --rm -it antspynet:latest \
-   /opt/bin/get_antsxnet_data.py \
-     /path/to/local/cache/dir \
-     1
+   /opt/bin/download_antsxnet_data.py \
+     --cache-dir /path/to/local/cache/dir
 ```
 
 You can also download a subset of data / networks by providing a list of names in a text
 file, one per line
 ```
 docker run --rm -it antspynet:latest \
-   /opt/bin/get_antsxnet_data.py \
-     /path/to/local/cache/dir \
-     1 \
-     /path/to/names.txt
+   /opt/bin/download_antsxnet_data.py \
+     --cache-dir /path/to/local/cache/dir \
+     --data-key-file datakeys.txt \
+     --model-key-file modelkeys.txt
 ```
 
 If the local cache directory is not mounted as `/home/antspyuser/.keras`, runtime scripts
