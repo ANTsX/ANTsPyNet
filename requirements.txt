@@ -45,7 +45,7 @@ imageio==2.34.1
     # via scikit-image
 joblib==1.4.2
     # via scikit-learn
-keras==3.13.1
+keras==3.13.2
     # via tensorflow
 kiwisolver==1.4.5
     # via matplotlib
