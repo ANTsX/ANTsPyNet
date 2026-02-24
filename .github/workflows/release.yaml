@@ -71,7 +71,7 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tag }}
             ${{ env.DOCKER_IMAGE }}:latest
 
-  publish-testpypi:
+  publish-pypi:
     name: Publish sdist to PyPI
     runs-on: ubuntu-latest
     needs:
