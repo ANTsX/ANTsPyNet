@@ -1,5 +1,6 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/antspynet?label=pypi%20downloads)](https://pypi.org/project/antspynet/)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
+[![Docker Pulls](https://img.shields.io/docker/pulls/antsx/antspynet.svg)](https://hub.docker.com/repository/docker/antsx/antspynet)
 [![PubMed](https://img.shields.io/badge/ANTsX_paper-Open_Access-8DABFF?logo=pubmed)](https://pubmed.ncbi.nlm.nih.gov/33907199/)
 
 # Advanced Normalization Tools for Deep Learning in Python (ANTsPyNet)
