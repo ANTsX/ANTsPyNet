@@ -104,7 +104,7 @@ arg set, the container will also have all ANTsPyNet data and pretrained networks
 Apptainer always runs as the system user, so you will need
 
 ```
-apptainer run --containall --home /home/antspyuser antspynet_latest.sif
+apptainer run --containall --no-home --home /home/antspyuser antspynet_latest.sif
 ```
 
 in order for ANTsPy and ANTsPyNet to find built in data.
