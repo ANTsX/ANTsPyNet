@@ -1,4 +1,4 @@
-name: Release (TestPyPI + Docker Hub)
+name: Release (PyPI + Docker Hub)
 
 on:
   release:
@@ -71,7 +71,7 @@ jobs:
             ${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tag }}
             ${{ env.DOCKER_IMAGE }}:latest
 
-  publish-testpypi:
+  publish-pypi:
     name: Publish sdist to PyPI
     runs-on: ubuntu-latest
     needs:
@@ -84,7 +84,7 @@ jobs:
           name: python-dist
           path: dist
 
-      - name: Publish to TestPyPI (API token)
+      - name: Publish to PyPI (API token)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
