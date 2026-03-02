@@ -59,17 +59,32 @@ jobs:
         id: meta
         run: |
           # For a release-triggered workflow, GITHUB_REF_NAME is the tag name (e.g., v0.2.3)
+          # but we strip the leading 'v' for the Docker tag (e.g., 0.2.3)
           echo "tag=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push
+      - name: Build and push base image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tag }}
             ${{ env.DOCKER_IMAGE }}:latest
+
+      - name: Build and push image with data
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/add_data.dockerfile
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tag }}-with-data
+            ${{ env.DOCKER_IMAGE }}:latest-with-data
 
   publish-testpypi:
     name: Publish sdist to PyPI
