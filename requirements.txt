@@ -53,7 +53,7 @@ lazy-loader==0.4
     # via scikit-image
 libclang==18.1.1
     # via tensorflow
-markdown==3.6
+markdown==3.8.1
     # via tensorboard
 markdown-it-py==3.0.0
     # via rich
