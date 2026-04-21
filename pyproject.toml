@@ -38,3 +38,6 @@ find = { include = ["antspynet","antspynet.*"] }
 [tool.setuptools]
 license-files = []
 
+[project.scripts]
+antsMouseBrainExtraction = "antspynet.cli.mouse_brain_extraction:main"
+
