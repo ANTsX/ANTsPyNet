@@ -98,14 +98,23 @@ def cit168_labeling(t1, verbose=False):
 
     # clone input to float
     t1 = ants.image_clone(t1, pixeltype="float")
-    t1 = ants.iMath(t1, "Normalize")
 
-    t1_preprocessed = ants.n4_bias_field_correction(t1, verbose=verbose)
+    t1_preprocessing = preprocess_brain_image(t1,
+        truncate_intensity=[1e-4, 0.999],
+        brain_extraction_modality="t1threetissue",
+        template=None,
+        do_bias_correction=True,
+        do_denoising=False,
+        intensity_normalization_type='01',
+        verbose=verbose)
+                        
+    t1_preprocessed = t1_preprocessing['preprocessed_image'] * t1_preprocessing['brain_mask']
 
     reg = ants.registration(template_small, t1_preprocessed, type_of_transform=template_transform_type, verbose=verbose)  
-    t1_preprocessed = ants.apply_transforms(fixed=template_large, moving=t1,
+    t1_preprocessed = ants.apply_transforms(fixed=template_large, moving=t1_preprocessed,
                                             transformlist=reg['fwdtransforms'][1],
                                             interpolator="linear", singleprecision=True, verbose=verbose)
+
     template_priors = ants.apply_transforms(fixed=t1_preprocessed, moving=template_seg,
                                             transformlist=reg['invtransforms'][1],
                                             interpolator="nearestNeighbor", singleprecision=True, verbose=verbose)
