@@ -89,6 +89,8 @@ from .deep_atropos import deep_atropos
 from .desikan_killiany_tourville_labeling import desikan_killiany_tourville_labeling
 from .harvard_oxford_atlas_labeling import harvard_oxford_atlas_labeling
 from .cerebellum_morphology import cerebellum_morphology
+from .nbm_labeling import nbm_labeling
+from .cit168_labeling import cit168_labeling
 from .brain_age import brain_age
 from .mri_super_resolution import mri_super_resolution
 from .quality_assessment import tid_neural_image_assessment
