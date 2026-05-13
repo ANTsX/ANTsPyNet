@@ -187,7 +187,10 @@ def get_pretrained_network(file_id=None,
             "sig_smallshort_train_2x2x2_1chan_featgraderL6_best_mdl": "https://ndownloader.figshare.com/files/49339858",
             "sig_smallshort_train_2x2x2_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339861",
             "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_mdl": "https://ndownloader.figshare.com/files/49339867",
-            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339864"
+            "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339864",
+            "deep_nbm_rank": "https://ndownloader.figshare.com/files/64536405",
+            "deepCIT168": "https://ndownloader.figshare.com/files/64536618",
+            "deepCIT168_sn": "https://ndownloader.figshare.com/files/64537371"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -350,6 +353,9 @@ def get_pretrained_network(file_id=None,
                   "sig_smallshort_train_2x2x2_1chan_featvggL6_best_mdl",
                   "sig_smallshort_train_2x2x4_1chan_featgraderL6_best_mdl",
                   "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl",
+                  "deep_nbm_rank",
+                  "deepCIT168",
+                  "deepCIT168_sn",
                   "show")
 
     if not file_id in valid_list:
