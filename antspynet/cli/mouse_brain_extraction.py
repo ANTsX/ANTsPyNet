@@ -33,6 +33,7 @@ def build_parser():
     )
     parser.add_argument(
         "--axis",
+        type=int,
         default=2,
         choices=[0, 1, 2],
         help="Axis index used for ex5 modalities (default: 2).",
