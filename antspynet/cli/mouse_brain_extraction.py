@@ -22,8 +22,8 @@ def build_parser():
     )
     parser.add_argument(
         "--modality",
-        type=str,
         default="t2",
+        choices=["t2", "ex5coronal", "ex5sagittal"],
         help='Mouse image modality passed to mouse_brain_extraction (default: "t2").',
     )
     parser.add_argument(
@@ -33,8 +33,8 @@ def build_parser():
     )
     parser.add_argument(
         "--axis",
-        type=int,
         default=2,
+        choices=[0, 1, 2],
         help="Axis index used for ex5 modalities (default: 2).",
     )
     parser.add_argument(
