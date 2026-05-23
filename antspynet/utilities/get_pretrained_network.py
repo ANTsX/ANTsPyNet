@@ -190,7 +190,8 @@ def get_pretrained_network(file_id=None,
             "sig_smallshort_train_2x2x4_1chan_featvggL6_best_mdl": "https://ndownloader.figshare.com/files/49339864",
             "deep_nbm_rank": "https://ndownloader.figshare.com/files/64536405",
             "deepCIT168": "https://ndownloader.figshare.com/files/64536618",
-            "deepCIT168_sn": "https://ndownloader.figshare.com/files/64537371"
+            "deepCIT168_sn": "https://ndownloader.figshare.com/files/64537371",
+            "resnet_grader": "https://ndownloader.figshare.com/files/64836051"
         }
         return(switcher.get(argument, "Invalid argument."))
 
@@ -356,6 +357,7 @@ def get_pretrained_network(file_id=None,
                   "deep_nbm_rank",
                   "deepCIT168",
                   "deepCIT168_sn",
+                  "resnet_grader",
                   "show")
 
     if not file_id in valid_list:
