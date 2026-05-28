@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import sys
 
 import ants
 import antspynet
@@ -73,7 +74,8 @@ def main(argv=None):
             verbose=args.verbose,
         )
     except Exception as error:
-        parser.exit(1, f"Error: {error}\n")
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
 
     return 0
 

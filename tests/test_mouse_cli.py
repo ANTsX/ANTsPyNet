@@ -1,6 +1,8 @@
 import os
 import tempfile
 import unittest
+from contextlib import redirect_stderr
+from io import StringIO
 from unittest.mock import patch
 
 import ants
@@ -63,6 +65,19 @@ class TestMouseBrainExtractionCli(unittest.TestCase):
         self.assertTrue(calls["mouse_brain_extraction"]["return_isotropic_output"])
         self.assertEqual(calls["mouse_brain_extraction"]["which_axis"], 1)
         self.assertTrue(calls["mouse_brain_extraction"]["verbose"])
+
+    def test_main_returns_nonzero_and_writes_error_to_stderr_on_failure(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_path = os.path.join(tmpdir, "input.nii.gz")
+            output_path = os.path.join(tmpdir, "output.nii.gz")
+
+            with patch("antspynet.cli.mouse_brain_extraction.run", side_effect=RuntimeError("boom")):
+                stderr = StringIO()
+                with redirect_stderr(stderr):
+                    exit_code = main([input_path, output_path])
+
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stderr.getvalue(), "Error: boom\n")
 
 
 if __name__ == "__main__":
