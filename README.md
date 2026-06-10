@@ -15,7 +15,7 @@ A collection of deep learning architectures and applications ported to the Pytho
   <img src="docs/figures/coreANTsXNetTools.png" width="600" />
 </p>
 
-## Overview 
+## Overview
 
 <details>
 <summary>Installation</summary>
@@ -132,7 +132,7 @@ ants.plot(t1, overlay=seg, overlay_alpha=0.5)
     * [Claustrum segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#claustrum-segmentation)
     * [Hypothalamus segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#hypothalamus-segmentation)
     * [Cerebellum morphology](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#cerebellum-morphology)
-    * White matter hyperintensities segmentation 
+    * White matter hyperintensities segmentation
         * [SYSU](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-sysu)
         * [Hypermapp3r](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-hypermapp3r)
         * [SHIVA](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#white-matter-hyperintensities-segmentation-shiva)
@@ -145,7 +145,7 @@ ants.plot(t1, overlay=seg, overlay_alpha=0.5)
 
 * [Lung applications](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#lung-applications)
 
-    * [Lung extraction](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#lung-extraction) 
+    * [Lung extraction](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#lung-extraction)
     * [Functional lung segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#functional-lung-segmentation)
     * [Pulmonary artery segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#pulmonary-artery-segmentation)
     * [Pulmonary airway segmentation](https://gist.github.com/ntustison/12a656a5fc2f6f9c4494c88dc09c5621#pulmonary-airway-segmentation)
@@ -197,7 +197,7 @@ ants.plot(t1, overlay=seg, overlay_alpha=0.5)
 
 <details><summary>License</summary>
 
-The ANTsPyNet package is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/master/LICENSE.md).
+The ANTsPyNet package is released under an [Apache License](https://github.com/ANTsX/ANTsPyNet/blob/main/LICENSE.md).
 
 </details>
 
@@ -212,13 +212,13 @@ The ANTsPyNet package is released under an [Apache License](https://github.com/A
 
 </details>
 
-<!-- 
+<!--
 ## Contributing
 
 If you encounter an issue, have questions about using ANTsPyNet, or want to request a feature, please feel free to [file an issue](https://github.com/ANTsX/ANTsPyNet/issues). If you plan to contribute new code to ANTsPyNet, we would be very appreciative. The best place to start is again by opening an issue and discussing the potential feature with us.
 -->
 
-<!-- 
+<!--
 ## to publish a release
 
 before doing this - make sure you have a recent run of `pip-compile pyproject.toml`
