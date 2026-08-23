@@ -473,7 +473,7 @@ def wmh_segmentation(flair,
     if white_matter_mask is None:
         if verbose:
             print("Calculate white matter mask.")
-        atropos = deep_atropos(t1, do_preprocessing=True, verbose=verbose)
+        atropos = deep_atropos([t1, None, None], do_preprocessing=True, verbose=verbose)
         white_matter_mask = ants.threshold_image(atropos['segmentation_image'], 3, 4, 1, 0)
 
     t1_preprocessed = None
