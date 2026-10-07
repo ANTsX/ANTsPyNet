@@ -36,7 +36,8 @@ def brain_extraction(image,
             * "t2star": T2Star MRI.
             * "bold": 3-D mean BOLD MRI.  Previous versions are specified as "bold.v0".
             * "fa": fractional anisotropy.  Previous versions are specified as "fa.v0".
-            * "mra": MRA h/t Tyler Hanson "mmbop".
+            * "mra": MRA h/t Tyler H. "mmbop".
+            * "pet": PET (from DLBS dataset: OpenNeuro ds004856).
             * "t1t2infant": Combined T1-w/T2-w infant MRI h/t Martin Styner.
             * "t1infant": T1-w infant MRI h/t Martin Styner.
             * "t2infant": T2-w infant MRI h/t Martin Styner.
@@ -145,6 +146,9 @@ def brain_extraction(image,
         elif modality == "mra":
             weights_file_name_prefix = "brainExtractionMra"
             is_standard_network = True
+        elif modality == "pet":
+            weights_file_name_prefix = "brainExtractionPet"
+            is_standard_network = True
         elif modality == "t1t2infant":
             weights_file_name_prefix = "brainExtractionInfantT1T2"
         elif modality == "t1infant":
@@ -166,7 +170,13 @@ def brain_extraction(image,
         if verbose:
             print("Brain extraction:  retrieving model weights.")
 
-        weights_file_name = get_pretrained_network(weights_file_name_prefix)
+        if modality == "pet":
+            weights_file_name = get_pretrained_network(
+                weights_file_name_prefix,
+                target_file_name="brainExtractionPet.weights.h5",
+            )
+        else:
+            weights_file_name = get_pretrained_network(weights_file_name_prefix)
 
         if verbose:
             print("Brain extraction:  retrieving template.")
@@ -184,8 +194,17 @@ def brain_extraction(image,
             reorient_template = xfrm.apply_to_image(reorient_template)
         else:
             reorient_template = ants.image_read(get_antsxnet_data("S_template3"))
-            if is_standard_network and (modality != "t1.v1" and modality != "mra"):
-                ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))
+            if modality == "pet":
+                reorient_template = ants.resample_image(
+                    reorient_template,
+                    resample_params=(1.5, 1.5, 1.5),
+                )
+                reorient_template = ants.pad_or_crop_image_to_size(
+                    reorient_template, (136, 176, 176)
+                )
+            elif is_standard_network and modality not in ("t1.v1", "mra"):
+                ants.set_spacing(reorient_template, (1.5, 1.5, 1.5))        
+
         resampled_image_size = reorient_template.shape
 
         number_of_filters = (8, 16, 32, 64)
