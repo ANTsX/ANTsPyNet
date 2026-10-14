@@ -150,7 +150,7 @@ def el_bicho(ventilation_image,
                 ventilation_image.shape))
             probability_images[l] = probability_images[l] + (prediction_image - probability_images[l]) / (d + 1)
 
-        current_start_slice = current_end_slice + 1
+        current_start_slice = current_end_slice
 
     ################################
     #
